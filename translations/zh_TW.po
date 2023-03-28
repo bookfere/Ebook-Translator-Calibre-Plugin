@@ -1,0 +1,216 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-03-28 19:25+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Disabled"
+msgstr "已禁用"
+
+msgid "Ebook Translator"
+msgstr "電子書翻譯器"
+
+msgid "Enabled"
+msgstr "已啓用"
+
+msgid "Total paragraphs: {}"
+msgstr "段落總數：{}"
+
+msgid "Translate engine return bad response."
+msgstr "翻譯引擎返回了錯誤響應。"
+
+msgid "Auto detect"
+msgstr "自動探測"
+
+msgid "DeepL do not support the language: {}"
+msgstr "DeepL不支持語言：{}"
+
+msgid "Translate"
+msgstr "翻譯"
+
+msgid "Setting"
+msgstr "設置"
+
+msgid "About"
+msgstr "關於"
+
+msgid "Donate"
+msgstr "讚賞"
+
+msgid "Feedback"
+msgstr "反饋"
+
+msgid "Input Format"
+msgstr "輸入格式"
+
+msgid "Output Format"
+msgstr "輸出格式"
+
+msgid "Title"
+msgstr "書名"
+
+msgid "Source Language"
+msgstr "來源語言"
+
+msgid "Target Language"
+msgstr "目標語言"
+
+msgid "The specified path does not exist."
+msgstr "指定路徑不存在。"
+
+msgid "[{} > {}] Translating \"{}\""
+msgstr "[{} > {}] 翻譯 \"{}\""
+
+msgid "Failed to translate"
+msgstr "翻譯失敗"
+
+msgid "completed"
+msgstr "已結束"
+
+msgid "Ebook Translation Log"
+msgstr "電子書翻譯日誌"
+
+msgid "Translation Completed"
+msgstr "翻譯已完成"
+
+msgid "The translation of \"{}\" was completed. Do you want to open the book?"
+msgstr "\"{}\"的翻譯已完成。是否想要立即閱讀這本電子書？"
+
+msgid "Output Path"
+msgstr "輸出路徑"
+
+msgid "Library"
+msgstr "書庫"
+
+msgid "Path"
+msgstr "路徑"
+
+msgid "Choose ..."
+msgstr "選擇 ..."
+
+msgid "Translate Engine"
+msgstr "翻譯引擎"
+
+msgid "API Key"
+msgstr "API密鑰"
+
+msgid "Network Proxy"
+msgstr "網絡代理"
+
+msgid "Enable"
+msgstr "開啓"
+
+msgid "Host"
+msgstr "主機"
+
+msgid "Port"
+msgstr "端口"
+
+msgid "Test"
+msgstr "測試"
+
+msgid "Cache"
+msgstr "緩存"
+
+msgid "Clear"
+msgstr "清除"
+
+msgid "Request"
+msgstr "請求"
+
+msgid "Attempt times (Default 3):"
+msgstr "重試次數（默認3次）："
+
+msgid "Max interval (Default 5s):"
+msgstr "最大間隔（默認5秒）"
+
+msgid "Log"
+msgstr "日誌"
+
+msgid "Show translation"
+msgstr "顯示譯文"
+
+msgid "Save"
+msgstr "保存"
+
+msgid "Can not clear cache while job(s) running."
+msgstr "有運行中的任務，無法清理緩存。"
+
+msgid "Total: {}"
+msgstr "總計：{}"
+
+msgid "Proxy host or port is incorrect."
+msgstr "代理的主機或端口填寫有誤。"
+
+msgid "The proxy is available."
+msgstr "網絡代理可用。"
+
+msgid "The proxy is not available."
+msgstr "網絡代理不可用。"
+
+msgid "An API key is required."
+msgstr "API密鑰是必填項。"
+
+msgid "The setting was saved."
+msgstr "設置已保存。"
+
+msgid "Failed to retreive data from translate engine API."
+msgstr "無法從翻譯引擎API獲取數據。"
+
+msgid "Will retry in {} seconds."
+msgstr "{} 秒後重試。"
+
+msgid "Retring ... (timeout is {} seconds)."
+msgstr "正在重試 ...（{}秒後超時）"
+
+msgid "Original: {}"
+msgstr "原文：{}"
+
+msgid "Translation (Cached): {}"
+msgstr "譯文（緩存）：{}"
+
+msgid "Translation: {}"
+msgstr "譯文：{}"
+
+msgid "There is no content need to translate."
+msgstr "沒有需要翻譯的內容。"
+
+msgid "Start to translate ebook content:"
+msgstr "開始翻譯電子書內容："
+
+msgid "Total items: {}"
+msgstr "全部條目：{}"
+
+msgid "Translating: {}/{}"
+msgstr "翻譯：{}/{}"
+
+msgid "Translation completed."
+msgstr "翻譯已完成"
+
+msgid "Start to convert ebook format:"
+msgstr "開始轉換電子書格式："
+
+msgid "Translate engine not exists."
+msgstr "翻譯引擎不存在。"
+
+msgid "Translate Book"
+msgstr "翻譯書籍"
+
+msgid "Translate Ebook Content"
+msgstr "翻譯電子書內容"
+
+msgid "You must choose at least one ebook."
+msgstr "必須選擇至少一本電子書。"
