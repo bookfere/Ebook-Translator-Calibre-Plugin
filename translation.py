@@ -123,7 +123,7 @@ class Translation:
             self._progress(process, _('Translating: {}/{}')
                            .format(count, total))
             self._handle(element)
-            if self.translator.is_need_sleep() and self.need_sleep:
+            if self.translator.need_sleep() and self.need_sleep:
                 time.sleep(random.randint(0, self.request_interval))
             count += 1
             process += step

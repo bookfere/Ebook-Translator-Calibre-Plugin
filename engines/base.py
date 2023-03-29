@@ -41,7 +41,7 @@ class Base:
     def _is_auto_lang(self):
         return self._get_lang_code(self.source_lang) == 'auto'
 
-    def is_need_sleep(self):
+    def need_sleep(self):
         return False
 
     def get_name(self):

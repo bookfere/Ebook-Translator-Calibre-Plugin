@@ -10,7 +10,7 @@ class GoogleTranslate(Base):
     def get_endpoint(self):
         return 'https://translate.googleapis.com/translate_a/single'
 
-    def is_need_sleep(self):
+    def need_sleep(self):
         return True
 
     def translate(self, text):
