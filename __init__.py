@@ -13,7 +13,7 @@ class EbookTranslator(InterfaceActionBase):
     title = _(name)
     supported_platforms = ['windows', 'osx', 'linux']
     author = 'bookfere.com'
-    version = (1, 0, 0)
+    version = (1, 0, 1)
     minimum_calibre_version = (1, 0, 0)
 
     actual_plugin = 'calibre_plugins.ebook_translator.ui:EbookTranslatorGui'

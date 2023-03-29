@@ -43,6 +43,8 @@ class MainWindowFrame(QDialog):
     def __init__(self, plugin, icon, ebooks):
         self.gui = plugin.gui
         QDialog.__init__(self, self.gui)
+        self.db = self.gui.current_db
+        self.api = self.db.new_api
         self.plugin = plugin
         self.icon = icon
         self.ebooks = ebooks
@@ -245,12 +247,13 @@ class MainWindowFrame(QDialog):
             shutil.move(temp_file, output_path)
         else:
             if job.same_format:
-                self.gui.current_db.save_original_format(
+                self.db.save_original_format(
                     book_id, ofmt, notify=False)
 
             with open(temp_file, 'rb') as data:
-                self.gui.current_db.add_format(
+                self.db.add_format(
                     book_id, ofmt, data, index_is_id=True)
+            output_path = self.api.format_abspath(book_id, ofmt)
             os.remove(temp_file)
 
             self.gui.tags_view.recount()
@@ -265,8 +268,10 @@ class MainWindowFrame(QDialog):
             job.description + ' ' + _('completed'), 5000)
 
         self.gui.proceed_question(
-            lambda payload: payload(['ebook-viewer', output_path]),
-            ebook_viewer,
+            lambda payload: payload(
+                'ebook-viewer',
+                kwargs={'args': ['ebook-viewer', output_path]}),
+            self.gui.job_manager.launch_gui_app,
             job.log_path,
             _('Ebook Translation Log'),
             _('Translation Completed'),
@@ -465,7 +470,6 @@ class MainWindowFrame(QDialog):
         self.api_key.clear()
         if current_engine in engine_info:
             self.api_key.setText(engine_info[current_engine])
-
 
     def choose_output_path(self):
         path = QFileDialog.getExistingDirectory()
