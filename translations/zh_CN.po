@@ -173,7 +173,7 @@ msgstr "无法从翻译引擎API获取数据。"
 msgid "Will retry in {} seconds."
 msgstr "{} 秒后重试。"
 
-msgid "Retring ... (timeout is {} seconds)."
+msgid "Retrying ... (timeout is {} seconds)."
 msgstr "正在重试 ...（{}秒后超时）"
 
 msgid "Original: {}"

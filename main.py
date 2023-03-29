@@ -90,12 +90,18 @@ class MainWindowFrame(QDialog):
         site.setOpenExternalLinks(True)
         info_layout.addWidget(site)
         info_layout.addStretch(1)
+        github = 'https://github.com/bookfere/Ebook-Translator-Calibre-Plugin'
+        if 'zh' in get_lang():
+            feedback = 'https://{}/post/1057.html'.format(app_author)
+            donate = 'https://{}/donate'.format(app_author)
+        else:
+            feedback = '{}/issues'.format(github)
+            donate = 'https://www.paypal.com/paypalme/bookfere'
         link = QLabel((
-            '<a href="https://github.com/bookfere/'
-            'Ebook-Translator-Calibre-Plugin">GitHub</a>'
-            ' ｜ <a href="https://{0}/post/1057.html">{1}</a>'
-            ' ｜ <a href="https://{0}/donate">{2}</a>'
-        ).format(app_author, _('Feedback'), _('Donate')))
+            '<a href="{0}">GitHub</a>'
+            ' ｜ <a href="{1}">{3}</a>'
+            ' ｜ <a href="{2}">{4}</a>'
+        ).format(github, feedback, donate, _('Feedback'), _('Donate')))
         link.setOpenExternalLinks(True)
         info_layout.addWidget(link)
         layout.addWidget(info)
@@ -138,18 +144,16 @@ class MainWindowFrame(QDialog):
             table.setCellWidget(index, 1, input_fmt)
             self.alter_ebooks_data(index, 3, input_fmt.currentText())
             input_fmt.currentTextChanged.connect(
-                lambda fmt, row=index: self.alter_ebooks_data(
-                    row, 3, fmt.lower()))
+                lambda fmt, row=index: self.alter_ebooks_data(row, 3, fmt))
 
             output_fmt = QComboBox()
             for fmt in get_output_formats('epub'):
-                output_fmt.addItem(fmt)
+                output_fmt.addItem(fmt.lower())
                 output_fmt.setStyleSheet('text-transform:uppercase;')
             table.setCellWidget(index, 2, output_fmt)
             self.alter_ebooks_data(index, 4, output_fmt.currentText())
             output_fmt.currentTextChanged.connect(
-                lambda fmt, row=index: self.alter_ebooks_data(
-                    row, 4, fmt.lower()))
+                lambda fmt, row=index: self.alter_ebooks_data(row, 4, fmt))
 
             source_lang = QComboBox()
             book_lang = lang_as_iso639_1(slang)
@@ -247,12 +251,9 @@ class MainWindowFrame(QDialog):
             shutil.move(temp_file, output_path)
         else:
             if job.same_format:
-                self.db.save_original_format(
-                    book_id, ofmt, notify=False)
-
+                self.db.save_original_format(book_id, ofmt, notify=False)
             with open(temp_file, 'rb') as data:
-                self.db.add_format(
-                    book_id, ofmt, data, index_is_id=True)
+                self.db.add_format(book_id, ofmt, data, index_is_id=True)
             output_path = self.api.format_abspath(book_id, ofmt)
             os.remove(temp_file)
 
@@ -307,7 +308,7 @@ class MainWindowFrame(QDialog):
         self.choose_output_type(self.library_radio.isChecked())
         self.library_radio.toggled.connect(self.choose_output_type)
 
-        # Translate engine setting
+        # Translate Engine
 
         engine_group = QGroupBox(_('Translate Engine'))
         engine_layout = QVBoxLayout()

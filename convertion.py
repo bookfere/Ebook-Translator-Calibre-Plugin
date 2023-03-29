@@ -1,7 +1,6 @@
 import hashlib
 from types import MethodType
 
-from lxml import etree
 from calibre.utils.logging import Log
 from calibre.ebooks.conversion.plumber import Plumber
 from calibre_plugins.ebook_translator.config import get_config

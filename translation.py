@@ -57,9 +57,9 @@ class Translation:
             self._log(message)
             self._log(_('Will retry in {} seconds.').format(interval))
             time.sleep(interval)
-            self._log(_('Retring ... (timeout is {} seconds).')
-                      .format(self.translator.timeout))
-            return self._translate(text, count)
+            self._log(_('Retrying ... (timeout is {} seconds).')
+                      .format(round(self.translator.timeout)))
+            return self._translate(text, count, interval)
 
     def _handle(self, element):
         translation = None
@@ -98,10 +98,11 @@ class Translation:
                 ('id_%s' % id(reserve), self._get_element_string(reserve))
                 for reserve in reserves]))
 
-        translation = '<{0}>{1}</{0}>'.format(
-                      etree.QName(element).localname, translation)
+        translation = '<{0} xmlns="{1}">{2}</{0}>'.format(
+                      etree.QName(element).localname, ns['x'], translation,)
         new_element = etree.fromstring(translation)
         new_element.set('class', element.get('class'))
+        element.tail = None  # Make sure it has no tail
         element.addnext(new_element)
 
     def _get_element_copy(self, element):
