@@ -38,4 +38,5 @@ class TestDeepl(unittest.TestCase):
         self.result.return_value = ''
         with self.assertRaises(Exception) as e:
             self.translator.translate('Hello World!')
-        self.assertIn('Expecting value', str(e.exception))
+        self.assertEqual(
+            'Translate engine return bad response.', str(e.exception))

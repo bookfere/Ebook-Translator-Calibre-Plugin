@@ -13,5 +13,5 @@ class TestUtils(unittest.TestCase):
         self.assertEqual('abc', trim('   abc   '))
         self.assertEqual('a b c', trim(' a b c '))
 
-        content = '{0}abc{0}'.format(html.unescape('&#160;') * 3)
-        self.assertEqual('abc', trim(content))
+        content = '{0}{0}ab{0}c{0}{0}'.format(html.unescape('&#160;'))
+        self.assertEqual('ab c', trim(content))
