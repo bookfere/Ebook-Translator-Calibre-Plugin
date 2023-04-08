@@ -19,7 +19,7 @@
 
 首先確保你的作業系統已經安裝了 [Calibre](https://calibre-ebook.com/)。
 
-1. 首先在[外掛程式發佈頁面](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/releases))下載外掛程式檔案；
+1. 首先在[外掛程式發佈頁面](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/releases)下載外掛程式檔案；
 2. 然後開啟 Calibre 並依次按下其選單【偏好設定 → 外掛 → 從檔案載入外掛】，彈出的對話方塊中選取下載的副檔名為 .zip 的外掛程式檔案完成安裝 (請留意，首次安裝此外掛程式時，要選擇將圖示顯示在主工具列上)；
 3. 最後關閉並重新開啟 Calibre 即可正常使用。
 
