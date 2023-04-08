@@ -15,6 +15,26 @@ A Calibre plugin to translate ebook into a specified language (optionally keepin
 
 ---
 
+## Installation
+
+Please make sure [Calibre](https://calibre-ebook.com/) is installed on your OS, and follow steps below:
+
+1. Download the plugin zip file from [releases page](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/releases).
+2. Click Calibre Menu [Preference... → Plug-ins → Load plug-in from file], and choose the zip file you got.
+3. Reboot Calibre (if the "Translate Book" plugin is not showing up on Calibre menu, you need to add it from [Preference... → Toolbars & menus], choose [The main toolbar], find the plugin and click [>], and [Apply]).
+
+---
+
+## Usage
+
+1. Select the ebook(s), and click the plugin icon "Translate Book".
+2. Select the Target Language (and Output Format if needed).
+3. Click [TRANSLATE] button.
+
+After that, you can check the translation process by clicking "Jobs" at the bottom right. Double clicking the job item, you can check the real-time translation log from the window it prompts.
+
+---
+
 ## Settings
 
 You can customize the plugin through "Content" and "Setting" panels.
@@ -54,6 +74,8 @@ __[ Translation Engine ]__
 * __ChatGPT__: API key required
 * __DeepL__: API key required
 * __DeepL(Pro)__: API key required
+* __Youdao__: APP key and secret required
+* __Baidu__: APP id and key required
 
 Except for Google, who does not require an API key, other translation engines require you to register a corresponding account and pay to obtain an API key.
 
