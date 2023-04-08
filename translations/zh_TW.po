@@ -3,49 +3,49 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-04-08 14:25+0800\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2023-04-08 21:31+0800\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.1.1\n"
 
 msgid "Disabled"
-msgstr "已禁用"
+msgstr "已停用"
 
 msgid "Ebook Translator"
-msgstr "電子書翻譯器"
+msgstr "電子書翻譯工具"
 
 msgid "Enabled"
-msgstr "已啓用"
+msgstr "已啟用"
 
 msgid "Total paragraphs: {}"
-msgstr "段落總數：{}"
+msgstr "段落總計：{}"
 
 msgid "Auto detect"
-msgstr "自動探測"
+msgstr "自動偵測"
 
 msgid "Incorrect format of APP id and key."
-msgstr "APP id 和 key 格式填寫有誤。"
+msgstr "應用程式 ID 和金鑰格式不正確。"
 
 msgid "API Key"
-msgstr "API密鑰"
+msgstr "API 金鑰"
 
 msgid "Translate engine return bad response."
-msgstr "翻譯引擎返回了錯誤響應。"
+msgstr "翻譯引擎返回了錯誤回應。"
 
 msgid "Can not parse returned response. Raw data: {}"
-msgstr "無法解析返回的相應。原始數據：{}"
+msgstr "無法剖析返回的回應。原始資料：{}"
 
 msgid "Incorrect format of APP key and secret."
-msgstr "APP key 和 secret 格式填寫有誤。"
+msgstr "應用程式金鑰和祕密格式不正確。"
 
 msgid "Translate"
 msgstr "翻譯"
@@ -54,16 +54,16 @@ msgid "Content"
 msgstr "內容"
 
 msgid "Setting"
-msgstr "設置"
+msgstr "設定"
 
 msgid "About"
 msgstr "關於"
 
 msgid "Donate"
-msgstr "讚賞"
+msgstr "捐助"
 
 msgid "Feedback"
-msgstr "反饋"
+msgstr "回饋"
 
 msgid "Input Format"
 msgstr "輸入格式"
@@ -87,22 +87,22 @@ msgid "[{} > {}] Translating \"{}\""
 msgstr "[{} > {}] 翻譯 \"{}\""
 
 msgid "Translation job failed"
-msgstr "翻譯失敗"
+msgstr "翻譯工作失敗"
 
 msgid "completed"
-msgstr "已結束"
+msgstr "已完成"
 
 msgid "Ebook Translation Log"
-msgstr "電子書翻譯日誌"
+msgstr "電子書翻譯記錄"
 
 msgid "Translation Completed"
 msgstr "翻譯已完成"
 
 msgid "The translation of \"{}\" was completed. Do you want to open the book?"
-msgstr "\"{}\"的翻譯已完成。是否想要立即閱讀這本電子書？"
+msgstr "「{}」的翻譯已完成。是否想要立即閱讀這本電子書？"
 
 msgid "Save"
-msgstr "保存"
+msgstr "儲存"
 
 msgid "Translation Position"
 msgstr "譯文位置"
@@ -117,10 +117,10 @@ msgid "Add without original"
 msgstr "僅保留譯文"
 
 msgid "Translation Color"
-msgstr "譯文顏色"
+msgstr "譯文色彩"
 
 msgid "CSS color value, e.g., #666666, grey, rgb(80, 80, 80)"
-msgstr "CSS 顏色值，如 #666666, gry, rgb(80, 80, 80)"
+msgstr "CSS 色彩值，如 #666666, gry, rgb(80, 80, 80)"
 
 msgid "Choose"
 msgstr "選擇"
@@ -132,22 +132,22 @@ msgid "Mode:"
 msgstr "模式："
 
 msgid "Normal"
-msgstr "普通"
+msgstr "一般"
 
 msgid "Normal (case-sensitive)"
-msgstr "普通（區分大小寫）"
+msgstr "一般 (區分大小寫)"
 
 msgid "Regular Expression"
-msgstr "正則表達式"
+msgstr "規則運算式"
 
 msgid "Exclude content by keyword. One keyword per line:"
-msgstr "排除帶指定關鍵詞的內容。一行一條關鍵詞："
+msgstr "依關鍵字排除內容。每行一條關鍵字："
 
 msgid "Exclude content by case-sensitive keyword. One keyword per line:"
-msgstr "排除帶指定關鍵詞的內容（區分字母大小寫）。一行一條關鍵詞："
+msgstr "依關鍵字排除內容 (區分大小寫)。每行一條關鍵字："
 
 msgid "Exclude content by regular expression pattern. One pattern per line:"
-msgstr "排除匹配正則表達式規則的內容。一行一條規則："
+msgstr "依規則運算式模式排除內容。每行一條模式："
 
 msgid "Output Path"
 msgstr "輸出路徑"
@@ -168,97 +168,97 @@ msgid "Translate Engine"
 msgstr "翻譯引擎"
 
 msgid "ChatGPT Prompt"
-msgstr "ChatGPT提示詞"
+msgstr "ChatGPT 提示"
 
 msgid "For auto detecting source language:"
-msgstr "自動探測來源語言時的提示詞"
+msgstr "自動偵測來源語言："
 
 msgid "For specifying source language:"
-msgstr "指定來源語言時的提示詞"
+msgstr "指定來源語言："
 
 msgid "Network Proxy"
-msgstr "網絡代理"
+msgstr "網路代理"
 
 msgid "Enable"
-msgstr "開啓"
+msgstr "啟用"
 
 msgid "Host"
 msgstr "主機"
 
 msgid "Port"
-msgstr "端口"
+msgstr "連接埠"
 
 msgid "Test"
 msgstr "測試"
 
 msgid "Cache"
-msgstr "緩存"
+msgstr "快取"
 
 msgid "Clear"
 msgstr "清除"
 
 msgid "Request"
-msgstr "請求"
+msgstr "要求"
 
 msgid "Attempt times (Default 3):"
-msgstr "重試次數（默認3次）："
+msgstr "嘗試次數 (預設 3 次)："
 
 msgid "Max interval (Default 5s):"
-msgstr "最大間隔（默認5秒）"
+msgstr "最大間隔 (預設 5 秒)："
 
 msgid "Log"
-msgstr "日誌"
+msgstr "記錄"
 
 msgid "Show translation"
 msgstr "顯示譯文"
 
 msgid "Cannot clear cache while there are running jobs."
-msgstr "有運行中的任務，無法清理緩存。"
+msgstr "有正在執行的工作，無法清除快取。"
 
 msgid "Total: {}"
 msgstr "總計：{}"
 
 msgid "Proxy host or port is incorrect."
-msgstr "代理的主機或端口填寫有誤。"
+msgstr "代理的主機或連接埠不正確。"
 
 msgid "The proxy is available."
-msgstr "網絡代理可用。"
+msgstr "網路代理可用。"
 
 msgid "The proxy is not available."
-msgstr "網絡代理不可用。"
+msgstr "網路代理無法使用。"
 
 msgid "Invalid color value."
-msgstr "無效的顏色值。"
+msgstr "無效的色彩值。"
 
 msgid "{} is not a valid regular expression."
-msgstr "{} 不是有效的正則表達式。"
+msgstr "{} 不是有效的規則運算式。"
 
 msgid "An API key is required."
-msgstr "API密鑰是必填項。"
+msgstr "API 金鑰是必要項目。"
 
 msgid "Prompt must include {} and {}"
-msgstr "提示詞必須包含 {} 和 {}"
+msgstr "提示必須包含 {} 和 {}"
 
 msgid "Prompt must include {}, {} and {}"
-msgstr "提示詞必須包含 {}、{} 和 {}"
+msgstr "提示必須包含 {}、{} 和 {}"
 
 msgid "The setting was saved."
-msgstr "設置已保存。"
+msgstr "設定已儲存。"
 
 msgid "Failed to retreive data from translate engine API."
-msgstr "無法從翻譯引擎API獲取數據。"
+msgstr "無法從翻譯引擎 API 擷取資料。"
 
 msgid "Will retry in {} seconds."
-msgstr "{} 秒後重試。"
+msgstr "將在 {} 秒後重試。"
 
 msgid "Retrying ... (timeout is {} seconds)."
-msgstr "正在重試 ...（{}秒後超時）"
+msgstr "正在重試 ... ({} 秒後逾時)"
 
 msgid "Original: {}"
 msgstr "原文：{}"
 
 msgid "Translation (Cached): {}"
-msgstr "譯文（緩存）：{}"
+msgstr "譯文 (快取)：{}"
 
 msgid "Translation: {}"
 msgstr "譯文：{}"
@@ -270,7 +270,7 @@ msgid "Start to translate ebook content:"
 msgstr "開始翻譯電子書內容："
 
 msgid "Total items: {}"
-msgstr "全部條目：{}"
+msgstr "項目總計：{}"
 
 msgid "Translating: {}/{}"
 msgstr "翻譯：{}/{}"
