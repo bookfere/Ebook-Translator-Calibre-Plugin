@@ -13,14 +13,11 @@ class EbookTranslator(InterfaceActionBase):
     title = _(name)
     supported_platforms = ['windows', 'osx', 'linux']
     author = 'bookfere.com'
-    version = (1, 0, 2)
+    version = (1, 1, 0)
+    __version__ = 'v' + '.'.join(map(str, version))
     minimum_calibre_version = (1, 0, 0)
 
     actual_plugin = 'calibre_plugins.ebook_translator.ui:EbookTranslatorGui'
-
-    @classmethod
-    def get_version(cls):
-        return 'v' + '.'.join(map(str, cls.version))
 
     def is_customizable(self):
         return False

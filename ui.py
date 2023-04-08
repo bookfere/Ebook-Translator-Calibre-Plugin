@@ -1,5 +1,3 @@
-import json
-
 from calibre.gui2.actions import InterfaceAction
 from calibre.ebooks.conversion.config import get_input_format_for_book
 from calibre_plugins.ebook_translator import EbookTranslator
@@ -37,18 +35,18 @@ class EbookTranslatorGui(InterfaceAction):
         ebooks = self.get_selected_ebooks()
 
         if len(ebooks) < 1:
-            alert = QMessageBox(self)
+            alert = QMessageBox(self.gui)
             alert.setIcon(QMessageBox.Warning)
-            alert.setText(_('You must choose at least one ebook.'))
+            alert.setText(_('Please choose at least one book.'))
             alert.exec_()
             return
 
         window = MainWindowFrame(self, self.qaction.icon(), ebooks)
         window.setModal(True)
         window.setMinimumWidth(600)
-        window.setMinimumHeight(530)
+        window.setMinimumHeight(520)
         window.setWindowTitle(
-            '%s - %s' % (EbookTranslator.title, EbookTranslator.get_version()))
+            '%s - %s' % (EbookTranslator.title, EbookTranslator.__version__))
         window.setWindowIcon(self.qaction.icon())
         window.show()
 

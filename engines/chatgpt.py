@@ -7,28 +7,41 @@ load_translations()
 
 
 class ChatgptTranslate(Base):
-    def get_endpoint(self):
-        return 'https://api.openai.com/v1/chat/completions'
+    name = 'ChatGPT'
+    support_lang = 'google.json'
+    endpoint = 'https://api.openai.com/v1/chat/completions'
 
+    prompts = {
+        'auto': 'Translate the content into {tlang}: {text}',
+        'lang': 'Translate the content from {slang} to {tlang}: {text}',
+    }
+
+    def set_prompt(self, auto=None, lang=None):
+        if auto is not None:
+            self.prompts.update(auto=auto)
+        if lang is not None:
+            self.prompts.update(lang=lang)
+
+    @Base._translate
     def translate(self, text):
         headers = {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer %s' % self.api_key
         }
 
-        content = 'Translate the content from {} to {}: {}'.format(
-                  self.source_lang, self.target_lang, text)
         if self._is_auto_lang():
-            content = 'Translate the content into {}: {}'.format(
-                      self.target_lang, text)
+            content = self.prompts.get('auto').format(
+                tlang=self.target_lang, text=text)
+        else:
+            content = self.prompts.get('lang').format(
+                slang=self.source_lang, tlang=self.target_lang, text=text)
 
         data = json.dumps({
             'model': 'gpt-3.5-turbo',
-            'messages': [{
-                'role': 'user',
-                'content': content
-            }]
+            'messages': [{'role': 'user', 'content': content}]
         })
 
-        response = self.request(data, method='POST', headers=headers)
+        return self.request(data, method='POST', headers=headers)
+
+    def parse(self, response):
         return json.loads(response)['choices'][0]['message']['content']

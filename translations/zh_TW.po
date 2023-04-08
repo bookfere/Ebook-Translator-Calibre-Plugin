@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-28 19:25+0800\n"
+"POT-Creation-Date: 2023-04-08 14:25+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,17 +29,29 @@ msgstr "已啓用"
 msgid "Total paragraphs: {}"
 msgstr "段落總數：{}"
 
-msgid "Translate engine return bad response."
-msgstr "翻譯引擎返回了錯誤響應。"
-
 msgid "Auto detect"
 msgstr "自動探測"
 
-msgid "DeepL do not support the language: {}"
-msgstr "DeepL不支持語言：{}"
+msgid "Incorrect format of APP id and key."
+msgstr "APP id 和 key 格式填寫有誤。"
+
+msgid "API Key"
+msgstr "API密鑰"
+
+msgid "Translate engine return bad response."
+msgstr "翻譯引擎返回了錯誤響應。"
+
+msgid "Can not parse returned response. Raw data: {}"
+msgstr "無法解析返回的相應。原始數據：{}"
+
+msgid "Incorrect format of APP key and secret."
+msgstr "APP key 和 secret 格式填寫有誤。"
 
 msgid "Translate"
 msgstr "翻譯"
+
+msgid "Content"
+msgstr "內容"
 
 msgid "Setting"
 msgstr "設置"
@@ -74,7 +86,7 @@ msgstr "指定路徑不存在。"
 msgid "[{} > {}] Translating \"{}\""
 msgstr "[{} > {}] 翻譯 \"{}\""
 
-msgid "Failed to translate"
+msgid "Translation job failed"
 msgstr "翻譯失敗"
 
 msgid "completed"
@@ -89,6 +101,54 @@ msgstr "翻譯已完成"
 msgid "The translation of \"{}\" was completed. Do you want to open the book?"
 msgstr "\"{}\"的翻譯已完成。是否想要立即閱讀這本電子書？"
 
+msgid "Save"
+msgstr "保存"
+
+msgid "Translation Position"
+msgstr "譯文位置"
+
+msgid "Add after original"
+msgstr "加在原文後"
+
+msgid "Add before original"
+msgstr "加在原文前"
+
+msgid "Add without original"
+msgstr "僅保留譯文"
+
+msgid "Translation Color"
+msgstr "譯文顏色"
+
+msgid "CSS color value, e.g., #666666, grey, rgb(80, 80, 80)"
+msgstr "CSS 顏色值，如 #666666, gry, rgb(80, 80, 80)"
+
+msgid "Choose"
+msgstr "選擇"
+
+msgid "Do not Translate"
+msgstr "不要翻譯"
+
+msgid "Mode:"
+msgstr "模式："
+
+msgid "Normal"
+msgstr "普通"
+
+msgid "Normal (case-sensitive)"
+msgstr "普通（區分大小寫）"
+
+msgid "Regular Expression"
+msgstr "正則表達式"
+
+msgid "Exclude content by keyword. One keyword per line:"
+msgstr "排除帶指定關鍵詞的內容。一行一條關鍵詞："
+
+msgid "Exclude content by case-sensitive keyword. One keyword per line:"
+msgstr "排除帶指定關鍵詞的內容（區分字母大小寫）。一行一條關鍵詞："
+
+msgid "Exclude content by regular expression pattern. One pattern per line:"
+msgstr "排除匹配正則表達式規則的內容。一行一條規則："
+
 msgid "Output Path"
 msgstr "輸出路徑"
 
@@ -98,14 +158,23 @@ msgstr "書庫"
 msgid "Path"
 msgstr "路徑"
 
+msgid "Choose a path to store translated book(s)"
+msgstr "選擇一個路徑用來存放翻譯後的電子書"
+
 msgid "Choose ..."
 msgstr "選擇 ..."
 
 msgid "Translate Engine"
 msgstr "翻譯引擎"
 
-msgid "API Key"
-msgstr "API密鑰"
+msgid "ChatGPT Prompt"
+msgstr "ChatGPT提示詞"
+
+msgid "For auto detecting source language:"
+msgstr "自動探測來源語言時的提示詞"
+
+msgid "For specifying source language:"
+msgstr "指定來源語言時的提示詞"
 
 msgid "Network Proxy"
 msgstr "網絡代理"
@@ -143,10 +212,7 @@ msgstr "日誌"
 msgid "Show translation"
 msgstr "顯示譯文"
 
-msgid "Save"
-msgstr "保存"
-
-msgid "Can not clear cache while job(s) running."
+msgid "Cannot clear cache while there are running jobs."
 msgstr "有運行中的任務，無法清理緩存。"
 
 msgid "Total: {}"
@@ -161,8 +227,20 @@ msgstr "網絡代理可用。"
 msgid "The proxy is not available."
 msgstr "網絡代理不可用。"
 
+msgid "Invalid color value."
+msgstr "無效的顏色值。"
+
+msgid "{} is not a valid regular expression."
+msgstr "{} 不是有效的正則表達式。"
+
 msgid "An API key is required."
 msgstr "API密鑰是必填項。"
+
+msgid "Prompt must include {} and {}"
+msgstr "提示詞必須包含 {} 和 {}"
+
+msgid "Prompt must include {}, {} and {}"
+msgstr "提示詞必須包含 {}、{} 和 {}"
 
 msgid "The setting was saved."
 msgstr "設置已保存。"
@@ -212,5 +290,5 @@ msgstr "翻譯書籍"
 msgid "Translate Ebook Content"
 msgstr "翻譯電子書內容"
 
-msgid "You must choose at least one ebook."
+msgid "Please choose at least one book."
 msgstr "必須選擇至少一本電子書。"

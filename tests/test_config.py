@@ -3,7 +3,26 @@ import calibre_plugins.ebook_translator.config as config
 
 
 class TestConfig(unittest.TestCase):
-    def test_set_and_get(self):
+
+    def test_init_config(self):
+        default = {
+            'to_library': True,
+            'output_path': None,
+            'translate_engine': 'Google',
+            'api_key': {},
+            'proxy_enabled': False,
+            'proxy_setting': [],
+            'request_attempt': 3,
+            'request_interval': 5,
+            'cache_enabled': True,
+            'log_translation': True,
+            'translation_position': 'after',
+            'rule_mode': 'normal',
+            'filter_rules': [],
+        }
+        config.preferences = None
+
+    def test_set_and_get_config(self):
         config.preferences = {
             'a': 1,
             'b': {
@@ -53,3 +72,14 @@ class TestConfig(unittest.TestCase):
                 }
             }
         })
+
+    def test_save_config(self):
+        config.preferences = {'a': 1, 'b': 2}
+        config.save_config({'a': 3, 'b': 4, 'c': 5})
+
+        self.assertEqual({'a': 3, 'b': 4, 'c': 5}, config.preferences)
+
+    def test_get_configs(self):
+        config.preferences = {'a': 1, 'b': 2}
+
+        self.assertEqual([1, 2], config.get_configs('a', 'b'))

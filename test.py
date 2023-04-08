@@ -1,4 +1,3 @@
-import os.path
 import unittest
 from calibre.utils.run_tests import run_cli
 from calibre_plugins.ebook_translator.tests import (

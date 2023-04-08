@@ -7,16 +7,17 @@ load_translations()
 
 
 class GoogleTranslate(Base):
-    def get_endpoint(self):
-        return 'https://translate.googleapis.com/translate_a/single'
+    name = 'Google'
+    support_lang = 'google.json'
+    endpoint = 'https://translate.googleapis.com/translate_a/single'
+    need_api_key = False
 
-    def need_sleep(self):
-        return True
-
+    @Base._translate
     def translate(self, text):
-        sl = self._get_lang_code(self.source_lang)
-        tl = self._get_lang_code(self.target_lang)
-        data = self.request({
+        sl = self._get_source_lang_code()
+        tl = self._get_target_lang_code()
+
+        return self.request({
             'client': 'gtx',
             'sl': sl,
             'tl': tl,
@@ -24,4 +25,5 @@ class GoogleTranslate(Base):
             'q': text,
         })
 
-        return ''.join(i[0] for i in json.loads(data)[0])
+    def parse(self, response):
+        return ''.join(i[0] for i in json.loads(response)[0])

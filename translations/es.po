@@ -18,277 +18,283 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "Disabled"
-msgstr "已禁用"
+msgstr "Desactivado"
 
 msgid "Ebook Translator"
-msgstr "电子书翻译器"
+msgstr "Traductor de libros electrónicos"
 
 msgid "Enabled"
-msgstr "已启用"
+msgstr "Activado"
+
+msgid "Filter Content"
+msgstr ""
+
+msgid "Pleasse choose at least one book."
+msgstr "Debes elegir al menos un book."
 
 msgid "Total paragraphs: {}"
-msgstr "段落总数：{}"
+msgstr "Total de párrafos: {}"
 
 msgid "Auto detect"
-msgstr "自动探测"
+msgstr "Detección automática"
 
 msgid "Incorrect format of APP id and key."
-msgstr "APP id 和 key 格式填写有误。"
+msgstr ""
 
 msgid "API Key"
-msgstr "API密钥"
+msgstr "Clave API"
 
 msgid "Translate engine return bad response."
-msgstr "翻译引擎返回了错误响应。"
+msgstr "El motor de traducción devuelve una mala respuesta."
 
 msgid "Can not parse returned response. Raw data: {}"
-msgstr "无法解析返回的相应。原始数据：{}"
+msgstr ""
 
 msgid "Incorrect format of APP key and secret."
-msgstr "APP key 和 secret 格式填写有误。"
+msgstr ""
 
 msgid "Translate"
-msgstr "翻译"
+msgstr "Traducir"
 
 msgid "Content"
-msgstr "内容"
+msgstr ""
 
 msgid "Setting"
-msgstr "设置"
+msgstr "Configuración"
 
 msgid "About"
-msgstr "关于"
+msgstr "Acerca"
 
 msgid "Donate"
-msgstr "赞赏"
+msgstr "Donar"
 
 msgid "Feedback"
-msgstr "反馈"
+msgstr "Comentario"
 
 msgid "Input Format"
-msgstr "输入格式"
+msgstr "Formato de entrada"
 
 msgid "Output Format"
-msgstr "输出格式"
+msgstr "Formato de salida"
 
 msgid "Title"
-msgstr "书名"
+msgstr "Título"
 
 msgid "Source Language"
-msgstr "来源语言"
+msgstr "Lenguaje original"
 
 msgid "Target Language"
-msgstr "目标语言"
+msgstr "Lenguaje a traducir"
 
 msgid "The specified path does not exist."
-msgstr "指定路径不存在。"
+msgstr "La ruta especificada no existe."
 
 msgid "[{} > {}] Translating \"{}\""
-msgstr "[{} > {}] 翻译 \"{}\""
+msgstr "[{} > {}] Traduciendo \"{}\""
 
 msgid "Translation job failed"
-msgstr "翻译失败"
+msgstr "Error al traducir"
 
 msgid "completed"
-msgstr "已结束"
+msgstr "completado"
 
 msgid "Ebook Translation Log"
-msgstr "电子书翻译日志"
+msgstr "Registro de traducción de libros electrónicos"
 
 msgid "Translation Completed"
-msgstr "翻译已完成"
+msgstr "Traducción completada"
 
 msgid "The translation of \"{}\" was completed. Do you want to open the book?"
-msgstr "\"{}\"的翻译已完成。是否想要立即阅读这本电子书？"
+msgstr "La traducción de \"{}\" se completó. ¿Quieres abrir el libro?"
 
 msgid "Save"
-msgstr "保存"
+msgstr "Guardar"
 
 msgid "Translation Position"
-msgstr "译文位置"
+msgstr ""
 
 msgid "Add after original"
-msgstr "加在原文后"
+msgstr ""
 
 msgid "Add before original"
-msgstr "加在原文前"
+msgstr ""
 
 msgid "Add without original"
-msgstr "仅保留译文"
+msgstr ""
 
 msgid "Translation Color"
-msgstr "译文颜色"
+msgstr ""
 
 msgid "CSS color value, e.g., #666666, grey, rgb(80, 80, 80)"
-msgstr "CSS 颜色值，如 #666666, gry, rgb(80, 80, 80)"
+msgstr ""
 
 msgid "Choose"
-msgstr "选择"
+msgstr ""
 
 msgid "Do not Translate"
-msgstr "不要翻译"
+msgstr ""
 
 msgid "Mode:"
-msgstr "模式："
+msgstr ""
 
 msgid "Normal"
-msgstr "普通"
+msgstr ""
 
 msgid "Normal (case-sensitive)"
-msgstr "普通（区分大小写）"
+msgstr ""
 
 msgid "Regular Expression"
-msgstr "正则表达式"
+msgstr ""
 
 msgid "Exclude content by keyword. One keyword per line:"
-msgstr "排除带指定关键词的内容。一行一条关键词："
+msgstr ""
 
 msgid "Exclude content by case-sensitive keyword. One keyword per line:"
-msgstr "排除带指定关键词的内容（区分字母大小写）。一行一条关键词："
+msgstr ""
 
 msgid "Exclude content by regular expression pattern. One pattern per line:"
-msgstr "排除匹配正则表达式规则的内容。一行一条规则："
+msgstr ""
 
 msgid "Output Path"
-msgstr "输出路径"
+msgstr "Ruta de salida"
 
 msgid "Library"
-msgstr "书库"
+msgstr "Biblioteca"
 
 msgid "Path"
-msgstr "路径"
+msgstr "Ruta"
 
 msgid "Choose a path to store translated book(s)"
-msgstr "选择一个路径用来存放翻译后的电子书"
+msgstr ""
 
 msgid "Choose ..."
-msgstr "选择 ..."
+msgstr "Elegir ..."
 
 msgid "Translate Engine"
-msgstr "翻译引擎"
+msgstr "Motor de traducción"
 
 msgid "ChatGPT Prompt"
-msgstr "ChatGPT提示词"
+msgstr ""
 
 msgid "For auto detecting source language:"
-msgstr "自动探测来源语言时的提示词"
+msgstr ""
 
 msgid "For specifying source language:"
-msgstr "指定来源语言时的提示词"
+msgstr ""
 
 msgid "Network Proxy"
-msgstr "网络代理"
+msgstr "Proxy de red"
 
 msgid "Enable"
-msgstr "开启"
+msgstr "Permitir"
 
 msgid "Host"
-msgstr "主机"
+msgstr "Host"
 
 msgid "Port"
-msgstr "端口"
+msgstr "Puerto"
 
 msgid "Test"
-msgstr "测试"
+msgstr "Prueba"
 
 msgid "Cache"
-msgstr "缓存"
+msgstr "Cache"
 
 msgid "Clear"
-msgstr "清除"
+msgstr "Limpiar"
 
 msgid "Request"
-msgstr "请求"
+msgstr "Pedido"
 
 msgid "Attempt times (Default 3):"
-msgstr "重试次数（默认3次）："
+msgstr "Tiempos de intento (predeterminado 3):"
 
 msgid "Max interval (Default 5s):"
-msgstr "最大间隔（默认5秒）"
+msgstr "Intervalo máximo (predeterminado 5s):"
 
 msgid "Log"
-msgstr "日志"
+msgstr "Registro"
 
 msgid "Show translation"
-msgstr "显示译文"
+msgstr "Mostrar traducción"
 
 msgid "Cannot clear cache while there are running jobs."
-msgstr "有运行中的任务，无法清理缓存。"
+msgstr "No se puede borrar el caché mientras se ejecuta el trabajo(s)."
 
 msgid "Total: {}"
-msgstr "总计：{}"
+msgstr "Total: {}"
 
 msgid "Proxy host or port is incorrect."
-msgstr "代理的主机或端口填写有误。"
+msgstr "El host o puerto proxy es incorrecto."
 
 msgid "The proxy is available."
-msgstr "网络代理可用。"
+msgstr "El proxy está disponible."
 
 msgid "The proxy is not available."
-msgstr "网络代理不可用。"
+msgstr "El proxy no está disponible."
 
 msgid "Invalid color value."
-msgstr "无效的颜色值。"
+msgstr ""
 
 msgid "{} is not a valid regular expression."
-msgstr "{} 不是有效的正则表达式。"
+msgstr ""
 
 msgid "An API key is required."
-msgstr "API密钥是必填项。"
+msgstr "Se requiere una clave API."
 
 msgid "Prompt must include {} and {}."
-msgstr "提示词必须包含 {} 和 {}。"
+msgstr ""
 
 msgid "Prompt must include {}, {} and {}."
-msgstr "提示词必须包含 {}、{} 和 {}。"
+msgstr ""
 
 msgid "The setting was saved."
-msgstr "设置已保存。"
+msgstr "Se guardó la configuración."
 
 msgid "Failed to retreive data from translate engine API."
-msgstr "无法从翻译引擎API获取数据。"
+msgstr "No se pudieron recuperar los datos de la API del motor de traducción."
 
 msgid "Will retry in {} seconds."
-msgstr "{} 秒后重试。"
+msgstr "Se volverá a intentar en {} segundos."
 
 msgid "Retrying ... (timeout is {} seconds)."
-msgstr "正在重试 ...（{}秒后超时）"
+msgstr "Reintentando... (el tiempo de espera es de {} segundos)."
 
 msgid "Original: {}"
-msgstr "原文：{}"
+msgstr "Original: {}"
 
 msgid "Translation (Cached): {}"
-msgstr "译文（缓存）：{}"
+msgstr "Traducción (En caché): {}"
 
 msgid "Translation: {}"
-msgstr "译文：{}"
+msgstr "Traducción: {}"
 
 msgid "There is no content need to translate."
-msgstr "没有需要翻译的内容。"
+msgstr "No hay necesidad de traducir el contenido."
 
 msgid "Start to translate ebook content:"
-msgstr "开始翻译电子书内容："
+msgstr "Comience a traducir contenido de libros electrónicos:"
 
 msgid "Total items: {}"
-msgstr "全部条目：{}"
+msgstr "Articulos totales: {}"
 
 msgid "Translating: {}/{}"
-msgstr "翻译：{}/{}"
+msgstr "Traduciendo: {}/{}"
 
 msgid "Translation completed."
-msgstr "翻译已完成"
+msgstr "Traducción completada."
 
 msgid "Start to convert ebook format:"
-msgstr "开始转换电子书格式："
+msgstr "Comienza a convertir el formato de libro electrónico:"
 
 msgid "Translate engine not exists."
-msgstr "翻译引擎不存在。"
+msgstr "El motor de traducción no existe."
 
 msgid "Translate Book"
-msgstr "翻译书籍"
+msgstr "Traducir libro"
 
 msgid "Translate Ebook Content"
-msgstr "翻译电子书内容"
+msgstr "Traducir contenido de libros electrónicos"
 
 msgid "Please choose at least one book."
-msgstr "必须选择至少一本电子书。"
+msgstr ""

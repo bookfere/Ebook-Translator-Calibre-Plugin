@@ -1,19 +1,21 @@
 import time
 import random
 
-from lxml import etree
 from calibre import prepare_string_for_xml as escape
 
-from calibre_plugins.ebook_translator.utils import ns, sep, uid, trim
+from calibre_plugins.ebook_translator.utils import sep, uid, trim
+from calibre_plugins.ebook_translator.element import ElementHandler
 
 
 load_translations()
 
 
 class Translation:
-    def __init__(self, translator):
+    def __init__(self, translator, position=None, color=None):
         self.translator = translator
 
+        self.position = position
+        self.color = color
         self.cache = None
         self.progress = None
         self.log = None
@@ -62,27 +64,15 @@ class Translation:
             return self._translate(text, count, interval)
 
     def _handle(self, element):
-        translation = None
-        element_copy = self._get_element_copy(element)
-        reserves = element_copy.findall('.//x:img', namespaces=ns)
-        for reserve in reserves:
-            # TODO: handle nested img element
-            if reserve.getparent() != element_copy:
-                reserves.remove(reserve)
-                continue
-            placeholder = '{id_%s}' % id(reserve)
-            element_copy.text = ((element_copy.text or '') + placeholder
-                                 + (reserve.tail or ''))
-            reserve.tail = None
-            reserve.getparent().remove(reserve)
+        element_handler = ElementHandler(element)
 
-        original = trim(''.join(element_copy.itertext()))
+        original = element_handler.get_content()
         self._log(_('Original: {}').format(original))
 
+        translation = None
         paragraph_uid = uid(original)
         if self.cache and self.cache.exists():
             translation = self.cache.get(paragraph_uid)
-
         if translation is not None:
             self._log(_('Translation (Cached): {}').format(translation))
             self.need_sleep = False
@@ -93,23 +83,10 @@ class Translation:
             self._log(_('Translation: {}').format(translation))
             self.need_sleep = True
 
-        if reserves:
-            translation = translation.format(**dict([
-                ('id_%s' % id(reserve), self._get_element_string(reserve))
-                for reserve in reserves]))
-
-        translation = '<{0} xmlns="{1}">{2}</{0}>'.format(
-                      etree.QName(element).localname, ns['x'], translation,)
-        new_element = etree.fromstring(translation)
-        new_element.set('class', element.get('class'))
-        element.tail = None  # Make sure it has no tail
-        element.addnext(new_element)
-
-    def _get_element_copy(self, element):
-        return etree.fromstring(self._get_element_string(element))
-
-    def _get_element_string(self, element):
-        return trim(etree.tostring(element, encoding='utf-8').decode())
+        element_handler.add_translation(
+            translation, self.translator.get_target_lang_code(),
+            self.position, self.color)
+        self.need_sleep = False
 
     def handle(self, elements):
         total = len(elements)
@@ -124,8 +101,8 @@ class Translation:
             self._progress(process, _('Translating: {}/{}')
                            .format(count, total))
             self._handle(element)
-            if self.translator.need_sleep() and self.need_sleep:
-                time.sleep(random.randint(0, self.request_interval))
+            if self.need_sleep:
+                time.sleep(random.randint(1, self.request_interval))
             count += 1
             process += step
         self._progress(1, _('Translation completed.'))

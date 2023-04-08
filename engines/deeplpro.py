@@ -5,5 +5,5 @@ load_translations()
 
 
 class DeeplProTranslate(DeeplTranslate):
-    def get_endpoint(self):
-        return 'https://api.deepl.com/v2/translate'
+    name = 'DeepL(Pro)'
+    endpoint = 'https://api.deepl.com/v2/translate'
