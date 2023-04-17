@@ -3,31 +3,33 @@ from calibre.utils.config import JSONConfig
 
 preferences = JSONConfig('plugins/ebook_translator')
 
+default_config = {
+    'to_library': True,
+    'output_path': None,
+    'translate_engine': 'Google',
+    'chatgpt_prompt': {},
+    'api_key': {},
+    'proxy_enabled': False,
+    'proxy_setting': [],
+    'request_attempt': 3,
+    'request_interval': 5,
+    'cache_enabled': True,
+    'log_translation': True,
+    'translation_position': 'after',
+    'translation_color': None,
+    'rule_mode': 'normal',
+    'filter_rules': [],
+    'custom_engines': {},
+}
+
 
 def init_config():
-    default = {
-        'to_library': True,
-        'output_path': None,
-        'translate_engine': 'Google',
-        'chatgpt_prompt': {},
-        'api_key': {},
-        'proxy_enabled': False,
-        'proxy_setting': [],
-        'request_attempt': 3,
-        'request_interval': 5,
-        'cache_enabled': True,
-        'log_translation': True,
-        'translation_position': 'after',
-        'translation_color': None,
-        'rule_mode': 'normal',
-        'filter_rules': [],
-    }
     if not preferences:
-        save_config(default)
-    for key, value in default.items():
+        save_config(default_config)
+    for key, value in default_config.items():
         if key not in preferences:
             set_config(key, value)
-    return {k:get_config(k, v) for k, v in default.items()}
+    return {k: get_config(k, v) for k, v in default_config.items()}
 
 
 def save_config(config):

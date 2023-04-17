@@ -7,6 +7,9 @@ ns = {'x': 'http://www.w3.org/1999/xhtml'}
 sep = '=' * 30
 
 
+def _z(message): return message
+
+
 def uid(*args):
     md5 = hashlib.md5()
     for arg in args:
@@ -26,3 +29,14 @@ def is_proxy_availiable(host, port, timeout=1):
     except Exception as e:
         return False
     return True
+
+
+def sorted_mixed_number(string_list):
+    def key(s):
+        num = ''.join([i for i in s if i.isdigit()])
+        return num if num else s
+    return sorted(string_list, key=key)
+
+
+def is_str(data):
+    return type(data).__name__ in ('str', 'unicode')

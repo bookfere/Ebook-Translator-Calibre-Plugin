@@ -9,24 +9,40 @@ load_translations()
 class DeeplTranslate(Base):
     name = 'DeepL'
     support_lang = 'deepl.json'
-    endpoint = 'https://api-free.deepl.com/v2/translate'
+    endpoint = {
+        'translate': 'https://api-free.deepl.com/v2/translate',
+        'usage': 'https://api-free.deepl.com/v2/usage',
+    }
 
-    @Base._translate
+    def get_usage(self):
+        # See: https://www.deepl.com/docs-api/general/get-usage/
+        def usage_info(data):
+            usage = json.loads(data)
+            total = usage.get('character_limit')
+            used = usage.get('character_count')
+            left = total - used
+            return '{} total, {} used, {} left'.format(total, used, left)
+
+        return self.get_result(
+            self.endpoint.get('usage'), callback=usage_info, silence=True,
+            headers={'Authorization': 'DeepL-Auth-Key %s' % self.api_key})
+
     def translate(self, text):
         headers = {
             'Content-Type': 'application/json',
-            'Authorization': 'DeepL-Auth-Key %s' % self.api_key
+            'Authorization': 'DeepL-Auth-Key %s' % self.api_key,
         }
 
         data = {
             'text': text,
-            'target_lang': self._get_target_lang_code()
+            'target_lang': self._get_target_code()
         }
 
         if not self._is_auto_lang():
-            data['source_lang'] = self._get_source_lang_code()
+            data['source_lang'] = self._get_source_code()
 
-        return self.request(data, method='POST', headers=headers)
+        return self.get_result(
+            self.endpoint.get('translate'), data, headers, method='POST')
 
-    def parse(self, response):
-        return json.loads(response)['translations'][0]['text']
+    def parse(self, data):
+        return json.loads(data)['translations'][0]['text']

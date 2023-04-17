@@ -8,32 +8,11 @@ from calibre_plugins.ebook_translator import EbookTranslator
 from calibre_plugins.ebook_translator.config import get_config, get_configs
 from calibre_plugins.ebook_translator.utils import ns, uid, trim
 from calibre_plugins.ebook_translator.cache import TranslationCache
-from calibre_plugins.ebook_translator.translation import Translation
-from calibre_plugins.ebook_translator.translator import TranslatorBuilder
+from calibre_plugins.ebook_translator.translator import get_translator
+from calibre_plugins.ebook_translator.translation import get_translation
 
 
 load_translations()
-
-
-def get_translator(source_lang, target_lang):
-    engine = get_config('translate_engine')
-    api_key = get_config('api_key.%s' % engine)
-    builder = TranslatorBuilder(source_lang, target_lang, engine, api_key)
-    translator = builder.build()
-    if get_config('proxy_enabled'):
-        translator.set_proxy(get_config('proxy_setting'))
-    if translator.is_chatgpt():
-        prompts = get_config('chatgpt_prompt')
-        translator.set_prompt(prompts.get('auto'), prompts.get('lang'))
-    return translator
-
-
-def get_translation(translator):
-    translation = Translation(translator, get_config('translation_position'),
-                              get_config('translation_color'))
-    translation.set_request_attempt(get_config('request_attempt'))
-    translation.set_request_interval(get_config('request_interval'))
-    return translation
 
 
 def extract_elements(pages):
@@ -70,7 +49,7 @@ def get_elements(root, elements):
             elements.append(element)
         else:
             get_elements(element, elements)
-    # Return root if all children has no content
+    # Return root if all children have no content
     return elements if elements else [root]
 
 
@@ -79,7 +58,7 @@ def filter_content(element):
     if content == '':
         return False
 
-    default_rules = ['^[\d\s\._-]+$']
+    default_rules = [r'^[\d\s\._-]+$']
     patterns = [re.compile(rule) for rule in default_rules]
 
     mode, rules = get_configs('rule_mode', 'filter_rules')
@@ -102,8 +81,18 @@ def convert_book(input_path, output_path, source_lang, target_lang,
                  notification):
     """parameter notification is automatically added by arbitrary_n."""
     log = Log()
-    translator = get_translator(source_lang, target_lang)
+    translator = get_translator()
+    translator.set_source_lang(source_lang)
+    translator.set_target_lang(target_lang)
     translation = get_translation(translator)
+
+    if get_config('cache_enabled'):
+        cache = TranslationCache(uid(
+            translator.name, input_path, source_lang, target_lang))
+        translation.set_cache(cache)
+
+    if get_config('log_translation'):
+        translation.set_log(log)
 
     dagnosis = """==============================
 | Diagnosis Information
@@ -119,14 +108,6 @@ def convert_book(input_path, output_path, source_lang, target_lang,
     log.info(dagnosis.format(
         __version__, EbookTranslator.__version__, translator.name, source_lang,
         target_lang, input_path, output_path))
-
-    if get_config('cache_enabled'):
-        cache = TranslationCache(uid(
-            translator.name, input_path, source_lang, target_lang))
-        translation.set_cache(cache)
-
-    if get_config('log_translation'):
-        translation.set_log(log)
 
     plumber = Plumber(
         input_path, output_path, log=log, report_progress=notification)

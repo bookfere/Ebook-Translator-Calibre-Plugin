@@ -2,7 +2,9 @@ import re
 import os
 import zipfile
 import os.path
+from types import MethodType
 
+from calibre.constants import DEBUG
 from calibre.gui2 import Dispatcher
 from calibre.ebooks.markdown import markdown
 from calibre.utils.localization import get_lang
@@ -13,29 +15,35 @@ from calibre.ebooks.conversion.config import get_output_formats
 from calibre_plugins.ebook_translator import EbookTranslator
 from calibre_plugins.ebook_translator.config import (
     init_config, save_config, get_config)
-from calibre_plugins.ebook_translator.utils import is_proxy_availiable
-from calibre_plugins.ebook_translator.translator import TranslatorBuilder
+from calibre_plugins.ebook_translator.utils import (
+    is_proxy_availiable, sorted_mixed_number)
+from calibre_plugins.ebook_translator.engines import builtin_engines
+from calibre_plugins.ebook_translator.translator import get_engine_class
 from calibre_plugins.ebook_translator.cache import TranslationCache
-from calibre_plugins.ebook_translator.components.source_lang import SourceLang
-from calibre_plugins.ebook_translator.components.target_lang import TargetLang
+from calibre_plugins.ebook_translator.components.lang import (
+    SourceLang, TargetLang)
+from calibre_plugins.ebook_translator.components.engine import (
+    EngineTester, ManageCustomEngine)
+from calibre_plugins.ebook_translator.components.parts import (
+    pop_alert, get_divider)
 
 
 try:
     from qt.core import (
-        Qt, QLabel, QDialog, QWidget, QLineEdit, QMessageBox, QPushButton,
-        QTabWidget, QComboBox, QHeaderView, QHBoxLayout, QVBoxLayout, QColor,
-        QGroupBox, QTableWidget, QTableWidgetItem, QRegularExpression,
-        QFileDialog, QIntValidator, QScrollArea, QRadioButton, QFrame,
-        QCheckBox,  QTextBrowser, QTextDocument, QButtonGroup, QPalette,
-        QColorDialog, QPlainTextEdit, QRegularExpressionValidator)
+        Qt, QLabel, QDialog, QWidget, QLineEdit, QPushButton, QPlainTextEdit,
+        QTabWidget, QComboBox, QHeaderView, QHBoxLayout, QVBoxLayout,
+        QGroupBox, QTableWidget, QTableWidgetItem, QRegularExpression, QColor,
+        QFileDialog, QIntValidator, QScrollArea, QRadioButton, QGridLayout,
+        QCheckBox, QTextBrowser, QTextDocument, QButtonGroup, QColorDialog,
+        QPalette, QRegularExpressionValidator)
 except ImportError:
     from PyQt5.Qt import (
-        Qt, QLabel, QDialog, QWidget, QLineEdit, QMessageBox, QTabWidget,
-        QComboBox, QPushButton, QHeaderView, QHBoxLayout, QVBoxLayout, QColor,
-        QGroupBox, QTableWidget, QTableWidgetItem, QRegularExpression,
-        QFileDialog, QIntValidator, QScrollArea, QRadioButton, QFrame,
-        QCheckBox, QTextBrowser, QTextDocument, QButtonGroup, QPalette,
-        QColorDialog, QPlainTextEdit, QRegularExpressionValidator)
+        Qt, QLabel, QDialog, QWidget, QLineEdit, QTabWidget, QPlainTextEdit,
+        QComboBox, QPushButton, QHeaderView, QHBoxLayout, QVBoxLayout,
+        QGroupBox, QTableWidget, QTableWidgetItem, QRegularExpression, QColor,
+        QFileDialog, QIntValidator, QScrollArea, QRadioButton, QGridLayout,
+        QCheckBox, QTextBrowser, QTextDocument, QButtonGroup, QColorDialog,
+        QPalette, QRegularExpressionValidator)
 
 load_translations()
 
@@ -55,10 +63,12 @@ class MainWindowFrame(QDialog):
         if not getattr(self.gui, 'bookfere_translate_ebook_jobs', None):
             self.gui.bookfere_translate_ebook_jobs = []
 
-        self.current_engine = self.get_translate_engine(
+        self.current_engine = get_engine_class(
             self.config.get('translate_engine'))
         self.source_langs = []
         self.target_langs = []
+
+        self.pop_alert = MethodType(pop_alert, self)
 
         self.main_layout()
 
@@ -91,17 +101,15 @@ class MainWindowFrame(QDialog):
             feedback = '{}/issues'.format(github)
             donate = 'https://www.paypal.com/paypalme/bookfere'
         link = QLabel((
-            '<a href="{0}">GitHub</a>'
-            ' ｜ <a href="{1}">{3}</a>'
-            ' ｜ <a href="{2}">{4}</a>'
-        ).format(github, feedback, donate, _('Feedback'), _('Donate')))
+            '<a href="{0}">GitHub</a> ｜ <a href="{1}">{3}</a>'
+            ' ｜ <a href="{2}">{4}</a>')
+            .format(github, feedback, donate, _('Feedback'), _('Donate')))
         link.setOpenExternalLinks(True)
         info_layout.addWidget(link)
         layout.addWidget(info)
 
     def tabs_bar_clicked_action(self, index):
-        if index == 1:
-            self.recount_translation_cache()
+        index == 1 and self.recount_translation_cache()
 
     def layout_translate(self):
         widget = QWidget()
@@ -160,7 +168,7 @@ class MainWindowFrame(QDialog):
             target_lang.currentTextChanged.connect(
                 lambda lang, row=index: self.alter_ebooks_data(row, 6, lang))
 
-            self.refresh_lang_codes()
+        self.refresh_lang_codes()
 
         layout.addWidget(table)
 
@@ -217,8 +225,9 @@ class MainWindowFrame(QDialog):
         self.gui.bookfere_translate_ebook_jobs.remove(job)
 
         if job.failed:
-            return self.gui.job_exception(
+            DEBUG or self.gui.job_exception(
                 job, dialog_title=_('Translation job failed'))
+            return
 
         book_id, title, ofmt, output_path = self.jobs.pop(job)
 
@@ -323,7 +332,8 @@ class MainWindowFrame(QDialog):
             valid = QColor(color).isValid()
             color_show.setStyleSheet(
                 'background-color:{};border-color:{};'.format(
-                valid and color or 'transparent', valid and color or '#eee'))
+                    valid and color or 'transparent',
+                    valid and color or '#eee'))
         show_color()
 
         def set_color(color):
@@ -359,7 +369,7 @@ class MainWindowFrame(QDialog):
         self.filter_rules.insertPlainText(
             '\n'.join(self.config.get('filter_rules')))
         filter_layout.addWidget(mode_group)
-        filter_layout.addWidget(self.get_divider())
+        filter_layout.addWidget(get_divider())
         filter_layout.addWidget(tip)
         filter_layout.addWidget(self.filter_rules)
         layout.addWidget(filter_group)
@@ -395,7 +405,6 @@ class MainWindowFrame(QDialog):
 
         return widget
 
-
     @layout_scroll_area
     def layout_config(self):
         widget = QWidget()
@@ -427,17 +436,21 @@ class MainWindowFrame(QDialog):
         self.library_radio.toggled.connect(self.choose_output_type)
 
         # Translate Engine
-        engine_group = QGroupBox(_('Translate Engine'))
-        engine_layout = QVBoxLayout()
-        self.translate_engine = QComboBox()
+        engine_group = QGroupBox(_('Translation Engine'))
+        engine_layout = QGridLayout(engine_group)
+        engine_list = QComboBox()
         self.api_key = QLineEdit()
-        engine_layout.addWidget(self.translate_engine)
-        engine_layout.addWidget(self.api_key)
-        engine_group.setLayout(engine_layout)
+        engine_test = QPushButton(_('Test'))
+        manage_engine = QPushButton(_('Custom'))
+        engine_layout.addWidget(engine_list, 0, 0)
+        engine_layout.addWidget(engine_test, 0, 1)
+        engine_layout.addWidget(manage_engine, 0, 2)
+        engine_layout.addWidget(self.api_key, 1, 0, 1, 3)
+        engine_layout.setColumnStretch(0, 1)
         layout.addWidget(engine_group)
         # ChatGPT Prompt
-        self.prompt_group = QGroupBox(_('ChatGPT Prompt'))
-        prompt_layout = QVBoxLayout(self.prompt_group)
+        prompt_group = QGroupBox(_('ChatGPT Prompt'))
+        prompt_layout = QVBoxLayout(prompt_group)
         self.prompt_auto = QLineEdit()
         self.prompt_lang = QLineEdit()
         prompt_layout.addWidget(
@@ -446,17 +459,70 @@ class MainWindowFrame(QDialog):
         prompt_layout.addWidget(
             QLabel(_('For specifying source language:')))
         prompt_layout.addWidget(self.prompt_lang)
-        layout.addWidget(self.prompt_group)
+        layout.addWidget(prompt_group)
 
-        self.translate_engine.wheelEvent = lambda event: None
-        for engine in TranslatorBuilder.engines:
-            self.translate_engine.addItem(engine.name)
-        self.translate_engine.setCurrentText(
-            self.config.get('translate_engine'))
-        self.translate_engine.currentTextChanged.connect(
-            self.choose_translate_engine)
-        self.choose_translate_engine(self.translate_engine.currentText())
-        self.show_chatgpt_prompt()
+        def choose_default_engine(index):
+            engine_name = engine_list.itemData(index)
+            self.config.update(translate_engine=engine_name)
+            self.current_engine = get_engine_class(engine_name)
+
+            # show api key setting
+            need_api_key = self.current_engine.need_api_key
+            self.api_key.setVisible(need_api_key)
+            if need_api_key:
+                api_keys = self.config.get('api_key')
+                self.api_key.clear()
+                if engine_name in api_keys:
+                    self.api_key.setText(api_keys.get(engine_name))
+                api_key_validator = QRegularExpressionValidator(
+                    QRegularExpression(self.current_engine.api_key_rule))
+                self.api_key.setValidator(api_key_validator)
+                self.api_key.setPlaceholderText(
+                    self.current_engine.api_key_hint)
+            # show prompt setting
+            is_chatgpt = self.current_engine.is_chatgpt()
+            prompt_group.setVisible(is_chatgpt)
+            if is_chatgpt:
+                prompts = self.config.get('chatgpt_prompt')
+                inputs = {'auto': self.prompt_auto, 'lang': self.prompt_lang}
+                for k, v in inputs.items():
+                    default_prompt = self.current_engine.prompts.get(k)
+                    v.setPlaceholderText(default_prompt)
+                    v.setText(prompts.get(k) or default_prompt)
+
+        engine_list.currentIndexChanged.connect(choose_default_engine)
+
+        def refresh_engine_list():
+            engine_list.currentIndexChanged.disconnect(choose_default_engine)
+            engine_list.clear()
+            for engine in builtin_engines:
+                engine_list.addItem(_(engine.name), engine.name)
+            custom_engines = self.config.get('custom_engines')
+            for name in sorted_mixed_number(custom_engines.keys()):
+                engine_list.addItem(name, name)
+            engine_list.setCurrentText(self.config.get('translate_engine'))
+            choose_default_engine(engine_list.currentIndex())
+            engine_list.currentIndexChanged.connect(choose_default_engine)
+        refresh_engine_list()
+
+        def manage_custom_translation_engine():
+            manager = ManageCustomEngine(self, self.config)
+            manager.finished.connect(refresh_engine_list)
+            manager.show()
+        manage_engine.clicked.connect(manage_custom_translation_engine)
+
+        def make_test_engine():
+            translator = self.current_engine()
+            api_key = self.api_key.text()
+            api_key and translator.set_api_key(api_key)
+            if self.proxy_enabled.isChecked():
+                translator.set_proxy(
+                    [self.proxy_host.text(), self.proxy_port.text()])
+            if translator.is_chatgpt():
+                translator.set_prompt(
+                    self.prompt_auto.text(), self.prompt_lang.text())
+            EngineTester(self, translator)
+        engine_test.clicked.connect(make_test_engine)
 
         # Network Proxy
         proxy_group = QGroupBox(_('Network Proxy'))
@@ -511,7 +577,7 @@ class MainWindowFrame(QDialog):
         cache_enabled = QCheckBox(_('Enable'))
         cache_layout = QVBoxLayout(cache_group)
         cache_layout.addWidget(cache_enabled)
-        cache_layout.addWidget(self.get_divider())
+        cache_layout.addWidget(get_divider())
         cache_layout.addWidget(self.cache_count)
         cache_layout.addWidget(cache_button)
         cache_layout.addStretch(1)
@@ -579,7 +645,8 @@ class MainWindowFrame(QDialog):
     def clear_translation_cache(self):
         if len(self.gui.bookfere_translate_ebook_jobs) > 0:
             return self.pop_alert(
-                _('Cannot clear cache while there are running jobs.'), 'warning')
+                _('Cannot clear cache while there are running jobs.'),
+                'warning')
         TranslationCache.clean()
         self.recount_translation_cache()
 
@@ -603,45 +670,13 @@ class MainWindowFrame(QDialog):
             return self.pop_alert(_('The proxy is available.'))
         return self.pop_alert(_('The proxy is not available.'), 'error')
 
-    def get_translate_engine(self, engine):
-        return TranslatorBuilder.get_engine_class(engine)
-
-    def choose_translate_engine(self, engine):
-        self.config.update(translate_engine=engine)
-        self.current_engine = self.get_translate_engine(engine)
-
-        self.api_key.setVisible(self.current_engine.need_api_key)
-        engine_info = self.config.get('api_key')
-        current_engine = self.translate_engine.currentText()
-        self.api_key.clear()
-        if current_engine in engine_info:
-            self.api_key.setText(engine_info.get(current_engine))
-        self.refresh_api_key_info()
-        self.show_chatgpt_prompt()
-
-    def show_chatgpt_prompt(self):
-        is_chatgpt = self.current_engine.is_chatgpt()
-        self.prompt_group.setVisible(is_chatgpt)
-        if is_chatgpt:
-            prompts = self.config.get('chatgpt_prompt')
-            inputs = {'auto': self.prompt_auto, 'lang': self.prompt_lang}
-            for k, v in inputs.items():
-                default_prompt = self.current_engine.prompts.get(k)
-                v.setPlaceholderText(default_prompt)
-                v.setText(prompts.get(k) or default_prompt)
-
     def refresh_lang_codes(self):
-        support_lang = self.current_engine.get_support_lang()
+        lang_codes = self.current_engine.lang_codes
         for source_lang in self.source_langs:
-            source_lang.refresh.emit(support_lang.get('source'))
+            source_lang.refresh.emit(lang_codes.get('source'),
+                                     not self.current_engine.is_custom())
         for target_lang in self.target_langs:
-            target_lang.refresh.emit(support_lang.get('target'))
-
-    def refresh_api_key_info(self):
-        api_key_validator = QRegularExpressionValidator(
-            QRegularExpression(self.current_engine.api_key_validate))
-        self.api_key.setValidator(api_key_validator)
-        self.api_key.setPlaceholderText(self.current_engine.api_key_hint)
+            target_lang.refresh.emit(lang_codes.get('target'))
 
     def save_config(self):
         # Translation color
@@ -674,8 +709,8 @@ class MainWindowFrame(QDialog):
         if self.api_key.isVisible() and not api_key:
             return self.pop_alert(
                 _('An API key is required.'), 'warning')
-        engine_info.update(
-            {self.config.get('translate_engine'): api_key or None})
+        if self.api_key.isVisible():
+            engine_info.update({self.config.get('translate_engine'): api_key})
 
         # ChatGPT prompt
         if self.current_engine.is_chatgpt():
@@ -683,8 +718,9 @@ class MainWindowFrame(QDialog):
             prompt_config = self.config.get('chatgpt_prompt')
             auto_text = self.prompt_auto.text()
             auto_default = self.current_engine.prompts.get('auto')
-            if not ('{tlang}' in auto_text and'{text}' in auto_text):
-                return self.pop_alert(_('Prompt must include {} and {}.')
+            if not ('{tlang}' in auto_text and '{text}' in auto_text):
+                return self.pop_alert(
+                    _('Prompt must include {} and {}.')
                     .format('{tlang}', '{text}'), 'warning')
             if auto_text != auto_default:
                 prompt_config.update(auto=auto_text)
@@ -692,10 +728,17 @@ class MainWindowFrame(QDialog):
             lang_default = self.current_engine.prompts.get('lang')
             if not ('{slang}' in lang_text and '{tlang}' and lang_text
                     and '{text}' in lang_text):
-                return self.pop_alert(_('Prompt must include {}, {} and {}.')
+                return self.pop_alert(
+                    _('Prompt must include {}, {} and {}.')
                     .format('{slang}', '{tlang}', '{text}'), 'warning')
             if lang_text != lang_default:
                 prompt_config.update(lang=lang_text)
+
+        # Custom engine
+        if self.current_engine.is_custom() and len(
+                self.config.get('custom_engines')) < 1:
+            return self.pop_alert(
+                _('Please add a custom translation engine first.'), 'warning')
 
         # Proxy setting
         proxy_setting = []
@@ -761,10 +804,10 @@ class MainWindowFrame(QDialog):
         document = QTextDocument()
         document.setDocumentMargin(30)
         document.setDefaultStyleSheet(
-            'h1,h2{font-size:large;}'
-            'p,ul{margin:20px 0;}'
-            'ul{-qt-list-indent:0;margin-left:10px;}'
-            'li{margin:6px 0;}')
+            'h1,h2{font-size:large;}p,body > ul{margin:20px 0;}'
+            'ul ul {list-style:circle;}ul ul ul{list-style:square;}'
+            'ul,ol{-qt-list-indent:0;margin-left:10px;}li{margin:6px 0;}'
+            'ol{margin-left:15px;}')
         html = markdown(self.get_readme())
         document.setHtml(html)
         description.setDocument(document)
@@ -788,21 +831,3 @@ class MainWindowFrame(QDialog):
                 return zf.read(filename)
             except Exception:
                 return None
-
-    def pop_alert(self, text, level='info'):
-        icons = {
-            'info': QMessageBox.Information,
-            'warning': QMessageBox.Warning,
-            'ask': QMessageBox.Question,
-            'error': QMessageBox.Critical,
-        }
-        alert = QMessageBox(self)
-        alert.setIcon(icons[level])
-        alert.setText(text)
-        alert.exec_()
-
-    def get_divider(self):
-        divider = QFrame()
-        divider.setFrameShape(QFrame.HLine)
-        divider.setFrameShadow(QFrame.Sunken)
-        return divider

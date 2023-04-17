@@ -4,13 +4,14 @@ import uuid
 import hashlib
 
 from calibre_plugins.ebook_translator.engines.base import Base
+from calibre_plugins.ebook_translator.utils import _z
 
 
 load_translations()
 
 
 class YoudaoTranslate(Base):
-    name = 'Youdao'
+    name = _('Youdao')
     support_lang = 'youdao.json'
     endpoint = 'https://openapi.youdao.com/api'
     api_key_hint = 'appid:appsecret'
@@ -27,7 +28,6 @@ class YoudaoTranslate(Base):
         return text if size <= 20 else \
             text[0:10] + str(size) + text[size - 10:size]
 
-    @Base._translate
     def translate(self, text):
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
@@ -42,8 +42,8 @@ class YoudaoTranslate(Base):
         sign = self.encrypt(sign_str)
 
         data = {
-            'from': self._get_source_lang_code(),
-            'to': self._get_target_lang_code(),
+            'from': self._get_source_code(),
+            'to': self._get_target_code(),
             'signType': 'v3',
             'curtime': curtime,
             'appKey': app_key,
@@ -53,7 +53,7 @@ class YoudaoTranslate(Base):
             'vocabId': False,
         }
 
-        return self.request(data, method='POST', headers=headers)
+        return self.get_result(self.endpoint, data, headers, method='POST')
 
-    def parse(self, response):
-        return json.loads(response)['translation'][0]
+    def parse(self, data):
+        return json.loads(data)['translation'][0]

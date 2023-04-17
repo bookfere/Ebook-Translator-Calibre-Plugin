@@ -3,19 +3,19 @@ import random
 import hashlib
 
 from calibre_plugins.ebook_translator.engines.base import Base
+from calibre_plugins.ebook_translator.utils import _z
 
 
 load_translations()
 
 
 class BaiduTranslate(Base):
-    name = 'Baidu'
+    name = _z('Baidu')
     support_lang = 'baidu.json'
     endpoint = 'https://fanyi-api.baidu.com/api/trans/vip/translate'
     api_key_hint = 'appid:appkey'
-    api_key_validate = r'^\d+:[a-zA-Z\d]+$'
+    api_key_rule = r'^\d+:[a-zA-Z\d]+$'
 
-    @Base._translate
     def translate(self, text):
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
@@ -31,13 +31,13 @@ class BaiduTranslate(Base):
         data = {
             'appid': app_id,
             'q': text,
-            'from': self._get_source_lang_code(),
-            'to': self._get_target_lang_code(),
+            'from': self._get_source_code(),
+            'to': self._get_target_code(),
             'salt': salt,
             'sign': sign
         }
 
-        return self.request(data, method='POST', headers=headers)
+        return self.get_result(self.endpoint, data, headers, method='POST')
 
     def parse(self, response):
         return json.loads(response)['trans_result'][0]['dst']

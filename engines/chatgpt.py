@@ -22,7 +22,6 @@ class ChatgptTranslate(Base):
         if lang is not None:
             self.prompts.update(lang=lang)
 
-    @Base._translate
     def translate(self, text):
         headers = {
             'Content-Type': 'application/json',
@@ -41,7 +40,7 @@ class ChatgptTranslate(Base):
             'messages': [{'role': 'user', 'content': content}]
         })
 
-        return self.request(data, method='POST', headers=headers)
+        return self.get_result(self.endpoint, data, headers, method='POST')
 
-    def parse(self, response):
-        return json.loads(response)['choices'][0]['message']['content']
+    def parse(self, data):
+        return json.loads(data)['choices'][0]['message']['content']
