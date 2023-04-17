@@ -130,7 +130,7 @@ __【 翻譯引擎 】__
     * `method`：要求方法 (選用)。省略會預設使用 `GET`
     * `headers`：要求標頭 (選用)。可參考翻譯引擎 API 文件填寫
     * `data`：要求資料。可以是一個 `dict` 物件也可以是字串，如果使用字串需要同時指定適當的要求標頭 `Content-Type`。其中包含 3 個內建變數，其中 `<source>` 和 `<target>` 分別對應之前填寫的語言代碼，如不需要可省略，`<text>` 表示傳送至翻譯引擎的文字，必須保留。其他具體要求資訊需參考翻譯引擎 API 文件。
-* `response`：依據自己的需要填寫解析回應資訊的運算式，以提取其中的譯文文本。回應資訊包含在變數 `response` 中，它是一個 [JSON](https://docs.python.org/3/library/json.html#encoders-and-decoders) 對象 (如果翻譯引擎返回的資料是 JSON 格式) 或 lxml 的 [Element](https://lxml.de/apidoc/lxml.etree.html#lxml.etree.ElementBase) 對象 (如果翻譯引擎返回的資料是 XML 格式)。
+* `response`：依據自己的需要填寫解析回應資訊的運算式，以提取其中的譯文文字。回應資訊包含在變數 `response` 中，它是一個 [JSON](https://docs.python.org/3/library/json.html#encoders-and-decoders) 對象 (如果翻譯引擎返回的資料是 JSON 格式) 或 lxml 的 [Element](https://lxml.de/apidoc/lxml.etree.html#lxml.etree.ElementBase) 對象 (如果翻譯引擎返回的資料是 XML 格式)。
 
 自訂翻譯引擎資料填寫完成後可以按下介面下方的【驗證】按鈕檢查資料是否有效，最後按下【儲存】按鈕儲存所有的變更。
 
