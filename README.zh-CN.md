@@ -4,6 +4,10 @@
 
 ---
 
+其他语言：[English]((https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.zh-TW.md)) · [正體中文](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.zh-TW.md)
+
+---
+
 ## 主要功能
 
 * 支持所选翻译引擎所支持的语言（如 Google 翻译支持 134 种）
@@ -76,12 +80,59 @@ __【 翻译引擎 】__
 * __ChatGPT__：需要 API 密钥
 * __DeepL__：需要 API 密钥
 * __DeepL(Pro)__：需要 API 密钥
-* __Youdao__: 需要 APP key 和 secret
-* __Baidu__: 需要 APP id 和 key
+* __有道__：需要 APP key 和 secret
+* __百度__：需要 APP id 和 key
+* __自定义__：自定义任意翻译引擎
 
 注意，除了 Google 不需要 API 密钥外，其他翻译引擎都需要你注册相应账户（可能需要付费）获取 API 密钥才能使用。另外，由于插件在开发时缺少 DeepL 的 API 密钥，根据其官网提供的响应信息样例，程序可以正常运行，实际运行情况未知。
 
 如果选择使用需要付费的翻译引擎，建议前往相应的官方文档查看计费规则。比如，ChatGPT，可以使用其官方提供的工具 [Tokenizer](https://platform.openai.com/tokenizer) 估算要翻译字数大约会消耗多少 token 以便预估费用。
+
+你可以点击【测试】按钮对当前所选翻译引擎进行测试。如果翻译引擎的 API 提供了余量信息，会在测试界面下方显示。
+
+点击【自定义】按钮可进入“自定义翻译引擎”界面，在这里可以添加、删除或修改翻译引擎。
+
+配置自定义翻译引擎的数据格式是 JSON 格式，每次新建一个自定义翻译引擎后都会看到如下所示的模板数据：
+
+<pre><code>{
+    "name": "New Engine - 36e05",
+    "languages": {
+        "source": {
+            "Source Language": "code"
+        },
+        "target": {
+            "Target Language": "code"
+        }
+    },
+    "request": {
+        "url": "https://example.api",
+        "method": "POST",
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "data": {
+            "source": "&lt;source&gt;",
+            "target": "&lt;target&gt;",
+            "text": "&lt;text&gt;"
+        }
+    },
+    "response": "response"
+}</code></pre>
+
+其中包含 4 个键值对，分别是 `name`、`languages`、`request` 和 `response`，其含义分别如下，你需要根据实际情况进行修改：
+
+* `name`：显示在界面上的名称。如“Bing”
+* `languages`：翻译引擎支持的语言代码。格式为 `{"语言名称": "语言代码"}`。具体信息需参考翻译引擎 API 文档。也可以分别填写来源语言和目标语言。
+    * `source`：来源语言。格式同上
+    * `target`：目标语言。格式同上
+* `request`：请求信息。包含如下键值对
+    * `url`：API 网址。具体信息需参考翻译引擎 API 文档
+    * `method`：请求方法（可选）。省略会默认使用 `GET`
+    * `headers`：请求标头（可选）。可参考翻译引擎 API 文档填写
+    * `data`：请求数据。可以是一个 `dict` 对象也可以是字符串，如果使用字符串需要同时指定合适的请求标头 `Content-Type`。其中包含 3 个内置变量，其中 `<source>` 和 `<target>` 分别对应之前填写的语言代码，如不需要可省略，`<text>` 表示发送给翻译引擎的文本，必须保留。其他具体请求信息需参考翻译引擎 API 文档。
+* `response`：根据自己的需要填写解析响应信息的表达式，以抽取其中的译文文本。响应信息包含在变量 `response` 中，它是一个 [JSON](https://docs.python.org/3/library/json.html#encoders-and-decoders) 对象（如果翻译引擎返回的数据是 JSON 格式）或 lxml 的 [Element](https://lxml.de/apidoc/lxml.etree.html#lxml.etree.ElementBase) 对象（如果翻译引擎返回的数据是 XML 格式）。
+
+自定义翻译引擎数据填写完成后可以点击界面下方的【验证】按钮检查数据是否有效，最后点击【保存】按钮保存所有的修改。
 
 __【 ChatGPT提示词 】__
 

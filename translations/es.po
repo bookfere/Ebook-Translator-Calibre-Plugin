@@ -1,63 +1,130 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Spanish translations for Ebook Translator Calibre package
+# Traducciones al español para el paquete Ebook Translator Calibre.
+# Copyright (C) 2023 THE Ebook Translator Calibre'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the Ebook Translator Calibre Plugin package.
+# Automatically generated, 2023.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-08 14:25+0800\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"Project-Id-Version: Ebook Translator Calibre Plugin\n"
+"Report-Msgid-Bugs-To: bookfere@gmail.com\n"
+"POT-Creation-Date: 2023-04-17 17:25+0800\n"
+"PO-Revision-Date: 2023-04-17 14:17+0800\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-msgid "Disabled"
-msgstr "Desactivado"
+msgid "Translating..."
+msgstr "Traduciendo..."
 
-msgid "Ebook Translator"
-msgstr "Traductor de libros electrónicos"
-
-msgid "Enabled"
-msgstr "Activado"
-
-msgid "Filter Content"
-msgstr ""
-
-msgid "Pleasse choose at least one book."
-msgstr "Debes elegir al menos un book."
-
-msgid "Total paragraphs: {}"
-msgstr "Total de párrafos: {}"
-
-msgid "Auto detect"
-msgstr "Detección automática"
-
-msgid "Incorrect format of APP id and key."
-msgstr ""
-
-msgid "API Key"
-msgstr "Clave API"
-
-msgid "Translate engine return bad response."
-msgstr "El motor de traducción devuelve una mala respuesta."
-
-msgid "Can not parse returned response. Raw data: {}"
-msgstr ""
-
-msgid "Incorrect format of APP key and secret."
-msgstr ""
+msgid "Translation Engine Tester"
+msgstr "Probador de Motor de Traducción"
 
 msgid "Translate"
 msgstr "Traducir"
 
+msgid "Usage: checking..."
+msgstr "Uso: verificación..."
+
+msgid "Custom Translation Engine"
+msgstr "Motor de Traducción Personalizado"
+
+msgid "Add"
+msgstr "Agregar"
+
+msgid "Delete"
+msgstr "Eliminar"
+
+msgid "Clear"
+msgstr "Limpiar"
+
+msgid "Reset"
+msgstr "Restablecer"
+
+msgid "Verify"
+msgstr "Verificar"
+
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Engine data format is valid."
+msgstr "El formato de datos del motor es válido."
+
+msgid "The engine name is already in use."
+msgstr "El nombre del motor ya está en uso."
+
+msgid "The setting was saved."
+msgstr "Se guardó la configuración."
+
+msgid "No custom engine to delete."
+msgstr "No hay motor personalizado para eliminar."
+
+msgid "Auto detect"
+msgstr "Detección automática"
+
+msgid "Baidu"
+msgstr "Baidu"
+
+msgid "Incorrect format of APP id and key."
+msgstr "Formato incorrecto de ID de aplicación y clave."
+
+msgid "API Key"
+msgstr "Clave API"
+
+msgid "Can not parse returned response. Raw data: {}"
+msgstr "No se pudo analizar la respuesta devuelta. Datos sin procesar: {}"
+
+msgid "Engine data must be in valid JSON format."
+msgstr "Los datos del motor deben estar en formato JSON válido."
+
+msgid "Invalid engine data."
+msgstr "Datos de motor no válidos."
+
+msgid "Engine name is required."
+msgstr "Se requiere el nombre del motor."
+
+msgid "Engine name must be different from builtin engine name."
+msgstr "El nombre del motor debe ser diferente del nombre del motor integrado."
+
+msgid "Language codes are required."
+msgstr "Se requieren códigos de idioma."
+
+msgid "Source and target must be added in pair."
+msgstr "La fuente y el destino deben agregarse en pareja."
+
+msgid "Request information is required."
+msgstr "Se requiere información de solicitud."
+
+msgid "API URL is required."
+msgstr "Se requiere una URL de API."
+
+msgid "Placeholder <text> is required."
+msgstr "Se requiere el marcador de posición <text>."
+
+msgid "A appropriate Content-Type in headers is required."
+msgstr "Se requiere un tipo de contenido adecuado en las cabeceras."
+
+msgid "Expression to parse response is required."
+msgstr "Se requiere una expresión para analizar la respuesta."
+
+msgid "Custom"
+msgstr "Personalizado"
+
+msgid "Resposne was parsed incorrectly."
+msgstr "La respuesta fue analizada incorrectamente."
+
+msgid "Youdao"
+msgstr "Youdao"
+
+msgid "Incorrect format of APP key and secret."
+msgstr "Formato incorrecto de clave y secreto de APP."
+
 msgid "Content"
-msgstr ""
+msgstr "Contenido"
 
 msgid "Setting"
 msgstr "Configuración"
@@ -107,53 +174,53 @@ msgstr "Traducción completada"
 msgid "The translation of \"{}\" was completed. Do you want to open the book?"
 msgstr "La traducción de \"{}\" se completó. ¿Quieres abrir el libro?"
 
-msgid "Save"
-msgstr "Guardar"
-
 msgid "Translation Position"
-msgstr ""
+msgstr "Posición de la traducción"
 
 msgid "Add after original"
-msgstr ""
+msgstr "Agregar después del original"
 
 msgid "Add before original"
-msgstr ""
+msgstr "Agregar antes del original"
 
 msgid "Add without original"
-msgstr ""
+msgstr "Agregar sin original"
 
 msgid "Translation Color"
-msgstr ""
+msgstr "Color de la traducción"
 
 msgid "CSS color value, e.g., #666666, grey, rgb(80, 80, 80)"
-msgstr ""
+msgstr "Valor de color CSS, por ejemplo, #666666, gris, rgb(80, 80, 80)"
 
 msgid "Choose"
-msgstr ""
+msgstr "Elegir"
 
 msgid "Do not Translate"
-msgstr ""
+msgstr "No traducir"
 
 msgid "Mode:"
-msgstr ""
+msgstr "Modo:"
 
 msgid "Normal"
-msgstr ""
+msgstr "Normal"
 
 msgid "Normal (case-sensitive)"
-msgstr ""
+msgstr "Normal (sensible a mayúsculas y minúsculas)"
 
 msgid "Regular Expression"
-msgstr ""
+msgstr "Expresión regular"
 
 msgid "Exclude content by keyword. One keyword per line:"
-msgstr ""
+msgstr "Excluir contenido por palabra clave. Una palabra clave por línea:"
 
 msgid "Exclude content by case-sensitive keyword. One keyword per line:"
 msgstr ""
+"Excluir contenido por palabra clave sensible a mayúsculas y minúsculas. Una "
+"palabra clave por línea:"
 
 msgid "Exclude content by regular expression pattern. One pattern per line:"
 msgstr ""
+"Excluir contenido por patrón de expresión regular. Un patrón por línea:"
 
 msgid "Output Path"
 msgstr "Ruta de salida"
@@ -165,22 +232,25 @@ msgid "Path"
 msgstr "Ruta"
 
 msgid "Choose a path to store translated book(s)"
-msgstr ""
+msgstr "Elija una ruta para guardar el/los libro(s) traducido(s)"
 
 msgid "Choose ..."
 msgstr "Elegir ..."
 
-msgid "Translate Engine"
+msgid "Translation Engine"
 msgstr "Motor de traducción"
 
+msgid "Test"
+msgstr "Probar"
+
 msgid "ChatGPT Prompt"
-msgstr ""
+msgstr "ChatGPT Prompt"
 
 msgid "For auto detecting source language:"
-msgstr ""
+msgstr "Para detectar automáticamente el idioma de origen:"
 
 msgid "For specifying source language:"
-msgstr ""
+msgstr "Para especificar el idioma de origen:"
 
 msgid "Network Proxy"
 msgstr "Proxy de red"
@@ -194,14 +264,8 @@ msgstr "Host"
 msgid "Port"
 msgstr "Puerto"
 
-msgid "Test"
-msgstr "Prueba"
-
 msgid "Cache"
 msgstr "Cache"
-
-msgid "Clear"
-msgstr "Limpiar"
 
 msgid "Request"
 msgstr "Pedido"
@@ -234,22 +298,22 @@ msgid "The proxy is not available."
 msgstr "El proxy no está disponible."
 
 msgid "Invalid color value."
-msgstr ""
+msgstr "Valor de color no válido."
 
 msgid "{} is not a valid regular expression."
-msgstr ""
+msgstr "{} no es una expresión regular válida."
 
 msgid "An API key is required."
 msgstr "Se requiere una clave API."
 
 msgid "Prompt must include {} and {}."
-msgstr ""
+msgstr "El prompt debe incluir {} y {}."
 
 msgid "Prompt must include {}, {} and {}."
-msgstr ""
+msgstr "El prompt debe incluir {}, {} y {}."
 
-msgid "The setting was saved."
-msgstr "Se guardó la configuración."
+msgid "Please add a custom translation engine first."
+msgstr "Por favor agregue primero un motor de traducción personalizado."
 
 msgid "Failed to retreive data from translate engine API."
 msgstr "No se pudieron recuperar los datos de la API del motor de traducción."
@@ -287,9 +351,6 @@ msgstr "Traducción completada."
 msgid "Start to convert ebook format:"
 msgstr "Comienza a convertir el formato de libro electrónico:"
 
-msgid "Translate engine not exists."
-msgstr "El motor de traducción no existe."
-
 msgid "Translate Book"
 msgstr "Traducir libro"
 
@@ -297,4 +358,4 @@ msgid "Translate Ebook Content"
 msgstr "Traducir contenido de libros electrónicos"
 
 msgid "Please choose at least one book."
-msgstr ""
+msgstr "Por favor, elija al menos un libro."

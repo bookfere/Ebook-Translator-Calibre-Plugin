@@ -15,7 +15,8 @@ class ElementHandler:
         for noise in noises:
             noise.getparent().remove(noise)
 
-        self.reserves = self.element_copy.xpath('.//*[self::x:img]', namespaces=ns)
+        self.reserves = self.element_copy.xpath(
+            './/*[self::x:img]', namespaces=ns)
         for reserve in self.reserves:
             # TODO: handle nested img element
             if reserve.getparent() != self.element_copy:
@@ -37,8 +38,7 @@ class ElementHandler:
                     'id_%s' % id(reserve), self._get_string(reserve))
 
         translation = '<{0} xmlns="{1}">{2}</{0}>'.format(
-                      etree.QName(self.element).localname, ns['x'],
-                      translation)
+            etree.QName(self.element).localname, ns['x'], translation)
         new_element = etree.fromstring(translation)
         if color is not None:
             new_element.set('style', 'color:%s' % color)

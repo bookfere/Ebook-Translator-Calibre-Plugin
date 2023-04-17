@@ -1,0 +1,470 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the Ebook Translator Calibre Plugin package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Ebook Translator Calibre Plugin\n"
+"Report-Msgid-Bugs-To: bookfere@gmail.com\n"
+"POT-Creation-Date: 2023-04-17 17:25+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: components/engine.py:40
+msgid "Translating..."
+msgstr ""
+
+#: components/engine.py:61
+msgid "Translation Engine Tester"
+msgstr ""
+
+#: components/engine.py:86 main.py:79 main.py:175
+msgid "Translate"
+msgstr ""
+
+#: components/engine.py:90
+msgid "Usage: checking..."
+msgstr ""
+
+#: components/engine.py:131
+msgid "Custom Translation Engine"
+msgstr ""
+
+#: components/engine.py:140
+msgid "Add"
+msgstr ""
+
+#: components/engine.py:141
+msgid "Delete"
+msgstr ""
+
+#: components/engine.py:144 main.py:574
+msgid "Clear"
+msgstr ""
+
+#: components/engine.py:145
+msgid "Reset"
+msgstr ""
+
+#: components/engine.py:146
+msgid "Verify"
+msgstr ""
+
+#: components/engine.py:147 main.py:272
+msgid "Save"
+msgstr ""
+
+#: components/engine.py:187
+msgid "Engine data format is valid."
+msgstr ""
+
+#: components/engine.py:203
+msgid "The engine name is already in use."
+msgstr ""
+
+#: components/engine.py:211 main.py:770
+msgid "The setting was saved."
+msgstr ""
+
+#: components/engine.py:217
+msgid "No custom engine to delete."
+msgstr ""
+
+#: components/lang.py:33 engines/base.py:63
+msgid "Auto detect"
+msgstr ""
+
+#: engines/baidu.py:13
+msgid "Baidu"
+msgstr ""
+
+#: engines/baidu.py:25
+msgid "Incorrect format of APP id and key."
+msgstr ""
+
+#: engines/base.py:15
+msgid "API Key"
+msgstr ""
+
+#: engines/base.py:89 tests/test_deepl.py:44
+msgid "Can not parse returned response. Raw data: {}"
+msgstr ""
+
+#: engines/custom.py:43
+msgid "Engine data must be in valid JSON format."
+msgstr ""
+
+#: engines/custom.py:46
+msgid "Invalid engine data."
+msgstr ""
+
+#: engines/custom.py:50
+msgid "Engine name is required."
+msgstr ""
+
+#: engines/custom.py:53
+msgid "Engine name must be different from builtin engine name."
+msgstr ""
+
+#: engines/custom.py:57
+msgid "Language codes are required."
+msgstr ""
+
+#: engines/custom.py:59
+msgid "Source and target must be added in pair."
+msgstr ""
+
+#: engines/custom.py:63
+msgid "Request information is required."
+msgstr ""
+
+#: engines/custom.py:65
+msgid "API URL is required."
+msgstr ""
+
+#: engines/custom.py:71 engines/custom.py:76
+msgid "Placeholder <text> is required."
+msgstr ""
+
+#: engines/custom.py:79
+msgid "A appropriate Content-Type in headers is required."
+msgstr ""
+
+#: engines/custom.py:83
+msgid "Expression to parse response is required."
+msgstr ""
+
+#: engines/custom.py:89 main.py:444
+msgid "Custom"
+msgstr ""
+
+#: engines/custom.py:123
+msgid "Resposne was parsed incorrectly."
+msgstr ""
+
+#: engines/youdao.py:14
+msgid "Youdao"
+msgstr ""
+
+#: engines/youdao.py:37
+msgid "Incorrect format of APP key and secret."
+msgstr ""
+
+#: main.py:80
+msgid "Content"
+msgstr ""
+
+#: main.py:81
+msgid "Setting"
+msgstr ""
+
+#: main.py:82
+msgid "About"
+msgstr ""
+
+#: main.py:106
+msgid "Donate"
+msgstr ""
+
+#: main.py:106
+msgid "Feedback"
+msgstr ""
+
+#: main.py:123
+msgid "Input Format"
+msgstr ""
+
+#: main.py:123
+msgid "Output Format"
+msgstr ""
+
+#: main.py:123
+msgid "Title"
+msgstr ""
+
+#: main.py:124
+msgid "Source Language"
+msgstr ""
+
+#: main.py:124
+msgid "Target Language"
+msgstr ""
+
+#: main.py:196 main.py:703
+msgid "The specified path does not exist."
+msgstr ""
+
+#: main.py:219
+msgid "[{} > {}] Translating \"{}\""
+msgstr ""
+
+#: main.py:229
+msgid "Translation job failed"
+msgstr ""
+
+#: main.py:245
+msgid "completed"
+msgstr ""
+
+#: main.py:253
+msgid "Ebook Translation Log"
+msgstr ""
+
+#: main.py:254
+msgid "Translation Completed"
+msgstr ""
+
+#: main.py:255
+msgid "The translation of \"{}\" was completed. Do you want to open the book?"
+msgstr ""
+
+#: main.py:285
+msgid "Translation Position"
+msgstr ""
+
+#: main.py:287
+msgid "Add after original"
+msgstr ""
+
+#: main.py:289
+msgid "Add before original"
+msgstr ""
+
+#: main.py:290
+msgid "Add without original"
+msgstr ""
+
+#: main.py:313
+msgid "Translation Color"
+msgstr ""
+
+#: main.py:317
+msgid "CSS color value, e.g., #666666, grey, rgb(80, 80, 80)"
+msgstr ""
+
+#: main.py:324
+msgid "Choose"
+msgstr ""
+
+#: main.py:353
+msgid "Do not Translate"
+msgstr ""
+
+#: main.py:358
+msgid "Mode:"
+msgstr ""
+
+#: main.py:359
+msgid "Normal"
+msgstr ""
+
+#: main.py:361
+msgid "Normal (case-sensitive)"
+msgstr ""
+
+#: main.py:362
+msgid "Regular Expression"
+msgstr ""
+
+#: main.py:385
+msgid "Exclude content by keyword. One keyword per line:"
+msgstr ""
+
+#: main.py:386
+msgid "Exclude content by case-sensitive keyword. One keyword per line:"
+msgstr ""
+
+#: main.py:388
+msgid "Exclude content by regular expression pattern. One pattern per line:"
+msgstr ""
+
+#: main.py:414
+msgid "Output Path"
+msgstr ""
+
+#: main.py:416
+msgid "Library"
+msgstr ""
+
+#: main.py:417
+msgid "Path"
+msgstr ""
+
+#: main.py:422
+msgid "Choose a path to store translated book(s)"
+msgstr ""
+
+#: main.py:425
+msgid "Choose ..."
+msgstr ""
+
+#: main.py:439
+msgid "Translation Engine"
+msgstr ""
+
+#: main.py:443 main.py:556
+msgid "Test"
+msgstr ""
+
+#: main.py:452
+msgid "ChatGPT Prompt"
+msgstr ""
+
+#: main.py:457
+msgid "For auto detecting source language:"
+msgstr ""
+
+#: main.py:460
+msgid "For specifying source language:"
+msgstr ""
+
+#: main.py:528
+msgid "Network Proxy"
+msgstr ""
+
+#: main.py:531 main.py:577
+msgid "Enable"
+msgstr ""
+
+#: main.py:541
+msgid "Host"
+msgstr ""
+
+#: main.py:545
+msgid "Port"
+msgstr ""
+
+#: main.py:573
+msgid "Cache"
+msgstr ""
+
+#: main.py:592
+msgid "Request"
+msgstr ""
+
+#: main.py:606
+msgid "Attempt times (Default 3):"
+msgstr ""
+
+#: main.py:608
+msgid "Max interval (Default 5s):"
+msgstr ""
+
+#: main.py:618
+msgid "Log"
+msgstr ""
+
+#: main.py:619
+msgid "Show translation"
+msgstr ""
+
+#: main.py:648
+msgid "Cannot clear cache while there are running jobs."
+msgstr ""
+
+#: main.py:655
+msgid "Total: {}"
+msgstr ""
+
+#: main.py:668 main.py:750
+msgid "Proxy host or port is incorrect."
+msgstr ""
+
+#: main.py:670
+msgid "The proxy is available."
+msgstr ""
+
+#: main.py:671
+msgid "The proxy is not available."
+msgstr ""
+
+#: main.py:685
+msgid "Invalid color value."
+msgstr ""
+
+#: main.py:695
+msgid "{} is not a valid regular expression."
+msgstr ""
+
+#: main.py:711
+msgid "An API key is required."
+msgstr ""
+
+#: main.py:723
+msgid "Prompt must include {} and {}."
+msgstr ""
+
+#: main.py:732
+msgid "Prompt must include {}, {} and {}."
+msgstr ""
+
+#: main.py:741
+msgid "Please add a custom translation engine first."
+msgstr ""
+
+#: translation.py:61
+msgid "Failed to retreive data from translate engine API."
+msgstr ""
+
+#: translation.py:67
+msgid "Will retry in {} seconds."
+msgstr ""
+
+#: translation.py:69
+msgid "Retrying ... (timeout is {} seconds)."
+msgstr ""
+
+#: translation.py:77
+msgid "Original: {}"
+msgstr ""
+
+#: translation.py:84
+msgid "Translation (Cached): {}"
+msgstr ""
+
+#: translation.py:90
+msgid "Translation: {}"
+msgstr ""
+
+#: translation.py:100
+msgid "There is no content need to translate."
+msgstr ""
+
+#: translation.py:101
+msgid "Start to translate ebook content:"
+msgstr ""
+
+#: translation.py:102
+msgid "Total items: {}"
+msgstr ""
+
+#: translation.py:107
+msgid "Translating: {}/{}"
+msgstr ""
+
+#: translation.py:114
+msgid "Translation completed."
+msgstr ""
+
+#: translation.py:115
+msgid "Start to convert ebook format:"
+msgstr ""
+
+#: ui.py:19
+msgid "Translate Book"
+msgstr ""
+
+#: ui.py:19
+msgid "Translate Ebook Content"
+msgstr ""
+
+#: ui.py:40
+msgid "Please choose at least one book."
+msgstr ""

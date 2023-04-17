@@ -2,12 +2,13 @@ from calibre.gui2.actions import InterfaceAction
 from calibre.ebooks.conversion.config import get_input_format_for_book
 from calibre_plugins.ebook_translator import EbookTranslator
 from calibre_plugins.ebook_translator.main import MainWindowFrame
+from calibre_plugins.ebook_translator.components.parts import pop_alert
 
 
 try:
-    from qt.core import QMenu, QMessageBox
+    from qt.core import QMenu
 except ImportError:
-    from PyQt5.Qt import QMenu, QMessageBox
+    from PyQt5.Qt import QMenu
 
 load_translations()
 
@@ -35,11 +36,8 @@ class EbookTranslatorGui(InterfaceAction):
         ebooks = self.get_selected_ebooks()
 
         if len(ebooks) < 1:
-            alert = QMessageBox(self.gui)
-            alert.setIcon(QMessageBox.Warning)
-            alert.setText(_('Please choose at least one book.'))
-            alert.exec_()
-            return
+            return pop_alert(
+                self.gui, _('Please choose at least one book.'), 'warning')
 
         window = MainWindowFrame(self, self.qaction.icon(), ebooks)
         window.setModal(True)

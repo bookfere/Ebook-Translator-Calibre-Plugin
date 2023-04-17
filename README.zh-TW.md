@@ -4,6 +4,10 @@
 
 ---
 
+其他語言：[English]((https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.zh-TW.md)) · [简体中文](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.md)
+
+---
+
 ## 主要功能
 
 * 支援所選翻譯引擎所支持的語言 (如 Google 翻譯支援 134 種)
@@ -30,7 +34,7 @@
 ## 使用方法
 
 1. 在 Calibre 書庫中選中要推送的電子書；
-2. 按下 Calibre 主工具列上的【翻譯書籍】圖示按鈕彈出外掛程式主界面，在這裡你可以修改「書名」(作為儲存檔案時使用的檔案名稱)，分別為每一本書選擇「輸入格式」、「輸出格式」、「來源語言」(一般狀況下「自動偵測」即可滿足需求)、「目標語言」(預設使用 Calibre 界面目前使用的語言)；
+2. 按下 Calibre 主工具列上的【翻譯書籍】圖示按鈕彈出外掛程式主介面，在這裡你可以修改「書名」(作為儲存檔案時使用的檔案名稱)，分別為每一本書選擇「輸入格式」、「輸出格式」、「來源語言」(一般狀況下「自動偵測」即可滿足需求)、「目標語言」(預設使用 Calibre 介面目前使用的語言)；
 3. 按下下方的【翻譯】按鈕即可開始翻譯。
 
 外掛程式會將每本電子書的翻譯工作推送新增至 Calibre 的工作佇列，你可以透過按下 Calibre 右下角的【工作】檢視推送詳細資料，按兩下工作條目可以進入記錄實時檢視正在翻譯的內容。
@@ -76,12 +80,59 @@ __【 翻譯引擎 】__
 * __ChatGPT__：需要 API 金鑰
 * __DeepL__：需要 API 金鑰
 * __DeepL(Pro)__：需要 API 金鑰
-* __Youdao__: 需要應用程式金鑰和秘密
-* __Baidu__: 需要應用程式 ID 和 金鑰
+* __Youdao__：需要應用程式金鑰和秘密
+* __Baidu__：需要應用程式 ID 和 金鑰
+* __客製化__：客製化任意翻譯引擎
 
 注意，除了 Google 不需要 API 金鑰外，其他翻譯引擎都需要你註冊對應帳戶 (可能需要付費) 取得 API 金鑰才能使用。另外，由於外掛程式在開發時缺少 DeepL 的 API 金鑰，依據其官網提供的回應資訊示範，程式可以正常執行，實際執行狀況未知。
 
 如果選擇使用需要付費的翻譯引擎，建議前往對應的官方文件查看計費規則。比如，ChatGPT，可以使用其官方提供的工具 [Tokenizer](https://platform.openai.com/tokenizer) 估算要翻譯字數大約會消耗多少權杖以便預估費用。
+
+你可以點選【測試】按鈕對目前所選翻譯引擎進行測試。如果翻譯引擎的 API 提供了剩餘量資訊，會在測試介面下方顯示。
+
+點擊【客製化】按鈕可進入「自訂翻譯引擎」介面，在這裡可以新增、刪除或修改翻譯引擎。
+
+設定客製化翻譯引擎的資料格式是 JSON 格式，每次新建一個自訂翻譯引擎後都會看到如下所示的模板資料：
+
+<pre><code>{
+    "name": "New Engine - 36e05",
+    "languages": {
+        "source": {
+            "Source Language": "code"
+        },
+        "target": {
+            "Target Language": "code"
+        }
+    },
+    "request": {
+        "url": "https://example.api",
+        "method": "POST",
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "data": {
+            "source": "&lt;source&gt;",
+            "target": "&lt;target&gt;",
+            "text": "&lt;text&gt;"
+        }
+    },
+    "response": "response"
+}</code></pre>
+
+其中包含 4 個鍵值對，分別是 `name`、`languages`、`request` 和 `response`，其含義分別如下，你需要根據實際情況進行修改：
+
+* `name`：顯示在介面上的名稱。如“Bing”
+* `languages`：翻譯引擎支持的語言代碼。格式爲 `{"語言名稱": "語言代碼"}`。具體信息需參考翻譯引擎 API 文檔。也可以分別填寫來源語言和目標語言。
+    * `source`：來源語言。格式同上
+    * `target`：目標語言。格式同上
+* `request`：請求信息。包含如下鍵值對
+    * `url`：API 網址。具體信息需參考翻譯引擎 API 文檔
+    * `method`：請求方法（可選）。省略會默認使用 `GET`
+    * `headers`：請求標頭（可選）。可參考翻譯引擎 API 文檔填寫
+    * `data`：請求資料。可以是一個 `dict` 物件也可以是字串，如果使用字串需要同時指定合適的請求標頭 `Content-Type`。其中包含 3 個內建變數，其中 `<source>` 和 `<target>` 分別對應之前填寫的語言代碼，如不需要可省略，`<text>` 表示發送給翻譯引擎的文本，必須保留。其他具體請求資訊需參考翻譯引擎 API 文件。
+* `response`：根據自己的需要填寫解析響應信息的表達式，以抽取其中的譯文文本。響應信息包含在變量 `response` 中，它是一個 [JSON](https://docs.python.org/3/library/json.html#encoders-and-decoders) 對象（如果翻譯引擎返回的數據是 JSON 格式）或 lxml 的 [Element](https://lxml.de/apidoc/lxml.etree.html#lxml.etree.ElementBase) 對象（如果翻譯引擎返回的數據是 XML 格式）。
+
+客製化翻譯引擎數據填寫完成後可以點擊介面下方的【驗證】按鈕檢查數據是否有效，最後點擊【保存】按鈕保存所有的修改。
 
 __【 ChatGPT 提示 】__
 
