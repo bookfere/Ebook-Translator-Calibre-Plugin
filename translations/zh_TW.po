@@ -9,28 +9,29 @@ msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
 "POT-Creation-Date: 2023-04-17 17:25+0800\n"
-"PO-Revision-Date: 2023-04-17 14:17+0800\n"
+"PO-Revision-Date: 2023-04-17 23:49+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.1.1\n"
 
 msgid "Translating..."
 msgstr "翻譯中..."
 
 msgid "Translation Engine Tester"
-msgstr "翻譯引擎測試程式"
+msgstr "翻譯引擎測試工具"
 
 msgid "Translate"
 msgstr "翻譯"
 
 msgid "Usage: checking..."
-msgstr "剩餘量：檢查中..."
+msgstr "使用量：檢查中..."
 
 msgid "Custom Translation Engine"
-msgstr "客製化翻譯引擎"
+msgstr "自訂翻譯引擎"
 
 msgid "Add"
 msgstr "新增"
@@ -51,7 +52,7 @@ msgid "Save"
 msgstr "儲存"
 
 msgid "Engine data format is valid."
-msgstr "翻譯引擎資料格式正確。"
+msgstr "引擎資料格式有效。"
 
 msgid "The engine name is already in use."
 msgstr "引擎名稱已經被使用。"
@@ -60,7 +61,7 @@ msgid "The setting was saved."
 msgstr "設定已儲存。"
 
 msgid "No custom engine to delete."
-msgstr "無自訂翻譯引擎可刪除。"
+msgstr "沒有自訂引擎可供刪除。"
 
 msgid "Auto detect"
 msgstr "自動偵測"
@@ -78,43 +79,43 @@ msgid "Can not parse returned response. Raw data: {}"
 msgstr "無法剖析返回的回應。原始資料：{}"
 
 msgid "Engine data must be in valid JSON format."
-msgstr "翻譯引擎資料必須符合有效的 JSON 格式。"
+msgstr "引擎資料必須符合有效的 JSON 格式。"
 
 msgid "Invalid engine data."
-msgstr "無效的翻譯引擎資料。"
+msgstr "無效的引擎資料。"
 
 msgid "Engine name is required."
-msgstr "翻譯引擎名稱為必填項目。"
+msgstr "必須提供引擎名稱。"
 
 msgid "Engine name must be different from builtin engine name."
-msgstr "翻譯引擎名稱必須與內建翻譯引擎名稱不同。"
+msgstr "引擎名稱必須與內建引擎名稱不同。"
 
 msgid "Language codes are required."
-msgstr "必須填寫語言代碼。"
+msgstr "必須提供語言代碼。"
 
 msgid "Source and target must be added in pair."
-msgstr "必須成對添加來源語言和目標語言。"
+msgstr "必須成對新增來源語言和目標語言。"
 
 msgid "Request information is required."
-msgstr "必須填寫請求信息。"
+msgstr "必須提供要求資訊。"
 
 msgid "API URL is required."
-msgstr "必須填寫 API URL。"
+msgstr "必須提供 API URL。"
 
 msgid "Placeholder <text> is required."
-msgstr "必須填寫佔位符 <text>。"
+msgstr "必須提供預留位置 <text>。"
 
 msgid "A appropriate Content-Type in headers is required."
-msgstr "必須填寫適當的 Content-Type 於標頭中。"
+msgstr "必須提供適當的 Content-Type 於標頭中。"
 
 msgid "Expression to parse response is required."
-msgstr "必須填寫解析回應的表達式。"
+msgstr "必須提供剖析回應的運算式。"
 
 msgid "Custom"
-msgstr "客製化"
+msgstr "自訂"
 
 msgid "Resposne was parsed incorrectly."
-msgstr "回應解析不正確。"
+msgstr "回應剖析不正確。"
 
 msgid "Youdao"
 msgstr "有道"
@@ -309,7 +310,7 @@ msgid "Prompt must include {}, {} and {}."
 msgstr "提示必須包含 {}、{} 和 {}。"
 
 msgid "Please add a custom translation engine first."
-msgstr "請先新增客製化翻譯引擎。"
+msgstr "請先新增自訂翻譯引擎。"
 
 msgid "Failed to retreive data from translate engine API."
 msgstr "無法從翻譯引擎 API 擷取資料。"
