@@ -120,7 +120,7 @@ class CustomTranslate(Base):
             result = eval(
                 self.engine_data.get('response'), {"response": response})
             if is_str(result):
-                raise Exception(_('Resposne was parsed incorrectly.'))
+                raise Exception(_('Response was parsed incorrectly.'))
             return result
 
         return self.get_result(

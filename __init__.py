@@ -1,5 +1,7 @@
 from calibre.customize import InterfaceActionBase
 
+from calibre_plugins.ebook_translator.utils import _z
+
 
 __license__ = 'GPL v3'
 __copyright__ = '2023, bookfere.com <bookfere@gmail.com>'
@@ -9,7 +11,7 @@ load_translations()
 
 
 class EbookTranslator(InterfaceActionBase):
-    name = 'Ebook Translator'
+    name = _z('Ebook Translator')
     title = _(name)
     supported_platforms = ['windows', 'osx', 'linux']
     author = 'bookfere.com'

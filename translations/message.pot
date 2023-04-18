@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-04-17 17:25+0800\n"
+"POT-Creation-Date: 2023-04-18 18:14+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,10 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: __init__.py:14
+msgid "Ebook Translator"
+msgstr ""
 
 #: components/engine.py:40
 msgid "Translating..."
@@ -33,47 +37,51 @@ msgstr ""
 msgid "Usage: checking..."
 msgstr ""
 
-#: components/engine.py:131
+#: components/engine.py:101
+msgid "Usage: {}"
+msgstr ""
+
+#: components/engine.py:135
 msgid "Custom Translation Engine"
 msgstr ""
 
-#: components/engine.py:140
+#: components/engine.py:144
 msgid "Add"
 msgstr ""
 
-#: components/engine.py:141
+#: components/engine.py:145
 msgid "Delete"
 msgstr ""
 
-#: components/engine.py:144 main.py:574
+#: components/engine.py:148 main.py:574
 msgid "Clear"
 msgstr ""
 
-#: components/engine.py:145
+#: components/engine.py:149
 msgid "Reset"
 msgstr ""
 
-#: components/engine.py:146
+#: components/engine.py:150
 msgid "Verify"
 msgstr ""
 
-#: components/engine.py:147 main.py:272
+#: components/engine.py:151 main.py:272
 msgid "Save"
 msgstr ""
 
-#: components/engine.py:187
+#: components/engine.py:191
 msgid "Engine data format is valid."
 msgstr ""
 
-#: components/engine.py:203
+#: components/engine.py:207
 msgid "The engine name is already in use."
 msgstr ""
 
-#: components/engine.py:211 main.py:770
+#: components/engine.py:215 main.py:770
 msgid "The setting was saved."
 msgstr ""
 
-#: components/engine.py:217
+#: components/engine.py:221
 msgid "No custom engine to delete."
 msgstr ""
 
@@ -93,7 +101,7 @@ msgstr ""
 msgid "API Key"
 msgstr ""
 
-#: engines/base.py:89 tests/test_deepl.py:44
+#: engines/base.py:89 tests/test_deepl.py:45
 msgid "Can not parse returned response. Raw data: {}"
 msgstr ""
 
@@ -146,7 +154,11 @@ msgid "Custom"
 msgstr ""
 
 #: engines/custom.py:123
-msgid "Resposne was parsed incorrectly."
+msgid "Response was parsed incorrectly."
+msgstr ""
+
+#: engines/deepl.py:24
+msgid "{} total, {} used, {} left"
 msgstr ""
 
 #: engines/youdao.py:14
