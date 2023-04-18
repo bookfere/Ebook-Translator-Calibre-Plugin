@@ -4,7 +4,7 @@ A Calibre plugin to translate ebook into a specified language (optionally keepin
 
 ---
 
-Other language: [简体中文](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.md) · [正體中文](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.zh-TW.md)
+Other language: [简体中文](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.zh-CN.md) · [正體中文](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.zh-TW.md)
 
 ---
 
@@ -12,6 +12,7 @@ Other language: [简体中文](https://github.com/bookfere/Ebook-Translator-Cali
 
 * Support languages supported by the selected translation engine (e.g. Google Translate supports 134 languages)
 * Support multiple translation engines, including Google Translate, ChatGPT, and DeepL
+* Support for custom translation engines (with the ability to parse JSON and XML formatted responses)
 * Support all ebook formats supported by Calibre (48 input formats, 20 output formats)
 * Support to translate more than one ebooks. The translation process of each book is carried out simultaneously without affecting one another
 * Support caching translated content, with no need to re-translate after request failure or network interruption
