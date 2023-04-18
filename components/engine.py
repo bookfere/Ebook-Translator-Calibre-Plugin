@@ -98,7 +98,7 @@ class EngineTester(QDialog):
 
         def check_usage(text):
             if text is not None:
-                usage.setText('Usage: {}'.format(text))
+                usage.setText(_('Usage: {}').format(text))
                 usage.setVisible(True)
             else:
                 usage.setVisible(False)
@@ -111,11 +111,15 @@ class EngineTester(QDialog):
             self.translate_worker.deleteLater)
         self.translate_thread.start()
 
+        def translate_result(text):
+            target.setPlainText(text)
+            self.usage_worker.check.emit()
+        self.translate_worker.result.connect(translate_result)
+
         def test_translate():
             self.translate_worker.translate.emit(
                 source.toPlainText(), source_lang.currentText(),
                 target_lang.currentText())
-            self.translate_worker.result.connect(target.setPlainText)
         translate.clicked.connect(test_translate)
 
     def done(self, result):

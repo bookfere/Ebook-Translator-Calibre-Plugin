@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-04-17 17:25+0800\n"
+"POT-Creation-Date: 2023-04-18 18:14+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -16,6 +16,9 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+msgid "Ebook Translator"
+msgstr "电子书翻译器"
 
 msgid "Translating..."
 msgstr "翻译中……"
@@ -28,6 +31,9 @@ msgstr "翻译"
 
 msgid "Usage: checking..."
 msgstr "用量：检查中……"
+
+msgid "Usage: {}"
+msgstr "用量：{}"
 
 msgid "Custom Translation Engine"
 msgstr "自定义翻译引擎"
@@ -113,8 +119,11 @@ msgstr "用来解析响应的表达式是必填项。"
 msgid "Custom"
 msgstr "自定义"
 
-msgid "Resposne was parsed incorrectly."
+msgid "Response was parsed incorrectly."
 msgstr "响应没有正确解析。"
+
+msgid "{} total, {} used, {} left"
+msgstr "总计 {}，已用 {}，剩余 {}"
 
 msgid "Youdao"
 msgstr "有道"

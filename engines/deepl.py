@@ -21,17 +21,14 @@ class DeeplTranslate(Base):
             total = usage.get('character_limit')
             used = usage.get('character_count')
             left = total - used
-            return '{} total, {} used, {} left'.format(total, used, left)
+            return _('{} total, {} used, {} left').format(total, used, left)
 
         return self.get_result(
             self.endpoint.get('usage'), callback=usage_info, silence=True,
             headers={'Authorization': 'DeepL-Auth-Key %s' % self.api_key})
 
     def translate(self, text):
-        headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'DeepL-Auth-Key %s' % self.api_key,
-        }
+        headers = {'Authorization': 'DeepL-Auth-Key %s' % self.api_key}
 
         data = {
             'text': text,
