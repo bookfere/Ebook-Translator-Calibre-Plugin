@@ -200,13 +200,14 @@ class ManageCustomEngine(QDialog):
                 valid, data = load_engine_data(raw_data)
                 if not valid:
                     return pop_alert(self, data, 'warning')
-                new_name = data.get('name').lower()
-                if current_name.lower() != new_name:
-                    if new_name in [name.lower() for name in custom_engines]:
+                new_name = data.get('name')
+                if current_name.lower() != new_name.lower():
+                    exist_names = [name.lower() for name in custom_engines]
+                    if new_name.lower() in exist_names:
                         return pop_alert(
                             self, _('The engine name is already in use.'),
                             'warning')
-                    del custom_engines[current_name]
+                del custom_engines[current_name]
                 custom_engines[new_name] = raw_data
                 self.config.update(custom_engines=custom_engines)
                 refresh_list()

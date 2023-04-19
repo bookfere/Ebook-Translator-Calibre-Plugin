@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-04-18 18:14+0800\n"
+"POT-Creation-Date: 2023-04-19 17:09+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -53,7 +53,7 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: components/engine.py:148 main.py:574
+#: components/engine.py:148 main.py:573
 msgid "Clear"
 msgstr ""
 
@@ -73,15 +73,15 @@ msgstr ""
 msgid "Engine data format is valid."
 msgstr ""
 
-#: components/engine.py:207
+#: components/engine.py:208
 msgid "The engine name is already in use."
 msgstr ""
 
-#: components/engine.py:215 main.py:770
+#: components/engine.py:216 main.py:769
 msgid "The setting was saved."
 msgstr ""
 
-#: components/engine.py:221
+#: components/engine.py:222
 msgid "No custom engine to delete."
 msgstr ""
 
@@ -101,63 +101,67 @@ msgstr ""
 msgid "API Key"
 msgstr ""
 
-#: engines/base.py:89 tests/test_deepl.py:45
+#: engines/base.py:89 tests/test_deepl.py:46
 msgid "Can not parse returned response. Raw data: {}"
 msgstr ""
 
-#: engines/custom.py:43
+#: engines/custom.py:43 tests/test_custom.py:43
 msgid "Engine data must be in valid JSON format."
 msgstr ""
 
-#: engines/custom.py:46
+#: engines/custom.py:46 tests/test_custom.py:46
 msgid "Invalid engine data."
 msgstr ""
 
-#: engines/custom.py:50
+#: engines/custom.py:50 tests/test_custom.py:49
 msgid "Engine name is required."
 msgstr ""
 
-#: engines/custom.py:53
+#: engines/custom.py:53 tests/test_custom.py:53
 msgid "Engine name must be different from builtin engine name."
 msgstr ""
 
-#: engines/custom.py:57
+#: engines/custom.py:57 tests/test_custom.py:56 tests/test_custom.py:59
 msgid "Language codes are required."
 msgstr ""
 
-#: engines/custom.py:59
+#: engines/custom.py:61 tests/test_custom.py:62 tests/test_custom.py:65
 msgid "Source and target must be added in pair."
 msgstr ""
 
-#: engines/custom.py:63
+#: engines/custom.py:65 tests/test_custom.py:68
 msgid "Request information is required."
 msgstr ""
 
-#: engines/custom.py:65
+#: engines/custom.py:67 tests/test_custom.py:72
 msgid "API URL is required."
 msgstr ""
 
-#: engines/custom.py:71 engines/custom.py:76
+#: engines/custom.py:71 tests/test_custom.py:77
 msgid "Placeholder <text> is required."
 msgstr ""
 
-#: engines/custom.py:79
+#: engines/custom.py:75 tests/test_custom.py:82
+msgid "Request headers must be an JSON object."
+msgstr ""
+
+#: engines/custom.py:78 tests/test_custom.py:88
 msgid "A appropriate Content-Type in headers is required."
 msgstr ""
 
-#: engines/custom.py:83
+#: engines/custom.py:82 tests/test_custom.py:93
 msgid "Expression to parse response is required."
 msgstr ""
 
-#: engines/custom.py:89 main.py:444
+#: engines/custom.py:88 main.py:444
 msgid "Custom"
 msgstr ""
 
-#: engines/custom.py:123
+#: engines/custom.py:116
 msgid "Response was parsed incorrectly."
 msgstr ""
 
-#: engines/deepl.py:24
+#: engines/deepl.py:26 tests/test_deepl.py:30
 msgid "{} total, {} used, {} left"
 msgstr ""
 
@@ -209,7 +213,7 @@ msgstr ""
 msgid "Target Language"
 msgstr ""
 
-#: main.py:196 main.py:703
+#: main.py:196 main.py:702
 msgid "The specified path does not exist."
 msgstr ""
 
@@ -321,7 +325,7 @@ msgstr ""
 msgid "Translation Engine"
 msgstr ""
 
-#: main.py:443 main.py:556
+#: main.py:443 main.py:555
 msgid "Test"
 msgstr ""
 
@@ -337,87 +341,87 @@ msgstr ""
 msgid "For specifying source language:"
 msgstr ""
 
-#: main.py:528
+#: main.py:527
 msgid "Network Proxy"
 msgstr ""
 
-#: main.py:531 main.py:577
+#: main.py:530 main.py:576
 msgid "Enable"
 msgstr ""
 
-#: main.py:541
+#: main.py:540
 msgid "Host"
 msgstr ""
 
-#: main.py:545
+#: main.py:544
 msgid "Port"
 msgstr ""
 
-#: main.py:573
+#: main.py:572
 msgid "Cache"
 msgstr ""
 
-#: main.py:592
+#: main.py:591
 msgid "Request"
 msgstr ""
 
-#: main.py:606
+#: main.py:605
 msgid "Attempt times (Default 3):"
 msgstr ""
 
-#: main.py:608
+#: main.py:607
 msgid "Max interval (Default 5s):"
 msgstr ""
 
-#: main.py:618
+#: main.py:617
 msgid "Log"
 msgstr ""
 
-#: main.py:619
+#: main.py:618
 msgid "Show translation"
 msgstr ""
 
-#: main.py:648
+#: main.py:647
 msgid "Cannot clear cache while there are running jobs."
 msgstr ""
 
-#: main.py:655
+#: main.py:654
 msgid "Total: {}"
 msgstr ""
 
-#: main.py:668 main.py:750
+#: main.py:667 main.py:749
 msgid "Proxy host or port is incorrect."
 msgstr ""
 
-#: main.py:670
+#: main.py:669
 msgid "The proxy is available."
 msgstr ""
 
-#: main.py:671
+#: main.py:670
 msgid "The proxy is not available."
 msgstr ""
 
-#: main.py:685
+#: main.py:684
 msgid "Invalid color value."
 msgstr ""
 
-#: main.py:695
+#: main.py:694
 msgid "{} is not a valid regular expression."
 msgstr ""
 
-#: main.py:711
+#: main.py:710
 msgid "An API key is required."
 msgstr ""
 
-#: main.py:723
+#: main.py:722
 msgid "Prompt must include {} and {}."
 msgstr ""
 
-#: main.py:732
+#: main.py:731
 msgid "Prompt must include {}, {} and {}."
 msgstr ""
 
-#: main.py:741
+#: main.py:740
 msgid "Please add a custom translation engine first."
 msgstr ""
 

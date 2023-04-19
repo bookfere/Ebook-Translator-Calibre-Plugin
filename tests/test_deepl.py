@@ -9,12 +9,12 @@ load_translations()
 
 class TestDeepl(unittest.TestCase):
     def setUp(self):
-        lang_codes = {
+        DeeplTranslate.set_lang_codes({
             'source': {'English': 'EN'},
             'target': {'Chinese': 'ZH'}
-        }
+        })
+
         self.translator = DeeplTranslate()
-        self.translator.set_lang_codes(lang_codes)
         self.translator.set_api_key('xxx')
         self.translator.set_source_lang('English')
         self.translator.set_target_lang('Chinese')
@@ -27,7 +27,8 @@ class TestDeepl(unittest.TestCase):
         self.result.return_value = '{"character_count": 30, ' \
             '"character_limit": 100}'
         self.assertEqual(
-            '100 total, 30 used, 70 left', self.translator.get_usage(),)
+            _('{} total, {} used, {} left').format(100, 30, 70),
+            self.translator.get_usage(),)
 
         self.result.return_value = '<dummy info>'
         self.assertIsNone(self.translator.get_usage())

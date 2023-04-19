@@ -5,6 +5,7 @@ from calibre_plugins.ebook_translator.utils import _z, is_str
 from calibre_plugins.ebook_translator.engines import builtin_engines
 from calibre_plugins.ebook_translator.engines.base import Base
 
+
 load_translations()
 
 
@@ -55,7 +56,9 @@ def load_engine_data(text):
     languages = json_data.get('languages')
     if not languages:
         return (False, _('Language codes are required.'))
-    elif not ('source' in languages and 'target' in languages):
+    has_source = 'source' in languages
+    has_target = 'target' in languages
+    if (has_source and not has_target) or (has_target and not has_source):
         return (False, _('Source and target must be added in pair.'))
     # request info
     request = json_data.get('request')
@@ -64,19 +67,16 @@ def load_engine_data(text):
     if 'url' not in request:
         return (False, _('API URL is required.'))
     # request data
-    headers = request.get('headers')
     data = request.get('data')
-    if isinstance(data, dict):
-        if '<text>' not in data.values():
-            return (False, _('Placeholder <text> is required.'))
-        if headers and 'application/json' in headers.values():
-            json_data.update(data=json.dumps(data))
-    elif is_str(data):
-        if '<text>' not in data:
-            return (False, _('Placeholder <text> is required.'))
-        if not headers or 'content-type' not in [i.lower() for i in headers]:
-            return (False, _(
-                'A appropriate Content-Type in headers is required.'))
+    if data is not None and '<text>' not in str(data):
+        return (False, _('Placeholder <text> is required.'))
+    # request headers
+    headers = request.get('headers') or {}
+    if headers and not isinstance(headers, dict):
+        return (False, _('Request headers must be an JSON object.'))
+    has_content_type = 'content-type' in [i.lower() for i in headers]
+    if is_str(data) and not has_content_type:
+        return (False, _('A appropriate Content-Type in headers is required.'))
     # response parser
     response = json_data.get('response')
     if not response or 'response' not in response:
@@ -97,20 +97,14 @@ class CustomTranslate(Base):
         headers = request.get('headers') or {}
 
         data = request.get('data')
-        if isinstance(data, dict):
-            for k, v in request.get('data').items():
-                if v == '<source>':
-                    data[k] = self._get_source_code()
-                elif v == '<target>':
-                    data[k] = self._get_target_code()
-                elif v == '<text>':
-                    data[k] = text
-                else:
-                    data[k] = v
-        elif is_str(data):
-            data.replace('<source>', self._get_source_code()) \
-                .repalce('<target>', self._get_target_code()) \
-                .replace('<text>', text)
+        need_restore = isinstance(data, dict)
+        data = json.dumps(data)
+        data = data.replace('<source>', self._get_source_code()) \
+            .replace('<target>', self._get_target_code()) \
+            .replace('<text>', text).encode('utf-8')
+        is_json = headers and 'application/json' in headers.values()
+        if need_restore and not is_json:
+            data = json.loads(data)
 
         def parse(response):
             try:
@@ -119,7 +113,7 @@ class CustomTranslate(Base):
                 response = etree.fromstring(response)
             result = eval(
                 self.engine_data.get('response'), {"response": response})
-            if is_str(result):
+            if not is_str(result):
                 raise Exception(_('Response was parsed incorrectly.'))
             return result
 

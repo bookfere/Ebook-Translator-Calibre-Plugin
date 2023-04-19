@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-04-18 18:14+0800\n"
+"POT-Creation-Date: 2023-04-19 17:09+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -81,7 +81,7 @@ msgid "API Key"
 msgstr "API密钥"
 
 msgid "Can not parse returned response. Raw data: {}"
-msgstr "无法解析返回的相应。原始数据：{}"
+msgstr "无法解析返回的响应。原始数据：{}"
 
 msgid "Engine data must be in valid JSON format."
 msgstr "引擎数据必须是有效的的 JSON 格式。"
@@ -109,6 +109,9 @@ msgstr "API 网址是必填项。"
 
 msgid "Placeholder <text> is required."
 msgstr "占位符 <text> 必须保留。"
+
+msgid "Request headers must be an JSON object."
+msgstr "请求标头必须是一个 JSON 对象。"
 
 msgid "A appropriate Content-Type in headers is required."
 msgstr "合适的 Contenty-Type 标头信息是必填项。"
