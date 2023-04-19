@@ -8,19 +8,16 @@ load_translations()
 
 
 class GoogleTranslate(Base):
-    name = 'Google'
+    name = 'Google(Free)'
     support_lang = 'google.json'
     endpoint = 'https://translate.googleapis.com/translate_a/single'
     need_api_key = False
 
     def translate(self, text):
-        sl = self._get_source_code()
-        tl = self._get_target_code()
-
         return self.get_result(self.endpoint, {
             'client': 'gtx',
-            'sl': sl,
-            'tl': tl,
+            'sl': self._get_source_code(),
+            'tl': self._get_target_code(),
             'dt': 't',
             'q': text,
         })

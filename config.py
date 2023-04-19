@@ -6,7 +6,7 @@ preferences = JSONConfig('plugins/ebook_translator')
 default_config = {
     'to_library': True,
     'output_path': None,
-    'translate_engine': 'Google',
+    'translate_engine': 'Google(Free)',
     'chatgpt_prompt': {},
     'api_key': {},
     'proxy_enabled': False,

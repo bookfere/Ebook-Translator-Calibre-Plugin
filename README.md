@@ -75,15 +75,16 @@ __[ Output Path ]__
 
 __[ Translation Engine ]__
 
-* __Google__ [default]: Free translation engine
+* __Google(Free)__ [default]: Free translation engine
 * __ChatGPT__: API key required
 * __DeepL__: API key required
 * __DeepL(Pro)__: API key required
+* __DeepL(Free)__: Free translation engine (Unstable)
 * __Youdao__: APP key and secret required
 * __Baidu__: APP id and key required
 * __Custom__: Customize your own translation engine.
 
-Except for Google, who does not require an API key, other translation engines require you to register a corresponding account and pay to obtain an API key.
+Except for Google(Free) and DeepL(Free), who does not require an API key, other translation engines require you to register a corresponding account and pay to obtain an API key.
 
 According to the response information sample provided by DeepL official website, the program can run properly, but due to the lack of DeepL's API key, the actual operation status is unknown.
 
