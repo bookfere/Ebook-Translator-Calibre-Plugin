@@ -465,7 +465,6 @@ class MainWindowFrame(QDialog):
             engine_name = engine_list.itemData(index)
             self.config.update(translate_engine=engine_name)
             self.current_engine = get_engine_class(engine_name)
-
             # show api key setting
             need_api_key = self.current_engine.need_api_key
             self.api_key.setVisible(need_api_key)
@@ -489,7 +488,7 @@ class MainWindowFrame(QDialog):
                     default_prompt = self.current_engine.prompts.get(k)
                     v.setPlaceholderText(default_prompt)
                     v.setText(prompts.get(k) or default_prompt)
-
+        engine_list.wheelEvent = lambda event: None
         engine_list.currentIndexChanged.connect(choose_default_engine)
 
         def refresh_engine_list():

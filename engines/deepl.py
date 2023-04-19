@@ -43,3 +43,11 @@ class DeeplTranslate(Base):
 
     def parse(self, data):
         return json.loads(data)['translations'][0]['text']
+
+
+class DeeplProTranslate(DeeplTranslate):
+    name = 'DeepL(Pro)'
+    endpoint = {
+        'translate': 'https://api.deepl.com/v2/translate',
+        'usage': 'https://api.deepl.com/v2/usage',
+    }
