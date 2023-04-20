@@ -99,6 +99,8 @@ class CustomTranslate(Base):
         data = request.get('data')
         need_restore = isinstance(data, dict)
         data = json.dumps(data)
+        # The replacement may include UTF-8 characters that need to be encoded
+        # to ensure pure Latin-1 (compliance with ISO-8859-1).
         data = data.replace('<source>', self._get_source_code()) \
             .replace('<target>', self._get_target_code()) \
             .replace('<text>', text).encode('utf-8')

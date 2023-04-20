@@ -101,7 +101,7 @@ class DeeplFreeTranslate(Base):
                 "timestamp": ts
             },
             "id": uid
-        })
+        }, separators=',:')
 
         # ((e, t) => e = (t.id + 3) % 13 == 0 || (t.id + 5) % 29 == 0
         # ? e.replace('"method":"', '"method" : "')
