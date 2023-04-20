@@ -30,6 +30,14 @@
 
 如果安装插件后，插件图标未出现在 Calibre 的主工具栏上，可以依次点击 Calibre 的菜单【首选项 → 工具与菜单】，在弹出的对话框中点击下拉菜单并选择“主工具栏”，然后在左栏找到并选中插件图标，点击中间的右箭头按钮【>】将其添加到右栏，最后点击【应用】按钮即可。
 
+如果你想安装 GitHub 仓库中最新的插件，可以运行以下命令：
+
+```
+git clone https://github.com/bookfere/Ebook-Translator-Calibre-Plugin.git
+cd Ebook-Translator-Calibre-Plugin
+git archive --format zip --output ../Ebook-Translator-Calibre-Plugin.zip master
+```
+
 ---
 
 ## 使用方法

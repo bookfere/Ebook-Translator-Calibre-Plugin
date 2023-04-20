@@ -28,6 +28,14 @@ Please make sure __[Calibre](https://calibre-ebook.com/)__ is installed on your 
 2. Click Calibre Menu [Preference... → Plug-ins → Load plug-in from file], and choose the zip file you downloaded.
 3. Reboot Calibre (if the "Translate Book" plugin is not showing up on Calibre menu, you need to add it from [Preference... → Toolbars & menus], choose [The main toolbar], find the plugin and click __[>]__, and __[Apply]__).
 
+If you want to install the latest plugin from the GitHub repository, run the following commands:
+
+```
+git clone https://github.com/bookfere/Ebook-Translator-Calibre-Plugin.git
+cd Ebook-Translator-Calibre-Plugin
+git archive --format zip --output ../Ebook-Translator-Calibre-Plugin.zip master
+```
+
 ---
 
 ## Usage
@@ -82,9 +90,9 @@ __[ Translation Engine ]__
 * __DeepL(Free)__: Free translation engine (Unstable)
 * __Youdao__: APP key and secret required
 * __Baidu__: APP id and key required
-* __Custom__: Customize your own translation engine.
+* __Custom__: Customize your own translation engine
 
-Except for Google(Free) and DeepL(Free), who does not require an API key, other translation engines require you to register a corresponding account and pay to obtain an API key.
+Except for Google(Free) and DeepL(Free), who does not require an API key, other built-in translation engines require you to register a corresponding account and pay to obtain an API key.
 
 According to the response information sample provided by DeepL official website, the program can run properly, but due to the lack of DeepL's API key, the actual operation status is unknown.
 

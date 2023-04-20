@@ -51,7 +51,7 @@ class TestCustom(unittest.TestCase):
         self.assertEqual(
             (False, _(
                 'Engine name must be different from builtin engine name.')),
-            load_engine_data('{"name":"Google"}'))
+            load_engine_data('{"name":"Google(Free)"}'))
         self.assertEqual(
             (False, _('Language codes are required.')),
             load_engine_data('{"name":"Test"}'))
