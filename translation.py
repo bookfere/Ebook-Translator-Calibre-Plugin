@@ -1,5 +1,6 @@
 import time
 import random
+from types import GeneratorType
 
 from calibre import prepare_string_for_xml as escape
 
@@ -56,7 +57,7 @@ class Translation:
 
     def _translate(self, text, count=0, interval=5):
         try:
-            return escape(trim(self.translator.translate(text)))
+            return self.translator.translate(text)
         except Exception as e:
             message = _('Failed to retreive data from translate engine API.')
             if count >= self.request_attempt:
@@ -85,6 +86,10 @@ class Translation:
             self.need_sleep = False
         else:
             translation = self._translate(original)
+            # TODO: translation monitor display streaming text
+            if isinstance(translation, GeneratorType):
+                translation = ''.join(text for text in translation)
+            translation = escape(trim(translation))
             if self.cache:
                 self.cache.add(paragraph_uid, translation)
             self._log(_('Translation: {}').format(translation))

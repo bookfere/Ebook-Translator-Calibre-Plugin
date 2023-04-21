@@ -482,12 +482,13 @@ class MainWindowFrame(QDialog):
             is_chatgpt = self.current_engine.is_chatgpt()
             prompt_group.setVisible(is_chatgpt)
             if is_chatgpt:
+                chatgpt = self.current_engine
                 prompts = self.config.get('chatgpt_prompt')
                 inputs = {'auto': self.prompt_auto, 'lang': self.prompt_lang}
-                for k, v in inputs.items():
-                    default_prompt = self.current_engine.prompts.get(k)
-                    v.setPlaceholderText(default_prompt)
-                    v.setText(prompts.get(k) or default_prompt)
+                for name, entry in inputs.items():
+                    default_prompt = chatgpt.default_prompts.get(name)
+                    entry.setPlaceholderText(default_prompt)
+                    entry.setText(prompts.get(name) or default_prompt)
         engine_list.wheelEvent = lambda event: None
         engine_list.currentIndexChanged.connect(choose_default_engine)
 
@@ -514,12 +515,10 @@ class MainWindowFrame(QDialog):
             translator = self.current_engine()
             api_key = self.api_key.text()
             api_key and translator.set_api_key(api_key)
-            if self.proxy_enabled.isChecked():
-                translator.set_proxy(
-                    [self.proxy_host.text(), self.proxy_port.text()])
-            if translator.is_chatgpt():
-                translator.set_prompt(
-                    self.prompt_auto.text(), self.prompt_lang.text())
+            self.proxy_enabled.isChecked() and translator.set_proxy(
+                [self.proxy_host.text(), self.proxy_port.text()])
+            translator.is_chatgpt() and translator.set_prompt(
+                self.prompt_auto.text(), self.prompt_lang.text())
             EngineTester(self, translator)
         engine_test.clicked.connect(make_test_engine)
 
@@ -716,21 +715,19 @@ class MainWindowFrame(QDialog):
             self.config.update(chatgpt_prompt={})
             prompt_config = self.config.get('chatgpt_prompt')
             auto_text = self.prompt_auto.text()
-            auto_default = self.current_engine.prompts.get('auto')
             if not ('{tlang}' in auto_text and '{text}' in auto_text):
                 return self.pop_alert(
                     _('Prompt must include {} and {}.')
                     .format('{tlang}', '{text}'), 'warning')
-            if auto_text != auto_default:
+            if auto_text != self.current_engine.default_prompts.get('auto'):
                 prompt_config.update(auto=auto_text)
             lang_text = self.prompt_lang.text()
-            lang_default = self.current_engine.prompts.get('lang')
             if not ('{slang}' in lang_text and '{tlang}' and lang_text
                     and '{text}' in lang_text):
                 return self.pop_alert(
                     _('Prompt must include {}, {} and {}.')
                     .format('{slang}', '{tlang}', '{text}'), 'warning')
-            if lang_text != lang_default:
+            if lang_text != self.current_engine.default_prompts.get('lang'):
                 prompt_config.update(lang=lang_text)
 
         # Custom engine

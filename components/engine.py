@@ -1,4 +1,5 @@
 import uuid
+from types import GeneratorType
 
 from calibre_plugins.ebook_translator.utils import sorted_mixed_number
 from calibre_plugins.ebook_translator.engines.custom import (
@@ -24,8 +25,10 @@ load_translations()
 
 
 class Worker(QObject):
+    clear = pyqtSignal()
     translate = pyqtSignal(str, str, str)
     result = pyqtSignal(str)
+    complete = pyqtSignal()
     check = pyqtSignal()
     usage = pyqtSignal(object)
 
@@ -37,12 +40,19 @@ class Worker(QObject):
 
     @pyqtSlot(str, str, str)
     def translate_text(self, text, source_lang, target_lang):
+        self.clear.emit()
         self.result.emit(_('Translating...'))
         self.translator.set_source_lang(source_lang)
         self.translator.set_target_lang(target_lang)
         try:
             translation = self.translator.translate(text)
-            self.result.emit(translation)
+            self.clear.emit()
+            if isinstance(translation, GeneratorType):
+                for text in translation:
+                    self.result.emit(text)
+            else:
+                self.result.emit(translation)
+            self.complete.emit()
         except Exception as e:
             self.result.emit(str(e))
 
@@ -111,10 +121,9 @@ class EngineTester(QDialog):
             self.translate_worker.deleteLater)
         self.translate_thread.start()
 
-        def translate_result(text):
-            target.setPlainText(text)
-            self.usage_worker.check.emit()
-        self.translate_worker.result.connect(translate_result)
+        self.translate_worker.clear.connect(target.clear)
+        self.translate_worker.result.connect(target.insertPlainText)
+        self.translate_worker.complete.connect(self.usage_worker.check.emit)
 
         def test_translate():
             self.translate_worker.translate.emit(
@@ -188,7 +197,7 @@ class ManageCustomEngine(QDialog):
             valid, data = load_engine_data(custom_engine_data.toPlainText())
             if not valid:
                 return pop_alert(self, data, 'warning')
-            pop_alert(self, _('Engine data format is valid.'))
+            pop_alert(self, _('Valid engine data format.'))
 
         def save_data():
             current_name = custom_list.currentText()

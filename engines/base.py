@@ -73,13 +73,14 @@ class Base:
         return lang_as_iso639_1(self._get_target_code())
 
     def get_result(self, url, data=None, headers={}, method='GET',
-                   callback=None, silence=False):
+                   stream=False, callback=None, silence=False):
         result = None
         try:
-            request = Request(url, data, headers=headers, method=method,
-                              timeout=self.timeout)
-            response = self.br.open(request)
-            result = response.read().decode('utf-8').strip()
+            self.br.open(Request(url, data, headers=headers, method=method,
+                                 timeout=self.timeout))
+            response = self.br.response()
+            result = response if stream else \
+                response.read().decode('utf-8').strip()
             return self.parse(result) if callback is None else callback(result)
         except Exception as e:
             if silence:
