@@ -131,7 +131,7 @@ class TestCustom(unittest.TestCase):
         translator.set_source_lang('English')
         translator.set_target_lang('Chinese')
         translator.br = MagicMock()
-        result = translator.br.open.return_value.read.return_value.decode
+        result = translator.br.response.return_value.read.return_value.decode
         result.return_value = '{"text": "你好世界！"}'
 
         self.assertEqual('你好世界！', translator.translate('Hello World!'))

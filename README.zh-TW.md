@@ -1,5 +1,7 @@
 # 電子書翻譯工具 (Calibre 外掛程式)
 
+![Ebook Translator Calibre Plugin](images/logo.png)
+
 一個可以將電子書翻譯成指定語言 (原文譯文對照) 的外掛程式。
 
 ---
@@ -32,11 +34,9 @@
 
 如果你想安裝 GitHub 儲存庫中最新的外掛程式，可以執行以下命令：
 
-```
-git clone https://github.com/bookfere/Ebook-Translator-Calibre-Plugin.git
+<pre><code>git clone https://github.com/bookfere/Ebook-Translator-Calibre-Plugin.git
 cd Ebook-Translator-Calibre-Plugin
-git archive --format zip --output ../Ebook-Translator-Calibre-Plugin.zip master
-```
+git archive --format zip --output ../Ebook-Translator-Calibre-Plugin.zip master</code></pre>
 
 ---
 

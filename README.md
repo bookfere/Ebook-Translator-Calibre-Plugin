@@ -1,5 +1,7 @@
 # Ebook Translator (A Calibre plugin)
 
+![Ebook Translator Calibre Plugin](images/logo.png)
+
 A Calibre plugin to translate ebook into a specified language (optionally keeping the original content).
 
 ---
@@ -30,11 +32,9 @@ Please make sure __[Calibre](https://calibre-ebook.com/)__ is installed on your 
 
 If you want to install the latest plugin from the GitHub repository, run the following commands:
 
-```
-git clone https://github.com/bookfere/Ebook-Translator-Calibre-Plugin.git
+<pre><code>git clone https://github.com/bookfere/Ebook-Translator-Calibre-Plugin.git
 cd Ebook-Translator-Calibre-Plugin
-git archive --format zip --output ../Ebook-Translator-Calibre-Plugin.zip master
-```
+git archive --format zip --output ../Ebook-Translator-Calibre-Plugin.zip master</code></pre>
 
 ---
 

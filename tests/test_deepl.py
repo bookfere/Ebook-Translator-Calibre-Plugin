@@ -19,7 +19,7 @@ class TestDeepl(unittest.TestCase):
         self.translator.set_source_lang('English')
         self.translator.set_target_lang('Chinese')
         self.translator.br = MagicMock()
-        self.response = self.translator.br.open
+        self.response = self.translator.br.response
         self.result = self.response.return_value.read \
             .return_value.decode
 

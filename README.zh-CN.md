@@ -1,5 +1,7 @@
 # 电子书翻译器（Calibre 插件）
 
+![Ebook Translator Calibre Plugin](images/logo.png)
+
 一个可以将电子书翻译成指定语言（原文译文对照）的插件。
 
 ---
@@ -32,11 +34,9 @@
 
 如果你想安装 GitHub 仓库中最新的插件，可以运行以下命令：
 
-```
-git clone https://github.com/bookfere/Ebook-Translator-Calibre-Plugin.git
+<pre><code>git clone https://github.com/bookfere/Ebook-Translator-Calibre-Plugin.git
 cd Ebook-Translator-Calibre-Plugin
-git archive --format zip --output ../Ebook-Translator-Calibre-Plugin.zip master
-```
+git archive --format zip --output ../Ebook-Translator-Calibre-Plugin.zip master</code></pre>
 
 ---
 

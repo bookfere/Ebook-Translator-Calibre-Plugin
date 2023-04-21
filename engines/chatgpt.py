@@ -1,4 +1,3 @@
-import time
 import json
 
 from calibre_plugins.ebook_translator.engines.base import Base
@@ -59,7 +58,6 @@ class ChatgptTranslate(Base):
                 delta = json.loads(chunk)['choices'][0]['delta']
                 if 'content' in delta:
                     yield delta['content']
-            time.sleep(0.05)
 
     # def parse(self, data):
     #     return json.loads(data)['choices'][0]['message']['content']

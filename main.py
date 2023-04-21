@@ -804,7 +804,7 @@ class MainWindowFrame(QDialog):
             'ul ul {list-style:circle;}ul ul ul{list-style:square;}'
             'ul,ol{-qt-list-indent:0;margin-left:10px;}li{margin:6px 0;}'
             'ol{margin-left:15px;}')
-        html = markdown(self.get_readme())
+        html = re.sub(r'<img.*?>', '', markdown(self.get_readme()))
         document.setHtml(html)
         description.setDocument(document)
         description.setOpenExternalLinks(True)
