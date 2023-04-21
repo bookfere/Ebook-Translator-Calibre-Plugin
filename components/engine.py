@@ -1,3 +1,4 @@
+import time
 import uuid
 from types import GeneratorType
 
@@ -46,11 +47,16 @@ class Worker(QObject):
         self.translator.set_target_lang(target_lang)
         try:
             translation = self.translator.translate(text)
-            self.clear.emit()
             if isinstance(translation, GeneratorType):
+                clear = True
                 for text in translation:
+                    if clear:
+                        self.clear.emit()
+                        clear = False
                     self.result.emit(text)
+                    time.sleep(0.05)
             else:
+                self.clear.emit()
                 self.result.emit(translation)
             self.complete.emit()
         except Exception as e:
