@@ -57,8 +57,8 @@ msgstr "Verificar"
 msgid "Save"
 msgstr "Guardar"
 
-msgid "Engine data format is valid."
-msgstr "El formato de datos del motor es válido."
+msgid "Valid engine data format."
+msgstr "Formato de datos del motor válido."
 
 msgid "The engine name is already in use."
 msgstr "El nombre del motor ya está en uso."

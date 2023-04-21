@@ -57,7 +57,7 @@ msgstr "驗證"
 msgid "Save"
 msgstr "儲存"
 
-msgid "Engine data format is valid."
+msgid "Valid engine data format."
 msgstr "引擎資料格式有效。"
 
 msgid "The engine name is already in use."
