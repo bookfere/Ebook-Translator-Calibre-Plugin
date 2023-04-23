@@ -66,6 +66,19 @@ __[ Translation Color ]__
 
 You can click the __[Select]__ button to select a color from color palette, or enter the color value manually. Please refer to "__[color value](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value)__" on MDN documentation for details. If left blank no customized color will be used.
 
+__[ Translation Glossary ]__
+
+* __Enable__: Enable to use the selected translation glossary file
+
+The role of a translation glossary is to specify specific translations for certain terms or to instruct the translation engine to ignore the translation of certain terms.
+
+The glossary file is a plain text file with extension .txt. It has the following format: if a term requires a specific translation, it is presented as a pair of two lines, the first one with the original term and the second one with its translation; If a term needs to be ignored in translation, it is presented as a single line per term. The groups of terms are separated by a blank line.
+
+<pre>La Torre Eiffel
+The Eiffel Tower
+
+La Estatua de la Libertad</pre>
+
 __[ Do not Translate ]__
 
 * __Normal__ [default]: Exclude content by keyword (one keyword per line)

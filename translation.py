@@ -1,3 +1,4 @@
+import os
 import time
 import random
 from types import GeneratorType
@@ -13,8 +14,9 @@ load_translations()
 
 
 class Translation:
-    def __init__(self, translator):
+    def __init__(self, translator, glossary):
         self.translator = translator
+        self.glossary = glossary
 
         self.position = None
         self.color = None
@@ -85,11 +87,16 @@ class Translation:
             self._log(_('Translation (Cached): {}').format(translation))
             self.need_sleep = False
         else:
+            original = self.glossary.replace(original)
+
             translation = self._translate(original)
             # TODO: translation monitor display streaming text
             if isinstance(translation, GeneratorType):
                 translation = ''.join(text for text in translation)
             translation = escape(trim(translation))
+
+            translation = self.glossary.restore(translation)
+
             if self.cache:
                 self.cache.add(paragraph_uid, translation)
             self._log(_('Translation: {}').format(translation))
@@ -120,8 +127,44 @@ class Translation:
         self._log(sep, _('Start to convert ebook format:'), sep, sep='\n')
 
 
+class Glossary:
+    def __init__(self):
+        self.glossary = []
+
+    def load(self, path):
+        try:
+            with open(path, encoding='utf-8') as f:
+                content = f.read().strip()
+        except Exception:
+            raise Exception(_('The specified glossary file does not exist.'))
+
+        if not content:
+            return
+
+        for group in content.split(os.linesep*2):
+            group = group.strip().split(os.linesep)
+            if len(group) > 2:
+                continue
+            if len(group) == 1:
+                group.append(group[0])
+            self.glossary.append(group)
+
+    def replace(self, text):
+        for word in self.glossary:
+            text = text.replace(word[0], 'id_%d' % id(word))
+        return text
+
+    def restore(self, text):
+        for word in self.glossary:
+            text = text.replace('id_%d' % id(word), word[1])
+        return text
+
+
 def get_translation(translator):
-    translation = Translation(translator)
+    glossary = Glossary()
+    if get_config('glossary_enabled'):
+        glossary.load(get_config('glossary_path'))
+    translation = Translation(translator, glossary)
     translation.set_position(get_config('translation_position'))
     translation.set_color(get_config('translation_color'))
     translation.set_request_attempt(get_config('request_attempt'))
