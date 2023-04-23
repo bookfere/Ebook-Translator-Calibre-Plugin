@@ -194,6 +194,12 @@ class MainWindowFrame(QDialog):
         if not to_library and not os.path.exists(output_path):
             return self.pop_alert(
                 _('The specified path does not exist.'), 'warning')
+
+        glossary_path = get_config('glossary_path')
+        if glossary_path and not os.path.exists(glossary_path):
+            return self.pop_alert(
+                _('The specified glossary file does not exist.'), 'warning')
+
         for book_id, title, fmts, ifmt, ofmt, slang, tlang in \
                 self.ebooks.values():
             self.translate_ebook(
@@ -349,6 +355,29 @@ class MainWindowFrame(QDialog):
         color_picker.colorSelected.connect(set_color)
         color_button.clicked.connect(color_picker.open)
 
+        # Glossary
+        glossary_group = QGroupBox(_('Translation Glossary'))
+        glossary_layout = QHBoxLayout(glossary_group)
+        self.glossary_enabled = QCheckBox(_('Enable'))
+        self.glossary_path = QLineEdit()
+        self.glossary_path.setPlaceholderText(_('Choose a glossary file'))
+        glossary_choose = QPushButton(_('Choose'))
+        glossary_layout.addWidget(self.glossary_enabled)
+        glossary_layout.addWidget(self.glossary_path)
+        glossary_layout.addWidget(glossary_choose)
+        layout.addWidget(glossary_group)
+
+        self.glossary_enabled.setChecked(self.config.get('glossary_enabled'))
+        self.glossary_enabled.clicked.connect(
+            lambda checked: self.config.update(glossary_enabled=checked))
+
+        self.glossary_path.setText(self.config.get('glossary_path'))
+
+        def choose_glossary_file():
+            path = QFileDialog.getOpenFileName(filter="Text files (*.txt)")
+            self.glossary_path.setText(path[0])
+        glossary_choose.clicked.connect(choose_glossary_file)
+
         # Filter Content
         filter_group = QGroupBox(_('Do not Translate'))
         filter_layout = QVBoxLayout(filter_group)
@@ -413,27 +442,37 @@ class MainWindowFrame(QDialog):
         # Output Path
         radio_group = QGroupBox(_('Output Path'))
         radio_layout = QHBoxLayout()
-        self.library_radio = QRadioButton(_('Library'))
+        library_radio = QRadioButton(_('Library'))
         self.path_radio = QRadioButton(_('Path'))
-        radio_layout.addWidget(self.library_radio)
+        radio_layout.addWidget(library_radio)
         radio_layout.addWidget(self.path_radio)
         self.output_path_entry = QLineEdit()
         self.output_path_entry.setPlaceholderText(
             _('Choose a path to store translated book(s)'))
         self.output_path_entry.setText(self.config.get('output_path'))
         radio_layout.addWidget(self.output_path_entry)
-        self.output_path_button = QPushButton(_('Choose ...'))
-        self.output_path_button.clicked.connect(self.choose_output_path)
-        radio_layout.addWidget(self.output_path_button)
+        output_path_button = QPushButton(_('Choose ...'))
+
+        radio_layout.addWidget(output_path_button)
         radio_group.setLayout(radio_layout)
         layout.addWidget(radio_group)
 
+        def choose_output_type(checked):
+            output_path_button.setDisabled(checked)
+            self.output_path_entry.setDisabled(checked)
+            self.config.update(to_library=checked)
+        library_radio.toggled.connect(choose_output_type)
+
         if self.config.get('to_library'):
-            self.library_radio.setChecked(True)
+            library_radio.setChecked(True)
         else:
             self.path_radio.setChecked(True)
-        self.choose_output_type(self.library_radio.isChecked())
-        self.library_radio.toggled.connect(self.choose_output_type)
+        choose_output_type(library_radio.isChecked())
+
+        def choose_output_path():
+            path = QFileDialog.getExistingDirectory()
+            self.output_path_entry.setText(path)
+        output_path_button.clicked.connect(choose_output_path)
 
         # Translate Engine
         engine_group = QGroupBox(_('Translation Engine'))
@@ -631,15 +670,6 @@ class MainWindowFrame(QDialog):
 
         return widget
 
-    def choose_output_type(self, checked):
-        self.output_path_button.setDisabled(checked)
-        self.output_path_entry.setDisabled(checked)
-        self.config.update(to_library=checked)
-
-    def choose_output_path(self):
-        path = QFileDialog.getExistingDirectory()
-        self.output_path_entry.setText(path)
-
     def clear_translation_cache(self):
         if len(self.gui.bookfere_translate_ebook_jobs) > 0:
             return self.pop_alert(
@@ -682,6 +712,14 @@ class MainWindowFrame(QDialog):
         if translation_color and not QColor(translation_color).isValid():
             return self.pop_alert(_('Invalid color value.'), 'warning')
         self.config.update(translation_color=translation_color or None)
+
+        # Glossary file
+        glossary_path = self.glossary_path.text()
+        if not os.path.exists(glossary_path):
+            return self.pop_alert(
+                _('The specified glossary file does not exist.'),
+                'warning')
+        self.config.update(glossary_path=glossary_path)
 
         # Filter rules
         rule_content = self.filter_rules.toPlainText()
@@ -803,7 +841,7 @@ class MainWindowFrame(QDialog):
             'h1,h2{font-size:large;}p,body > ul{margin:20px 0;}'
             'ul ul {list-style:circle;}ul ul ul{list-style:square;}'
             'ul,ol{-qt-list-indent:0;margin-left:10px;}li{margin:6px 0;}'
-            'ol{margin-left:15px;}')
+            'ol{margin-left:15px;}pre{background-color:#eee;}')
         html = re.sub(r'<img.*?>', '', markdown(self.get_readme()))
         document.setHtml(html)
         description.setDocument(document)

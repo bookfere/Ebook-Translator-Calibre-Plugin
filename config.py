@@ -20,6 +20,8 @@ default_config = {
     'rule_mode': 'normal',
     'filter_rules': [],
     'custom_engines': {},
+    'glossary_enabled': False,
+    'glossary_path': None,
 }
 
 

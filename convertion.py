@@ -22,7 +22,7 @@ def extract_elements(pages):
             continue
         p_elements = list(
             filter(filter_content, page.data.findall('.//x:p', namespaces=ns)))
-        if len(p_elements) > 1:
+        if len(p_elements) > 0:
             tags = ('h1', 'h2', 'h3', 'h4', 'h5', 'h6',
                     'div[@class="paragraph"]')
             pattern = './/*[self::x:p%s]' % ''.join(

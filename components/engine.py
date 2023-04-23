@@ -13,14 +13,12 @@ from calibre_plugins.ebook_translator.components.parts import pop_alert
 
 try:
     from qt.core import (
-        pyqtSignal, pyqtSlot, QDialog, QThread, QGridLayout,
-        QPushButton, QPlainTextEdit, QObject, QTextCursor, QLabel,
-        QComboBox, QSpacerItem)
+        pyqtSignal, pyqtSlot, QDialog, QThread, QGridLayout, QPushButton,
+        QPlainTextEdit, QObject, QTextCursor, QLabel, QComboBox, QSpacerItem)
 except ImportError:
     from PyQt5.Qt import (
-        pyqtSignal, pyqtSlot, QDialog, QThread, QGridLayout,
-        QPushButton, QPlainTextEdit, QObject, QTextCursor, QLabel,
-        QComboBox, QSpacerItem)
+        pyqtSignal, pyqtSlot, QDialog, QThread, QGridLayout, QPushButton,
+        QPlainTextEdit, QObject, QTextCursor, QLabel, QComboBox, QSpacerItem)
 
 load_translations()
 
@@ -60,6 +58,7 @@ class Worker(QObject):
                 self.result.emit(translation)
             self.complete.emit()
         except Exception as e:
+            self.clear.emit()
             self.result.emit(str(e))
 
     @pyqtSlot()

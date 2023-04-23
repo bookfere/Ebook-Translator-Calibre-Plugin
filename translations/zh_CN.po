@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-04-19 17:09+0800\n"
+"POT-Creation-Date: 2023-04-23 21:25+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -167,6 +167,9 @@ msgstr "目标语言"
 msgid "The specified path does not exist."
 msgstr "指定路径不存在。"
 
+msgid "The specified glossary file does not exist."
+msgstr "指定的词汇表文件不存在。"
+
 msgid "[{} > {}] Translating \"{}\""
 msgstr "[{} > {}] 翻译 \"{}\""
 
@@ -205,6 +208,15 @@ msgstr "CSS 颜色值，如 #666666, gry, rgb(80, 80, 80)"
 
 msgid "Choose"
 msgstr "选择"
+
+msgid "Translation Glossary"
+msgstr "翻译词汇表"
+
+msgid "Enable"
+msgstr "开启"
+
+msgid "Choose a glossary file"
+msgstr "选择一个词汇表文件"
 
 msgid "Do not Translate"
 msgstr "不要翻译"
@@ -262,9 +274,6 @@ msgstr "指定来源语言时的提示词"
 
 msgid "Network Proxy"
 msgstr "网络代理"
-
-msgid "Enable"
-msgstr "开启"
 
 msgid "Host"
 msgstr "主机"
