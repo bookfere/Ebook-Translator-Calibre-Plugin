@@ -31,11 +31,8 @@ def is_proxy_availiable(host, port, timeout=1):
     return True
 
 
-def sorted_mixed_number(string_list):
-    def key(s):
-        num = ''.join([i for i in s if i.isdigit()])
-        return num if num else s
-    return sorted(string_list, key=key)
+def sorted_mixed_keys(s):
+    return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', s)]
 
 
 def is_str(data):

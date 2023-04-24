@@ -4,7 +4,7 @@ from lxml import etree
 from calibre_plugins.ebook_translator.utils import ns, trim
 
 
-class ElementHandler:
+class Element:
     def __init__(self, element):
         self.element = element
         self.element_copy = copy.deepcopy(element)
@@ -30,8 +30,8 @@ class ElementHandler:
 
         return trim(''.join(self.element_copy.itertext())).replace('\n', ' ')
 
-    def add_translation(self, translation, lang=None, position=None,
-                        color=None):
+    def add_translation(
+            self, translation, lang=None, position=None, color=None):
         if self.reserves:
             for reserve in self.reserves:
                 translation = translation.replace(
@@ -58,3 +58,58 @@ class ElementHandler:
     @staticmethod
     def _get_string(element):
         return trim(etree.tostring(element, encoding='utf-8').decode('utf-8'))
+
+
+class ElementHandler:
+    def __init__(self, items, merge_length=0, lang=None, position=None,
+                 color=None):
+        self.elements = [Element(item) for item in items]
+        self.merge_length = merge_length
+        self.lang = lang
+        self.position = position
+        self.color = color
+
+        self.original = []
+        self.translation = []
+
+    def get_original(self):
+        if self.merge_length == 0:
+            for element in self.elements:
+                self.original.append(element.get_content())
+            return self.original
+
+        content = ''
+        for element in self.elements:
+            uid = ' <id_%s> ' % id(element)
+            text = element.get_content() + uid
+            print(text)
+            if len((content + text).encode()) < self.merge_length:
+                content += text
+                continue
+            elif content:
+                self.original.append(content)
+            content = text
+        if content:
+            self.original.append(content)
+        return self.original
+
+    def add_translation(self, text):
+        self.translation.append(text)
+
+    def apply_translation(self):
+        if self.merge_length == 0:
+            for element in self.elements:
+                element.add_translation(
+                    self.translation[self.elements.index(element)],
+                    self.lang, self.position, self.color)
+            return
+
+        content = ''.join(self.translation)
+        for element in self.elements:
+            uid = 'id_%s' % id(element)
+            end = content.find(uid)
+            part = content[:end]
+            content = content.replace(part + uid, '')
+
+            element.add_translation(
+                part.strip(' \n\t<>'), self.lang, self.position, self.color)

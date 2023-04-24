@@ -16,7 +16,7 @@ from calibre_plugins.ebook_translator import EbookTranslator
 from calibre_plugins.ebook_translator.config import (
     init_config, save_config, get_config)
 from calibre_plugins.ebook_translator.utils import (
-    is_proxy_availiable, sorted_mixed_number)
+    is_proxy_availiable, sorted_mixed_keys)
 from calibre_plugins.ebook_translator.engines import builtin_engines
 from calibre_plugins.ebook_translator.translator import get_engine_class
 from calibre_plugins.ebook_translator.cache import TranslationCache
@@ -35,7 +35,7 @@ try:
         QGroupBox, QTableWidget, QTableWidgetItem, QRegularExpression, QColor,
         QFileDialog, QIntValidator, QScrollArea, QRadioButton, QGridLayout,
         QCheckBox, QTextBrowser, QTextDocument, QButtonGroup, QColorDialog,
-        QPalette, QRegularExpressionValidator)
+        QSpinBox, QPalette, QRegularExpressionValidator)
 except ImportError:
     from PyQt5.Qt import (
         Qt, QLabel, QDialog, QWidget, QLineEdit, QTabWidget, QPlainTextEdit,
@@ -43,7 +43,7 @@ except ImportError:
         QGroupBox, QTableWidget, QTableWidgetItem, QRegularExpression, QColor,
         QFileDialog, QIntValidator, QScrollArea, QRadioButton, QGridLayout,
         QCheckBox, QTextBrowser, QTextDocument, QButtonGroup, QColorDialog,
-        QPalette, QRegularExpressionValidator)
+        QSpinBox, QPalette, QRegularExpressionValidator)
 
 load_translations()
 
@@ -315,6 +315,21 @@ class MainWindowFrame(QDialog):
         click.connect(lambda btn_id: self.config.update(
             translation_position=position_map.get(btn_id)))
 
+        # Merge Translate
+        merge_group = QGroupBox('%s %s' % (_('Merge Translate'), _('(Beta)')))
+        merge_layout = QHBoxLayout(merge_group)
+        self.merge_length = QSpinBox()
+        self.merge_length.setMinimumWidth(100)
+        self.merge_length.setRange(0, 5000)
+        merge_layout.addWidget(QLabel(_('Character count:')))
+        merge_layout.addWidget(self.merge_length)
+        merge_layout.addWidget(QLabel(_(
+            'The number of characters to translate at once (0 to disable)')))
+        merge_layout.addStretch(1)
+        layout.addWidget(merge_group)
+
+        self.merge_length.setValue(self.config.get('merge_length'))
+
         # Translation Color
         color_group = QGroupBox(_('Translation Color'))
         color_layout = QHBoxLayout(color_group)
@@ -395,6 +410,7 @@ class MainWindowFrame(QDialog):
         mode_layout.addStretch(1)
         tip = QLabel()
         self.filter_rules = QPlainTextEdit()
+        self.filter_rules.setMinimumHeight(150)
         self.filter_rules.insertPlainText(
             '\n'.join(self.config.get('filter_rules')))
         filter_layout.addWidget(mode_group)
@@ -537,7 +553,7 @@ class MainWindowFrame(QDialog):
             for engine in builtin_engines:
                 engine_list.addItem(_(engine.name), engine.name)
             custom_engines = self.config.get('custom_engines')
-            for name in sorted_mixed_number(custom_engines.keys()):
+            for name in sorted(custom_engines.keys(), key=sorted_mixed_keys):
                 engine_list.addItem(name, name)
             engine_list.setCurrentText(self.config.get('translate_engine'))
             choose_default_engine(engine_list.currentIndex())
@@ -627,29 +643,18 @@ class MainWindowFrame(QDialog):
 
         # Request
         request_group = QGroupBox(_('Request'))
-        self.attempt_limit = QLineEdit()
-        attempt_validator = QIntValidator()
-        attempt_validator.setBottom(0)
-        self.attempt_limit.setValidator(attempt_validator)
-        self.attempt_limit.setPlaceholderText('0')
-        self.attempt_limit.setText(str(self.config.get('request_attempt')))
-        self.interval_max = QLineEdit()
-        interval_validator = QIntValidator()
-        interval_validator.setBottom(1)
-        self.interval_max.setValidator(interval_validator)
-        self.interval_max.setPlaceholderText('1')
-        self.interval_max.setText(str(self.config.get('request_interval')))
+        self.attempt_limit = QSpinBox()
+        self.attempt_limit.setMinimum(0)
+        self.attempt_limit.setValue(self.config.get('request_attempt'))
+        self.interval_max = QSpinBox()
+        self.attempt_limit.setMinimum(1)
+        self.interval_max.setValue(self.config.get('request_interval'))
         request_layout = QVBoxLayout(request_group)
         request_layout.addWidget(QLabel(_('Attempt times (Default 3):')))
         request_layout.addWidget(self.attempt_limit)
         request_layout.addWidget(QLabel(_('Max interval (Default 5s):')))
         request_layout.addWidget(self.interval_max)
         misc_layout.addWidget(request_group, 1)
-
-        self.interval_max.textChanged.connect(
-            lambda num: self.interval_max.setText(
-                str(interval_validator.bottom()) if num.isdigit() and
-                int(num) < interval_validator.bottom() else num))
 
         # Log
         log_group = QGroupBox(_('Log'))
@@ -721,6 +726,9 @@ class MainWindowFrame(QDialog):
                 'warning')
         self.config.update(glossary_path=glossary_path)
 
+        # Merge limit
+        self.config.update(merge_length=self.merge_length.value())
+
         # Filter rules
         rule_content = self.filter_rules.toPlainText()
         filter_rules = filter(None, [r for r in rule_content.split('\n')])
@@ -789,15 +797,9 @@ class MainWindowFrame(QDialog):
         self.config.update(proxy_setting=proxy_setting)
 
         # Request
-        request_fields = (
-            ('request_attempt', self.attempt_limit),
-            ('request_interval', self.interval_max),
-        )
-        for name, entry in request_fields:
-            value = int(entry.text()) if entry.text() \
-                else entry.validator().bottom()
-            entry.setText(str(value))
-            self.config.update({name: value})
+        self.config.update(
+            request_attempt=self.attempt_limit.value(),
+            request_interval=self.interval_max.value())
 
         save_config(self.config)
         self.refresh_lang_codes()

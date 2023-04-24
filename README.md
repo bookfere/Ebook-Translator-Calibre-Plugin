@@ -60,6 +60,10 @@ __[ Translation Position ]__
 * __Add before original__: Add the translation text before original text
 * __Add without original__: Add the translation text and delete original text
 
+__[ Merge Translate ]__
+
+* __Character count__ [default 0]: Merge the paragraphs according to a specified character count before translation.
+
 __[ Translation Color ]__
 
 * __Color Value__: CSS color value, e.g., #666666, grey, rgb(80, 80, 80)
@@ -68,7 +72,7 @@ You can click the __[Select]__ button to select a color from color palette, or e
 
 __[ Translation Glossary ]__
 
-* __Enable__: Enable to use the selected translation glossary file
+* __Enable__ [default unchecked]: Enable to use the selected translation glossary file
 
 The role of a translation glossary is to specify specific translations for certain terms or to instruct the translation engine to ignore the translation of certain terms.
 
