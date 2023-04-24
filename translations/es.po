@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-04-23 21:25+0800\n"
+"POT-Creation-Date: 2023-04-25 02:52+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -200,6 +200,18 @@ msgstr "Agregar antes del original"
 
 msgid "Add without original"
 msgstr "Agregar sin original"
+
+msgid "(Beta)"
+msgstr "(Beta)"
+
+msgid "Merge Translate"
+msgstr "traducción de fusión"
+
+msgid "Character count:"
+msgstr "recuento de caracteres:"
+
+msgid "The number of characters to translate at once (0 to disable)"
+msgstr "El número de caracteres a traducir de una sola vez (0 para desactivar)"
 
 msgid "Translation Color"
 msgstr "Color de la traducción"

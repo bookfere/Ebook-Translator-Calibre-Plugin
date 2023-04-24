@@ -6,7 +6,8 @@ from calibre.constants import __version__
 from calibre.ebooks.conversion.plumber import Plumber
 from calibre_plugins.ebook_translator import EbookTranslator
 from calibre_plugins.ebook_translator.config import get_config, get_configs
-from calibre_plugins.ebook_translator.utils import ns, uid, trim
+from calibre_plugins.ebook_translator.utils import (
+    ns, uid, trim, sorted_mixed_keys)
 from calibre_plugins.ebook_translator.cache import TranslationCache
 from calibre_plugins.ebook_translator.translator import get_translator
 from calibre_plugins.ebook_translator.translation import get_translation
@@ -16,10 +17,10 @@ load_translations()
 
 
 def extract_elements(pages):
+    pages = sorted([page for page in pages if 'html' in page.media_type],
+                   key=lambda page: sorted_mixed_keys(page.href))
     elements = []
     for page in pages:
-        if 'html' not in page.media_type:
-            continue
         p_elements = list(
             filter(filter_content, page.data.findall('.//x:p', namespaces=ns)))
         if len(p_elements) > 0:

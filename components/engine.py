@@ -2,7 +2,7 @@ import time
 import uuid
 from types import GeneratorType
 
-from calibre_plugins.ebook_translator.utils import sorted_mixed_number
+from calibre_plugins.ebook_translator.utils import sorted_mixed_keys
 from calibre_plugins.ebook_translator.engines.custom import (
     get_engine_template, load_engine_data)
 from calibre_plugins.ebook_translator.components.lang import (
@@ -180,7 +180,7 @@ class ManageCustomEngine(QDialog):
 
         def refresh_list():
             custom_list.clear()
-            for name in sorted_mixed_number(custom_engines.keys()):
+            for name in sorted(custom_engines.keys(), key=sorted_mixed_keys):
                 custom_list.addItem(name)
         refresh_list()
         custom_list.setCurrentText(current_engine)

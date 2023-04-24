@@ -22,6 +22,7 @@ default_config = {
     'custom_engines': {},
     'glossary_enabled': False,
     'glossary_path': None,
+    'merge_length': 0,
 }
 
 

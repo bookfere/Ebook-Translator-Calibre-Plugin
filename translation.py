@@ -3,7 +3,7 @@ import time
 import random
 from types import GeneratorType
 
-from calibre import prepare_string_for_xml as escape
+# from calibre import prepare_string_for_xml as escape
 
 from calibre_plugins.ebook_translator.utils import sep, uid, trim
 from calibre_plugins.ebook_translator.config import get_config
@@ -18,8 +18,9 @@ class Translation:
         self.translator = translator
         self.glossary = glossary
 
-        self.position = None
-        self.color = None
+        self.merge_length = 0
+        self.translation_position = None
+        self.translation_color = None
         self.request_attempt = 3
         self.request_interval = 5
         self.cache = None
@@ -28,11 +29,14 @@ class Translation:
 
         self.need_sleep = False
 
-    def set_position(self, position):
-        self.position = position
+    def set_merge_length(self, length):
+        self.merge_length = length
 
-    def set_color(self, color):
-        self.color = color
+    def set_translation_position(self, position):
+        self.translation_position = position
+
+    def set_translation_color(self, color):
+        self.translation_color = color
 
     def set_request_attempt(self, limit):
         self.request_attempt = limit
@@ -57,7 +61,7 @@ class Translation:
         if self.log:
             self.log.info(*args, **kwargs)
 
-    def _translate(self, text, count=0, interval=5):
+    def _translate_text(self, text, count=0, interval=5):
         try:
             return self.translator.translate(text)
         except Exception as e:
@@ -71,16 +75,14 @@ class Translation:
             time.sleep(interval)
             self._log(_('Retrying ... (timeout is {} seconds).')
                       .format(int(self.translator.timeout)))
-            return self._translate(text, count, interval)
+            return self._translate_text(text, count, interval)
 
-    def _handle(self, element):
-        element_handler = ElementHandler(element)
-
-        original = element_handler.get_content()
+    def _get_translation(self, original):
         self._log(_('Original: {}').format(original))
 
         translation = None
         paragraph_uid = uid(original)
+
         if self.cache and self.cache.exists():
             translation = self.cache.get(paragraph_uid)
         if translation is not None:
@@ -89,40 +91,52 @@ class Translation:
         else:
             original = self.glossary.replace(original)
 
-            translation = self._translate(original)
+            translation = self._translate_text(original)
             # TODO: translation monitor display streaming text
             if isinstance(translation, GeneratorType):
                 translation = ''.join(text for text in translation)
-            translation = escape(trim(translation))
+            # translation = escape(trim(translation))
 
-            translation = self.glossary.restore(translation)
+            translation = self.glossary.restore(trim(translation))
 
-            if self.cache:
-                self.cache.add(paragraph_uid, translation)
+            self.cache and self.cache.add(paragraph_uid, translation)
             self._log(_('Translation: {}').format(translation))
             self.need_sleep = True
 
-        element_handler.add_translation(
-            translation, self.translator.get_target_code(),
-            self.position, self.color)
+        return translation
+
+        # element_handler.add_translation(
+        #     translation, self.translator.get_target_code(),
+        #     self.position, self.color)
 
     def handle(self, elements):
-        total = len(elements)
+        element_handler = ElementHandler(
+            elements, self.merge_length, self.translator.get_target_code(),
+            self.translation_position, self.translation_color)
+
+        original_group = element_handler.get_original()
+        count = 0
+        total = len(original_group)
+
         if total < 1:
             raise Exception(_('There is no content need to translate.'))
+
         self._log(sep, _('Start to translate ebook content:'), sep, sep='\n')
         self._log(_('Total items: {}').format(total))
         process, step = 0.0, 1.0 / total
-        count = 0
-        for element in elements:
+
+        for original in original_group:
             self._log('-' * 30)
+            count += 1
             self._progress(process, _('Translating: {}/{}')
                            .format(count, total))
-            self._handle(element)
+            element_handler.add_translation(
+                self._get_translation(original))
+            process += step
             if self.need_sleep and count < total:
                 time.sleep(random.randint(1, self.request_interval))
-            count += 1
-            process += step
+        element_handler.apply_translation()
+
         self._progress(1, _('Translation completed.'))
         self._log(sep, _('Start to convert ebook format:'), sep, sep='\n')
 
@@ -165,8 +179,9 @@ def get_translation(translator):
     if get_config('glossary_enabled'):
         glossary.load(get_config('glossary_path'))
     translation = Translation(translator, glossary)
-    translation.set_position(get_config('translation_position'))
-    translation.set_color(get_config('translation_color'))
+    translation.set_merge_length(get_config('merge_length'))
+    translation.set_translation_position(get_config('translation_position'))
+    translation.set_translation_color(get_config('translation_color'))
     translation.set_request_attempt(get_config('request_attempt'))
     translation.set_request_interval(get_config('request_interval'))
     return translation

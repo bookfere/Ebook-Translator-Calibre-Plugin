@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-04-23 21:25+0800\n"
+"POT-Creation-Date: 2023-04-25 02:52+0800\n"
 "PO-Revision-Date: 2023-04-17 23:49+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -200,6 +200,18 @@ msgstr "加在原文前"
 
 msgid "Add without original"
 msgstr "僅保留譯文"
+
+msgid "(Beta)"
+msgstr "（測試版）"
+
+msgid "Merge Translate"
+msgstr "合併翻譯"
+
+msgid "Character count:"
+msgstr "字元數量："
+
+msgid "The number of characters to translate at once (0 to disable)"
+msgstr "一次要翻译的字元數量（設為零 0 停用此功能）"
 
 msgid "Translation Color"
 msgstr "譯文色彩"
