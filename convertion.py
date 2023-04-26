@@ -24,8 +24,7 @@ def extract_elements(pages):
         p_elements = list(
             filter(filter_content, page.data.findall('.//x:p', namespaces=ns)))
         if len(p_elements) > 0:
-            tags = ('h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-                    'div[@class="paragraph"]')
+            tags = ('h1', 'h2', 'h3', 'h4', 'h5', 'h6')
             pattern = './/*[self::x:p%s]' % ''.join(
                 [' or self::x:%s' % tag for tag in tags])
             elements.extend(page.data.xpath(pattern, namespaces=ns))

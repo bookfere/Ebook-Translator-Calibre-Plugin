@@ -1,12 +1,14 @@
+__English__ · [简体中文](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.zh-CN.md) · [正體中文](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.zh-TW.md)
+
+---
+
 # Ebook Translator (A Calibre plugin)
 
 ![Ebook Translator Calibre Plugin](images/logo.png)
 
 A Calibre plugin to translate ebook into a specified language (optionally keeping the original content).
 
----
-
-Other language: [简体中文](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.zh-CN.md) · [正體中文](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.zh-TW.md)
+![Translation illustration](images/sample.png)
 
 ---
 
@@ -26,25 +28,25 @@ Other language: [简体中文](https://github.com/bookfere/Ebook-Translator-Cali
 
 Please make sure __[Calibre](https://calibre-ebook.com/)__ is installed on your OS, and install the plugin via either ways below:
 
-[Install from Calibre]
+__[ Install from Calibre ]__
 
 1. Click Calibre Menu __[Preference... -> Plug-ins -> Get new plugins]__.
 2. Select Ebook Translator from the plugin list, and click __[Install]__.
 3. Reboot Calibre.
 
-[Load from file]
+__[ Load from file ]__
 
 1. Download the plugin zip file from __[releases page](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/releases)__.
 2. Click Calibre Menu __[Preference... → Plug-ins → Load plug-in from file]__, and choose the zip file you downloaded.
 3. Reboot Calibre.
-
-If the "Translate Book" plugin is not showing up on Calibre menu, you need to add it from __[Preference... → Toolbars & menus]__, choose __[The main toolbar]__, find the plugin and click __[>]__, and __[Apply]__
 
 If you want to install the latest plugin from the GitHub repository, run the following commands:
 
 <pre><code>git clone https://github.com/bookfere/Ebook-Translator-Calibre-Plugin.git
 cd Ebook-Translator-Calibre-Plugin
 git archive --format zip --output ../Ebook-Translator-Calibre-Plugin.zip master</code></pre>
+
+If the "Translate Book" plugin is not showing up on Calibre menu, you need to add it from __[Preference... → Toolbars & menus]__, choose __[The main toolbar]__, find the plugin and click __[>]__, and __[Apply]__.
 
 ---
 
@@ -175,6 +177,10 @@ __[ ChatGPT Prompt ]__
 
 * __For auto detecting source language__: Customize ChatGPT prompt to translate from 'Auto detect' source language
 * __For specifying source language__: Customize ChatGPT prompt to translate from specified source language
+
+__[ Preferred Language ]__
+
+* __Target Language__ [default UI language]：Set the preferred language for the target language.
 
 __[ Network Proxy ]__
 

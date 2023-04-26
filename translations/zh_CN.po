@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-04-25 02:52+0800\n"
+"POT-Creation-Date: 2023-04-27 03:15+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -20,11 +20,16 @@ msgstr ""
 msgid "Ebook Translator"
 msgstr "电子书翻译器"
 
+msgid ""
+"A Calibre plugin to translate ebook into a specified language (optionally "
+"keeping the original content)."
+msgstr "一个可以将电子书翻译成指定语言（原文译文对照）的插件。"
+
 msgid "Translating..."
 msgstr "翻译中……"
 
-msgid "Translation Engine Tester"
-msgstr "翻译引擎测试器"
+msgid "Test Translation Engine"
+msgstr "测试翻译引擎"
 
 msgid "Translate"
 msgstr "翻译"
@@ -62,7 +67,7 @@ msgstr "有效的引擎数据格式。"
 msgid "The engine name is already in use."
 msgstr "引擎名称已使用。"
 
-msgid "The setting was saved."
+msgid "The setting has been saved."
 msgstr "设置已保存。"
 
 msgid "No custom engine to delete."
@@ -127,6 +132,15 @@ msgstr "响应没有正确解析。"
 
 msgid "{} total, {} used, {} left"
 msgstr "总计 {}，已用 {}，剩余 {}"
+
+msgid "DeepL(Pro)"
+msgstr "DeepL (Pro)"
+
+msgid "DeepL(Free)"
+msgstr "DeepL (Free)"
+
+msgid "Google(Free)"
+msgstr "Google (Free)"
 
 msgid "Youdao"
 msgstr "有道"
@@ -203,14 +217,14 @@ msgstr "仅保留译文"
 msgid "(Beta)"
 msgstr "(测试版）"
 
-msgid "Merge Translate"
+msgid "Merge to Translate"
 msgstr "合并翻译"
 
-msgid "Character count:"
-msgstr "字符数："
+msgid "Enable"
+msgstr "开启"
 
-msgid "The number of characters to translate at once (0 to disable)"
-msgstr "单次要翻译的字符数（设为 0 停用此功能）"
+msgid "The number of characters to translate at one time"
+msgstr "单次要翻译的字符数量"
 
 msgid "Translation Color"
 msgstr "译文颜色"
@@ -223,9 +237,6 @@ msgstr "选择"
 
 msgid "Translation Glossary"
 msgstr "翻译词汇表"
-
-msgid "Enable"
-msgstr "开启"
 
 msgid "Choose a glossary file"
 msgstr "选择一个词汇表文件"
@@ -245,14 +256,14 @@ msgstr "普通（区分大小写）"
 msgid "Regular Expression"
 msgstr "正则表达式"
 
-msgid "Exclude content by keyword. One keyword per line:"
-msgstr "排除带指定关键词的内容。一行一条关键词："
+msgid "Exclude paragraph by keyword. One keyword per line:"
+msgstr "排除带指定关键词的段落。一行一条关键词："
 
-msgid "Exclude content by case-sensitive keyword. One keyword per line:"
-msgstr "排除带指定关键词的内容（区分字母大小写）。一行一条关键词："
+msgid "Exclude paragraph by case-sensitive keyword. One keyword per line:"
+msgstr "排除带指定关键词的段落（区分字母大小写）。一行一条关键词："
 
-msgid "Exclude content by regular expression pattern. One pattern per line:"
-msgstr "排除匹配正则表达式规则的内容。一行一条规则："
+msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
+msgstr "排除匹配正则表达式规则的段落。一行一条规则："
 
 msgid "Output Path"
 msgstr "输出路径"
@@ -283,6 +294,9 @@ msgstr "自动探测来源语言时的提示词"
 
 msgid "For specifying source language:"
 msgstr "指定来源语言时的提示词"
+
+msgid "Preferred Language"
+msgstr "偏好语言"
 
 msgid "Network Proxy"
 msgstr "网络代理"
@@ -379,6 +393,9 @@ msgstr "翻译已完成"
 
 msgid "Start to convert ebook format:"
 msgstr "开始转换电子书格式："
+
+msgid "Can not open glossary file: {}"
+msgstr "无法打开词汇表文件：{}"
 
 msgid "Translate Book"
 msgstr "翻译书籍"

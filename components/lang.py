@@ -17,6 +17,7 @@ class SourceLang(QComboBox):
         QComboBox.__init__(self, parent)
         self.book_lang = book_lang
         self.refresh.connect(self.set_codes)
+        self.wheelEvent = lambda event: None
 
     @pyqtSlot(dict, bool)
     def set_codes(self, codes, auto_detect=True):
@@ -38,16 +39,15 @@ class SourceLang(QComboBox):
 
 
 class TargetLang(QComboBox):
-    refresh = pyqtSignal(dict)
+    refresh = pyqtSignal(dict, str)
 
     def __init__(self, parent=None):
         QComboBox.__init__(self, parent)
         self.refresh.connect(self.set_codes)
+        self.wheelEvent = lambda event: None
 
-    @pyqtSlot(dict)
-    def set_codes(self, codes):
-        default = self.itemText(0)
-        current = self.currentText()
+    @pyqtSlot(dict, str)
+    def set_codes(self, codes, preferred=None):
         self.clear()
         recommend, rest = [], []
         ui_lang = get_lang().lower()
@@ -57,13 +57,11 @@ class TargetLang(QComboBox):
                 recommend.append(lang)
             else:
                 rest.append(lang)
-            if code == ui_lang and current == default:
-                current = lang
         langs = sorted(recommend, key=ascii_text)
         langs += sorted(rest, key=ascii_text)
         for lang in langs:
             self.addItem(lang)
-        if current and current in codes:
-            self.setCurrentText(current)
+        if preferred and preferred in codes:
+            self.setCurrentText(preferred)
         else:
             self.setCurrentIndex(0)

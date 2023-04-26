@@ -1,7 +1,12 @@
 import copy
 
 from lxml import etree
-from calibre_plugins.ebook_translator.utils import ns, trim
+from calibre import prepare_string_for_xml as escape
+from calibre_plugins.ebook_translator.utils import ns, uid, trim
+
+
+def get_string(element):
+    return trim(etree.tostring(element, encoding='utf-8').decode('utf-8'))
 
 
 class Element:
@@ -18,24 +23,22 @@ class Element:
         self.reserves = self.element_copy.xpath(
             './/*[self::x:img]', namespaces=ns)
         for reserve in self.reserves:
-            # TODO: handle nested img element
-            if reserve.getparent() != self.element_copy:
-                self.reserves.remove(reserve)
-                continue
-            placeholder = 'id_%s' % id(reserve)
-            self.element_copy.text = ((self.element_copy.text or '')
-                                      + placeholder + (reserve.tail or ''))
-            reserve.tail = None
+            placeholder = 'el_%s' % id(reserve)
+            previous = reserve.getprevious()
+            previous.tail = (previous.tail or '') + placeholder
+            previous.tail += (reserve.tail or '')
             reserve.getparent().remove(reserve)
+            reserve.tail = None
 
         return trim(''.join(self.element_copy.itertext())).replace('\n', ' ')
 
     def add_translation(
             self, translation, lang=None, position=None, color=None):
-        if self.reserves:
-            for reserve in self.reserves:
-                translation = translation.replace(
-                    'id_%s' % id(reserve), self._get_string(reserve))
+        translation = escape(translation)
+
+        for reserve in self.reserves:
+            translation = translation.replace(
+                'el_%s' % id(reserve), get_string(reserve))
 
         translation = '<{0} xmlns="{1}">{2}</{0}>'.format(
             etree.QName(self.element).localname, ns['x'], translation)
@@ -55,16 +58,13 @@ class Element:
         if position == 'only':
             self.element.getparent().remove(self.element)
 
-    @staticmethod
-    def _get_string(element):
-        return trim(etree.tostring(element, encoding='utf-8').decode('utf-8'))
-
 
 class ElementHandler:
-    def __init__(self, items, merge_length=0, lang=None, position=None,
-                 color=None):
+    def __init__(self, items, lang=None, position=None, color=None,
+                 merge_length=0, merge_divider=None):
         self.elements = [Element(item) for item in items]
         self.merge_length = merge_length
+        self.merge_divider = merge_divider  # e.g. <{}>/{{{}}}
         self.lang = lang
         self.position = position
         self.color = color
@@ -75,22 +75,23 @@ class ElementHandler:
     def get_original(self):
         if self.merge_length == 0:
             for element in self.elements:
-                self.original.append(element.get_content())
+                content = element.get_content()
+                self.original.append((uid(content), content))
             return self.original
 
         content = ''
-        for element in self.elements:
-            uid = ' <id_%s> ' % id(element)
-            text = element.get_content() + uid
-            print(text)
+        for sid, element in enumerate(self.elements):
+            placeholder = ' %s ' % self.merge_divider.format('id_%s' % sid)
+            text = element.get_content() + placeholder
             if len((content + text).encode()) < self.merge_length:
                 content += text
                 continue
             elif content:
-                self.original.append(content)
+                self.original.append((uid(content), content))
             content = text
         if content:
-            self.original.append(content)
+            self.original.append((uid(content), content))
+
         return self.original
 
     def add_translation(self, text):
@@ -105,11 +106,11 @@ class ElementHandler:
             return
 
         content = ''.join(self.translation)
-        for element in self.elements:
-            uid = 'id_%s' % id(element)
-            end = content.find(uid)
+        for sid, element in enumerate(self.elements):
+            placeholder = 'id_%s' % sid
+            end = content.find(placeholder)
             part = content[:end]
-            content = content.replace(part + uid, '')
-
+            content = content.replace(part + placeholder, '', 1)
+            chars = ' \n\t%s' % self.merge_divider
             element.add_translation(
-                part.strip(' \n\t<>'), self.lang, self.position, self.color)
+                part.strip(chars), self.lang, self.position, self.color)

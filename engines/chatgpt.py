@@ -19,6 +19,10 @@ class ChatgptTranslate(Base):
     def __init__(self):
         Base.__init__(self)
         self.prompts = self.default_prompts.copy()
+        self.keep_mark = False
+
+    def set_keep_mark(self):
+        self.keep_mark = True
 
     def set_prompt(self, auto=None, lang=None):
         if auto is not None:
@@ -38,6 +42,10 @@ class ChatgptTranslate(Base):
         else:
             content = self.prompts.get('lang').format(
                 slang=self.source_lang, tlang=self.target_lang, text=text)
+
+        # TODO: need to optimize
+        if self.keep_mark:
+            content = 'Retain placeholder similar to {{id_0}} and %s' % content
 
         data = json.dumps({
             'stream': True,

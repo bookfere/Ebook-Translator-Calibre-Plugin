@@ -1,14 +1,14 @@
 import json
 
-from calibre_plugins.ebook_translator.engines.base import Base
 from calibre_plugins.ebook_translator.utils import _z
+from calibre_plugins.ebook_translator.engines.base import Base
 
 
 load_translations()
 
 
 class GoogleTranslate(Base):
-    name = 'Google(Free)'
+    name = _z('Google(Free)')
     support_lang = 'google.json'
     endpoint = 'https://translate.googleapis.com/translate_a/single'
     need_api_key = False

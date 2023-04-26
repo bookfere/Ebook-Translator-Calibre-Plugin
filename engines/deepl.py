@@ -2,6 +2,7 @@ import json
 import time
 import random
 
+from calibre_plugins.ebook_translator.utils import _z
 from calibre_plugins.ebook_translator.engines.base import Base
 
 
@@ -15,6 +16,7 @@ class DeeplTranslate(Base):
         'translate': 'https://api-free.deepl.com/v2/translate',
         'usage': 'https://api-free.deepl.com/v2/usage',
     }
+    merge_divider = '<m id={} />'
 
     def get_usage(self):
         # See: https://www.deepl.com/docs-api/general/get-usage/
@@ -48,7 +50,7 @@ class DeeplTranslate(Base):
 
 
 class DeeplProTranslate(DeeplTranslate):
-    name = 'DeepL(Pro)'
+    name = _z('DeepL(Pro)')
     endpoint = {
         'translate': 'https://api.deepl.com/v2/translate',
         'usage': 'https://api.deepl.com/v2/usage',
@@ -56,10 +58,11 @@ class DeeplProTranslate(DeeplTranslate):
 
 
 class DeeplFreeTranslate(Base):
-    name = 'DeepL(Free)'
+    name = _z('DeepL(Free)')
     support_lang = 'deepl.json'
     endpoint = 'https://www2.deepl.com/jsonrpc?client=chrome-extension,1.4.0'
     need_api_key = False
+    merge_divider = '<m id={} />'
 
     headers = {
         'Accept': '*/*',

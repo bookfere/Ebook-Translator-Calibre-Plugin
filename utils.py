@@ -20,6 +20,7 @@ def uid(*args):
 def trim(text):
     # Remove \xa0 to be compitable with Python2.x
     text = re.sub(u'\u00a0|\u3000', ' ', text)
+    text = re.sub(u'\u200b', '', text)
     return re.sub(r'^\s+|\s+$', '', text)
 
 

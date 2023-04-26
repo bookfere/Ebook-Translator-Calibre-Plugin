@@ -1,4 +1,5 @@
 import unittest
+
 from calibre_plugins.ebook_translator.utils import uid, trim
 
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-04-25 02:52+0800\n"
+"POT-Creation-Date: 2023-04-27 03:15+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -21,11 +21,18 @@ msgstr ""
 msgid "Ebook Translator"
 msgstr "Traductor de libros electrónicos"
 
+msgid ""
+"A Calibre plugin to translate ebook into a specified language (optionally "
+"keeping the original content)."
+msgstr ""
+"Un complemento de Calibre para traducir libros electrónicos a un idioma "
+"específico (opcionalmente manteniendo el contenido original)."
+
 msgid "Translating..."
 msgstr "Traduciendo..."
 
-msgid "Translation Engine Tester"
-msgstr "Probador de Motor de Traducción"
+msgid "Test Translation Engine"
+msgstr "Motor de traducción de prueba"
 
 msgid "Translate"
 msgstr "Traducir"
@@ -63,8 +70,8 @@ msgstr "Formato de datos del motor válido."
 msgid "The engine name is already in use."
 msgstr "El nombre del motor ya está en uso."
 
-msgid "The setting was saved."
-msgstr "Se guardó la configuración."
+msgid "The setting has been saved."
+msgstr "La configuración ha sido guardada."
 
 msgid "No custom engine to delete."
 msgstr "No hay motor personalizado para eliminar."
@@ -128,6 +135,15 @@ msgstr "La respuesta fue analizada incorrectamente."
 
 msgid "{} total, {} used, {} left"
 msgstr "{} en total, {} utilizado(s), {} restante(s)"
+
+msgid "DeepL(Pro)"
+msgstr "DeepL (Pro)"
+
+msgid "DeepL(Free)"
+msgstr "DeepL (Free)"
+
+msgid "Google(Free)"
+msgstr "Google (Free)"
 
 msgid "Youdao"
 msgstr "Youdao"
@@ -204,14 +220,14 @@ msgstr "Agregar sin original"
 msgid "(Beta)"
 msgstr "(Beta)"
 
-msgid "Merge Translate"
-msgstr "traducción de fusión"
+msgid "Merge to Translate"
+msgstr "Fusione para traducir"
 
-msgid "Character count:"
-msgstr "recuento de caracteres:"
+msgid "Enable"
+msgstr "Permitir"
 
-msgid "The number of characters to translate at once (0 to disable)"
-msgstr "El número de caracteres a traducir de una sola vez (0 para desactivar)"
+msgid "The number of characters to translate at one time"
+msgstr "El número de caracteres a traducir de una sola vez"
 
 msgid "Translation Color"
 msgstr "Color de la traducción"
@@ -224,9 +240,6 @@ msgstr "Elegir"
 
 msgid "Translation Glossary"
 msgstr "Glosario de traducción"
-
-msgid "Enable"
-msgstr "Permitir"
 
 msgid "Choose a glossary file"
 msgstr "Elija un archivo de glosario"
@@ -246,17 +259,16 @@ msgstr "Normal (sensible a mayúsculas y minúsculas)"
 msgid "Regular Expression"
 msgstr "Expresión regular"
 
-msgid "Exclude content by keyword. One keyword per line:"
-msgstr "Excluir contenido por palabra clave. Una palabra clave por línea:"
+msgid "Exclude paragraph by keyword. One keyword per line:"
+msgstr "Excluir párrafo por palabra clave. Una palabra clave por línea.:"
 
-msgid "Exclude content by case-sensitive keyword. One keyword per line:"
+msgid "Exclude paragraph by case-sensitive keyword. One keyword per line:"
 msgstr ""
-"Excluir contenido por palabra clave sensible a mayúsculas y minúsculas. Una "
+"Excluir párrafo por palabra clave sensible a mayúsculas y minúsculas. Una "
 "palabra clave por línea:"
 
-msgid "Exclude content by regular expression pattern. One pattern per line:"
-msgstr ""
-"Excluir contenido por patrón de expresión regular. Un patrón por línea:"
+msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
+msgstr "Excluir párrafo por patrón de expresión regular. Un patrón por línea:"
 
 msgid "Output Path"
 msgstr "Ruta de salida"
@@ -287,6 +299,9 @@ msgstr "Para detectar automáticamente el idioma de origen:"
 
 msgid "For specifying source language:"
 msgstr "Para especificar el idioma de origen:"
+
+msgid "Preferred Language"
+msgstr "Idioma preferido"
 
 msgid "Network Proxy"
 msgstr "Proxy de red"
@@ -383,6 +398,9 @@ msgstr "Traducción completada."
 
 msgid "Start to convert ebook format:"
 msgstr "Comienza a convertir el formato de libro electrónico:"
+
+msgid "Can not open glossary file: {}"
+msgstr "No se puede abrir el archivo de glosario: {}"
 
 msgid "Translate Book"
 msgstr "Traducir libro"

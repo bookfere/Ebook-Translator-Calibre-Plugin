@@ -17,7 +17,10 @@ class EbookTranslator(InterfaceActionBase):
     author = 'bookfere.com'
     version = (1, 2, 2)
     __version__ = 'v' + '.'.join(map(str, version))
-    minimum_calibre_version = (1, 0, 0)
+    description = _('A Calibre plugin to translate ebook into a specified '
+                    'language (optionally keeping the original content).')
+    # see: https://www.mobileread.com/forums/showthread.php?t=242223
+    minimum_calibre_version = (2, 0, 0)
 
     actual_plugin = 'calibre_plugins.ebook_translator.ui:EbookTranslatorGui'
 

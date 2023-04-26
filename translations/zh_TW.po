@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-04-25 02:52+0800\n"
+"POT-Creation-Date: 2023-04-27 03:15+0800\n"
 "PO-Revision-Date: 2023-04-25 15:36+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -21,11 +21,16 @@ msgstr ""
 msgid "Ebook Translator"
 msgstr "電子書翻譯工具"
 
+msgid ""
+"A Calibre plugin to translate ebook into a specified language (optionally "
+"keeping the original content)."
+msgstr "一個可以將電子書翻譯成指定語言 (原文譯文對照) 的外掛程式。"
+
 msgid "Translating..."
 msgstr "翻譯中..."
 
-msgid "Translation Engine Tester"
-msgstr "翻譯引擎測試工具"
+msgid "Test Translation Engine"
+msgstr "測試翻譯引擎"
 
 msgid "Translate"
 msgstr "翻譯"
@@ -63,7 +68,7 @@ msgstr "引擎資料格式有效。"
 msgid "The engine name is already in use."
 msgstr "引擎名稱已經被使用。"
 
-msgid "The setting was saved."
+msgid "The setting has been saved."
 msgstr "設定已儲存。"
 
 msgid "No custom engine to delete."
@@ -129,6 +134,15 @@ msgstr "回應剖析不正確。"
 msgid "{} total, {} used, {} left"
 msgstr "總計 {}，已用 {}，剩餘 {}"
 
+msgid "DeepL(Pro)"
+msgstr "DeepL (Pro)"
+
+msgid "DeepL(Free)"
+msgstr "DeepL (Free)"
+
+msgid "Google(Free)"
+msgstr "Google (Free)"
+
 msgid "Youdao"
 msgstr "有道"
 
@@ -169,7 +183,7 @@ msgid "The specified path does not exist."
 msgstr "指定路徑不存在。"
 
 msgid "The specified glossary file does not exist."
-msgstr "指定的詞彙檔案不存在。"
+msgstr "指定的詞彙表檔案不存在。"
 
 msgid "[{} > {}] Translating \"{}\""
 msgstr "[{} > {}] 翻譯「{}」"
@@ -204,14 +218,14 @@ msgstr "僅保留譯文"
 msgid "(Beta)"
 msgstr "(測試版)"
 
-msgid "Merge Translate"
+msgid "Merge to Translate"
 msgstr "合併翻譯"
 
-msgid "Character count:"
-msgstr "字元計數："
+msgid "Enable"
+msgstr "啟用"
 
-msgid "The number of characters to translate at once (0 to disable)"
-msgstr "一次性翻譯的字元數目 (設為 0 以停用)"
+msgid "The number of characters to translate at one time"
+msgstr "一次性翻譯的字元數目"
 
 msgid "Translation Color"
 msgstr "譯文色彩"
@@ -225,11 +239,8 @@ msgstr "選擇"
 msgid "Translation Glossary"
 msgstr "翻譯詞彙表"
 
-msgid "Enable"
-msgstr "啟用"
-
 msgid "Choose a glossary file"
-msgstr "請選擇一個詞彙檔案。"
+msgstr "請選擇一個詞彙表檔案。"
 
 msgid "Do not Translate"
 msgstr "不要翻譯"
@@ -246,14 +257,14 @@ msgstr "一般 (區分大小寫)"
 msgid "Regular Expression"
 msgstr "規則運算式"
 
-msgid "Exclude content by keyword. One keyword per line:"
-msgstr "依關鍵字排除內容。每行一條關鍵字："
+msgid "Exclude paragraph by keyword. One keyword per line:"
+msgstr "依關鍵字排除段落。每行一條關鍵字："
 
-msgid "Exclude content by case-sensitive keyword. One keyword per line:"
-msgstr "依關鍵字排除內容 (區分大小寫)。每行一條關鍵字："
+msgid "Exclude paragraph by case-sensitive keyword. One keyword per line:"
+msgstr "依關鍵字排除段落 (區分大小寫)。每行一條關鍵字："
 
-msgid "Exclude content by regular expression pattern. One pattern per line:"
-msgstr "依規則運算式模式排除內容。每行一條模式："
+msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
+msgstr "依規則運算式模式排除段落。每行一條模式："
 
 msgid "Output Path"
 msgstr "輸出路徑"
@@ -284,6 +295,9 @@ msgstr "自動偵測來源語言："
 
 msgid "For specifying source language:"
 msgstr "指定來源語言："
+
+msgid "Preferred Language"
+msgstr "偏好語言"
 
 msgid "Network Proxy"
 msgstr "網路代理"
@@ -380,6 +394,9 @@ msgstr "翻譯已完成"
 
 msgid "Start to convert ebook format:"
 msgstr "開始轉換電子書格式："
+
+msgid "Can not open glossary file: {}"
+msgstr "無法打開詞彙表檔案：{}"
 
 msgid "Translate Book"
 msgstr "翻譯書籍"

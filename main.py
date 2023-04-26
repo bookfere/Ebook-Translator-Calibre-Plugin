@@ -65,6 +65,7 @@ class MainWindowFrame(QDialog):
 
         self.current_engine = get_engine_class(
             self.config.get('translate_engine'))
+        self.preferred_language = self.config.get('preferred_language')
         self.source_langs = []
         self.target_langs = []
 
@@ -78,7 +79,7 @@ class MainWindowFrame(QDialog):
         self.tabs = QTabWidget()
         self.tabs.addTab(self.layout_translate(), _('Translate'))
         self.tabs.addTab(self.layout_content(), _('Content'))
-        self.tabs.addTab(self.layout_config(), _('Setting'))
+        self.tabs.addTab(self.layout_setting(), _('Setting'))
         self.tabs.addTab(self.layout_about(), _('About'))
         self.tabs.setStyleSheet('QTabBar::tab {min-width:120px;}')
         layout.addWidget(self.tabs)
@@ -155,15 +156,15 @@ class MainWindowFrame(QDialog):
                 lambda fmt, row=index: self.alter_ebooks_data(row, 4, fmt))
 
             source_lang = SourceLang(book_lang=slang)
-            self.source_langs.append(source_lang)
             table.setCellWidget(index, 3, source_lang)
+            self.source_langs.append(source_lang)
             self.alter_ebooks_data(index, 5, source_lang.currentText())
             source_lang.currentTextChanged.connect(
                 lambda lang, row=index: self.alter_ebooks_data(row, 5, lang))
 
             target_lang = TargetLang()
-            self.target_langs.append(target_lang)
             table.setCellWidget(index, 4, target_lang)
+            self.target_langs.append(target_lang)
             self.alter_ebooks_data(index, 6, target_lang.currentText())
             target_lang.currentTextChanged.connect(
                 lambda lang, row=index: self.alter_ebooks_data(row, 6, lang))
@@ -275,8 +276,14 @@ class MainWindowFrame(QDialog):
             scroll_area.setWidget(func(self))
             layout.addWidget(scroll_area, 1)
 
+            def save_updated_config():
+                if self.tabs.currentIndex() == 1:
+                    self.update_content_config()
+                else:
+                    self.update_setting_config()
+
             save_button = QPushButton(_('Save'))
-            save_button.clicked.connect(self.save_config)
+            save_button.clicked.connect(save_updated_config)
             layout.addWidget(save_button)
 
             return widget
@@ -316,19 +323,24 @@ class MainWindowFrame(QDialog):
             translation_position=position_map.get(btn_id)))
 
         # Merge Translate
-        merge_group = QGroupBox('%s %s' % (_('Merge Translate'), _('(Beta)')))
+        merge_group = QGroupBox(
+            '%s %s' % (_('Merge to Translate'), _('(Beta)')))
         merge_layout = QHBoxLayout(merge_group)
+        merge_enabled = QCheckBox(_('Enable'))
         self.merge_length = QSpinBox()
-        self.merge_length.setMinimumWidth(100)
+        # self.merge_length.setMinimumWidth(100)
         self.merge_length.setRange(0, 5000)
-        merge_layout.addWidget(QLabel(_('Character count:')))
+        merge_layout.addWidget(merge_enabled)
         merge_layout.addWidget(self.merge_length)
         merge_layout.addWidget(QLabel(_(
-            'The number of characters to translate at once (0 to disable)')))
+            'The number of characters to translate at one time')))
         merge_layout.addStretch(1)
         layout.addWidget(merge_group)
 
         self.merge_length.setValue(self.config.get('merge_length'))
+        merge_enabled.setChecked(self.config.get('merge_enabled'))
+        merge_enabled.clicked.connect(
+            lambda checked: self.config.update(merge_enabled=checked))
 
         # Translation Color
         color_group = QGroupBox(_('Translation Color'))
@@ -427,10 +439,10 @@ class MainWindowFrame(QDialog):
         mode_btn_group.addButton(regex_mode, 2)
 
         tips = (
-            _('Exclude content by keyword. One keyword per line:'),
-            _('Exclude content by case-sensitive keyword.'
+            _('Exclude paragraph by keyword. One keyword per line:'),
+            _('Exclude paragraph by case-sensitive keyword.'
               ' One keyword per line:'),
-            _('Exclude content by regular expression pattern.'
+            _('Exclude paragraph by regular expression pattern.'
               ' One pattern per line:'),
         )
 
@@ -451,7 +463,7 @@ class MainWindowFrame(QDialog):
         return widget
 
     @layout_scroll_area
-    def layout_config(self):
+    def layout_setting(self):
         widget = QWidget()
         layout = QVBoxLayout(widget)
 
@@ -503,6 +515,7 @@ class MainWindowFrame(QDialog):
         engine_layout.addWidget(self.api_key, 1, 0, 1, 3)
         engine_layout.setColumnStretch(0, 1)
         layout.addWidget(engine_group)
+
         # ChatGPT Prompt
         prompt_group = QGroupBox(_('ChatGPT Prompt'))
         prompt_layout = QVBoxLayout(prompt_group)
@@ -515,6 +528,17 @@ class MainWindowFrame(QDialog):
             QLabel(_('For specifying source language:')))
         prompt_layout.addWidget(self.prompt_lang)
         layout.addWidget(prompt_group)
+
+        # preferred Language
+        preferred_group = QGroupBox(_('Preferred Language'))
+        preferred_layout = QGridLayout(preferred_group)
+        self.preferred_target = TargetLang()
+        self.preferred_target.set_codes(
+            self.current_engine.lang_codes.get('target'))
+        preferred_layout.addWidget(QLabel(_('Target Language')), 0, 0)
+        preferred_layout.addWidget(self.preferred_target, 0, 1)
+        preferred_layout.setColumnStretch(1, 1)
+        layout.addWidget(preferred_group)
 
         def choose_default_engine(index):
             engine_name = engine_list.itemData(index)
@@ -544,6 +568,10 @@ class MainWindowFrame(QDialog):
                     default_prompt = chatgpt.default_prompts.get(name)
                     entry.setPlaceholderText(default_prompt)
                     entry.setText(prompts.get(name) or default_prompt)
+            # refresh preferred language
+            self.preferred_target.refresh.emit(
+                self.current_engine.lang_codes.get('target'),
+                self.preferred_language.get(engine_name))
         engine_list.wheelEvent = lambda event: None
         engine_list.currentIndexChanged.connect(choose_default_engine)
 
@@ -644,10 +672,10 @@ class MainWindowFrame(QDialog):
         # Request
         request_group = QGroupBox(_('Request'))
         self.attempt_limit = QSpinBox()
-        self.attempt_limit.setMinimum(0)
+        self.attempt_limit.setRange(0, 9999)
         self.attempt_limit.setValue(self.config.get('request_attempt'))
         self.interval_max = QSpinBox()
-        self.attempt_limit.setMinimum(1)
+        self.interval_max.setRange(1, 9999)
         self.interval_max.setValue(self.config.get('request_interval'))
         request_layout = QVBoxLayout(request_group)
         request_layout.addWidget(QLabel(_('Attempt times (Default 3):')))
@@ -706,12 +734,14 @@ class MainWindowFrame(QDialog):
     def refresh_lang_codes(self):
         lang_codes = self.current_engine.lang_codes
         for source_lang in self.source_langs:
-            source_lang.refresh.emit(lang_codes.get('source'),
-                                     not self.current_engine.is_custom())
+            source_lang.refresh.emit(
+                lang_codes.get('source'), not self.current_engine.is_custom())
         for target_lang in self.target_langs:
-            target_lang.refresh.emit(lang_codes.get('target'))
+            target_lang.refresh.emit(
+                lang_codes.get('target'),
+                self.preferred_language.get(self.current_engine.name))
 
-    def save_config(self):
+    def update_content_config(self):
         # Translation color
         translation_color = self.translation_color.text()
         if translation_color and not QColor(translation_color).isValid():
@@ -719,14 +749,15 @@ class MainWindowFrame(QDialog):
         self.config.update(translation_color=translation_color or None)
 
         # Glossary file
-        glossary_path = self.glossary_path.text()
-        if not os.path.exists(glossary_path):
-            return self.pop_alert(
-                _('The specified glossary file does not exist.'),
-                'warning')
-        self.config.update(glossary_path=glossary_path)
+        if self.config.get('glossary_enabled'):
+            glossary_path = self.glossary_path.text()
+            if not os.path.exists(glossary_path):
+                return self.pop_alert(
+                    _('The specified glossary file does not exist.'),
+                    'warning')
+            self.config.update(glossary_path=glossary_path)
 
-        # Merge limit
+        # Merge length
         self.config.update(merge_length=self.merge_length.value())
 
         # Filter rules
@@ -740,6 +771,11 @@ class MainWindowFrame(QDialog):
                         .format(rule), 'warning')
         self.config.update(filter_rules=list(filter_rules))
 
+        save_config(self.config)
+        self.refresh_lang_codes()
+        self.pop_alert(_('The setting has been saved.'))
+
+    def update_setting_config(self):
         # Output path
         output_path = self.output_path_entry.text()
         if not (self.config.get('to_library') or os.path.exists(output_path)):
@@ -776,6 +812,10 @@ class MainWindowFrame(QDialog):
             if lang_text != self.current_engine.default_prompts.get('lang'):
                 prompt_config.update(lang=lang_text)
 
+        # Preferred Language
+        self.preferred_language.update(
+            {self.current_engine.name: self.preferred_target.currentText()})
+
         # Custom engine
         if self.current_engine.is_custom() and len(
                 self.config.get('custom_engines')) < 1:
@@ -802,8 +842,7 @@ class MainWindowFrame(QDialog):
             request_interval=self.interval_max.value())
 
         save_config(self.config)
-        self.refresh_lang_codes()
-        self.pop_alert(_('The setting was saved.'))
+        self.pop_alert(_('The setting has been saved.'))
 
     def is_valid_regex(self, rule):
         try:
@@ -843,7 +882,7 @@ class MainWindowFrame(QDialog):
             'h1,h2{font-size:large;}p,body > ul{margin:20px 0;}'
             'ul ul {list-style:circle;}ul ul ul{list-style:square;}'
             'ul,ol{-qt-list-indent:0;margin-left:10px;}li{margin:6px 0;}'
-            'ol{margin-left:15px;}pre{background-color:#eee;}')
+            'ol{margin-left:15px;}pre{background-color:#eee;font-size:10px}')
         html = re.sub(r'<img.*?>', '', markdown(self.get_readme()))
         document.setHtml(html)
         description.setDocument(document)

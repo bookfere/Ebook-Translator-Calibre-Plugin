@@ -1,12 +1,14 @@
+[English](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.md) · __简体中文__ · [正體中文](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.zh-TW.md)
+
+---
+
 # 电子书翻译器（Calibre 插件）
 
 ![Ebook Translator Calibre Plugin](images/logo.png)
 
 一个可以将电子书翻译成指定语言（原文译文对照）的插件。
 
----
-
-其他语言：[English](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.md) · [正體中文](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.zh-TW.md)
+![Translation illustration](images/sample.png)
 
 ---
 
@@ -26,17 +28,25 @@
 
 首先确保你的操作系统已经安装了 [Calibre](https://calibre-ebook.com/)。
 
+【 __通过 Calibre 安装__ 】
+
+1. 打开 Calibre 并依次点击其菜单【 __首选项...__ → __插件__ → __获取新的插件__ 】；
+2. 在插件列表中选中 __Ebook Translator__ 然后点击 【 __安装__ 】 按钮；
+3. 重启 Calibre 使插件生效。
+
+【 __通过插件文件安装__ 】
+
 1. 首先在[插件发布页面](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/releases))下载插件文件；
 2. 然后打开 Calibre 并依次点击其菜单【首选项 → 插件 → 从文件加载插件】，弹出的对话框中选择下载的后缀名为 .zip 的插件文件完成安装（请留意，首次安装此插件时，要选择把图标显示在主工具栏上）；
 3. 最后关闭并重新打开 Calibre 即可正常使用。
-
-如果安装插件后，插件图标未出现在 Calibre 的主工具栏上，可以依次点击 Calibre 的菜单【首选项 → 工具与菜单】，在弹出的对话框中点击下拉菜单并选择“主工具栏”，然后在左栏找到并选中插件图标，点击中间的右箭头按钮【>】将其添加到右栏，最后点击【应用】按钮即可。
 
 如果你想安装 GitHub 仓库中最新的插件，可以运行以下命令：
 
 <pre><code>git clone https://github.com/bookfere/Ebook-Translator-Calibre-Plugin.git
 cd Ebook-Translator-Calibre-Plugin
 git archive --format zip --output ../Ebook-Translator-Calibre-Plugin.zip master</code></pre>
+
+如果安装插件后，插件图标未出现在 Calibre 的主工具栏上，可以依次点击 Calibre 的菜单【首选项 → 工具与菜单】，在弹出的对话框中点击下拉菜单并选择“主工具栏”，然后在左栏找到并选中插件图标，点击中间的右箭头按钮【>】将其添加到右栏，最后点击【应用】按钮即可。
 
 ---
 
@@ -115,7 +125,7 @@ __【 翻译引擎 】__
 
 如果选择使用需要付费的翻译引擎，建议前往相应的官方文档查看计费规则。比如，ChatGPT，可以使用其官方提供的工具 [Tokenizer](https://platform.openai.com/tokenizer) 估算要翻译字数大约会消耗多少 token 以便预估费用。
 
-你可以点击【测试】按钮对当前所选翻译引擎进行测试。如果翻译引擎的 API 提供了余量信息，会在测试界面下方显示。
+你可以点击【测试】按钮对当前所选翻译引擎进行测试。如果翻译引擎的 API 提供了余量信息，会在测试翻译引擎界面下方显示。
 
 点击【自定义】按钮可进入“自定义翻译引擎”界面，在这里可以添加、删除或修改翻译引擎。
 
@@ -165,6 +175,10 @@ __【 ChatGPT提示词 】__
 
 * __自动探测来源语言时的提示词__：自定义当来源语言为“自动探测”时的翻译提示词
 * __指定来源语言时的提示词__：自定义当来源语言为指定语言时的翻译提示词
+
+__【 偏好语言 】__
+
+* __目标语言__ [默认界面语言]：为目标语言设置首选语言
 
 __【 网络代理 】__
 
