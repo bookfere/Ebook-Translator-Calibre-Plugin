@@ -14,7 +14,7 @@ Other language: [简体中文](https://github.com/bookfere/Ebook-Translator-Cali
 
 * Support languages supported by the selected translation engine (e.g. Google Translate supports 134 languages)
 * Support multiple translation engines, including Google Translate, ChatGPT, and DeepL
-* Support for custom translation engines (with the ability to parse JSON and XML formatted responses)
+* Support for custom translation engines (you can configure to parse response in JSON or XML format)
 * Support all ebook formats supported by Calibre (48 input formats, 20 output formats)
 * Support to translate more than one ebooks. The translation process of each book is carried out simultaneously without affecting one another
 * Support caching translated content, with no need to re-translate after request failure or network interruption
@@ -68,7 +68,7 @@ __[ Translation Color ]__
 
 * __Color Value__: CSS color value, e.g., #666666, grey, rgb(80, 80, 80)
 
-You can click the __[Select]__ button to select a color from color palette, or enter the color value manually. Please refer to "__[color value](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value)__" on MDN documentation for details. If left blank no customized color will be used.
+You can click the __[Select]__ button to select a color from color palette, or enter the color value manually. Please refer to "__[color value](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value)__" on MDN documentation for details. If left blank no customized color will be applied.
 
 __[ Translation Glossary ]__
 
@@ -85,9 +85,9 @@ La Estatua de la Libertad</pre>
 
 __[ Do not Translate ]__
 
-* __Normal__ [default]: Exclude content by keyword (one keyword per line)
-* __Normal(case-sensitive)__: Exclude content by case-sensitive keyword (one keyword per line)
-* __Regular Expression__: Exclude content by Regular Expression rule (one rule per line)
+* __Normal__ [default]: Exclude paragraph by keyword (one keyword per line)
+* __Normal(case-sensitive)__: Exclude paragraph by case-sensitive keyword (one keyword per line)
+* __Regular Expression__: Exclude paragraph by Regular Expression rule (one rule per line)
 
 For regular expression syntax, please refer to "__[Regular Expression Syntax](https://docs.python.org/3/library/re.html#regular-expression-syntax)__" on Python documentation.
 
@@ -115,7 +115,7 @@ According to the response information sample provided by DeepL official website,
 
 If you opt for a paid translation engine, we recommend you to refer to its official documentation for pricing rules. For example, ChatGPT uses its official tool, __[Tokenizer](https://platform.openai.com/tokenizer)__, to estimate the number of tokens required to translate a given amount of text in order to provide a cost estimate.
 
-You can click the __[Test]__ button to test the selected translation engine. If translation engine provides quota information, it will be displayed at the bottom of Translation Engine Tester window.
+You can click the __[Test]__ button to test the selected translation engine. If translation engine provides quota information, it will be displayed at the bottom of Test Translation Engine window.
 
 Click the __[Custom]__ button, you will enter the "Custom Translation Engine" interface, where you can add, delete and configure a translation engine.
 
@@ -156,7 +156,7 @@ The above data template contains 4 name/value pairs, which are explained below. 
     * `url`: The API URL, as specified in the documentation of the translation engine API.
     * `method`: The request method (optional), with a default value of `GET`.
     * `headers`: The request header (optional). You can refer to the documentation of the translation engine API for details.
-* `data`: Request data, can be either a `dict` which will be encoded and sent as application/`x-www-form-urlencoded` data or a string which will be sent as is. If you use a string you should also set the `Content-Type` header appropriately. It includes 3 built-in variables: `<source>`, `<target>`, and `<text>`. `<source>` and `<target>` correspond to the language codes set earlier, and can be ignored if not needed. `<text>` refers to the translation text sent to the translation engine, which must be included to save. Please refer to the documentation of the translation engine API for details.
+* `data`: Request data, can be either a `dict` object which will be encoded and sent as application/`x-www-form-urlencoded` data or a string which will be sent as is. If you use a string you should also set the `Content-Type` header appropriately. It includes 3 built-in variables: `<source>`, `<target>`, and `<text>`. `<source>` and `<target>` correspond to the language codes set earlier, and can be ignored if not needed; `<text>` refers to the original text sent to the translation engine, which must be included to save. Please refer to the documentation of the translation engine API for details.
 * `response`: The expression used to parse the response data to obtain the translation text. The response data is included in the `response` variable, which is a __[JSON](https://docs.python.org/3/library/json.html#encoders*and*decoders)__ object (if the response from the translation engine is in JSON format) or an __[Element](https://lxml.de/apidoc/lxml.etree.html#lxml.etree.ElementBase)__ object of lxml (if the response from the translation engine is in XML format).
 
 Once you have completed the data for the custom translation engine, you can click the __[Verify]__ button to check whether the data is valid, and click the __[Save]__ button to save all the changes.
@@ -185,7 +185,7 @@ __[ Request ]__
 * __Attempt Times__ [default 3]: The number of times to attempt if failed to request translation engine
 * __Maximum Interval__ [default 5 seconds]: The maximum time interval to request translation engine
 
-A single request to translation engine can last up to 300 seconds. After the timeout, it will retry according to the specified attempt times, and the waiting time for each retry will be gradually increased. The request interval will be a random number between 1 and the specified maximum interval.
+A single request to translation engine can last up to 300 seconds. After the timeout, it will retry according to the specified attempt times, and the waiting time for each retry will be gradually increased. The request interval will be a random number between 1 and the maximum interval specified.
 
 When using Google Translate API, which is currently available for free, we recommend you to increase the "Maximum Interval" to an appropriate value (more than 5 seconds is recommended) to prevent it from being flagged as abusive behavior, which could lead to translation interruptions or denial of service. For paid translation engines, the "Maximum Interval" can be set to 1.
 
