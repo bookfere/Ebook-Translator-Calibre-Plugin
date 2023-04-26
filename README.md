@@ -24,11 +24,21 @@ Other language: [简体中文](https://github.com/bookfere/Ebook-Translator-Cali
 
 ## Installation
 
-Please make sure __[Calibre](https://calibre-ebook.com/)__ is installed on your OS, and follow steps below:
+Please make sure __[Calibre](https://calibre-ebook.com/)__ is installed on your OS, and install the plugin via either ways below:
+
+[Install from Calibre]
+
+1. Click Calibre Menu __[Preference... -> Plug-ins -> Get new plugins]__.
+2. Select Ebook Translator from the plugin list, and click __[Install]__.
+3. Reboot Calibre.
+
+[Load from file]
 
 1. Download the plugin zip file from __[releases page](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/releases)__.
-2. Click Calibre Menu [Preference... → Plug-ins → Load plug-in from file], and choose the zip file you downloaded.
-3. Reboot Calibre (if the "Translate Book" plugin is not showing up on Calibre menu, you need to add it from [Preference... → Toolbars & menus], choose [The main toolbar], find the plugin and click __[>]__, and __[Apply]__).
+2. Click Calibre Menu __[Preference... → Plug-ins → Load plug-in from file]__, and choose the zip file you downloaded.
+3. Reboot Calibre.
+
+If the "Translate Book" plugin is not showing up on Calibre menu, you need to add it from __[Preference... → Toolbars & menus]__, choose __[The main toolbar]__, find the plugin and click __[>]__, and __[Apply]__
 
 If you want to install the latest plugin from the GitHub repository, run the following commands:
 
