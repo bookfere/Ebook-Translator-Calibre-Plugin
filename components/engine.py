@@ -73,7 +73,7 @@ class EngineTester(QDialog):
     def __init__(self, parent, translator):
         QDialog.__init__(self, parent)
         self.translator = translator
-        self.setWindowTitle(_('Translation Engine Tester'))
+        self.setWindowTitle(_('Test Translation Engine'))
         self.setModal(True)
         self.setMinimumWidth(500)
         self.setMaximumHeight(300)
@@ -177,6 +177,7 @@ class ManageCustomEngine(QDialog):
         custom_engines = self.config.get('custom_engines').copy()
         default_engine = default_config.get('translate_engine')
         current_engine = self.config.get('translate_engine')
+        preferred_language = self.config.get('preferred_language')
 
         def refresh_list():
             custom_list.clear()
@@ -224,10 +225,11 @@ class ManageCustomEngine(QDialog):
                 del custom_engines[current_name]
                 custom_engines[new_name] = raw_data
                 self.config.update(custom_engines=custom_engines)
+
                 refresh_list()
                 custom_list.setCurrentText(new_name)
             save_config(self.config)
-            pop_alert(self, _('The setting was saved.'))
+            pop_alert(self, _('The setting has been saved.'))
             # self.done(0)
 
         def delete_data():
@@ -240,6 +242,8 @@ class ManageCustomEngine(QDialog):
             custom_list.removeItem(current_index)
             if current_name == current_engine:
                 self.config.update(translate_engine=default_engine)
+            if current_name in preferred_language:
+                del preferred_language[current_name]
 
         custom_list.currentTextChanged.connect(reset_data)
         custom_add.clicked.connect(add_data)

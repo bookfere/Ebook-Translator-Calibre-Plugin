@@ -3,9 +3,7 @@ import time
 import random
 from types import GeneratorType
 
-# from calibre import prepare_string_for_xml as escape
-
-from calibre_plugins.ebook_translator.utils import sep, uid, trim
+from calibre_plugins.ebook_translator.utils import sep, trim
 from calibre_plugins.ebook_translator.config import get_config
 from calibre_plugins.ebook_translator.element import ElementHandler
 
@@ -14,10 +12,10 @@ load_translations()
 
 
 class Translation:
-    def __init__(self, translator, glossary):
+    def __init__(self, translator):
         self.translator = translator
-        self.glossary = glossary
 
+        self.glossary = Glossary()
         self.merge_length = 0
         self.translation_position = None
         self.translation_color = None
@@ -30,7 +28,8 @@ class Translation:
         self.need_sleep = False
 
     def set_merge_length(self, length):
-        self.merge_length = length
+        # Custom translation engine does not support merge to translate now.
+        self.merge_length = 0 if self.translator.is_custom() else length
 
     def set_translation_position(self, position):
         self.translation_position = position
@@ -77,42 +76,33 @@ class Translation:
                       .format(int(self.translator.timeout)))
             return self._translate_text(text, count, interval)
 
-    def _get_translation(self, original):
+    def _get_translation(self, identity, original):
         self._log(_('Original: {}').format(original))
-
         translation = None
-        paragraph_uid = uid(original)
 
         if self.cache and self.cache.exists():
-            translation = self.cache.get(paragraph_uid)
+            translation = self.cache.get(identity)
         if translation is not None:
             self._log(_('Translation (Cached): {}').format(translation))
             self.need_sleep = False
         else:
             original = self.glossary.replace(original)
-
             translation = self._translate_text(original)
             # TODO: translation monitor display streaming text
             if isinstance(translation, GeneratorType):
                 translation = ''.join(text for text in translation)
-            # translation = escape(trim(translation))
-
             translation = self.glossary.restore(trim(translation))
-
-            self.cache and self.cache.add(paragraph_uid, translation)
+            self.cache and self.cache.add(identity, translation)
             self._log(_('Translation: {}').format(translation))
             self.need_sleep = True
 
         return translation
 
-        # element_handler.add_translation(
-        #     translation, self.translator.get_target_code(),
-        #     self.position, self.color)
-
     def handle(self, elements):
         element_handler = ElementHandler(
-            elements, self.merge_length, self.translator.get_target_code(),
-            self.translation_position, self.translation_color)
+            elements, self.translator.get_target_code(),
+            self.translation_position, self.translation_color,
+            self.merge_length, self.translator.merge_divider)
 
         original_group = element_handler.get_original()
         count = 0
@@ -125,13 +115,13 @@ class Translation:
         self._log(_('Total items: {}').format(total))
         process, step = 0.0, 1.0 / total
 
-        for original in original_group:
+        for identity, original in original_group:
             self._log('-' * 30)
             count += 1
             self._progress(process, _('Translating: {}/{}')
                            .format(count, total))
             element_handler.add_translation(
-                self._get_translation(original))
+                self._get_translation(identity, original))
             process += step
             if self.need_sleep and count < total:
                 time.sleep(random.randint(1, self.request_interval))
@@ -147,10 +137,10 @@ class Glossary:
 
     def load(self, path):
         try:
-            with open(path, encoding='utf-8') as f:
+            with open(path) as f:
                 content = f.read().strip()
-        except Exception:
-            raise Exception(_('The specified glossary file does not exist.'))
+        except Exception as e:
+            raise Exception(_('Can not open glossary file: {}').format(str(e)))
 
         if not content:
             return
@@ -175,11 +165,11 @@ class Glossary:
 
 
 def get_translation(translator):
-    glossary = Glossary()
+    translation = Translation(translator)
     if get_config('glossary_enabled'):
-        glossary.load(get_config('glossary_path'))
-    translation = Translation(translator, glossary)
-    translation.set_merge_length(get_config('merge_length'))
+        translation.glossary.load(get_config('glossary_path'))
+    if get_config('merge_enabled'):
+        translation.set_merge_length(get_config('merge_length'))
     translation.set_translation_position(get_config('translation_position'))
     translation.set_translation_color(get_config('translation_color'))
     translation.set_request_attempt(get_config('request_attempt'))

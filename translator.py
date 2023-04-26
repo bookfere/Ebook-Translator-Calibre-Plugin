@@ -36,4 +36,5 @@ def get_translator():
     if translator.is_chatgpt():
         prompts = get_config('chatgpt_prompt')
         translator.set_prompt(prompts.get('auto'), prompts.get('lang'))
+        get_config('merge_enabled') and translator.set_keep_mark()
     return translator

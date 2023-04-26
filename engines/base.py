@@ -14,6 +14,7 @@ class Base:
     need_api_key = True
     api_key_hint = _('API Key')
     api_key_rule = r'^.*$'
+    merge_divider = '{{{{{}}}}}'
 
     def __init__(self):
         self.api_key = ''
@@ -29,6 +30,7 @@ class Base:
 
     @classmethod
     def set_engine_data(cls, data):
+        cls.name = data.get('name')  # rename custom engine
         cls.engine_data = data
 
     @classmethod
@@ -39,11 +41,11 @@ class Base:
 
     @classmethod
     def is_chatgpt(cls):
-        return cls.name == 'ChatGPT'
+        return cls.__name__ == 'ChatgptTranslate'
 
     @classmethod
     def is_custom(cls):
-        return cls.name == 'Custom'
+        return cls.__name__ == 'CustomTranslate'
 
     def set_api_key(self, api_key):
         self.api_key = api_key

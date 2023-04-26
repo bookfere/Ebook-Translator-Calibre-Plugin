@@ -1,12 +1,14 @@
+[English](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.md) · [简体中文](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.zh-CN.md) · __正體中文__
+
+---
+
 # 電子書翻譯工具 (Calibre 外掛程式)
 
 ![Ebook Translator Calibre Plugin](images/logo.png)
 
 一個可以將電子書翻譯成指定語言 (原文譯文對照) 的外掛程式。
 
----
-
-其他語言：[English](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.md) · [简体中文](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.zh-CN.md)
+![Translation illustration](images/sample.png)
 
 ---
 
@@ -26,17 +28,25 @@
 
 首先確保您的作業系統已經安裝了 [Calibre](https://calibre-ebook.com/)。
 
+【 __透過 Calibre 安裝__ 】
+
+1. 開啟 Calibre 並依次按下其選單【 __偏好設定...__ → __外掛__ → __取得新的外掛__ 】；
+2. 在插件清單中選取【 __Ebook Translator__ 】，再點擊【 __安裝__ 】按鈕；
+3. 重新開啟 Calibre 即可正常使用外掛。
+
+【 __透過外掛檔案安裝__ 】
+
 1. 首先在[外掛程式發佈頁面](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/releases)下載外掛程式檔案；
 2. 然後開啟 Calibre 並依次按下其選單【偏好設定 → 外掛 → 從檔案載入外掛】，彈出的對話方塊中選取下載的副檔名為 .zip 的外掛程式檔案完成安裝 (請留意，首次安裝此外掛程式時，要選擇將圖示顯示在主工具列上)；
 3. 最後關閉並重新開啟 Calibre 即可正常使用。
-
-如果安裝外掛程式後，外掛程式圖示未出現在 Calibre 的主工具列上，可以依次按下 Calibre 的選單【偏好設定 → 工具列和選單】，在彈出的對話方塊中按下下拉選單並選擇「主工具列」，然後在左欄找到並選中外掛程式圖示，按下中間的右箭頭按鈕【>】將其新增到右欄，最後按下【儲存】按鈕即可。
 
 如果您想安裝 GitHub 存放庫中最新的外掛程式，可以執行以下命令：
 
 <pre><code>git clone https://github.com/bookfere/Ebook-Translator-Calibre-Plugin.git
 cd Ebook-Translator-Calibre-Plugin
 git archive --format zip --output ../Ebook-Translator-Calibre-Plugin.zip master</code></pre>
+
+如果安裝外掛程式後，外掛程式圖示未出現在 Calibre 的主工具列上，可以依次按下 Calibre 的選單【偏好設定 → 工具列和選單】，在彈出的對話方塊中按下下拉選單並選擇「主工具列」，然後在左欄找到並選中外掛程式圖示，按下中間的右箭頭按鈕【>】將其新增到右欄，最後按下【儲存】按鈕即可。
 
 ---
 
@@ -115,7 +125,7 @@ __【 翻譯引擎 】__
 
 如果選擇使用需要付費的翻譯引擎，建議前往對應的官方文件查看計費規則。比如，ChatGPT，可以使用其官方提供的工具 [Tokenizer](https://platform.openai.com/tokenizer) 估算要翻譯字數大約會消耗多少權杖以便預估費用。
 
-您可以按下【測試】按鈕對目前選取的翻譯引擎進行測試。如果翻譯引擎的 API 提供了配額資訊，會在測試介面下方顯示。
+您可以按下【測試】按鈕對目前選取的翻譯引擎進行測試。如果翻譯引擎的 API 提供了配額資訊，會在測試翻譯引擎介面下方顯示。
 
 按下【自訂】按鈕可進入「自訂翻譯引擎」介面，在這裡可以新增、刪除或修改翻譯引擎。
 
@@ -165,6 +175,10 @@ __【 ChatGPT 提示 】__
 
 * __自動偵測來源語言時的提示__：自訂來源語言為「自動偵測」時的翻譯提示
 * __指定來源語言時的提示__：自訂來源語言為指定語言時的翻譯提示
+
+__【 偏好語言 】__
+
+* __目標語言__ [預設介面語言]：設定目標語言的首選語言
 
 __【 網路代理 】__
 

@@ -11,7 +11,7 @@ load_translations()
 
 
 class YoudaoTranslate(Base):
-    name = _('Youdao')
+    name = _z('Youdao')
     support_lang = 'youdao.json'
     endpoint = 'https://openapi.youdao.com/api'
     api_key_hint = 'appid:appsecret'
