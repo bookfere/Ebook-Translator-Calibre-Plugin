@@ -8,7 +8,9 @@
 
 一個可以將電子書翻譯成指定語言 (原文譯文對照) 的外掛程式。
 
-![Translation illustration](images/sample.png)
+---
+
+![Translation illustration](images/sample-tc.png)
 
 ---
 

@@ -8,7 +8,9 @@
 
 一个可以将电子书翻译成指定语言（原文译文对照）的插件。
 
-![Translation illustration](images/sample.png)
+---
+
+![Translation illustration](images/sample-sc.png)
 
 ---
 
