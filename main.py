@@ -322,26 +322,6 @@ class MainWindowFrame(QDialog):
         click.connect(lambda btn_id: self.config.update(
             translation_position=position_map.get(btn_id)))
 
-        # Merge Translate
-        merge_group = QGroupBox(
-            '%s %s' % (_('Merge to Translate'), _('(Beta)')))
-        merge_layout = QHBoxLayout(merge_group)
-        merge_enabled = QCheckBox(_('Enable'))
-        self.merge_length = QSpinBox()
-        # self.merge_length.setMinimumWidth(100)
-        self.merge_length.setRange(0, 5000)
-        merge_layout.addWidget(merge_enabled)
-        merge_layout.addWidget(self.merge_length)
-        merge_layout.addWidget(QLabel(_(
-            'The number of characters to translate at one time')))
-        merge_layout.addStretch(1)
-        layout.addWidget(merge_group)
-
-        self.merge_length.setValue(self.config.get('merge_length'))
-        merge_enabled.setChecked(self.config.get('merge_enabled'))
-        merge_enabled.clicked.connect(
-            lambda checked: self.config.update(merge_enabled=checked))
-
         # Translation Color
         color_group = QGroupBox(_('Translation Color'))
         color_layout = QHBoxLayout(color_group)
@@ -404,6 +384,26 @@ class MainWindowFrame(QDialog):
             path = QFileDialog.getOpenFileName(filter="Text files (*.txt)")
             self.glossary_path.setText(path[0])
         glossary_choose.clicked.connect(choose_glossary_file)
+
+        # Merge Translate
+        merge_group = QGroupBox(
+            '%s %s' % (_('Merge to Translate'), _('(Beta)')))
+        merge_layout = QHBoxLayout(merge_group)
+        merge_enabled = QCheckBox(_('Enable'))
+        self.merge_length = QSpinBox()
+        # self.merge_length.setMinimumWidth(100)
+        self.merge_length.setRange(1, 99999)
+        merge_layout.addWidget(merge_enabled)
+        merge_layout.addWidget(self.merge_length)
+        merge_layout.addWidget(QLabel(_(
+            'The number of characters to translate at one time')))
+        merge_layout.addStretch(1)
+        layout.addWidget(merge_group)
+
+        self.merge_length.setValue(self.config.get('merge_length'))
+        merge_enabled.setChecked(self.config.get('merge_enabled'))
+        merge_enabled.clicked.connect(
+            lambda checked: self.config.update(merge_enabled=checked))
 
         # Filter Content
         filter_group = QGroupBox(_('Do not Translate'))
@@ -772,7 +772,6 @@ class MainWindowFrame(QDialog):
         self.config.update(filter_rules=list(filter_rules))
 
         save_config(self.config)
-        self.refresh_lang_codes()
         self.pop_alert(_('The setting has been saved.'))
 
     def update_setting_config(self):
@@ -842,6 +841,7 @@ class MainWindowFrame(QDialog):
             request_interval=self.interval_max.value())
 
         save_config(self.config)
+        self.refresh_lang_codes()
         self.pop_alert(_('The setting has been saved.'))
 
     def is_valid_regex(self, rule):
