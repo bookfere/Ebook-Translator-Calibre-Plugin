@@ -83,7 +83,7 @@ class ElementHandler:
         for sid, element in enumerate(self.elements):
             placeholder = ' %s ' % self.merge_divider.format('id_%s' % sid)
             text = element.get_content() + placeholder
-            if len((content + text).encode()) < self.merge_length:
+            if len(content + text) < self.merge_length:
                 content += text
                 continue
             elif content:

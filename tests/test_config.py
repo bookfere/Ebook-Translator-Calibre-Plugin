@@ -6,22 +6,29 @@ import calibre_plugins.ebook_translator.config as config
 class TestConfig(unittest.TestCase):
 
     def test_init_config(self):
-        default = {
-            'to_library': True,
-            'output_path': None,
-            'translate_engine': 'Google',
-            'api_key': {},
-            'proxy_enabled': False,
-            'proxy_setting': [],
-            'request_attempt': 3,
-            'request_interval': 5,
-            'cache_enabled': True,
-            'log_translation': True,
-            'translation_position': 'after',
-            'rule_mode': 'normal',
-            'filter_rules': [],
-        }
-        config.preferences = None
+        config.preferences = {}
+
+        config.default_config = {'test1': 1}
+        config.init_config()
+        self.assertEqual({'test1': 1}, config.preferences)
+
+        config.default_config = {'test1': 1, 'test2': 2}
+        config.init_config()
+        self.assertEqual({'test1': 1, 'test2': 2}, config.preferences)
+
+        config.preferences['test1'] = 1
+        config.init_config()
+        self.assertEqual({'test1': 1, 'test2': 2}, config.preferences)
+
+        config.default_config = {'test1': 1, 'test2': 2, 'test3': 3}
+        config.init_config()
+        self.assertEqual({'test1': 1, 'test2': 2, 'test3': 3},
+                         config.preferences)
+
+        config.default_config = {'test4': 4}
+        config.init_config()
+        self.assertEqual({'test1': 1, 'test2': 2, 'test3': 3, 'test4': 4},
+                         config.preferences)
 
     def test_set_and_get_config(self):
         config.preferences = {

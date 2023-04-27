@@ -72,6 +72,7 @@ class EngineTester(QDialog):
 
     def __init__(self, parent, translator):
         QDialog.__init__(self, parent)
+        self.parent = parent
         self.translator = translator
         self.setWindowTitle(_('Test Translation Engine'))
         self.setModal(True)
@@ -96,7 +97,8 @@ class EngineTester(QDialog):
                               not self.translator.is_custom())
         layout.addWidget(source_lang, 2, 0)
         target_lang = TargetLang()
-        target_lang.set_codes(self.translator.target_codes)
+        target_lang.set_codes(self.translator.target_codes,
+                              self.parent.preferred_target.currentText())
         layout.addWidget(target_lang, 2, 1)
         translate = QPushButton(_('Translate'))
         layout.addWidget(translate, 2, 2)

@@ -40,7 +40,7 @@ __[ Load from file ]__
 2. Click Calibre Menu __[Preference... → Plug-ins → Load plug-in from file]__, and choose the zip file you downloaded.
 3. Reboot Calibre.
 
-If you want to install the latest plugin from the GitHub repository, run the following commands:
+If you want to install the latest plugin, run the following commands to download the latest plugin file from GitHub repository:
 
 <pre><code>git clone https://github.com/bookfere/Ebook-Translator-Calibre-Plugin.git
 cd Ebook-Translator-Calibre-Plugin
@@ -72,9 +72,11 @@ __[ Translation Position ]__
 * __Add before original__: Add the translation text before original text
 * __Add without original__: Add the translation text and delete original text
 
-__[ Merge Translate ]__
+__[ Merge to Translate ]__
 
-* __Character count__ [default 0]: Merge the paragraphs according to a specified character count before translation.
+* __Enable__ [default unchecked]: Enable to merge to translate
+
+You can specify the number of characters to translate at one time, default value is 2000.
 
 __[ Translation Color ]__
 
@@ -86,7 +88,7 @@ __[ Translation Glossary ]__
 
 * __Enable__ [default unchecked]: Enable to use the selected translation glossary file
 
-The role of a translation glossary is to specify specific translations for certain terms or to instruct the translation engine to ignore the translation of certain terms.
+A translation glossary serves to define precise translations for particular terms and to direct the translation engin to exclude specific terms from translation.
 
 The glossary file is a plain text file with extension .txt. It has the following format: if a term requires a specific translation, it is presented as a pair of two lines, the first one with the original term and the second one with its translation; If a term needs to be ignored in translation, it is presented as a single line per term. The groups of terms are separated by a blank line.
 
@@ -119,7 +121,7 @@ __[ Translation Engine ]__
 * __DeepL(Free)__: Free translation engine (Unstable)
 * __Youdao__: APP key and secret required
 * __Baidu__: APP id and key required
-* __Custom__: Customize your own translation engine
+* __[Custom]__: Customize your own translation engine
 
 Except for Google(Free) and DeepL(Free), who does not require an API key, other built-in translation engines require you to register a corresponding account and pay to obtain an API key.
 
