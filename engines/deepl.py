@@ -16,7 +16,7 @@ class DeeplTranslate(Base):
         'translate': 'https://api-free.deepl.com/v2/translate',
         'usage': 'https://api-free.deepl.com/v2/usage',
     }
-    merge_divider = '<m id={} />'
+    merge_divider = ('<m id={} />', r'<m\s+id={}\s+/>')
 
     def get_usage(self):
         # See: https://www.deepl.com/docs-api/general/get-usage/
@@ -62,7 +62,7 @@ class DeeplFreeTranslate(Base):
     support_lang = 'deepl.json'
     endpoint = 'https://www2.deepl.com/jsonrpc?client=chrome-extension,1.4.0'
     need_api_key = False
-    merge_divider = '<m id={} />'
+    merge_divider = DeeplTranslate.merge_divider
 
     headers = {
         'Accept': '*/*',

@@ -8,7 +8,7 @@ from calibre_plugins.ebook_translator.engines.custom import (
 from calibre_plugins.ebook_translator.components.lang import (
     SourceLang, TargetLang)
 from calibre_plugins.ebook_translator.config import save_config, default_config
-from calibre_plugins.ebook_translator.components.parts import pop_alert
+from calibre_plugins.ebook_translator.components.alert import pop_alert
 
 
 try:

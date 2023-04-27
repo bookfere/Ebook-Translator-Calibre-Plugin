@@ -2,7 +2,7 @@ from calibre.gui2.actions import InterfaceAction
 from calibre.ebooks.conversion.config import get_input_format_for_book
 from calibre_plugins.ebook_translator import EbookTranslator
 from calibre_plugins.ebook_translator.main import MainWindowFrame
-from calibre_plugins.ebook_translator.components.parts import pop_alert
+from calibre_plugins.ebook_translator.components.alert import pop_alert
 
 
 try:

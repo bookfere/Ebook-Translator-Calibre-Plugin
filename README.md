@@ -32,7 +32,7 @@ Please make sure __[Calibre](https://calibre-ebook.com/)__ is installed on your 
 
 __[ Install from Calibre ]__
 
-1. Click Calibre Menu __[Preference... -> Plug-ins -> Get new plugins]__.
+1. Click Calibre Menu __[Preference... → Plug-ins → Get new plugins]__.
 2. Select Ebook Translator from the plugin list, and click __[Install]__.
 3. Reboot Calibre.
 
