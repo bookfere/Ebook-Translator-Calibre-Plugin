@@ -1,3 +1,4 @@
+import re
 import copy
 
 from lxml import etree
@@ -64,7 +65,7 @@ class ElementHandler:
                  merge_length=0, merge_divider=None):
         self.elements = [Element(item) for item in items]
         self.merge_length = merge_length
-        self.merge_divider = merge_divider  # e.g. <{}>/{{{}}}
+        self.merge_divider = merge_divider
         self.lang = lang
         self.position = position
         self.color = color
@@ -81,7 +82,7 @@ class ElementHandler:
 
         content = ''
         for sid, element in enumerate(self.elements):
-            placeholder = ' %s ' % self.merge_divider.format('id_%s' % sid)
+            placeholder = ' %s ' % self.merge_divider[0].format('id_%s' % sid)
             text = element.get_content() + placeholder
             if len(content + text) < self.merge_length:
                 content += text
@@ -106,11 +107,14 @@ class ElementHandler:
             return
 
         content = ''.join(self.translation)
+        pattern = self.merge_divider[1]
         for sid, element in enumerate(self.elements):
-            placeholder = 'id_%s' % sid
+            matches = re.search(pattern.format('id_%s' % sid), content)
+            if not matches:
+                continue
+            placeholder = matches.group(0)
             end = content.find(placeholder)
             part = content[:end]
             content = content.replace(part + placeholder, '', 1)
-            chars = ' \n\t%s' % self.merge_divider
             element.add_translation(
-                part.strip(chars), self.lang, self.position, self.color)
+                part.strip(), self.lang, self.position, self.color)

@@ -20,12 +20,13 @@ from calibre_plugins.ebook_translator.utils import (
 from calibre_plugins.ebook_translator.engines import builtin_engines
 from calibre_plugins.ebook_translator.translator import get_engine_class
 from calibre_plugins.ebook_translator.cache import TranslationCache
+from calibre_plugins.ebook_translator.components import get_divider
+from calibre_plugins.ebook_translator.components.alert import (
+    pop_alert, ask_action)
 from calibre_plugins.ebook_translator.components.lang import (
     SourceLang, TargetLang)
 from calibre_plugins.ebook_translator.components.engine import (
     EngineTester, ManageCustomEngine)
-from calibre_plugins.ebook_translator.components.parts import (
-    pop_alert, get_divider)
 
 
 try:
@@ -70,6 +71,7 @@ class MainWindowFrame(QDialog):
         self.target_langs = []
 
         self.pop_alert = MethodType(pop_alert, self)
+        self.ask_action = MethodType(ask_action, self)
 
         self.main_layout()
 
@@ -196,10 +198,18 @@ class MainWindowFrame(QDialog):
             return self.pop_alert(
                 _('The specified path does not exist.'), 'warning')
 
+        glossary_enabled = get_config('glossary_enabled')
         glossary_path = get_config('glossary_path')
-        if glossary_path and not os.path.exists(glossary_path):
+        if glossary_enabled and not os.path.exists(glossary_path):
             return self.pop_alert(
                 _('The specified glossary file does not exist.'), 'warning')
+
+        if self.current_engine.is_chatgpt() and get_config('merge_enabled'):
+            confirm = self.ask_action(
+                _('The "Merge to Translate" feature may not work properly on '
+                  'ChatGPT. Do you want to continue anyway?'))
+            if confirm == 'no':
+                return
 
         for book_id, title, fmts, ifmt, ofmt, slang, tlang in \
                 self.ebooks.values():
