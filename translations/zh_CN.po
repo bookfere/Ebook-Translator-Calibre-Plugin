@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-04-27 03:15+0800\n"
+"POT-Creation-Date: 2023-04-28 14:25+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -124,23 +124,11 @@ msgstr "合适的 Contenty-Type 标头信息是必填项。"
 msgid "Expression to parse response is required."
 msgstr "用来解析响应的表达式是必填项。"
 
-msgid "Custom"
-msgstr "自定义"
-
 msgid "Response was parsed incorrectly."
 msgstr "响应没有正确解析。"
 
 msgid "{} total, {} used, {} left"
 msgstr "总计 {}，已用 {}，剩余 {}"
-
-msgid "DeepL(Pro)"
-msgstr "DeepL (Pro)"
-
-msgid "DeepL(Free)"
-msgstr "DeepL (Free)"
-
-msgid "Google(Free)"
-msgstr "Google (Free)"
 
 msgid "Youdao"
 msgstr "有道"
@@ -214,6 +202,15 @@ msgstr "加在原文前"
 msgid "Add without original"
 msgstr "仅保留译文"
 
+msgid "Translation Color"
+msgstr "译文颜色"
+
+msgid "CSS color value, e.g., #666666, grey, rgb(80, 80, 80)"
+msgstr "CSS 颜色值，如 #666666, gry, rgb(80, 80, 80)"
+
+msgid "Choose"
+msgstr "选择"
+
 msgid "(Beta)"
 msgstr "(测试版）"
 
@@ -225,15 +222,6 @@ msgstr "开启"
 
 msgid "The number of characters to translate at one time"
 msgstr "单次要翻译的字符数量"
-
-msgid "Translation Color"
-msgstr "译文颜色"
-
-msgid "CSS color value, e.g., #666666, grey, rgb(80, 80, 80)"
-msgstr "CSS 颜色值，如 #666666, gry, rgb(80, 80, 80)"
-
-msgid "Choose"
-msgstr "选择"
 
 msgid "Translation Glossary"
 msgstr "翻译词汇表"
@@ -285,6 +273,9 @@ msgstr "翻译引擎"
 
 msgid "Test"
 msgstr "测试"
+
+msgid "Custom"
+msgstr "自定义"
 
 msgid "ChatGPT Prompt"
 msgstr "ChatGPT提示词"

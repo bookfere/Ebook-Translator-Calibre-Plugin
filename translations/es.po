@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-04-27 03:15+0800\n"
+"POT-Creation-Date: 2023-04-28 14:25+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -127,23 +127,11 @@ msgstr "Se requiere un tipo de contenido adecuado en las cabeceras."
 msgid "Expression to parse response is required."
 msgstr "Se requiere una expresión para analizar la respuesta."
 
-msgid "Custom"
-msgstr "Personalizado"
-
 msgid "Response was parsed incorrectly."
 msgstr "La respuesta fue analizada incorrectamente."
 
 msgid "{} total, {} used, {} left"
 msgstr "{} en total, {} utilizado(s), {} restante(s)"
-
-msgid "DeepL(Pro)"
-msgstr "DeepL (Pro)"
-
-msgid "DeepL(Free)"
-msgstr "DeepL (Free)"
-
-msgid "Google(Free)"
-msgstr "Google (Free)"
 
 msgid "Youdao"
 msgstr "Youdao"
@@ -217,6 +205,15 @@ msgstr "Agregar antes del original"
 msgid "Add without original"
 msgstr "Agregar sin original"
 
+msgid "Translation Color"
+msgstr "Color de la traducción"
+
+msgid "CSS color value, e.g., #666666, grey, rgb(80, 80, 80)"
+msgstr "Valor de color CSS, por ejemplo, #666666, gris, rgb(80, 80, 80)"
+
+msgid "Choose"
+msgstr "Elegir"
+
 msgid "(Beta)"
 msgstr "(Beta)"
 
@@ -228,15 +225,6 @@ msgstr "Permitir"
 
 msgid "The number of characters to translate at one time"
 msgstr "El número de caracteres a traducir de una sola vez"
-
-msgid "Translation Color"
-msgstr "Color de la traducción"
-
-msgid "CSS color value, e.g., #666666, grey, rgb(80, 80, 80)"
-msgstr "Valor de color CSS, por ejemplo, #666666, gris, rgb(80, 80, 80)"
-
-msgid "Choose"
-msgstr "Elegir"
 
 msgid "Translation Glossary"
 msgstr "Glosario de traducción"
@@ -290,6 +278,9 @@ msgstr "Motor de traducción"
 
 msgid "Test"
 msgstr "Probar"
+
+msgid "Custom"
+msgstr "Personalizado"
 
 msgid "ChatGPT Prompt"
 msgstr "ChatGPT Prompt"

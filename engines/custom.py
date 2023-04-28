@@ -86,7 +86,8 @@ def load_engine_data(text):
 
 
 class CustomTranslate(Base):
-    name = _z('Custom')
+    name = 'Custom'
+    alias = 'Custom'
     need_api_key = False
 
     def translate(self, text):
