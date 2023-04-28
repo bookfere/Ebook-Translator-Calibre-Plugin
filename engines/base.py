@@ -1,3 +1,5 @@
+import traceback
+
 from mechanize import Browser, Request
 from calibre.utils.localization import lang_as_iso639_1
 
@@ -7,6 +9,7 @@ load_translations()
 
 class Base:
     name = None
+    alias = None
     support_lang = None
     engine_data = {}
     lang_codes = {}
@@ -85,6 +88,7 @@ class Base:
                 response.read().decode('utf-8').strip()
             return self.parse(result) if callback is None else callback(result)
         except Exception as e:
+            traceback.print_exc()
             if silence:
                 return None
             raw_data = str(e) if result is None else result + ' ' + str(e)

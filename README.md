@@ -8,8 +8,6 @@ __English__ · [简体中文](https://github.com/bookfere/Ebook-Translator-Calib
 
 A Calibre plugin to translate ebook into a specified language (optionally keeping the original content).
 
----
-
 ![Translation illustration](images/sample-en.png)
 
 ---

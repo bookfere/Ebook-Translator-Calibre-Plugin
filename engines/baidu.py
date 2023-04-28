@@ -2,15 +2,16 @@ import json
 import random
 import hashlib
 
-from calibre_plugins.ebook_translator.engines.base import Base
 from calibre_plugins.ebook_translator.utils import _z
+from calibre_plugins.ebook_translator.engines.base import Base
 
 
 load_translations()
 
 
 class BaiduTranslate(Base):
-    name = _z('Baidu')
+    name = 'Baidu'
+    alias = _z('Baidu')
     support_lang = 'baidu.json'
     endpoint = 'https://fanyi-api.baidu.com/api/trans/vip/translate'
     api_key_hint = 'appid:appkey'

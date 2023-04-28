@@ -2,7 +2,6 @@ import json
 import time
 import random
 
-from calibre_plugins.ebook_translator.utils import _z
 from calibre_plugins.ebook_translator.engines.base import Base
 
 
@@ -11,6 +10,7 @@ load_translations()
 
 class DeeplTranslate(Base):
     name = 'DeepL'
+    alias = 'DeepL'
     support_lang = 'deepl.json'
     endpoint = {
         'translate': 'https://api-free.deepl.com/v2/translate',
@@ -50,7 +50,8 @@ class DeeplTranslate(Base):
 
 
 class DeeplProTranslate(DeeplTranslate):
-    name = _z('DeepL(Pro)')
+    name = 'DeepL(Pro)'
+    alias = 'DeepL (Pro)'
     endpoint = {
         'translate': 'https://api.deepl.com/v2/translate',
         'usage': 'https://api.deepl.com/v2/usage',
@@ -58,7 +59,8 @@ class DeeplProTranslate(DeeplTranslate):
 
 
 class DeeplFreeTranslate(Base):
-    name = _z('DeepL(Free)')
+    name = 'DeepL(Free)'
+    alias = 'DeepL (Free)'
     support_lang = 'deepl.json'
     endpoint = 'https://www2.deepl.com/jsonrpc?client=chrome-extension,1.4.0'
     need_api_key = False

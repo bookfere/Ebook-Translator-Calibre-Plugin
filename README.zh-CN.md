@@ -6,9 +6,7 @@
 
 ![Ebook Translator Calibre Plugin](images/logo.png)
 
-一个可以将电子书翻译成指定语言（原文译文对照）的插件。
-
----
+一个可以将电子书翻译成指定语言（原文译文对照）的 Calibre 插件。
 
 ![Translation illustration](images/sample-sc.png)
 
@@ -125,7 +123,7 @@ __【 翻译引擎 】__
 * __百度__：需要 APP id 和 key
 * __[自定义]__：自定义任意翻译引擎
 
-注意，除了 Google(Free) 和 DeepL(Free) 不需要 API 密钥外，其他内置翻译引擎都需要你注册相应账户（可能需要付费）获取 API 密钥才能使用。另外，由于插件在开发时缺少 DeepL 的 API 密钥，根据其官网提供的响应信息样例，程序可以正常运行，实际运行情况未知。
+注意，除了 Google (Free) 和 DeepL (Free) 不需要 API 密钥外，其他内置翻译引擎都需要你注册相应账户（可能需要付费）获取 API 密钥才能使用。另外，由于插件在开发时缺少 DeepL 的 API 密钥，根据其官网提供的响应信息样例，程序可以正常运行，实际运行情况未知。
 
 如果选择使用需要付费的翻译引擎，建议前往相应的官方文档查看计费规则。比如，ChatGPT，可以使用其官方提供的工具 [Tokenizer](https://platform.openai.com/tokenizer) 估算要翻译字数大约会消耗多少 token 以便预估费用。
 

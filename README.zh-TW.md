@@ -6,9 +6,7 @@
 
 ![Ebook Translator Calibre Plugin](images/logo.png)
 
-一個可以將電子書翻譯成指定語言 (原文譯文對照) 的外掛程式。
-
----
+一個可以將電子書翻譯成指定語言 (原文譯文對照) 的 Calibre 外掛程式。
 
 ![Translation illustration](images/sample-tc.png)
 
@@ -95,7 +93,7 @@ The Statue of Liberty</pre>
 
 __【 合併翻譯 】__
 
-* __字元數__ [預設為 0]：啟用合併翻譯功能
+* __启用__ [默认不勾选]：啟用合併翻譯功能
 
 您可以在這裡設置單次要翻譯的字元數量，預設值為 2000。
 

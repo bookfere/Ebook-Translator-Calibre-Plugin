@@ -8,6 +8,7 @@ load_translations()
 
 class ChatgptTranslate(Base):
     name = 'ChatGPT'
+    alias = 'ChatGPT'
     support_lang = 'google.json'
     endpoint = 'https://api.openai.com/v1/chat/completions'
 

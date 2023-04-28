@@ -145,6 +145,7 @@ class MainWindowFrame(QDialog):
                 input_fmt.setStyleSheet('text-transform:uppercase;')
             table.setCellWidget(index, 1, input_fmt)
             self.alter_ebooks_data(index, 3, input_fmt.currentText())
+            input_fmt.wheelEvent = lambda event: None
             input_fmt.currentTextChanged.connect(
                 lambda fmt, row=index: self.alter_ebooks_data(row, 3, fmt))
 
@@ -154,6 +155,7 @@ class MainWindowFrame(QDialog):
                 output_fmt.setStyleSheet('text-transform:uppercase;')
             table.setCellWidget(index, 2, output_fmt)
             self.alter_ebooks_data(index, 4, output_fmt.currentText())
+            output_fmt.wheelEvent = lambda event: None
             output_fmt.currentTextChanged.connect(
                 lambda fmt, row=index: self.alter_ebooks_data(row, 4, fmt))
 
@@ -203,13 +205,6 @@ class MainWindowFrame(QDialog):
         if glossary_enabled and not os.path.exists(glossary_path):
             return self.pop_alert(
                 _('The specified glossary file does not exist.'), 'warning')
-
-        if self.current_engine.is_chatgpt() and get_config('merge_enabled'):
-            confirm = self.ask_action(
-                _('The "Merge to Translate" feature may not work properly on '
-                  'ChatGPT. Do you want to continue anyway?'))
-            if confirm == 'no':
-                return
 
         for book_id, title, fmts, ifmt, ofmt, slang, tlang in \
                 self.ebooks.values():
@@ -372,6 +367,25 @@ class MainWindowFrame(QDialog):
         color_picker.colorSelected.connect(set_color)
         color_button.clicked.connect(color_picker.open)
 
+        # Merge Translate
+        merge_group = QGroupBox(
+            '%s %s' % (_('Merge to Translate'), _('(Beta)')))
+        merge_layout = QHBoxLayout(merge_group)
+        merge_enabled = QCheckBox(_('Enable'))
+        self.merge_length = QSpinBox()
+        self.merge_length.setRange(1, 99999)
+        merge_layout.addWidget(merge_enabled)
+        merge_layout.addWidget(self.merge_length)
+        merge_layout.addWidget(QLabel(_(
+            'The number of characters to translate at one time')))
+        merge_layout.addStretch(1)
+        layout.addWidget(merge_group)
+
+        self.merge_length.setValue(self.config.get('merge_length'))
+        merge_enabled.setChecked(self.config.get('merge_enabled'))
+        merge_enabled.clicked.connect(
+            lambda checked: self.config.update(merge_enabled=checked))
+
         # Glossary
         glossary_group = QGroupBox(_('Translation Glossary'))
         glossary_layout = QHBoxLayout(glossary_group)
@@ -394,26 +408,6 @@ class MainWindowFrame(QDialog):
             path = QFileDialog.getOpenFileName(filter="Text files (*.txt)")
             self.glossary_path.setText(path[0])
         glossary_choose.clicked.connect(choose_glossary_file)
-
-        # Merge Translate
-        merge_group = QGroupBox(
-            '%s %s' % (_('Merge to Translate'), _('(Beta)')))
-        merge_layout = QHBoxLayout(merge_group)
-        merge_enabled = QCheckBox(_('Enable'))
-        self.merge_length = QSpinBox()
-        # self.merge_length.setMinimumWidth(100)
-        self.merge_length.setRange(1, 99999)
-        merge_layout.addWidget(merge_enabled)
-        merge_layout.addWidget(self.merge_length)
-        merge_layout.addWidget(QLabel(_(
-            'The number of characters to translate at one time')))
-        merge_layout.addStretch(1)
-        layout.addWidget(merge_group)
-
-        self.merge_length.setValue(self.config.get('merge_length'))
-        merge_enabled.setChecked(self.config.get('merge_enabled'))
-        merge_enabled.clicked.connect(
-            lambda checked: self.config.update(merge_enabled=checked))
 
         # Filter Content
         filter_group = QGroupBox(_('Do not Translate'))
@@ -589,7 +583,7 @@ class MainWindowFrame(QDialog):
             engine_list.currentIndexChanged.disconnect(choose_default_engine)
             engine_list.clear()
             for engine in builtin_engines:
-                engine_list.addItem(_(engine.name), engine.name)
+                engine_list.addItem(_(engine.alias), engine.name)
             custom_engines = self.config.get('custom_engines')
             for name in sorted(custom_engines.keys(), key=sorted_mixed_keys):
                 engine_list.addItem(name, name)
