@@ -72,23 +72,23 @@ __[ Translation Position ]__
 * __Add before original__: Add the translation text before original text
 * __Add without original__: Add the translation text and delete original text
 
-__[ Merge to Translate ]__
-
-* __Enable__ [default unchecked]: Enable to merge to translate
-
-You can specify the number of characters to translate at one time, default value is 2000.
-
 __[ Translation Color ]__
 
 * __Color Value__: CSS color value, e.g., #666666, grey, rgb(80, 80, 80)
 
 You can click the __[Select]__ button to select a color from color palette, or enter the color value manually. Please refer to "__[color value](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value)__" on MDN documentation for details. If left blank no customized color will be applied.
 
+__[ Merge to Translate ]__
+
+* __Enable__ [default unchecked]: Enable to merge to translate
+
+You can specify the number of characters to translate at one time, default value is 2000.
+
 __[ Translation Glossary ]__
 
 * __Enable__ [default unchecked]: Enable to use the selected translation glossary file
 
-A translation glossary serves to define precise translations for particular terms and to direct the translation engin to exclude specific terms from translation.
+A translation glossary serves to define precise translations for particular terms and to direct the translation engine to exclude specific terms from translation.
 
 The glossary file is a plain text file with extension .txt. It has the following format: if a term requires a specific translation, it is presented as a pair of two lines, the first one with the original term and the second one with its translation; If a term needs to be ignored in translation, it is presented as a single line per term. The groups of terms are separated by a blank line.
 
@@ -125,8 +125,6 @@ __[ Translation Engine ]__
 
 Except for Google(Free) and DeepL(Free), who does not require an API key, other built-in translation engines require you to register a corresponding account and pay to obtain an API key.
 
-According to the response information sample provided by DeepL official website, the program can run properly, but due to the lack of DeepL's API key, the actual operation status is unknown.
-
 If you opt for a paid translation engine, we recommend you to refer to its official documentation for pricing rules. For example, ChatGPT uses its official tool, __[Tokenizer](https://platform.openai.com/tokenizer)__, to estimate the number of tokens required to translate a given amount of text in order to provide a cost estimate.
 
 You can click the __[Test]__ button to test the selected translation engine. If translation engine provides quota information, it will be displayed at the bottom of Test Translation Engine window.
@@ -160,7 +158,7 @@ The data to configure a custom translation engine is in JSON format. Each time y
     "response": "response"
 }</code></pre>
 
-The above data template contains 4 name/value pairs, which are explained below. You can update the template as needed.
+The above data template contains 4 name/value pairs, which will be explained as below. You can update the template as needed.
 
 * `name`: The name of the translation engine displayed on the UI, for example, Bing.
 * `languages`: The language codes supported by the translation engine. The format is `{'Language Name': 'language code'}`. Please refer to the documentation of the translation engine API for details. You can also specify the source language and target language respectively.
@@ -173,7 +171,7 @@ The above data template contains 4 name/value pairs, which are explained below. 
 * `data`: Request data, can be either a `dict` object which will be encoded and sent as application/`x-www-form-urlencoded` data or a string which will be sent as is. If you use a string you should also set the `Content-Type` header appropriately. It includes 3 built-in variables: `<source>`, `<target>`, and `<text>`. `<source>` and `<target>` correspond to the language codes set earlier, and can be ignored if not needed; `<text>` refers to the original text sent to the translation engine, which must be included to save. Please refer to the documentation of the translation engine API for details.
 * `response`: The expression used to parse the response data to obtain the translation text. The response data is included in the `response` variable, which is a __[JSON](https://docs.python.org/3/library/json.html#encoders*and*decoders)__ object (if the response from the translation engine is in JSON format) or an __[Element](https://lxml.de/apidoc/lxml.etree.html#lxml.etree.ElementBase)__ object of lxml (if the response from the translation engine is in XML format).
 
-Once you have completed the data for the custom translation engine, you can click the __[Verify]__ button to check whether the data is valid, and click the __[Save]__ button to save all the changes.
+Once you have completed the data for the custom translation engine, you can click the __[Verify]__ button to check whether the data format is valid, and click the __[Save]__ button to save all the changes.
 
 __[ ChatGPT Prompt ]__
 
@@ -182,7 +180,7 @@ __[ ChatGPT Prompt ]__
 
 __[ Preferred Language ]__
 
-* __Target Language__ [default UI language]：Set the preferred language for the target language.
+* __Target Language__ [default UI language]：Set the preferred target language.
 
 __[ Network Proxy ]__
 
@@ -196,7 +194,7 @@ __[ Cache ]__
 * __Enable__ [default checked]: Enable to cache translated content
 * __Clear__: Delete all caches
 
-Enabling the caching function can avoid re-translation of translated content after request failure or network interruption. You can also check the amount of disk space occupied by the cache here, and click __[Clear]__ button to delete all caches. Note that if a translation job is currently in progress, the __[Clear]__ button will be disabled to use.
+Enabling the caching function can avoid re-translation of the translated content after request failure or network interruption. You can also check the amount of disk space occupied by the cache here, and click __[Clear]__ button to delete all caches. Note that if a translation job is currently in progress, the __[Clear]__ button will be disabled to use.
 
 __[ Request ]__
 
