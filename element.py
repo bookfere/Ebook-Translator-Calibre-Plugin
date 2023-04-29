@@ -98,6 +98,9 @@ class ElementHandler:
     def add_translation(self, text):
         self.translation.append(text)
 
+    def varify_translation(self):
+        pass
+
     def apply_translation(self):
         if self.merge_length == 0:
             for element in self.elements:

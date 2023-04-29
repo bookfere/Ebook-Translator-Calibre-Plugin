@@ -16,7 +16,7 @@ class Base:
     endpoint = None
     need_api_key = True
     api_key_hint = _('API Key')
-    api_key_rule = r'^.*$'
+    api_key_rule = r'^.+$'
     merge_divider = ('{{{{{}}}}}', r'{{\s*{{\s*{}\s*}}\s*}}')
 
     def __init__(self):
@@ -30,6 +30,11 @@ class Base:
 
         self.source_codes = self.lang_codes.get('source')
         self.target_codes = self.lang_codes.get('target')
+
+    @classmethod
+    def get_api_key_error(cls):
+        return _('A correct key format "{}" is required.') \
+            .format(cls.api_key_hint)
 
     @classmethod
     def set_engine_data(cls, data):

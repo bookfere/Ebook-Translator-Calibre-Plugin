@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-04-28 14:25+0800\n"
+"POT-Creation-Date: 2023-04-29 23:32+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,7 +59,7 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: components/engine.py:164 main.py:659
+#: components/engine.py:164 main.py:656
 msgid "Clear"
 msgstr ""
 
@@ -83,7 +83,7 @@ msgstr ""
 msgid "The engine name is already in use."
 msgstr ""
 
-#: components/engine.py:234 main.py:779 main.py:849
+#: components/engine.py:234 main.py:770 main.py:850
 msgid "The setting has been saved."
 msgstr ""
 
@@ -91,7 +91,7 @@ msgstr ""
 msgid "No custom engine to delete."
 msgstr ""
 
-#: components/lang.py:34 engines/base.py:68
+#: components/lang.py:34 engines/base.py:73
 msgid "Auto detect"
 msgstr ""
 
@@ -99,15 +99,15 @@ msgstr ""
 msgid "Baidu"
 msgstr ""
 
-#: engines/baidu.py:26
-msgid "Incorrect format of APP id and key."
-msgstr ""
-
 #: engines/base.py:18
 msgid "API Key"
 msgstr ""
 
-#: engines/base.py:96 tests/test_deepl.py:46
+#: engines/base.py:36
+msgid "A correct key format \"{}\" is required."
+msgstr ""
+
+#: engines/base.py:101 tests/test_deepl.py:46
 msgid "Can not parse returned response. Raw data: {}"
 msgstr ""
 
@@ -171,10 +171,6 @@ msgstr ""
 msgid "Youdao"
 msgstr ""
 
-#: engines/youdao.py:38
-msgid "Incorrect format of APP key and secret."
-msgstr ""
-
 #: main.py:83
 msgid "Content"
 msgstr ""
@@ -215,11 +211,11 @@ msgstr ""
 msgid "Target Language"
 msgstr ""
 
-#: main.py:201 main.py:786
+#: main.py:201 main.py:783
 msgid "The specified path does not exist."
 msgstr ""
 
-#: main.py:207 main.py:760
+#: main.py:207 main.py:751
 msgid "The specified glossary file does not exist."
 msgstr ""
 
@@ -283,7 +279,7 @@ msgstr ""
 msgid "Merge to Translate"
 msgstr ""
 
-#: main.py:374 main.py:392 main.py:616 main.py:662
+#: main.py:374 main.py:392 main.py:613 main.py:659
 msgid "Enable"
 msgstr ""
 
@@ -355,7 +351,7 @@ msgstr ""
 msgid "Translation Engine"
 msgstr ""
 
-#: main.py:514 main.py:641
+#: main.py:514 main.py:638
 msgid "Test"
 msgstr ""
 
@@ -379,83 +375,83 @@ msgstr ""
 msgid "Preferred Language"
 msgstr ""
 
-#: main.py:613
+#: main.py:610
 msgid "Network Proxy"
 msgstr ""
 
-#: main.py:626
+#: main.py:623
 msgid "Host"
 msgstr ""
 
-#: main.py:630
+#: main.py:627
 msgid "Port"
 msgstr ""
 
-#: main.py:658
+#: main.py:655
 msgid "Cache"
 msgstr ""
 
-#: main.py:677
+#: main.py:674
 msgid "Request"
 msgstr ""
 
-#: main.py:685
+#: main.py:682
 msgid "Attempt times (Default 3):"
 msgstr ""
 
-#: main.py:687
+#: main.py:684
 msgid "Max interval (Default 5s):"
 msgstr ""
 
-#: main.py:692
+#: main.py:689
 msgid "Log"
 msgstr ""
 
-#: main.py:693
+#: main.py:690
 msgid "Show translation"
 msgstr ""
 
-#: main.py:713
+#: main.py:710
 msgid "Cannot clear cache while there are running jobs."
 msgstr ""
 
-#: main.py:720
+#: main.py:717
 msgid "Total: {}"
 msgstr ""
 
-#: main.py:733 main.py:835
+#: main.py:724 main.py:836
 msgid "Proxy host or port is incorrect."
 msgstr ""
 
-#: main.py:735
+#: main.py:726
 msgid "The proxy is available."
 msgstr ""
 
-#: main.py:736
+#: main.py:727
 msgid "The proxy is not available."
 msgstr ""
 
-#: main.py:752
+#: main.py:743
 msgid "Invalid color value."
 msgstr ""
 
-#: main.py:774
+#: main.py:765
 msgid "{} is not a valid regular expression."
 msgstr ""
 
-#: main.py:794
+#: main.py:793
 msgid "An API key is required."
 msgstr ""
 
-#: main.py:805
+#: main.py:806
 msgid "Prompt must include {} and {}."
 msgstr ""
 
-#: main.py:813
+#: main.py:814
 msgid "Prompt must include {}, {} and {}."
 msgstr ""
 
-#: main.py:826
+#: main.py:827
 msgid "Please add a custom translation engine first."
 msgstr ""
 

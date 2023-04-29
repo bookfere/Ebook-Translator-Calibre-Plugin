@@ -16,6 +16,7 @@ class YoudaoTranslate(Base):
     support_lang = 'youdao.json'
     endpoint = 'https://openapi.youdao.com/api'
     api_key_hint = 'appid:appsecret'
+    api_key_rule = r'^.+?:.+$'
 
     def encrypt(self, signStr):
         hash_algorithm = hashlib.sha256()
@@ -35,7 +36,7 @@ class YoudaoTranslate(Base):
         try:
             app_key, app_secret = self.api_key.split(':')
         except Exception:
-            raise Exception(_('Incorrect format of APP key and secret.'))
+            raise Exception(self.get_api_key_error())
 
         curtime = str(int(time.time()))
         salt = str(uuid.uuid1())

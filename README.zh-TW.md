@@ -26,13 +26,13 @@
 
 ## 安裝外掛程式
 
-首先確保您的作業系統已經安裝了 [Calibre](https://calibre-ebook.com/)。
+首先確保您的作業系統已經安裝了 [Calibre](https://calibre-ebook.com/)，然後透過以下任意方式安裝此外掛程式。
 
 【 __透過 Calibre 安裝__ 】
 
-1. 開啟 Calibre 並依次按下其選單【 __偏好設定...__ → __外掛__ → __取得新的外掛__ 】；
-2. 在插件清單中選取【 __Ebook Translator__ 】，再點擊【 __安裝__ 】按鈕；
-3. 重新開啟 Calibre 即可正常使用外掛。
+1. 首先開啟 Calibre 並依次按下其選單【 __偏好設定...__ → __外掛__ → __取得新的外掛__ 】；
+2. 然後在插件清單中選取【 __Ebook Translator__ 】，再點擊【 __安裝__ 】按鈕 (請留意，首次安裝此外掛程式時，要選擇將圖示顯示在主工具列上)；
+3. 最後關閉並重新開啟 Calibre 即可正常使用。
 
 【 __透過外掛檔案安裝__ 】
 
@@ -78,6 +78,12 @@ __【 譯文色彩 】__
 
 您可以透過按下【選取】按鈕從調色盤選取色彩，也可以手動輸入色彩值，色彩值可參考 MDN 有關「[色彩值](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value)」的文件。如果留空則不使用自訂色彩。
 
+__【 合併翻譯 】__
+
+* __启用__ [默认不勾选]：啟用合併翻譯功能
+
+您可以在這裡設置單次要翻譯的字元數量，預設值為 2000。
+
 __【 翻譯詞彙表 】__
 
 * __啟用__ [預設不勾選]：啟用選取的翻譯詞彙表
@@ -90,12 +96,6 @@ __【 翻譯詞彙表 】__
 艾菲爾鐵塔
 
 The Statue of Liberty</pre>
-
-__【 合併翻譯 】__
-
-* __启用__ [默认不勾选]：啟用合併翻譯功能
-
-您可以在這裡設置單次要翻譯的字元數量，預設值為 2000。
 
 __【 忽略翻譯 】__
 
@@ -115,12 +115,12 @@ __【 輸出路徑 】__
 __【 翻譯引擎 】__
 
 * __Google(Free)__ [預設]：免費的翻譯引擎
-* __ChatGPT__：需要 API 金鑰
-* __DeepL__：需要 API 金鑰
-* __DeepL(Pro)__：需要 API 金鑰
+* __ChatGPT__：需要 API 金鑰（[取得](https://platform.openai.com/account/api-keys)）
+* __DeepL__：需要 API 金鑰（[取得](https://www.deepl.com/pro?cta=header-pro-button/)）
+* __DeepL(Pro)__：需要 API 金鑰（[取得](https://www.deepl.com/pro?cta=header-pro-button/)）
 * __DeepL(Free)__: 免費的翻譯引擎 (不穩定)
-* __Youdao__：需要應用程式金鑰和秘密
-* __Baidu__：需要應用程式 ID 和 金鑰
+* __Youdao__：需要應用程式金鑰和秘密（[取得](https://ai.youdao.com/console/#/app-overview/create-application)）
+* __Baidu__：需要應用程式 ID 和 金鑰（[取得](https://api.fanyi.baidu.com/register)）
 * __[自訂]__：自訂任意翻譯引擎
 
 注意，除了 Google(Free) 和 DeepL(Free) 不需要 API 金鑰外，其他內建翻譯引擎都需要您註冊對應帳戶 (可能需要付費) 取得 API 金鑰才能使用。另外，由於外掛程式在開發時缺少 DeepL 的 API 金鑰，依據其官網提供的回應資訊範例，程式可以正常執行，實際執行狀況未知。

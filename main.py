@@ -556,9 +556,6 @@ class MainWindowFrame(QDialog):
                 self.api_key.clear()
                 if engine_name in api_keys:
                     self.api_key.setText(api_keys.get(engine_name))
-                api_key_validator = QRegularExpressionValidator(
-                    QRegularExpression(self.current_engine.api_key_rule))
-                self.api_key.setValidator(api_key_validator)
                 self.api_key.setPlaceholderText(
                     self.current_engine.api_key_hint)
             # show prompt setting
@@ -719,16 +716,10 @@ class MainWindowFrame(QDialog):
         return self.cache_count.setText(
             _('Total: {}').format(TranslationCache.count()))
 
-    def is_valid_proxy_host(self, host):
-        state = self.host_validator.validate(host, 0)[0]
-        if isinstance(state, int):
-            return state == 2  # Compatible with PyQt5
-        return state.value == 2
-
     def test_proxy_connection(self):
         host = self.proxy_host.text()
         port = self.proxy_port.text()
-        if not (host and self.is_valid_proxy_host(host) and port):
+        if not (host and self.is_valid(self.host_validator, host) and port):
             return self.pop_alert(
                 _('Proxy host or port is incorrect.'), level='warning')
         if is_proxy_availiable(host, port):
@@ -778,6 +769,12 @@ class MainWindowFrame(QDialog):
         save_config(self.config)
         self.pop_alert(_('The setting has been saved.'))
 
+    def is_valid(self, validator, value):
+        state = validator.validate(value, 0)[0]
+        if isinstance(state, int):
+            return state == 2  # Compatible with PyQt5
+        return state.value == 2
+
     def update_setting_config(self):
         # Output path
         output_path = self.output_path_entry.text()
@@ -787,12 +784,16 @@ class MainWindowFrame(QDialog):
         self.config.update(output_path=output_path.strip())
 
         # API key
-        engine_info = self.config.get('api_key')
-        api_key = self.api_key.text()
-        if self.api_key.isVisible() and not api_key:
-            return self.pop_alert(
-                _('An API key is required.'), 'warning')
-        if self.api_key.isVisible():
+        if self.current_engine.need_api_key:
+            engine_info = self.config.get('api_key')
+            api_key = self.api_key.text()
+            api_key_validator = QRegularExpressionValidator(
+                QRegularExpression(self.current_engine.api_key_rule))
+            if not api_key:
+                return self.pop_alert(_('An API key is required.'), 'warning')
+            if not self.is_valid(api_key_validator, api_key):
+                return self.pop_alert(
+                    self.current_engine.get_api_key_error(), 'warning')
             engine_info.update({self.config.get('translate_engine'): api_key})
 
         # ChatGPT prompt
@@ -830,7 +831,7 @@ class MainWindowFrame(QDialog):
         host = self.proxy_host.text()
         port = self.proxy_port.text()
         if self.config.get('proxy_enabled') and not (
-                host and self.is_valid_proxy_host(host) and port):
+                host and self.is_valid(self.host_validator, host) and port):
             return self.pop_alert(
                 _('Proxy host or port is incorrect.'), level='warning')
         if host:
