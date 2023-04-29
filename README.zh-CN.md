@@ -26,18 +26,18 @@
 
 ## 安装插件
 
-首先确保你的操作系统已经安装了 [Calibre](https://calibre-ebook.com/)。
+首先确保你的操作系统已经安装了 [Calibre](https://calibre-ebook.com/)，然后通过以下任意方式安装本插件。
 
 【 __通过 Calibre 安装__ 】
 
-1. 打开 Calibre 并依次点击其菜单【 __首选项...__ → __插件__ → __获取新的插件__ 】；
-2. 在插件列表中选中 __Ebook Translator__ 然后点击 【 __安装__ 】 按钮；
-3. 重启 Calibre 使插件生效。
+1. 首先打开 Calibre 并依次点击其菜单【 __首选项...__ → __插件__ → __获取新的插件__ 】；
+2. 然后在插件列表中选中 __Ebook Translator__ 然后点击 【 __安装__ 】 按钮（请留意，首次安装此插件时，要选择把图标显示在主工具栏上）；
+3. 最后关闭并重新打开 Calibre 即可正常使用。
 
 【 __通过插件文件安装__ 】
 
-1. 首先在[插件发布页面](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/releases))下载插件文件；
-2. 然后打开 Calibre 并依次点击其菜单【首选项 → 插件 → 从文件加载插件】，弹出的对话框中选择下载的后缀名为 .zip 的插件文件完成安装（请留意，首次安装此插件时，要选择把图标显示在主工具栏上）；
+1. 首先在[插件发布页面](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/releases)下载插件文件；
+2. 然后打开 Calibre 并依次点击其菜单【首选项 → 插件 → 从文件加载插件】，弹出的对话框中选择下载的扩展名为 .zip 的插件文件完成安装（请留意，首次安装此插件时，要选择把图标显示在主工具栏上）；
 3. 最后关闭并重新打开 Calibre 即可正常使用。
 
 如果你想安装最新的插件，可以运行以下命令从 GitHub 仓库中下载最新的插件文件：
@@ -72,17 +72,17 @@ __【 译文位置 】__
 * __加在原文前__：将译文添加到原文前
 * __不保留原文__：删除原文只保留译文
 
-__【 合并翻译 】__
-
-* __启用__ [默认不勾选]：启用合并翻译功能
-
-你可以在这里设置单次要翻译的字符数量，默认值为 2000。
-
 __【 译文颜色 】__
 
 * __颜色值__：CSS 颜色值，如 #666666, gry, rgb(80, 80, 80)
 
 你可以通过点击【选择】按钮从调色盘选取颜色，也可以手动输入颜色值，颜色值可参考 MDN 有关“[颜色值](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value)”的文档。如果留空则不使用自定义颜色。
+
+__【 合并翻译 】__
+
+* __启用__ [默认不勾选]：启用合并翻译功能
+
+你可以在这里设置单次要翻译的字符数量，默认值为 2000。
 
 __【翻译词汇表】__
 
@@ -115,12 +115,12 @@ __【 输出路径 】__
 __【 翻译引擎 】__
 
 * __Google(Free)__ [默认]：免费的翻译引擎
-* __ChatGPT__：需要 API 密钥
-* __DeepL__：需要 API 密钥
-* __DeepL(Pro)__：需要 API 密钥
+* __ChatGPT__：需要 API 密钥（[获取](https://platform.openai.com/account/api-keys)）
+* __DeepL__：需要 API 密钥（[获取](https://www.deepl.com/pro?cta=header-pro-button/)）
+* __DeepL(Pro)__：需要 API 密钥（[获取](https://www.deepl.com/pro?cta=header-pro-button/)）
 * __DeepL(Free)__: 免费的翻译引擎 (不稳定)
-* __有道__：需要 APP key 和 secret
-* __百度__：需要 APP id 和 key
+* __有道__：需要 APP key 和 secret（[获取](https://ai.youdao.com/console/#/app-overview/create-application)）
+* __百度__：需要 APP id 和 key（[获取](https://api.fanyi.baidu.com/register)）
 * __[自定义]__：自定义任意翻译引擎
 
 注意，除了 Google (Free) 和 DeepL (Free) 不需要 API 密钥外，其他内置翻译引擎都需要你注册相应账户（可能需要付费）获取 API 密钥才能使用。另外，由于插件在开发时缺少 DeepL 的 API 密钥，根据其官网提供的响应信息样例，程序可以正常运行，实际运行情况未知。

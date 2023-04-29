@@ -11,6 +11,7 @@ class ChatgptTranslate(Base):
     alias = 'ChatGPT'
     support_lang = 'google.json'
     endpoint = 'https://api.openai.com/v1/chat/completions'
+    # api_key_hint = 'sk-xxx...xxx'
 
     default_prompts = {
         'auto': 'Translate the content into {tlang}: {text}',

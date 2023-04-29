@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-04-28 14:25+0800\n"
+"POT-Creation-Date: 2023-04-29 23:32+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -79,11 +79,11 @@ msgstr "自动探测"
 msgid "Baidu"
 msgstr "百度"
 
-msgid "Incorrect format of APP id and key."
-msgstr "APP id 和 key 格式填写有误。"
-
 msgid "API Key"
 msgstr "API密钥"
+
+msgid "A correct key format \"{}\" is required."
+msgstr "必须填写正确的密钥格式 \"{}\"。"
 
 msgid "Can not parse returned response. Raw data: {}"
 msgstr "无法解析返回的响应。原始数据：{}"
@@ -132,9 +132,6 @@ msgstr "总计 {}，已用 {}，剩余 {}"
 
 msgid "Youdao"
 msgstr "有道"
-
-msgid "Incorrect format of APP key and secret."
-msgstr "APP key 和 secret 格式填写有误。"
 
 msgid "Content"
 msgstr "内容"

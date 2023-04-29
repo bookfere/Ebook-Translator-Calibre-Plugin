@@ -16,6 +16,7 @@ class DeeplTranslate(Base):
         'translate': 'https://api-free.deepl.com/v2/translate',
         'usage': 'https://api-free.deepl.com/v2/usage',
     }
+    # api_key_hint = 'xxx-xxx-xxx:fx'
     merge_divider = ('<m id={} />', r'<m\s+id={}\s+/>')
 
     def get_usage(self):
