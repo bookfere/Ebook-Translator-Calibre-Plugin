@@ -17,7 +17,7 @@ class Base:
     need_api_key = True
     api_key_hint = _('API Key')
     api_key_rule = r'^.+$'
-    merge_divider = ('{{{{{}}}}}', r'{{\s*{{\s*{}\s*}}\s*}}')
+    placeholder = ('{{{{{}}}}}', r'{{\s*{{\s*{}\s*}}\s*}}')
 
     def __init__(self):
         self.api_key = ''

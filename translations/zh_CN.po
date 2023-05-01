@@ -1,7 +1,7 @@
-# Chinese translations for Ebook Translator Calibre package
-# Ebook Translator Calibre 软件包的简体中文翻译.
-# Copyright (C) 2023 THE Ebook Translator Calibre'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the Ebook Translator Calibre Plugin package.
+# Chinese translations for Ebook Translator Calibre Plugin
+# Ebook Translator Calibre Plugin 软件包的简体中文翻译.
+# Copyright (C) 2023 THE Ebook Translator Calibre Plugin'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the Ebook Translator Calibre Plugin.
 # Automatically generated, 2023.
 #
 msgid ""
