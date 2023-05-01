@@ -102,19 +102,17 @@ class Translation:
         element_handler = ElementHandler(
             elements, self.translator.get_target_code(),
             self.translation_position, self.translation_color,
-            self.merge_length, self.translator.merge_divider)
+            self.merge_length, self.translator.placeholder)
 
         original_group = element_handler.get_original()
-        count = 0
         total = len(original_group)
-
         if total < 1:
             raise Exception(_('There is no content need to translate.'))
-
         self._log(sep, _('Start to translate ebook content:'), sep, sep='\n')
         self._log(_('Total items: {}').format(total))
         process, step = 0.0, 1.0 / total
 
+        count = 0
         for identity, original in original_group:
             self._log('-' * 30)
             count += 1
@@ -125,6 +123,7 @@ class Translation:
             process += step
             if self.need_sleep and count < total:
                 time.sleep(random.randint(1, self.request_interval))
+
         element_handler.apply_translation()
 
         self._progress(1, _('Translation completed.'))

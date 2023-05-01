@@ -15,7 +15,7 @@ class EbookTranslator(InterfaceActionBase):
     title = _(name)
     supported_platforms = ['windows', 'osx', 'linux']
     author = 'bookfere.com'
-    version = (1, 3, 1)
+    version = (1, 3, 2)
     __version__ = 'v' + '.'.join(map(str, version))
     description = _('A Calibre plugin to translate ebook into a specified '
                     'language (optionally keeping the original content).')

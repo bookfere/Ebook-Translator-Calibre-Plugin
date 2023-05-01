@@ -1,7 +1,7 @@
 import unittest
 from calibre.utils.run_tests import run_cli
 from calibre_plugins.ebook_translator.tests import (
-    test_utils, test_config, test_deepl, test_custom)
+    test_utils, test_config, test_deepl, test_custom, test_element)
 
 
 def get_tests(module):
@@ -10,11 +10,8 @@ def get_tests(module):
 
 def get_test_suite():
     suite = unittest.TestSuite()
-    suite.addTests(get_tests(test_utils))
-    suite.addTests(get_tests(test_config))
-    suite.addTests(get_tests(test_deepl))
-    suite.addTests(get_tests(test_custom))
-
+    klasses = [test_utils, test_config, test_deepl, test_custom, test_element]
+    suite.addTests(get_tests(klass) for klass in klasses)
     return suite
 
 

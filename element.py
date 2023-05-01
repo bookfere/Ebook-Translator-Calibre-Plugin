@@ -11,8 +11,9 @@ def get_string(element):
 
 
 class Element:
-    def __init__(self, element):
+    def __init__(self, element, placeholder):
         self.element = element
+        self.placeholder = placeholder
         self.element_copy = copy.deepcopy(element)
         self.reserves = []
 
@@ -23,27 +24,30 @@ class Element:
 
         self.reserves = self.element_copy.xpath(
             './/*[self::x:img]', namespaces=ns)
-        for reserve in self.reserves:
-            placeholder = 'el_%s' % id(reserve)
+        for rid, reserve in enumerate(self.reserves):
+            placeholder = self.placeholder[0].format('id_r%s' % rid)
+            parent = reserve.getparent()
             previous = reserve.getprevious()
-            previous.tail = (previous.tail or '') + placeholder
-            previous.tail += (reserve.tail or '')
-            reserve.getparent().remove(reserve)
+            if previous is not None:
+                previous.tail = (previous.tail or '') + placeholder
+                previous.tail += (reserve.tail or '')
+            else:
+                parent.text = (parent.text or '') + placeholder
+                parent.text += (reserve.tail or '')
+            parent.remove(reserve)
             reserve.tail = None
-
-        return trim(''.join(self.element_copy.itertext())).replace('\n', ' ')
+        return re.sub(r'\s+', ' ', trim(''.join(self.element_copy.itertext())))
 
     def add_translation(
-            self, translation, lang=None, position=None, color=None):
+            self, translation, position=None, lang=None, color=None):
         translation = escape(translation)
+        for rid, reserve in enumerate(self.reserves):
+            translation = re.sub(
+                escape(self.placeholder[1].format('id_r%s' % rid)),
+                get_string(reserve), translation)
 
-        for reserve in self.reserves:
-            translation = translation.replace(
-                'el_%s' % id(reserve), get_string(reserve))
-
-        translation = '<{0} xmlns="{1}">{2}</{0}>'.format(
-            etree.QName(self.element).localname, ns['x'], translation)
-        new_element = etree.fromstring(translation)
+        new_element = etree.XML('<{0} xmlns="{1}">{2}</{0}>'.format(
+            etree.QName(self.element).localname, ns['x'], translation))
         if color is not None:
             new_element.set('style', 'color:%s' % color)
         if lang is not None:
@@ -58,17 +62,18 @@ class Element:
             self.element.addnext(new_element)
         if position == 'only':
             self.element.getparent().remove(self.element)
+        return new_element
 
 
 class ElementHandler:
     def __init__(self, items, lang=None, position=None, color=None,
-                 merge_length=0, merge_divider=None):
-        self.elements = [Element(item) for item in items]
-        self.merge_length = merge_length
-        self.merge_divider = merge_divider
+                 merge_length=0, placeholder=None):
+        self.elements = [Element(item, placeholder) for item in items]
         self.lang = lang
         self.position = position
         self.color = color
+        self.merge_length = merge_length
+        self.placeholder = placeholder
 
         self.original = []
         self.translation = []
@@ -81,8 +86,8 @@ class ElementHandler:
             return self.original
 
         content = ''
-        for sid, element in enumerate(self.elements):
-            placeholder = ' %s ' % self.merge_divider[0].format('id_%s' % sid)
+        for pid, element in enumerate(self.elements):
+            placeholder = ' %s ' % self.placeholder[0].format('id_p%s' % pid)
             text = element.get_content() + placeholder
             if len(content + text) < self.merge_length:
                 content += text
@@ -98,21 +103,18 @@ class ElementHandler:
     def add_translation(self, text):
         self.translation.append(text)
 
-    def varify_translation(self):
-        pass
-
     def apply_translation(self):
         if self.merge_length == 0:
             for element in self.elements:
                 element.add_translation(
                     self.translation[self.elements.index(element)],
-                    self.lang, self.position, self.color)
+                    self.position, self.lang, self.color)
             return
 
         content = ''.join(self.translation)
-        pattern = self.merge_divider[1]
-        for sid, element in enumerate(self.elements):
-            matches = re.search(pattern.format('id_%s' % sid), content)
+        for pid, element in enumerate(self.elements):
+            matches = re.search(
+                self.placeholder[1].format('id_p%s' % pid), content)
             if not matches:
                 continue
             placeholder = matches.group(0)
@@ -120,4 +122,4 @@ class ElementHandler:
             part = content[:end]
             content = content.replace(part + placeholder, '', 1)
             element.add_translation(
-                part.strip(), self.lang, self.position, self.color)
+                part.strip(), self.position, self.lang, self.color)

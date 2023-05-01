@@ -584,7 +584,7 @@ class MainWindowFrame(QDialog):
             custom_engines = self.config.get('custom_engines')
             for name in sorted(custom_engines.keys(), key=sorted_mixed_keys):
                 engine_list.addItem(name, name)
-            engine_list.setCurrentText(self.config.get('translate_engine'))
+            engine_list.setCurrentText(_(self.current_engine.alias))
             choose_default_engine(engine_list.currentIndex())
             engine_list.currentIndexChanged.connect(choose_default_engine)
         refresh_engine_list()
@@ -617,7 +617,7 @@ class MainWindowFrame(QDialog):
         proxy_layout.addWidget(self.proxy_enabled)
 
         self.proxy_host = QLineEdit()
-        regex = r'^[a-zA-Z\d]([a-zA-Z\d]+(\.|-*)){2,}[a-zA-Z\d]\.[a-zA-Z\d]+$'
+        regex = r'^[a-zA-Z\d](://|[a-zA-Z\d]+(\.|-*)){2,}[a-zA-Z\d]+$'
         re = QRegularExpression(regex)
         self.host_validator = QRegularExpressionValidator(re)
         self.proxy_host.setPlaceholderText(_('Host'))
