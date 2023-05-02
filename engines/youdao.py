@@ -16,7 +16,7 @@ class YoudaoTranslate(Base):
     support_lang = 'youdao.json'
     endpoint = 'https://openapi.youdao.com/api'
     api_key_hint = 'appid:appsecret'
-    api_key_rule = r'^.+?:.+$'
+    api_key_rule = r'^[^\s:]+?:[^\s:]+$'
 
     def encrypt(self, signStr):
         hash_algorithm = hashlib.sha256()
