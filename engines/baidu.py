@@ -15,7 +15,7 @@ class BaiduTranslate(Base):
     support_lang = 'baidu.json'
     endpoint = 'https://fanyi-api.baidu.com/api/trans/vip/translate'
     api_key_hint = 'appid:appkey'
-    api_key_rule = r'^.+?:.+$'
+    api_key_rule = r'^[^\s:]+?:[^\s:]+$'
 
     def translate(self, text):
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}

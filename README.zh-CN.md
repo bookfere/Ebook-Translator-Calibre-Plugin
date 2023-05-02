@@ -114,11 +114,12 @@ __【 输出路径 】__
 
 __【 翻译引擎 】__
 
-* __Google(Free)__ [默认]：免费的翻译引擎
+* __Google (Free)__ [默认]：免费的翻译引擎
+* __Google (Basic)__: 需要 API 密钥（[获取](https://console.cloud.google.com/apis/credentials)）
 * __ChatGPT__：需要 API 密钥（[获取](https://platform.openai.com/account/api-keys)）
 * __DeepL__：需要 API 密钥（[获取](https://www.deepl.com/pro?cta=header-pro-button/)）
-* __DeepL(Pro)__：需要 API 密钥（[获取](https://www.deepl.com/pro?cta=header-pro-button/)）
-* __DeepL(Free)__: 免费的翻译引擎 (不稳定)
+* __DeepL (Pro)__：需要 API 密钥（[获取](https://www.deepl.com/pro?cta=header-pro-button/)）
+* __DeepL (Free)__: 免费的翻译引擎 (不稳定)
 * __有道__：需要 APP key 和 secret（[获取](https://ai.youdao.com/console/#/app-overview/create-application)）
 * __百度__：需要 APP id 和 key（[获取](https://api.fanyi.baidu.com/register)）
 * __[自定义]__：自定义任意翻译引擎
