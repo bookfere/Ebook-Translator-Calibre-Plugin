@@ -1,3 +1,4 @@
+import re
 import json
 import time
 import uuid
@@ -15,8 +16,8 @@ class YoudaoTranslate(Base):
     alias = _z('Youdao')
     support_lang = 'youdao.json'
     endpoint = 'https://openapi.youdao.com/api'
-    api_key_hint = 'appid:appsecret'
-    api_key_rule = r'^[^\s:]+?:[^\s:]+$'
+    api_key_hint = 'appid|appsecret'
+    api_key_rule = r'^[^\s:\|]+?[:\|][^\s:\|]+$'
 
     def encrypt(self, signStr):
         hash_algorithm = hashlib.sha256()
@@ -31,10 +32,8 @@ class YoudaoTranslate(Base):
             text[0:10] + str(size) + text[size - 10:size]
 
     def translate(self, text):
-        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-
         try:
-            app_key, app_secret = self.api_key.split(':')
+            app_key, app_secret = re.split(r'[:\|]', self.api_key)
         except Exception:
             raise Exception(self.get_api_key_error())
 
@@ -42,6 +41,8 @@ class YoudaoTranslate(Base):
         salt = str(uuid.uuid1())
         sign_str = app_key + self.truncate(text) + salt + curtime + app_secret
         sign = self.encrypt(sign_str)
+
+        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
         data = {
             'from': self._get_source_code(),

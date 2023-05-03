@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-04-29 23:32+0800\n"
+"POT-Creation-Date: 2023-05-04 00:02+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -129,6 +129,9 @@ msgstr "响应没有正确解析。"
 
 msgid "{} total, {} used, {} left"
 msgstr "总计 {}，已用 {}，剩余 {}"
+
+msgid "Can not obtain Google API key. Reason: {}"
+msgstr "无法获取 Google API 密钥。原因：{}"
 
 msgid "Youdao"
 msgstr "有道"
@@ -334,9 +337,6 @@ msgstr "无效的颜色值。"
 msgid "{} is not a valid regular expression."
 msgstr "{} 不是有效的正则表达式。"
 
-msgid "An API key is required."
-msgstr "API密钥是必填项。"
-
 msgid "Prompt must include {} and {}."
 msgstr "提示词必须包含 {} 和 {}。"
 
@@ -352,8 +352,8 @@ msgstr "无法从翻译引擎API获取数据。"
 msgid "Will retry in {} seconds."
 msgstr "{} 秒后重试。"
 
-msgid "Retrying ... (timeout is {} seconds)."
-msgstr "正在重试 ...（{}秒后超时）"
+msgid "[{}] Retrying {} ... (timeout is {} seconds)."
+msgstr "[{}] 正在重试 {} ...（{}秒后超时）"
 
 msgid "Original: {}"
 msgstr "原文：{}"

@@ -1,6 +1,7 @@
 import traceback
 
 from mechanize import Browser, Request
+from calibre.constants import DEBUG
 from calibre.utils.localization import lang_as_iso639_1
 
 
@@ -23,6 +24,7 @@ class Base:
         self.api_key = ''
         self.source_lang = None
         self.target_lang = None
+        self.proxy_uri = None
 
         self.br = Browser()
         self.br.set_handle_robots(False)
@@ -66,8 +68,9 @@ class Base:
 
     def set_proxy(self, proxy=[]):
         if isinstance(proxy, list) and len(proxy) == 2:
-            proxy = 'http://%s:%s' % tuple(proxy)
-            self.br.set_proxies({'http': proxy, 'https': proxy})
+            self.proxy_uri = '%s:%s' % tuple(proxy)
+            if not self.proxy_uri.startswith('http'):
+                self.proxy_uri = 'http://%s' % self.proxy_uri
 
     def _get_source_code(self):
         return 'auto' if self.source_lang == _('Auto detect') else \
@@ -85,6 +88,8 @@ class Base:
     def get_result(self, url, data=None, headers={}, method='GET',
                    stream=False, callback=None, silence=False):
         result = None
+        self.proxy_uri and self.br.set_proxies(
+            {'http': self.proxy_uri, 'https': self.proxy_uri})
         try:
             self.br.open(Request(url, data, headers=headers, method=method,
                                  timeout=self.timeout))
@@ -93,7 +98,7 @@ class Base:
                 response.read().decode('utf-8').strip()
             return self.parse(result) if callback is None else callback(result)
         except Exception as e:
-            traceback.print_exc()
+            DEBUG and traceback.print_exc()
             if silence:
                 return None
             raw_data = str(e) if result is None else result + ' ' + str(e)

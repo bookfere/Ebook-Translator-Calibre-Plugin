@@ -1,3 +1,6 @@
+import os
+
+from calibre.constants import DEBUG
 from calibre.gui2.actions import InterfaceAction
 from calibre.ebooks.conversion.config import get_input_format_for_book
 from calibre_plugins.ebook_translator import EbookTranslator
@@ -33,6 +36,7 @@ class EbookTranslatorGui(InterfaceAction):
         # self.qaction.setMenu(menu)
 
     def show_dialog(self):
+        DEBUG and os.environ.update(CALIBRE_DEBUG='1')
         ebooks = self.get_selected_ebooks()
 
         if len(ebooks) < 1:

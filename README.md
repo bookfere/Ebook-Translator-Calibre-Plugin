@@ -116,10 +116,11 @@ __[ Translation Engine ]__
 
 * __Google (Free)__ [default]: Free translation engine
 * __Google (Basic)__: API key required ([obtain](https://console.cloud.google.com/apis/credentials))
+* __Google (Advanced)__: Project ID and JSON key file required ([obtain](https://console.cloud.google.com/apis/credentials))
 * __ChatGPT__: API key required ([obtain](https://platform.openai.com/account/api-keys))
 * __DeepL__: API key required ([obtain](https://www.deepl.com/pro?cta=header-pro-button/))
 * __DeepL (Pro)__: API key required ([obtain](https://www.deepl.com/pro?cta=header-pro-button/))
-* __DeepL (Free)__: Free translation engine (Unstable)
+* __DeepL (Free)__: Free translation engine (unstable)
 * __Youdao__: APP key and secret required ([obtain](https://ai.youdao.com/console/#/app-overview/create-application))
 * __Baidu__: APP id and key required ([obtain](https://api.fanyi.baidu.com/register))
 * __[Custom]__: Customize your own translation engine
