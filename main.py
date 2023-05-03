@@ -620,11 +620,11 @@ class MainWindowFrame(QDialog):
         proxy_layout.addWidget(self.proxy_enabled)
 
         self.proxy_host = QLineEdit()
-        regex = r'^[a-zA-Z\d](://|[a-zA-Z\d]+(\.|-*)){2,}[a-zA-Z\d]+$'
-        re = QRegularExpression(regex)
-        self.host_validator = QRegularExpressionValidator(re)
+        rule = r'^(http://|)([a-zA-Z\d]+:[a-zA-Z\d]+@|)' \
+               r'(([a-zA-Z\d]|-)*[a-zA-Z\d]\.){1,}[a-zA-Z\d]+$'
+        self.host_validator = QRegularExpressionValidator(
+            QRegularExpression(rule))
         self.proxy_host.setPlaceholderText(_('Host'))
-        self.proxy_host.setValidator(self.host_validator)
         proxy_layout.addWidget(self.proxy_host, 4)
         self.proxy_port = QLineEdit()
         self.proxy_port.setPlaceholderText(_('Port'))
@@ -722,7 +722,7 @@ class MainWindowFrame(QDialog):
     def test_proxy_connection(self):
         host = self.proxy_host.text()
         port = self.proxy_port.text()
-        if not (host and self.is_valid_data(self.host_validator, host) and port):
+        if not (self.is_valid_data(self.host_validator, host) and port):
             return self.pop_alert(
                 _('Proxy host or port is incorrect.'), level='warning')
         if is_proxy_availiable(host, port):
@@ -790,8 +790,6 @@ class MainWindowFrame(QDialog):
         if self.current_engine.need_api_key:
             engine_info = self.config.get('api_key')
             api_key = self.api_key.text()
-            if not api_key:
-                return self.pop_alert(_('An API key is required.'), 'warning')
             if not self.is_valid_data(self.api_key_validator, api_key):
                 return self.pop_alert(
                     self.current_engine.get_api_key_error(), 'warning')

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-04-29 23:32+0800\n"
+"POT-Creation-Date: 2023-05-04 00:02+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -132,6 +132,9 @@ msgstr "La respuesta fue analizada incorrectamente."
 
 msgid "{} total, {} used, {} left"
 msgstr "{} en total, {} utilizado(s), {} restante(s)"
+
+msgid "Can not obtain Google API key. Reason: {}"
+msgstr "No se puede obtener la clave de API de Google. Razón: {}"
 
 msgid "Youdao"
 msgstr "Youdao"
@@ -339,9 +342,6 @@ msgstr "Valor de color no válido."
 msgid "{} is not a valid regular expression."
 msgstr "{} no es una expresión regular válida."
 
-msgid "An API key is required."
-msgstr "Se requiere una clave API."
-
 msgid "Prompt must include {} and {}."
 msgstr "El prompt debe incluir {} y {}."
 
@@ -357,8 +357,8 @@ msgstr "No se pudieron recuperar los datos de la API del motor de traducción."
 msgid "Will retry in {} seconds."
 msgstr "Se volverá a intentar en {} segundos."
 
-msgid "Retrying ... (timeout is {} seconds)."
-msgstr "Reintentando... (el tiempo de espera es de {} segundos)."
+msgid "[{}] Retrying {} ... (timeout is {} seconds)."
+msgstr "[{}] Reintentando {} ... (el tiempo de espera es de {} segundos)."
 
 msgid "Original: {}"
 msgstr "Original: {}"

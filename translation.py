@@ -72,8 +72,9 @@ class Translation:
             self._log(message)
             self._log(_('Will retry in {} seconds.').format(interval))
             time.sleep(interval)
-            self._log(_('Retrying ... (timeout is {} seconds).')
-                      .format(int(self.translator.timeout)))
+            self._log(_('[{}] Retrying {} ... (timeout is {} seconds).')
+                      .format(time.strftime('%Y-%m-%d %H:%I:%S'), count,
+                              int(self.translator.timeout)))
             return self._translate_text(text, count, interval)
 
     def _get_translation(self, identity, original):

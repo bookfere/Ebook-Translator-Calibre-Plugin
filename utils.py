@@ -26,6 +26,7 @@ def trim(text):
 
 def is_proxy_availiable(host, port, timeout=1):
     try:
+        host = host.replace('http://', '')
         socket.create_connection((host, int(port)), timeout).close()
     except Exception as e:
         return False

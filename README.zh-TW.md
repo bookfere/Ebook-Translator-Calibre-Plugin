@@ -116,6 +116,7 @@ __【 翻譯引擎 】__
 
 * __Google (Free)__ [預設]：免費的翻譯引擎
 * __Google (Basic)__：需要 API 金鑰（[取得](https://console.cloud.google.com/apis/credentials)）
+* __Google (Advanced)__：需要專案 ID 和 JSON 金鑰檔案（[取得](https://console.cloud.google.com/apis/credentials)）
 * __ChatGPT__：需要 API 金鑰（[取得](https://platform.openai.com/account/api-keys)）
 * __DeepL__：需要 API 金鑰（[取得](https://www.deepl.com/pro?cta=header-pro-button/)）
 * __DeepL (Pro)__：需要 API 金鑰（[取得](https://www.deepl.com/pro?cta=header-pro-button/)）

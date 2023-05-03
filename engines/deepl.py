@@ -41,7 +41,7 @@ class DeeplTranslate(Base):
         }
 
         if not self._is_auto_lang():
-            data['source_lang'] = self._get_source_code()
+            data.update(source_lang=self._get_source_code())
 
         return self.get_result(
             self.endpoint.get('translate'), data, headers, method='POST')
@@ -75,8 +75,8 @@ class DeeplFreeTranslate(Base):
         'Authority': 'www2.deepl.com',
         'Content-Type': 'application/json; charset=utf-8',
         'User-Agent': 'DeepLBrowserExtension/1.3.0 Mozilla/5.0 (Macintosh;'
-        ' Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) '
-        'Chrome/111.0.0.0 Safari/537.36',
+        ' Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)'
+        ' Chrome/111.0.0.0 Safari/537.36',
         'Origin': 'chrome-extension://cofdbpoegempjloogbagkncekinflcnj',
         'Referer': 'https://www.deepl.com/',
     }
