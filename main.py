@@ -276,8 +276,10 @@ class MainWindowFrame(QDialog):
 
             scroll_area = QScrollArea(widget)
             scroll_area.setWidgetResizable(True)
-            # scroll_area.setFrameStyle(QFrame.NoFrame)
-            if not QApplication.instance().is_dark_theme:
+            # Compatible with lower versions of Calibre
+            instance = QApplication.instance()
+            if not (getattr(instance, 'is_dark_theme', None) and
+                    instance.is_dark_theme):
                 scroll_area.setBackgroundRole(QPalette.Light)
             scroll_area.setWidget(func(self))
             layout.addWidget(scroll_area, 1)
