@@ -36,7 +36,7 @@ try:
         QGroupBox, QTableWidget, QTableWidgetItem, QRegularExpression, QColor,
         QFileDialog, QIntValidator, QScrollArea, QRadioButton, QGridLayout,
         QCheckBox, QTextBrowser, QTextDocument, QButtonGroup, QColorDialog,
-        QSpinBox, QPalette, QRegularExpressionValidator)
+        QSpinBox, QPalette, QRegularExpressionValidator, QApplication)
 except ImportError:
     from PyQt5.Qt import (
         Qt, QLabel, QDialog, QWidget, QLineEdit, QTabWidget, QPlainTextEdit,
@@ -44,7 +44,7 @@ except ImportError:
         QGroupBox, QTableWidget, QTableWidgetItem, QRegularExpression, QColor,
         QFileDialog, QIntValidator, QScrollArea, QRadioButton, QGridLayout,
         QCheckBox, QTextBrowser, QTextDocument, QButtonGroup, QColorDialog,
-        QSpinBox, QPalette, QRegularExpressionValidator)
+        QSpinBox, QPalette, QRegularExpressionValidator, QApplication)
 
 load_translations()
 
@@ -277,7 +277,8 @@ class MainWindowFrame(QDialog):
             scroll_area = QScrollArea(widget)
             scroll_area.setWidgetResizable(True)
             # scroll_area.setFrameStyle(QFrame.NoFrame)
-            scroll_area.setBackgroundRole(QPalette.Light)
+            if not QApplication.instance().is_dark_theme:
+                scroll_area.setBackgroundRole(QPalette.Light)
             scroll_area.setWidget(func(self))
             layout.addWidget(scroll_area, 1)
 
