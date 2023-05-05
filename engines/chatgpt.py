@@ -47,7 +47,8 @@ class ChatgptTranslate(Base):
 
         # TODO: need to optimize
         if self.keep_mark:
-            content = 'Retain placeholder similar to {{id_0}} and %s' % content
+            content = 'Retain placeholder similar to {{id_p0}} and %s' \
+                % content
 
         data = json.dumps({
             'stream': True,

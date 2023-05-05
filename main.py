@@ -590,7 +590,8 @@ class MainWindowFrame(QDialog):
             custom_engines = self.config.get('custom_engines')
             for name in sorted(custom_engines.keys(), key=sorted_mixed_keys):
                 engine_list.addItem(name, name)
-            engine_list.setCurrentText(_(self.current_engine.alias))
+            engine_list.setCurrentIndex(
+                engine_list.findData(self.config.get('translate_engine')))
             choose_default_engine(engine_list.currentIndex())
             engine_list.currentIndexChanged.connect(choose_default_engine)
         refresh_engine_list()
