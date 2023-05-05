@@ -86,8 +86,3 @@ class TestConfig(unittest.TestCase):
         config.save_config({'a': 3, 'b': 4, 'c': 5})
 
         self.assertEqual({'a': 3, 'b': 4, 'c': 5}, config.preferences)
-
-    def test_get_configs(self):
-        config.preferences = {'a': 1, 'b': 2}
-
-        self.assertEqual([1, 2], config.get_configs('a', 'b'))

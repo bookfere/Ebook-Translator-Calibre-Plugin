@@ -25,7 +25,7 @@ class Element:
         self.reserves = self.element_copy.xpath(
             './/*[self::x:img]', namespaces=ns)
         for rid, reserve in enumerate(self.reserves):
-            placeholder = self.placeholder[0].format('id_r%s' % rid)
+            placeholder = self.placeholder[0].format(rid + 10000)
             parent = reserve.getparent()
             previous = reserve.getprevious()
             if previous is not None:
@@ -43,7 +43,8 @@ class Element:
         translation = escape(translation)
         for rid, reserve in enumerate(self.reserves):
             translation = re.sub(
-                escape(self.placeholder[1].format('id_r%s' % rid)),
+                # Escape the mark to replace escaped marks in the content.
+                escape(self.placeholder[1].format(rid + 10000)),
                 get_string(reserve), translation)
 
         new_element = etree.XML('<{0} xmlns="{1}">{2}</{0}>'.format(
@@ -66,8 +67,8 @@ class Element:
 
 
 class ElementHandler:
-    def __init__(self, items, lang=None, position=None, color=None,
-                 merge_length=0, placeholder=None):
+    def __init__(self, items, placeholder, merge_length=0, lang=None,
+                 position=None, color=None):
         self.elements = [Element(item, placeholder) for item in items]
         self.lang = lang
         self.position = position
@@ -87,7 +88,7 @@ class ElementHandler:
 
         content = ''
         for pid, element in enumerate(self.elements):
-            placeholder = ' %s ' % self.placeholder[0].format('id_p%s' % pid)
+            placeholder = ' %s ' % self.placeholder[0].format(pid)
             text = element.get_content() + placeholder
             if len(content + text) < self.merge_length:
                 content += text
@@ -113,8 +114,7 @@ class ElementHandler:
 
         content = ''.join(self.translation)
         for pid, element in enumerate(self.elements):
-            matches = re.search(
-                self.placeholder[1].format('id_p%s' % pid), content)
+            matches = re.search(self.placeholder[1].format(pid), content)
             if not matches:
                 continue
             placeholder = matches.group(0)

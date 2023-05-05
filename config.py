@@ -42,10 +42,6 @@ def save_config(config):
         set_config(key, value)
 
 
-def get_configs(*keys):
-    return [get_config(key) for key in keys]
-
-
 def get_config(key, default=None):
     temp = preferences.copy()
     for key in key.split('.'):

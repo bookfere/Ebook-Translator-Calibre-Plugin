@@ -5,6 +5,7 @@ from calibre.gui2.actions import InterfaceAction
 from calibre.ebooks.conversion.config import get_input_format_for_book
 from calibre_plugins.ebook_translator import EbookTranslator
 from calibre_plugins.ebook_translator.main import MainWindowFrame
+# from calibre_plugins.ebook_translator.monitor import MonitorPanel
 from calibre_plugins.ebook_translator.components.alert import pop_alert
 
 
@@ -31,8 +32,8 @@ class EbookTranslatorGui(InterfaceAction):
         self.qaction.triggered.connect(self.show_dialog)
 
         # menu = QMenu(self.gui)
-        # test = menu.addAction(_('Setting'))
-        # test.triggered.connect(self.setting)
+        # test = menu.addAction(_('Translation Monitor'))
+        # test.triggered.connect(self.show_monitor)
         # self.qaction.setMenu(menu)
 
     def show_dialog(self):
@@ -52,24 +53,26 @@ class EbookTranslatorGui(InterfaceAction):
         window.setWindowIcon(self.qaction.icon())
         window.show()
 
-    def setting(self):
-        pass
+    # def show_monitor(self):
+    #     MonitorPanel(self.gui).show()
 
-    # {
-    #     0: [
-    #         'book_id': 123,  # book ID in db
-    #         'test',  # Title
-    #         {
-    #             'mobi': '/path/to/ebook.mobi',  # Format 1
-    #             'txt': '/path/to/ebook.txt',  # Format 2
-    #         },
-    #         'txt',  # Input format
-    #         'epub',  # Output format
-    #         'en-US',  # Source language
-    #         'zh-CN',  # Target Language
-    #     ]
-    # }
     def get_selected_ebooks(self):
+        """
+        {
+            0: [
+                'book_id': 123,  # book ID in db
+                'test',  # Title
+                {
+                    'mobi': '/path/to/ebook.mobi',  # Format 1
+                    'txt': '/path/to/ebook.txt',  # Format 2
+                },
+                'txt',  # Input format
+                'epub',  # Output format
+                'en-US',  # Source language
+                'zh-CN',  # Target Language
+            ]
+        }
+        """
         ebooks = {}
         api = self.gui.current_db.new_api
         rows = self.gui.library_view.selectionModel().selectedRows()
