@@ -2,9 +2,12 @@ import re
 import socket
 import hashlib
 
+from calibre.utils.logging import Log
+
 
 ns = {'x': 'http://www.w3.org/1999/xhtml'}
 sep = '=' * 30
+log = Log()
 
 
 def _z(message): return message

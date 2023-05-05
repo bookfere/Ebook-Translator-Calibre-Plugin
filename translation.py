@@ -28,8 +28,7 @@ class Translation:
         self.need_sleep = False
 
     def set_merge_length(self, length):
-        # Custom translation engine does not support merge to translate now.
-        self.merge_length = 0 if self.translator.is_custom() else length
+        self.merge_length = length
 
     def set_translation_position(self, position):
         self.translation_position = position
@@ -92,6 +91,7 @@ class Translation:
             # TODO: translation monitor display streaming text
             if isinstance(translation, GeneratorType):
                 translation = ''.join(text for text in translation)
+                translation = translation.replace('\n', ' ')
             translation = self.glossary.restore(trim(translation))
             self.cache and self.cache.add(identity, translation)
             self._log(_('Translation: {}').format(translation))
@@ -101,9 +101,9 @@ class Translation:
 
     def handle(self, elements):
         element_handler = ElementHandler(
-            elements, self.translator.get_target_code(),
-            self.translation_position, self.translation_color,
-            self.merge_length, self.translator.placeholder)
+            elements, self.translator.placeholder, self.merge_length,
+            self.translator.get_target_code(), self.translation_position,
+            self.translation_color)
 
         original_group = element_handler.get_original()
         total = len(original_group)

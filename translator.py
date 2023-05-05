@@ -34,7 +34,6 @@ def get_translator():
     if get_config('proxy_enabled'):
         translator.set_proxy(get_config('proxy_setting'))
     if translator.is_chatgpt():
-        prompts = get_config('chatgpt_prompt')
-        translator.set_prompt(prompts.get('auto'), prompts.get('lang'))
+        translator.set_prompt(**get_config('chatgpt_prompt'))
         get_config('merge_enabled') and translator.set_keep_mark()
     return translator

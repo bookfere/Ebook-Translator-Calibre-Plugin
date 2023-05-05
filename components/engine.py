@@ -77,7 +77,7 @@ class EngineTester(QDialog):
         self.setWindowTitle(_('Test Translation Engine'))
         self.setModal(True)
         self.setMinimumWidth(500)
-        self.setMaximumHeight(300)
+        # self.setMaximumHeight(300)
         self.layout()
         self.show()
 
@@ -227,7 +227,6 @@ class ManageCustomEngine(QDialog):
                 del custom_engines[current_name]
                 custom_engines[new_name] = raw_data
                 self.config.update(custom_engines=custom_engines)
-
                 refresh_list()
                 custom_list.setCurrentText(new_name)
             save_config(self.config)

@@ -1,13 +1,12 @@
 import re
 from types import MethodType
 
-from calibre.utils.logging import Log
 from calibre.constants import __version__
 from calibre.ebooks.conversion.plumber import Plumber
 from calibre_plugins.ebook_translator import EbookTranslator
-from calibre_plugins.ebook_translator.config import get_config, get_configs
+from calibre_plugins.ebook_translator.config import get_config
 from calibre_plugins.ebook_translator.utils import (
-    ns, uid, trim, sorted_mixed_keys)
+    ns, log, uid, trim, sorted_mixed_keys)
 from calibre_plugins.ebook_translator.cache import TranslationCache
 from calibre_plugins.ebook_translator.translator import get_translator
 from calibre_plugins.ebook_translator.translation import get_translation
@@ -16,11 +15,15 @@ from calibre_plugins.ebook_translator.translation import get_translation
 load_translations()
 
 
+def get_sorted_pages(pages):
+    return sorted(
+        [page for page in pages if 'html' in page.media_type],
+        key=lambda page: sorted_mixed_keys(page.href))
+
+
 def extract_elements(pages):
-    pages = sorted([page for page in pages if 'html' in page.media_type],
-                   key=lambda page: sorted_mixed_keys(page.href))
     elements = []
-    for page in pages:
+    for page in get_sorted_pages(pages):
         p_elements = list(
             filter(filter_content, page.data.findall('.//x:p', namespaces=ns)))
         if len(p_elements) > 0:
@@ -34,7 +37,7 @@ def extract_elements(pages):
     return list(filter(filter_content, elements))
 
 
-def get_elements(root, elements):
+def get_elements(root, elements=[]):
     for element in root.findall('./*'):
         element_has_content = False
         if element.text is not None and trim(element.text) != '':
@@ -61,7 +64,7 @@ def filter_content(element):
     default_rules = [r'^[\d\s\._-]+$']
     patterns = [re.compile(rule) for rule in default_rules]
 
-    mode, rules = get_configs('rule_mode', 'filter_rules')
+    mode, rules = get_config('rule_mode'), get_config('filter_rules')
     for rule in rules:
         if mode == 'regex':
             patterns.append(re.compile(rule))
@@ -70,7 +73,6 @@ def filter_content(element):
             if mode == 'normal':
                 args.append(re.I)
             patterns.append(re.compile(*args))
-
     for pattern in patterns:
         if pattern.search(content):
             return False
@@ -80,7 +82,6 @@ def filter_content(element):
 def convert_book(input_path, output_path, source_lang, target_lang,
                  notification):
     """parameter notification is automatically added by arbitrary_n."""
-    log = Log()
     translator = get_translator()
     translator.set_source_lang(source_lang)
     translator.set_target_lang(target_lang)
@@ -94,7 +95,7 @@ def convert_book(input_path, output_path, source_lang, target_lang,
     if get_config('log_translation'):
         translation.set_log(log)
 
-    dagnosis = """==============================
+    diagnosis_info = """==============================
 | Diagnosis Information
 ==============================
 | Calibre Version: {}
@@ -103,11 +104,10 @@ def convert_book(input_path, output_path, source_lang, target_lang,
 | Source Language: {}
 | Target Language: {}
 | Input Path: {}
-| Output Path: {}
-=============================="""
-    log.info(dagnosis.format(
-        __version__, EbookTranslator.__version__, translator.name, source_lang,
-        target_lang, input_path, output_path))
+| Output Path: {}"""
+    diagnosis_info = diagnosis_info.format(
+        __version__, EbookTranslator.__version__, translator.name,
+        source_lang, target_lang, input_path, output_path)
 
     plumber = Plumber(
         input_path, output_path, log=log, report_progress=notification)
@@ -116,6 +116,7 @@ def convert_book(input_path, output_path, source_lang, target_lang,
 
     def convert(self, oeb, output_path, input_plugin, opts, log):
         log.info('translating ebook content ... (this will take a while)')
+        log.info(diagnosis_info)
         translation.set_progress(self.report_progress)
         translation.handle(extract_elements(oeb.manifest.items))
         _convert(oeb, output_path, input_plugin, opts, log)

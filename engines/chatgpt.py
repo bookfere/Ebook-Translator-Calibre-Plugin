@@ -14,8 +14,8 @@ class ChatgptTranslate(Base):
     # api_key_hint = 'sk-xxx...xxx'
 
     default_prompts = {
-        'auto': 'Translate the content into {tlang}: {text}',
-        'lang': 'Translate the content from {slang} to {tlang}: {text}',
+        'auto': 'Translate the content into {tlang} only: {text}',
+        'lang': 'Translate the content from {slang} to {tlang} only: {text}',
     }
 
     def __init__(self):
@@ -27,10 +27,8 @@ class ChatgptTranslate(Base):
         self.keep_mark = True
 
     def set_prompt(self, auto=None, lang=None):
-        if auto is not None:
-            self.prompts.update(auto=auto)
-        if lang is not None:
-            self.prompts.update(lang=lang)
+        auto and self.prompts.update(auto=auto)
+        lang and self.prompts.update(lang=lang)
 
     def translate(self, text):
         headers = {
@@ -45,10 +43,10 @@ class ChatgptTranslate(Base):
             content = self.prompts.get('lang').format(
                 slang=self.source_lang, tlang=self.target_lang, text=text)
 
-        # TODO: need to optimize
+        # TODO: We need to optimize the prompt to retain placeholders.
         if self.keep_mark:
-            content = 'Retain placeholder similar to {{id_p0}} and %s' \
-                % content
+            content = 'Retain intentionally added placeholders that matches ' \
+                      'pattern "{{id_\\d+}}" and then %s' % content.lower()
 
         data = json.dumps({
             'stream': True,
