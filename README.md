@@ -115,7 +115,7 @@ __[ Output Path ]__
 __[ Translation Engine ]__
 
 * __Google (Free)__ [default]: Free translation engine
-* __Google (Basic)__: API key required ([obtain](https://console.cloud.google.com/apis/credentials))
+* __Google (Basic)__: API key or JSON key file required ([obtain](https://console.cloud.google.com/apis/credentials))
 * __Google (Advanced)__: Project ID and JSON key file required ([obtain](https://console.cloud.google.com/apis/credentials))
 * __ChatGPT__: API key required ([obtain](https://platform.openai.com/account/api-keys))
 * __DeepL__: API key required ([obtain](https://www.deepl.com/pro?cta=header-pro-button/))
@@ -126,6 +126,8 @@ __[ Translation Engine ]__
 * __[Custom]__: Customize your own translation engine
 
 Except for Google(Free) and DeepL(Free), who does not require an API key, other built-in translation engines require you to register a corresponding account and pay to obtain an API key.
+
+If you intend to use a JSON key file with the Google translation engine, you will also need to install the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install-sdk) on your operating system and ensure that the gcloud command is working properly."
 
 If you opt for a paid translation engine, we recommend you to refer to its official documentation for pricing rules. For example, ChatGPT uses its official tool, __[Tokenizer](https://platform.openai.com/tokenizer)__, to estimate the number of tokens required to translate a given amount of text in order to provide a cost estimate.
 

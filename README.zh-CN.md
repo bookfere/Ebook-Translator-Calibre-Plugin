@@ -115,7 +115,7 @@ __【 输出路径 】__
 __【 翻译引擎 】__
 
 * __Google (Free)__ [默认]：免费的翻译引擎
-* __Google (Basic)__：需要 API 密钥（[获取](https://console.cloud.google.com/apis/credentials)）
+* __Google (Basic)__：需要 API 密钥或 JSON 密钥文件（[获取](https://console.cloud.google.com/apis/credentials)）
 * __Google (Advanced)__：需要项目 ID 和 JSON 密钥文件（[获取](https://console.cloud.google.com/apis/credentials)）
 * __ChatGPT__：需要 API 密钥（[获取](https://platform.openai.com/account/api-keys)）
 * __DeepL__：需要 API 密钥（[获取](https://www.deepl.com/pro?cta=header-pro-button/)）
@@ -126,6 +126,8 @@ __【 翻译引擎 】__
 * __[自定义]__：自定义任意翻译引擎
 
 注意，除了 Google (Free) 和 DeepL (Free) 不需要 API 密钥外，其他内置翻译引擎都需要你注册相应账户（可能需要付费）获取 API 密钥才能使用。另外，由于插件在开发时缺少 DeepL 的 API 密钥，根据其官网提供的响应信息样例，程序可以正常运行，实际运行情况未知。
+
+如果你打算选用 Google 翻译引擎并使用 JSON 密钥文件，需要确保你的操作系统已安装 [Google Cloud CLI](https://cloud.google.com/sdk/docs/install-sdk) 并且能够正常运行 `gcloud` 命令。
 
 如果选择使用需要付费的翻译引擎，建议前往相应的官方文档查看计费规则。比如，ChatGPT，可以使用其官方提供的工具 [Tokenizer](https://platform.openai.com/tokenizer) 估算要翻译字数大约会消耗多少 token 以便预估费用。
 
