@@ -2,7 +2,6 @@ import os
 
 from calibre.constants import DEBUG
 from calibre.gui2.actions import InterfaceAction
-from calibre.ebooks.conversion.config import get_input_format_for_book
 from calibre_plugins.ebook_translator import EbookTranslator
 from calibre_plugins.ebook_translator.main import MainWindowFrame
 # from calibre_plugins.ebook_translator.monitor import MonitorPanel
@@ -10,6 +9,12 @@ from calibre_plugins.ebook_translator.components.alert import pop_alert
 
 
 try:
+    from calibre.ebooks.conversion.config import get_input_format_for_book
+except ImportError:
+    from calibre.gui2.convert.single import get_input_format_for_book
+
+try:
+    get_input_format_for_book
     from qt.core import QMenu
 except ImportError:
     from PyQt5.Qt import QMenu
