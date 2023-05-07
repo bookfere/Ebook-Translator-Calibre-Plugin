@@ -90,9 +90,16 @@ class Base:
         result = None
         self.proxy_uri and self.br.set_proxies(
             {'http': self.proxy_uri, 'https': self.proxy_uri})
+        # Compatible with mechanize 0.3.0 on Calibre 3.21.
         try:
-            self.br.open(Request(url, data, headers=headers, method=method,
-                                 timeout=self.timeout))
+            request = Request(
+                url, data, headers=headers, timeout=self.timeout,
+                method=method)
+        except Exception:
+            request = Request(
+                url, data, headers=headers, timeout=self.timeout)
+        try:
+            self.br.open(request)
             response = self.br.response()
             result = response if stream else \
                 response.read().decode('utf-8').strip()

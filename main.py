@@ -6,11 +6,10 @@ from types import MethodType
 
 from calibre.constants import DEBUG
 from calibre.gui2 import Dispatcher
-from calibre.ebooks.markdown import markdown
+from calibre.library.comments import markdown
 from calibre.utils.localization import get_lang
 from calibre.ptempfile import PersistentTemporaryFile
 from calibre.ebooks.metadata.meta import get_metadata
-from calibre.ebooks.conversion.config import get_output_formats
 
 from calibre_plugins.ebook_translator import EbookTranslator
 from calibre_plugins.ebook_translator.config import (
@@ -28,6 +27,11 @@ from calibre_plugins.ebook_translator.components.lang import (
 from calibre_plugins.ebook_translator.components.engine import (
     EngineTester, ManageCustomEngine)
 
+
+try:
+    from calibre.ebooks.conversion.config import get_output_formats
+except ImportError:
+    from calibre.gui2.convert.single import get_output_formats
 
 try:
     from qt.core import (
