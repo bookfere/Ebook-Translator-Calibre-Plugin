@@ -190,7 +190,8 @@ class MainWindowFrame(QDialog):
 
         # Change the book title
         table.itemChanged.connect(
-            lambda item: self.alter_ebooks_data(item.row(), 1, item.text()))
+            lambda item: self.alter_ebooks_data(
+                item.row(), 1, item.text().strip() or _('Unknown')))
 
         return widget
 
@@ -221,7 +222,8 @@ class MainWindowFrame(QDialog):
         input_path = fmts[ifmt]
         if not get_config('to_library'):
             output_path = os.path.join(
-                get_config('output_path'), '%s (%s).%s' % (title, tlang, ofmt))
+                get_config('output_path'),
+                '%s (%s).%s' % (title[:200], tlang, ofmt))
         else:
             output_path = PersistentTemporaryFile(suffix='.' + ofmt).name
 
