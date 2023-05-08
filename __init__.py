@@ -1,13 +1,14 @@
 from calibre.customize import InterfaceActionBase
 
-from calibre_plugins.ebook_translator.utils import _z
-
 
 __license__ = 'GPL v3'
 __copyright__ = '2023, bookfere.com <bookfere@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
 load_translations()
+
+# To prevent update errors, avoid importing anything from other plugin modules.
+def _z(message): return message
 
 
 class EbookTranslator(InterfaceActionBase):

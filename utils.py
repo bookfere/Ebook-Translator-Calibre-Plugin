@@ -10,9 +10,6 @@ sep = '=' * 30
 log = Log()
 
 
-def _z(message): return message
-
-
 def uid(*args):
     md5 = hashlib.md5()
     for arg in args:
