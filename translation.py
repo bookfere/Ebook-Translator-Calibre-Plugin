@@ -96,7 +96,6 @@ class Translation:
             self.cache and self.cache.add(identity, translation)
             self._log(_('Translation: {}').format(translation))
             self.need_sleep = True
-
         return translation
 
     def handle(self, elements):

@@ -24,16 +24,8 @@ def get_sorted_pages(pages):
 def extract_elements(pages):
     elements = []
     for page in get_sorted_pages(pages):
-        p_elements = list(
-            filter(filter_content, page.data.findall('.//x:p', namespaces=ns)))
-        if len(p_elements) > 0:
-            tags = ('h1', 'h2', 'h3', 'h4', 'h5', 'h6')
-            pattern = './/*[self::x:p%s]' % ''.join(
-                [' or self::x:%s' % tag for tag in tags])
-            elements.extend(page.data.xpath(pattern, namespaces=ns))
-        else:
-            body = page.data.find('./x:body', namespaces=ns)
-            elements.extend(get_elements(body, []))
+        body = page.data.find('./x:body', namespaces=ns)
+        elements.extend(get_elements(body, []))
     return list(filter(filter_content, elements))
 
 
