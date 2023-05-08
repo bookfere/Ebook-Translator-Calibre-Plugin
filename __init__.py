@@ -7,7 +7,7 @@ __docformat__ = 'restructuredtext en'
 
 load_translations()
 
-# To prevent update errors, avoid importing anything from other plugin modules.
+# To prevent update errors, avoid importing anything from plugin modules.
 def _z(message): return message
 
 
@@ -16,7 +16,7 @@ class EbookTranslator(InterfaceActionBase):
     title = _(name)
     supported_platforms = ['windows', 'osx', 'linux']
     author = 'bookfere.com'
-    version = (1, 3, 5)
+    version = (1, 3, 6)
     __version__ = 'v' + '.'.join(map(str, version))
     description = _('A Calibre plugin to translate ebook into a specified '
                     'language (optionally keeping the original content).')
