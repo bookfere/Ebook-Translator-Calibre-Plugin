@@ -1,7 +1,7 @@
 import json
 from lxml import etree
 
-from calibre_plugins.ebook_translator.utils import _z, is_str
+from calibre_plugins.ebook_translator.utils import is_str
 from calibre_plugins.ebook_translator.engines import builtin_engines
 from calibre_plugins.ebook_translator.engines.base import Base
 

@@ -3,7 +3,7 @@ import json
 import random
 import hashlib
 
-from calibre_plugins.ebook_translator.utils import _z
+from calibre_plugins.ebook_translator import _z
 from calibre_plugins.ebook_translator.engines.base import Base
 
 
