@@ -8,6 +8,7 @@ from calibre_plugins.ebook_translator.config import get_config
 from calibre_plugins.ebook_translator.utils import (
     ns, log, uid, trim, sorted_mixed_keys)
 from calibre_plugins.ebook_translator.cache import TranslationCache
+from calibre_plugins.ebook_translator.element import get_string, get_name
 from calibre_plugins.ebook_translator.translator import get_translator
 from calibre_plugins.ebook_translator.translation import get_translation
 
@@ -30,7 +31,10 @@ def extract_elements(pages):
 
 
 def get_elements(root, elements=[]):
+    ignore_tags = ['pre', 'code']
     for element in root.findall('./*'):
+        if get_name(element) in ignore_tags:
+            continue
         element_has_content = False
         if element.text is not None and trim(element.text) != '':
             element_has_content = True
@@ -65,6 +69,8 @@ def filter_content(element):
             if mode == 'normal':
                 args.append(re.I)
             patterns.append(re.compile(*args))
+    if get_config('filter_scope') == 'html':
+        content = get_string(element, True)
     for pattern in patterns:
         if pattern.search(content):
             return False

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-05-04 00:02+0800\n"
+"POT-Creation-Date: 2023-05-10 00:54+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -169,6 +169,9 @@ msgstr "Lenguaje original"
 msgid "Target Language"
 msgstr "Lenguaje a traducir"
 
+msgid "Unknown"
+msgstr ""
+
 msgid "The specified path does not exist."
 msgstr "La ruta especificada no existe."
 
@@ -232,7 +235,7 @@ msgstr "Glosario de traducción"
 msgid "Choose a glossary file"
 msgstr "Elija un archivo de glosario"
 
-msgid "Do not Translate"
+msgid "Do Not Translate"
 msgstr "No traducir"
 
 msgid "Mode:"
@@ -246,6 +249,15 @@ msgstr "Normal (sensible a mayúsculas y minúsculas)"
 
 msgid "Regular Expression"
 msgstr "Expresión regular"
+
+msgid "Scope:"
+msgstr ""
+
+msgid "Text only"
+msgstr ""
+
+msgid "HTML content"
+msgstr ""
 
 msgid "Exclude paragraph by keyword. One keyword per line:"
 msgstr "Excluir párrafo por palabra clave. Una palabra clave por línea.:"

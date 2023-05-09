@@ -127,7 +127,7 @@ __【 翻譯引擎 】__
 
 注意，除了 Google(Free) 和 DeepL(Free) 不需要 API 金鑰外，其他內建翻譯引擎都需要您註冊對應帳戶 (可能需要付費) 取得 API 金鑰才能使用。另外，由於外掛程式在開發時缺少 DeepL 的 API 金鑰，依據其官網提供的回應資訊範例，程式可以正常執行，實際執行狀況未知。
 
-如果您打算使用 Google 翻译引擎並使用 JSON 金鑰檔案，需要確保您的作業系統已安裝 [Google Cloud CLI](https://cloud.google.com/sdk/docs/install-sdk) 並且能夠正常執行 `gcloud` 命令。
+如果您打算使用 Google 翻译引擎並使用 JSON 金鑰檔案，需要確保您的作業系統已安裝 __[Google Cloud CLI](https://cloud.google.com/sdk/docs/install-sdk)__ 並且能夠正常執行 `gcloud` 命令以登入您的 Google 帳戶。請查閱 __[Google Cloud Translate 官方文件](https://cloud.google.com/translate/docs/setup)__ 以取得更多相關設定資訊。
 
 如果選擇使用需要付費的翻譯引擎，建議前往對應的官方文件查看計費規則。比如，ChatGPT，可以使用其官方提供的工具 [Tokenizer](https://platform.openai.com/tokenizer) 估算要翻譯字數大約會消耗多少權杖以便預估費用。
 
@@ -172,7 +172,7 @@ __【 翻譯引擎 】__
     * `url`：API URL。具體資訊需參考翻譯引擎 API 文件
     * `method`：要求方法 (選用)。省略會預設使用 `GET`
     * `headers`：要求標頭 (選用)。可參考翻譯引擎 API 文件填寫
-    * `data`：要求資料。可以是一個 `dict` 物件也可以是字串，如果使用字串需要同時指定適當的要求標頭 `Content-Type`。其中包含 3 個內建變數，其中 `<source>` 和 `<target>` 分別對應之前填寫的語言代碼，如不需要可省略，`<text>` 表示傳送至翻譯引擎的文字，必須保留。其他具體要求資訊需參考翻譯引擎 API 文件。
+    * `data`：要求資料。可以是一個 JSON 物件也可以是字串，JSON 物件會被自動轉化爲 `dict` 並編碼成 `application/x-www-form-urlencoded` 格式傳送，如果使用一般字串形式傳送，需要同時指定適當的要求標頭，如 `Content-Type: application/json`。其中包含 3 個內建變數，其中 `<source>` 和 `<target>` 分別對應之前填寫的語言代碼，如不需要可省略，`<text>` 表示傳送至翻譯引擎的文字，必須保留。其他具體要求資訊需參考翻譯引擎 API 文件。
 * `response`：依據自己的需要填寫解析回應資訊的運算式，以提取其中的譯文文字。回應資訊包含在變數 `response` 中，它是一個 [JSON](https://docs.python.org/3/library/json.html#encoders-and-decoders) 對象 (如果翻譯引擎返回的資料是 JSON 格式) 或 lxml 的 [Element](https://lxml.de/apidoc/lxml.etree.html#lxml.etree.ElementBase) 對象 (如果翻譯引擎返回的資料是 XML 格式)。
 
 自訂翻譯引擎資料填寫完成後可以按下介面下方的【驗證】按鈕檢查資料是否有效，最後按下【儲存】按鈕儲存所有的變更。

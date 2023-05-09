@@ -419,7 +419,7 @@ class MainWindowFrame(QDialog):
         glossary_choose.clicked.connect(choose_glossary_file)
 
         # Filter Content
-        filter_group = QGroupBox(_('Do not Translate'))
+        filter_group = QGroupBox(_('Do Not Translate'))
         filter_layout = QVBoxLayout(filter_group)
         mode_group = QWidget()
         mode_layout = QHBoxLayout(mode_group)
@@ -433,6 +433,16 @@ class MainWindowFrame(QDialog):
         mode_layout.addWidget(inormal_mode)
         mode_layout.addWidget(regex_mode)
         mode_layout.addStretch(1)
+        scope_group = QWidget()
+        scope_layout = QHBoxLayout(scope_group)
+        scope_layout.setContentsMargins(0, 0, 0, 0)
+        scope_layout.addWidget(QLabel(_('Scope:')))
+        scope_text = QRadioButton(_('Text only'))
+        scope_text.setChecked(True)
+        scope_element = QRadioButton(_('HTML content'))
+        scope_layout.addWidget(scope_text)
+        scope_layout.addWidget(scope_element, 1)
+        filter_layout.addWidget(scope_group)
         tip = QLabel()
         self.filter_rules = QPlainTextEdit()
         self.filter_rules.setMinimumHeight(150)
@@ -443,6 +453,21 @@ class MainWindowFrame(QDialog):
         filter_layout.addWidget(tip)
         filter_layout.addWidget(self.filter_rules)
         layout.addWidget(filter_group)
+
+        scope_map = dict(enumerate(['text', 'html']))
+        scope_rmap = dict((v, k) for k, v in scope_map.items())
+        scope_btn_group = QButtonGroup(scope_group)
+        scope_btn_group.addButton(scope_text, 0)
+        scope_btn_group.addButton(scope_element, 1)
+
+        scope_btn_group.button(scope_rmap.get(
+            self.config.get('filter_scope'))).setChecked(True)
+
+        scope_btn_click = getattr(scope_btn_group, 'idClicked', None) or \
+            scope_btn_group.buttonClicked[int]
+        scope_btn_click.connect(
+            lambda btn_id: self.config.update(
+                filter_scope=scope_map.get(btn_id)))
 
         mode_map = dict(enumerate(['normal', 'case', 'regex']))
         mode_rmap = dict((v, k) for k, v in mode_map.items())
@@ -467,9 +492,9 @@ class MainWindowFrame(QDialog):
             self.config.get('rule_mode'))).setChecked(True)
         tip.setText(tips[mode_btn_group.checkedId()])
 
-        click = getattr(mode_btn_group, 'idClicked', None) or \
+        mode_btn_click = getattr(mode_btn_group, 'idClicked', None) or \
             mode_btn_group.buttonClicked[int]
-        click.connect(choose_filter_mode)
+        mode_btn_click.connect(choose_filter_mode)
 
         layout.addStretch(1)
 

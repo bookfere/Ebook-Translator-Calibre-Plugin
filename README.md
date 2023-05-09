@@ -127,7 +127,7 @@ __[ Translation Engine ]__
 
 Except for Google(Free) and DeepL(Free), who does not require an API key, other built-in translation engines require you to register a corresponding account and pay to obtain an API key.
 
-If you intend to use a JSON key file with the Google translation engine, you will also need to install the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install-sdk) on your operating system and ensure that the `gcloud` command is working properly.
+If you intend to use a JSON key file with the Google translation engine, you will also need to install the __[Google Cloud CLI](https://cloud.google.com/sdk/docs/install-sdk)__ on your operating system and ensure that the `gcloud` command is working properly to log in to your Google account. For more information, please refer to the __[Google Cloud Translate documentation](https://cloud.google.com/translate/docs/setup)__.
 
 If you opt for a paid translation engine, we recommend you to refer to its official documentation for pricing rules. For example, ChatGPT uses its official tool, __[Tokenizer](https://platform.openai.com/tokenizer)__, to estimate the number of tokens required to translate a given amount of text in order to provide a cost estimate.
 
@@ -172,7 +172,7 @@ The above data template contains 4 name/value pairs, which will be explained as 
     * `url`: The API URL, as specified in the documentation of the translation engine API.
     * `method`: The request method (optional), with a default value of `GET`.
     * `headers`: The request header (optional). You can refer to the documentation of the translation engine API for details.
-* `data`: Request data, can be either a `dict` object which will be encoded and sent as application/`x-www-form-urlencoded` data or a string which will be sent as is. If you use a string you should also set the `Content-Type` header appropriately. It includes 3 built-in variables: `<source>`, `<target>`, and `<text>`. `<source>` and `<target>` correspond to the language codes set earlier, and can be ignored if not needed; `<text>` refers to the original text sent to the translation engine, which must be included to save. Please refer to the documentation of the translation engine API for details.
+* `data`: Request data, can be either a JSON object which will be encoded and sent as `application/x-www-form-urlencoded` data or a string which will be sent as is. If you use a string you should also set the `Content-Type` header appropriately, e.g. `Content-Type: application/json`. It includes 3 built-in variables: `<source>`, `<target>`, and `<text>`. `<source>` and `<target>` correspond to the language codes set earlier, and can be ignored if not needed; `<text>` refers to the original text sent to the translation engine, which must be included to save. Please refer to the documentation of the translation engine API for details.
 * `response`: The expression used to parse the response data to obtain the translation text. The response data is included in the `response` variable, which is a __[JSON](https://docs.python.org/3/library/json.html#encoders*and*decoders)__ object (if the response from the translation engine is in JSON format) or an __[Element](https://lxml.de/apidoc/lxml.etree.html#lxml.etree.ElementBase)__ object of lxml (if the response from the translation engine is in XML format).
 
 Once you have completed the data for the custom translation engine, you can click the __[Verify]__ button to check whether the data format is valid, and click the __[Save]__ button to save all the changes.

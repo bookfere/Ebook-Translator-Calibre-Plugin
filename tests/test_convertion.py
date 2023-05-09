@@ -36,8 +36,8 @@ class TestElement(unittest.TestCase):
 
     @patch('calibre_plugins.ebook_translator.convertion.get_config')
     def test_extract_elements(self, mock_get_config):
-        values = {'rule_mode': 'normal', 'filter_rules': []}
-        mock_get_config.side_effect = lambda key: values[key]
+        mock_get_config.side_effect = lambda key: {
+            'rule_mode': 'normal', 'filter_rules': []}.get(key)
 
         elements = extract_elements(self.pages)
         self.assertIsInstance(elements, list)
@@ -57,6 +57,7 @@ class TestElement(unittest.TestCase):
             <div>123<div>456</div>789</div>
             <div><div>123</div>456<div>789</div></div>
             <div><section>123<div>456</div></section>789</div>
+            <pre>123 <code>456</code> 789</pre>
         </div>
     </div>
 </body>
@@ -75,43 +76,54 @@ class TestElement(unittest.TestCase):
 
     @patch('calibre_plugins.ebook_translator.convertion.get_config')
     def test_filter_content(self, mock_get_config):
+        values = {
+            'rule_mode': 'normal',
+            'filter_scope': 'text',
+            'filter_rules': []
+        }
+        mock_get_config.side_effect = lambda key: values[key]
+
         markups = ['<p></p>', '<p>\xa0</p>', '<p>\u3000</p>', '<p>\u200b</p>']
         for markup in markups:
             with self.subTest(markup=markup):
                 self.assertFalse(filter_content(etree.XML(markup)))
 
-        values = {'rule_mode': 'regex', 'filter_rules': ['^a', 'f$', '[^z]']}
+        values.update(filter_rules=['a', 'b', 'c'])
+        markups = ['<p>xxxaxxx</p>', '<p>xxxbxxx</p>', '<p>xxxcxxx</p>']
+        for markup in markups:
+            with self.subTest(markup=markup):
+                self.assertFalse(filter_content(etree.XML(markup)))
+
+        values.update(filter_rules=['A', 'B', 'C'])
+        markups = ['<p>xxxaxxx</p>', '<p>xxxbxxx</p>', '<p>xxxcxxx</p>']
+        for markup in markups:
+            with self.subTest(markup=markup):
+                self.assertFalse(filter_content(etree.XML(markup)))
+
+        values.update(rule_mode='case')
+        markups = ['<p>xxxAxxx</p>', '<p>xxxBxxx</p>', '<p>xxxCxxx</p>']
+        for markup in markups:
+            with self.subTest(markup=markup):
+                self.assertFalse(filter_content(etree.XML(markup)))
+
+        values.update(filter_rules=['a', 'b', 'c'])
         mock_get_config.side_effect = lambda key: values[key]
+        markups = ['<p>xxxAxxx</p>', '<p>xxxBxxx</p>', '<p>xxxCxxx</p>']
+        for markup in markups:
+            with self.subTest(markup=markup):
+                self.assertTrue(filter_content(etree.XML(markup)))
+
+        values.update(rule_mode='regex', filter_rules=['^a', 'f$', '[^z]'])
         markups = ['<p>5.</p>', '<p>5-5.</p>', '<p>5-5_5.</p>',
                    '<p>abc</p>', '<p>def</p>', '<p>ghi</p>']
         for markup in markups:
             with self.subTest(markup=markup):
                 self.assertFalse(filter_content(etree.XML(markup)))
 
-        values = {'rule_mode': 'normal', 'filter_rules': ['a', 'b', 'c']}
-        mock_get_config.side_effect = lambda key: values[key]
-        markups = ['<p>xxxaxxx</p>', '<p>xxxbxxx</p>', '<p>xxxcxxx</p>']
+        values.update(
+            rule_mode='regex', filter_scope='html',
+            filter_rules=['^<pre>', '</code>$', 'class="c"'])
+        markups = ['<pre>a</pre>', '<code>b</code>', '<p class="c">c</p>']
         for markup in markups:
             with self.subTest(markup=markup):
                 self.assertFalse(filter_content(etree.XML(markup)))
-
-        values = {'rule_mode': 'normal', 'filter_rules': ['A', 'B', 'C']}
-        mock_get_config.side_effect = lambda key: values[key]
-        markups = ['<p>xxxaxxx</p>', '<p>xxxbxxx</p>', '<p>xxxcxxx</p>']
-        for markup in markups:
-            with self.subTest(markup=markup):
-                self.assertFalse(filter_content(etree.XML(markup)))
-
-        values = {'rule_mode': 'case', 'filter_rules': ['A', 'B', 'C']}
-        mock_get_config.side_effect = lambda key: values[key]
-        markups = ['<p>xxxAxxx</p>', '<p>xxxBxxx</p>', '<p>xxxCxxx</p>']
-        for markup in markups:
-            with self.subTest(markup=markup):
-                self.assertFalse(filter_content(etree.XML(markup)))
-
-        values = {'rule_mode': 'case', 'filter_rules': ['a', 'b', 'c']}
-        mock_get_config.side_effect = lambda key: values[key]
-        markups = ['<p>xxxAxxx</p>', '<p>xxxBxxx</p>', '<p>xxxCxxx</p>']
-        for markup in markups:
-            with self.subTest(markup=markup):
-                self.assertTrue(filter_content(etree.XML(markup)))

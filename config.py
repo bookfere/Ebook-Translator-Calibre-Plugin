@@ -18,6 +18,7 @@ default_config = {
     'translation_position': 'after',
     'translation_color': None,
     'rule_mode': 'normal',
+    'filter_scope': 'text',
     'filter_rules': [],
     'custom_engines': {},
     'glossary_enabled': False,
