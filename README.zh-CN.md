@@ -127,7 +127,7 @@ __【 翻译引擎 】__
 
 注意，除了 Google (Free) 和 DeepL (Free) 不需要 API 密钥外，其他内置翻译引擎都需要你注册相应账户（可能需要付费）获取 API 密钥才能使用。另外，由于插件在开发时缺少 DeepL 的 API 密钥，根据其官网提供的响应信息样例，程序可以正常运行，实际运行情况未知。
 
-如果你打算选用 Google 翻译引擎并使用 JSON 密钥文件，需要确保你的操作系统已安装 [Google Cloud CLI](https://cloud.google.com/sdk/docs/install-sdk) 并且能够正常运行 `gcloud` 命令。
+如果你打算选用 Google 翻译引擎并使用 JSON 密钥文件，需要确保你的操作系统已安装 __[Google Cloud CLI](https://cloud.google.com/sdk/docs/install-sdk)__ 并且能够正常运行 `gcloud` 命令登录你的 Google 账户。更多相关配置信息请查阅 __[Google Cloud Translate 官方文档](https://cloud.google.com/translate/docs/setup)__。
 
 如果选择使用需要付费的翻译引擎，建议前往相应的官方文档查看计费规则。比如，ChatGPT，可以使用其官方提供的工具 [Tokenizer](https://platform.openai.com/tokenizer) 估算要翻译字数大约会消耗多少 token 以便预估费用。
 
@@ -172,7 +172,7 @@ __【 翻译引擎 】__
     * `url`：API 网址。具体信息需参考翻译引擎 API 文档
     * `method`：请求方法（可选）。省略会默认使用 `GET`
     * `headers`：请求标头（可选）。可参考翻译引擎 API 文档填写
-    * `data`：请求数据。可以是一个 `dict` 对象也可以是字符串，如果使用字符串需要同时指定合适的请求标头 `Content-Type`。其中包含 3 个内置变量，其中 `<source>` 和 `<target>` 分别对应之前填写的语言代码，如不需要可省略，`<text>` 表示发送给翻译引擎的文本，必须保留。其他具体请求信息需参考翻译引擎 API 文档。
+    * `data`：请求数据。可以是 JSON 对象也可以是字符串，JSON 对象默认情况下会被转换成 `dict` 对象并编码成 `application/x-www-form-urlencoded` 格式发送，如果想要以普通字符串形式发送，需要同时指定合适的请求标头，如 `Content-Type: application/json`。数据包含 3 个内置变量，其中 `<source>` 和 `<target>` 分别对应之前填写的语言代码，如不需要可省略，`<text>` 表示发送给翻译引擎的文本，必须保留。其他具体请求信息需参考翻译引擎 API 文档。
 * `response`：根据自己的需要填写解析响应信息的表达式，以抽取其中的译文文本。响应信息包含在变量 `response` 中，它是一个 [JSON](https://docs.python.org/3/library/json.html#encoders-and-decoders) 对象（如果翻译引擎返回的数据是 JSON 格式）或 lxml 的 [Element](https://lxml.de/apidoc/lxml.etree.html#lxml.etree.ElementBase) 对象（如果翻译引擎返回的数据是 XML 格式）。
 
 自定义翻译引擎数据填写完成后可以点击界面下方的【验证】按钮检查数据是否有效，最后点击【保存】按钮保存所有的修改。

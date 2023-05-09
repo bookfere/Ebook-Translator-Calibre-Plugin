@@ -45,6 +45,7 @@ class ChatgptTranslate(Base):
 
         # TODO: We need to optimize the prompt to retain placeholders.
         if self.keep_mark:
+            # 'Retain placeholder similar to {{id_0}} and %s'
             content = 'Retain intentionally added placeholders that matches ' \
                       'pattern "{{id_\\d+}}" and then %s' % content.lower()
 

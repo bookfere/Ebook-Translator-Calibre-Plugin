@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-05-04 00:02+0800\n"
+"POT-Creation-Date: 2023-05-10 00:54+0800\n"
 "PO-Revision-Date: 2023-04-25 15:36+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -167,6 +167,9 @@ msgstr "來源語言"
 msgid "Target Language"
 msgstr "目標語言"
 
+msgid "Unknown"
+msgstr ""
+
 msgid "The specified path does not exist."
 msgstr "指定路徑不存在。"
 
@@ -230,7 +233,7 @@ msgstr "翻譯詞彙表"
 msgid "Choose a glossary file"
 msgstr "請選擇一個詞彙表檔案。"
 
-msgid "Do not Translate"
+msgid "Do Not Translate"
 msgstr "不要翻譯"
 
 msgid "Mode:"
@@ -244,6 +247,15 @@ msgstr "一般 (區分大小寫)"
 
 msgid "Regular Expression"
 msgstr "規則運算式"
+
+msgid "Scope:"
+msgstr ""
+
+msgid "Text only"
+msgstr ""
+
+msgid "HTML content"
+msgstr ""
 
 msgid "Exclude paragraph by keyword. One keyword per line:"
 msgstr "依關鍵字排除段落。每行一條關鍵字："

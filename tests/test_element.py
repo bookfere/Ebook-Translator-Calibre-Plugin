@@ -4,7 +4,7 @@ from unittest.mock import patch
 from lxml import etree
 from calibre_plugins.ebook_translator.utils import ns
 from calibre_plugins.ebook_translator.element import (
-    get_string, Element, ElementHandler)
+    get_string, get_name, Element, ElementHandler)
 from calibre_plugins.ebook_translator.engines.base import Base
 
 
@@ -27,6 +27,21 @@ class TestElement(unittest.TestCase):
 </html>""")
         self.paragraph = xhtml.find('.//x:p', namespaces=ns)
         self.element = Element(self.paragraph, Base.placeholder)
+
+    def test_get_string(self):
+        markup = '<p xmlns="http://www.w3.org/1999/xhtml" class="a">abc</p>'
+        element = etree.XML(markup)
+        self.assertEqual(markup, get_string(element, False))
+        self.assertEqual('<p class="a">abc</p>', get_string(element, True))
+
+        markup = '<p xmlns:epub="http://www.idpf.org/2007/ops">abc</p>'
+        element = etree.XML(markup)
+        self.assertEqual(markup, get_string(element, False))
+        self.assertEqual('<p>abc</p>', get_string(element, True))
+
+    def test_get_name(self):
+        xhtml = '<p xmlns="http://www.w3.org/1999/xhtml">a</p>'
+        self.assertEqual('p', get_name(etree.XML(xhtml)))
 
     def test_get_content(self):
         content = ('{{id_10000}} a {{id_10001}} b c {{id_10002}} d e '

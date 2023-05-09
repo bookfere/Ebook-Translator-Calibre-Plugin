@@ -6,8 +6,13 @@ from calibre import prepare_string_for_xml as escape
 from calibre_plugins.ebook_translator.utils import ns, uid, trim
 
 
-def get_string(element):
-    return trim(etree.tostring(element, encoding='utf-8').decode('utf-8'))
+def get_string(element, remove_ns=False):
+    string = trim(etree.tostring(element, encoding='utf-8').decode('utf-8'))
+    return string if not remove_ns else re.sub(r'\sxmlns(.*?"){2}', '', string)
+
+
+def get_name(element):
+    return etree.QName(element).localname
 
 
 class Element:
@@ -18,7 +23,9 @@ class Element:
         self.reserves = []
 
     def get_content(self):
-        noises = self.element_copy.xpath('.//*[self::x:rt]', namespaces=ns)
+        tags = ('rt', 'sup')
+        pattern = ' or '.join(['self::x:%s' % tag for tag in tags])
+        noises = self.element_copy.xpath('.//*[%s]' % pattern, namespaces=ns)
         for noise in noises:
             noise.getparent().remove(noise)
 
@@ -48,7 +55,7 @@ class Element:
                 get_string(reserve), translation)
 
         new_element = etree.XML('<{0} xmlns="{1}">{2}</{0}>'.format(
-            etree.QName(self.element).localname, ns['x'], translation))
+            get_name(self.element), ns['x'], translation))
         if color is not None:
             new_element.set('style', 'color:%s' % color)
         if lang is not None:
