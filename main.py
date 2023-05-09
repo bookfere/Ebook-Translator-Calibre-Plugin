@@ -433,22 +433,25 @@ class MainWindowFrame(QDialog):
         mode_layout.addWidget(inormal_mode)
         mode_layout.addWidget(regex_mode)
         mode_layout.addStretch(1)
+
         scope_group = QWidget()
         scope_layout = QHBoxLayout(scope_group)
         scope_layout.setContentsMargins(0, 0, 0, 0)
         scope_layout.addWidget(QLabel(_('Scope:')))
         scope_text = QRadioButton(_('Text only'))
         scope_text.setChecked(True)
-        scope_element = QRadioButton(_('HTML content'))
+        scope_element = QRadioButton(_('HTML element'))
         scope_layout.addWidget(scope_text)
         scope_layout.addWidget(scope_element, 1)
-        filter_layout.addWidget(scope_group)
+
         tip = QLabel()
         self.filter_rules = QPlainTextEdit()
         self.filter_rules.setMinimumHeight(150)
         self.filter_rules.insertPlainText(
             '\n'.join(self.config.get('filter_rules')))
+
         filter_layout.addWidget(mode_group)
+        filter_layout.addWidget(scope_group)
         filter_layout.addWidget(get_divider())
         filter_layout.addWidget(tip)
         filter_layout.addWidget(self.filter_rules)
