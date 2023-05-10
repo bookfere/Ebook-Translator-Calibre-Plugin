@@ -123,7 +123,7 @@ class Translation:
                 _('Translating: {}/{}').format(progress['count'], total))
             progress['length'] += progress.get('step')
 
-        if sys.version_info < (3, 4, 0):
+        if sys.version_info < (3, 7, 0):
             for identity, original in original_group:
                 write_progress()
                 element_handler.add_translation(
@@ -131,7 +131,7 @@ class Translation:
                 if self.need_sleep and progress.get('count') < total:
                     time.sleep(random.randint(1, self.request_interval))
         else:
-            # Only for Python 3.4+
+            # Only for Python 3.7+
             from calibre_plugins.ebook_translator.concurrency import async_
             async_(get_config('concurrency_limit'), original_group,
                    self._get_translation, write_progress,
