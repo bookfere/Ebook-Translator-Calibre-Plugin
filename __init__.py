@@ -1,3 +1,6 @@
+import os
+
+from calibre.constants import DEBUG
 from calibre.customize import InterfaceActionBase
 
 
@@ -25,6 +28,10 @@ class EbookTranslator(InterfaceActionBase):
     minimum_calibre_version = (2, 0, 0)
 
     actual_plugin = 'calibre_plugins.ebook_translator.ui:EbookTranslatorGui'
+
+    # The DEBUG constant cannot be shared with new worker processes.
+    # To ensure that it is available, add it to the OS environment.
+    DEBUG and os.environ.update(CALIBRE_DEBUG=str(DEBUG))
 
     def is_customizable(self):
         return False

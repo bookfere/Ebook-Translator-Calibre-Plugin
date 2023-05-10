@@ -419,7 +419,7 @@ class MainWindowFrame(QDialog):
         glossary_choose.clicked.connect(choose_glossary_file)
 
         # Filter Content
-        filter_group = QGroupBox(_('Do Not Translate'))
+        filter_group = QGroupBox(_('Ignore Paragraph'))
         filter_layout = QVBoxLayout(filter_group)
         mode_group = QWidget()
         mode_layout = QHBoxLayout(mode_group)

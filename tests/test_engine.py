@@ -41,13 +41,12 @@ class TestDeepl(unittest.TestCase):
         self.translator.set_source_lang('English')
         self.translator.set_target_lang('Chinese')
         self.translator.br = MagicMock()
-        self.response = self.translator.br.response
-        self.result = self.response.return_value.read \
-            .return_value.decode
+        self.result = self.translator.br.response.return_value.read \
+            .return_value.decode.return_value.strip
 
     def test_get_usage(self):
-        self.result.return_value = '{"character_count": 30, ' \
-            '"character_limit": 100}'
+        self.result.return_value = \
+            '{"character_count": 30, "character_limit": 100}'
         self.assertEqual(
             _('{} total, {} used, {} left').format(100, 30, 70),
             self.translator.get_usage(),)

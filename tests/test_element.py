@@ -8,6 +8,26 @@ from calibre_plugins.ebook_translator.element import (
 from calibre_plugins.ebook_translator.engines.base import Base
 
 
+class TestFunction(unittest.TestCase):
+    def test_get_string(self):
+        markup = '<div xmlns="http://www.w3.org/1999/xhtml">' \
+                 '<p class="a">abc</p> def</div>'
+        element = etree.XML(markup).find('x:p', namespaces=ns)
+        self.assertEqual(
+            '<p xmlns="http://www.w3.org/1999/xhtml" class="a">abc</p>',
+            get_string(element, False))
+        self.assertEqual('<p class="a">abc</p>', get_string(element, True))
+
+        markup = '<p xmlns:epub="http://www.idpf.org/2007/ops">abc</p>'
+        element = etree.XML(markup)
+        self.assertEqual(markup, get_string(element, False))
+        self.assertEqual('<p>abc</p>', get_string(element, True))
+
+    def test_get_name(self):
+        xhtml = '<p xmlns="http://www.w3.org/1999/xhtml">a</p>'
+        self.assertEqual('p', get_name(etree.XML(xhtml)))
+
+
 class TestElement(unittest.TestCase):
     def setUp(self):
         xhtml = etree.XML("""
@@ -22,44 +42,36 @@ class TestElement(unittest.TestCase):
             <span>g <img src="w2.jpg"/> h</span>
             <img src="w3.jpg"/> i
             <img src="w3.jpg"/>
+            <code>[CODE]</code> k
         </p>
     </body>
 </html>""")
         self.paragraph = xhtml.find('.//x:p', namespaces=ns)
         self.element = Element(self.paragraph, Base.placeholder)
 
-    def test_get_string(self):
-        markup = '<p xmlns="http://www.w3.org/1999/xhtml" class="a">abc</p>'
-        element = etree.XML(markup)
-        self.assertEqual(markup, get_string(element, False))
-        self.assertEqual('<p class="a">abc</p>', get_string(element, True))
-
-        markup = '<p xmlns:epub="http://www.idpf.org/2007/ops">abc</p>'
-        element = etree.XML(markup)
-        self.assertEqual(markup, get_string(element, False))
-        self.assertEqual('<p>abc</p>', get_string(element, True))
-
-    def test_get_name(self):
-        xhtml = '<p xmlns="http://www.w3.org/1999/xhtml">a</p>'
-        self.assertEqual('p', get_name(etree.XML(xhtml)))
+    def test_get_elements(self):
+        elements = self.element.get_elements(('ruby', 'img'))
+        self.assertEqual(8, len(elements))
+        self.assertEqual(
+            '<ruby>b<rt>B</rt></ruby>', get_string(elements[2], True))
 
     def test_get_content(self):
         content = ('{{id_10000}} a {{id_10001}} b c {{id_10002}} d e '
                    '{{id_10003}} f g {{id_10004}} h {{id_10005}} i '
-                   '{{id_10006}}')
+                   '{{id_10006}} {{id_10007}} k')
         self.assertEqual(content, self.element.get_content())
 
     def test_add_translation(self):
         self.element.get_content()  # remove rt and reserve images
         translation = ('{{id_10000}} A {{id_10001}} B C {{id_10002}} D E '
                        '{{id_10003}} F G {{id_10004}} H {{id_10005}} I '
-                       '{{id_10006}}')
+                       '{{id_10006}} {{id_10007}} K')
         new = self.element.add_translation(translation)
         translation = ('<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
                        '<img src="icon.jpg"/> A <img src="w1.jpg"/> '
                        'B C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
                        'F G <img src="w2.jpg"/> H <img src="w3.jpg"/> I '
-                       '<img src="w3.jpg"/></p>')
+                       '<img src="w3.jpg"/> <code>[CODE]</code> K</p>')
         self.assertEqual(translation, get_string(new))
         self.assertIsNone(new.get('lang'))
         self.assertIsNone(new.get('style'))
