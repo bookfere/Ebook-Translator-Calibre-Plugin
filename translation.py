@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import random
 from types import GeneratorType
@@ -77,6 +78,7 @@ class Translation:
             return self._translate_text(text, count, interval)
 
     def _get_translation(self, identity, original):
+        self._log('-' * 30)
         self._log(_('Original: {}').format(original))
         translation = None
 
@@ -110,19 +112,30 @@ class Translation:
             raise Exception(_('There is no content need to translate.'))
         self._log(sep, _('Start to translate ebook content:'), sep, sep='\n')
         self._log(_('Total items: {}').format(total))
-        process, step = 0.0, 1.0 / total
 
-        count = 0
-        for identity, original in original_group:
-            self._log('-' * 30)
-            count += 1
-            self._progress(process, _('Translating: {}/{}')
-                           .format(count, total))
-            element_handler.add_translation(
-                self._get_translation(identity, original))
-            process += step
-            if self.need_sleep and count < total:
-                time.sleep(random.randint(1, self.request_interval))
+        # count, process, step = 0, 0.0, 1.0 / total
+        progress = {'count': 0, 'length': 0.0, 'step': 1.0 / total}
+
+        def write_progress():
+            progress['count'] += 1
+            self._progress(
+                progress.get('length'),
+                _('Translating: {}/{}').format(progress['count'], total))
+            progress['length'] += progress.get('step')
+
+        if sys.version_info < (3, 4, 0):
+            for identity, original in original_group:
+                write_progress()
+                element_handler.add_translation(
+                    self._get_translation(identity, original))
+                if self.need_sleep and progress.get('count') < total:
+                    time.sleep(random.randint(1, self.request_interval))
+        else:
+            # Only for Python 3.4+
+            from calibre_plugins.ebook_translator.concurrency import async_
+            async_(get_config('concurrency_limit'), original_group,
+                   self._get_translation, write_progress,
+                   element_handler.add_translation)
 
         element_handler.apply_translation()
 

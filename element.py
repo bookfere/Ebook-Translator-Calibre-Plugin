@@ -107,8 +107,11 @@ class ElementHandler:
 
         return self.original
 
-    def add_translation(self, text):
-        self.translation.append(text)
+    def add_translation(self, translation):
+        if isinstance(translation, list):
+            self.translation.extend(translation)
+        else:
+            self.translation.append(translation)
 
     def apply_translation(self):
         if self.merge_length == 0:
