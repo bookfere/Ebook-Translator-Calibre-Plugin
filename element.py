@@ -7,7 +7,8 @@ from calibre_plugins.ebook_translator.utils import ns, uid, trim
 
 
 def get_string(element, remove_ns=False):
-    string = trim(etree.tostring(element, encoding='utf-8').decode('utf-8'))
+    string = trim(etree.tostring(
+        element, encoding='utf-8', with_tail=False).decode('utf-8'))
     return string if not remove_ns else re.sub(r'\sxmlns(.*?"){2}', '', string)
 
 
@@ -22,19 +23,18 @@ class Element:
         self.element_copy = copy.deepcopy(element)
         self.reserves = []
 
+    def get_elements(self, tags):
+        xpath = './/*[%s]' % ' or '.join(['self::x:%s' % tag for tag in tags])
+        return self.element_copy.xpath(xpath, namespaces=ns)
+
     def get_content(self):
-        tags = ('rt', 'sup')
-        pattern = ' or '.join(['self::x:%s' % tag for tag in tags])
-        noises = self.element_copy.xpath('.//*[%s]' % pattern, namespaces=ns)
-        for noise in noises:
+        for noise in self.get_elements(('rt', 'sup')):
             noise.getparent().remove(noise)
 
-        self.reserves = self.element_copy.xpath(
-            './/*[self::x:img]', namespaces=ns)
+        self.reserves = self.get_elements(('img', 'code'))
         for rid, reserve in enumerate(self.reserves):
             placeholder = self.placeholder[0].format(rid + 10000)
-            parent = reserve.getparent()
-            previous = reserve.getprevious()
+            previous, parent = reserve.getprevious(), reserve.getparent()
             if previous is not None:
                 previous.tail = (previous.tail or '') + placeholder
                 previous.tail += (reserve.tail or '')
@@ -42,7 +42,6 @@ class Element:
                 parent.text = (parent.text or '') + placeholder
                 parent.text += (reserve.tail or '')
             parent.remove(reserve)
-            reserve.tail = None
         return re.sub(r'\s+', ' ', trim(''.join(self.element_copy.itertext())))
 
     def add_translation(
@@ -50,7 +49,7 @@ class Element:
         translation = escape(translation)
         for rid, reserve in enumerate(self.reserves):
             translation = re.sub(
-                # Escape the mark to replace escaped marks in the content.
+                # Escape the markups to replace escaped markups.
                 escape(self.placeholder[1].format(rid + 10000)),
                 get_string(reserve), translation)
 

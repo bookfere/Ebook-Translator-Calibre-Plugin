@@ -1,4 +1,5 @@
 import re
+import sys
 import socket
 import hashlib
 
@@ -8,6 +9,7 @@ from calibre.utils.logging import Log
 ns = {'x': 'http://www.w3.org/1999/xhtml'}
 sep = '=' * 30
 log = Log()
+is_test = 'unittest' in sys.modules
 
 
 def uid(*args):
@@ -24,6 +26,14 @@ def trim(text):
     return re.sub(r'^\s+|\s+$', '', text)
 
 
+def sorted_mixed_keys(s):
+    return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', s)]
+
+
+def is_str(data):
+    return type(data).__name__ in ('str', 'unicode')
+
+
 def is_proxy_availiable(host, port, timeout=1):
     try:
         host = host.replace('http://', '')
@@ -31,11 +41,3 @@ def is_proxy_availiable(host, port, timeout=1):
     except Exception as e:
         return False
     return True
-
-
-def sorted_mixed_keys(s):
-    return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', s)]
-
-
-def is_str(data):
-    return type(data).__name__ in ('str', 'unicode')

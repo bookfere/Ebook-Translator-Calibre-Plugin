@@ -3,6 +3,7 @@ import traceback
 from mechanize import Browser, Request
 from calibre.constants import DEBUG
 from calibre.utils.localization import lang_as_iso639_1
+from calibre_plugins.ebook_translator.utils import is_test
 
 
 load_translations()
@@ -86,7 +87,7 @@ class Base:
         return lang_as_iso639_1(self._get_target_code())
 
     def get_result(self, url, data=None, headers={}, method='GET',
-                   stream=False, callback=None, silence=False):
+                   stream=False, silence=False, callback=None):
         result = None
         self.proxy_uri and self.br.set_proxies(
             {'http': self.proxy_uri, 'https': self.proxy_uri})
@@ -103,9 +104,10 @@ class Base:
             response = self.br.response()
             result = response if stream else \
                 response.read().decode('utf-8').strip()
-            return self.parse(result) if callback is None else callback(result)
+            return callback(result) if callback else self.parse(result)
         except Exception as e:
-            DEBUG and traceback.print_exc()
+            if not is_test and DEBUG:
+                traceback.print_exc()
             if silence:
                 return None
             raw_data = str(e) if result is None else result + ' ' + str(e)

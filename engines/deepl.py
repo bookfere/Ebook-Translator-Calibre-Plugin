@@ -29,7 +29,7 @@ class DeeplTranslate(Base):
             return _('{} total, {} used, {} left').format(total, used, left)
 
         return self.get_result(
-            self.endpoint.get('usage'), callback=usage_info, silence=True,
+            self.endpoint.get('usage'), silence=True, callback=usage_info,
             headers={'Authorization': 'DeepL-Auth-Key %s' % self.api_key})
 
     def translate(self, text):

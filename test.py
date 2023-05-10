@@ -17,4 +17,6 @@ def get_test_suite():
 
 
 if __name__ == '__main__':
-    run_cli(get_test_suite())
+    # runner = unittest.TextTestRunner()
+    # runner.run(get_test_suite())
+    run_cli(get_test_suite(), buffer=False)
