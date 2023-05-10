@@ -1,5 +1,6 @@
 import re
 import os
+import sys
 import zipfile
 import os.path
 from types import MethodType
@@ -713,6 +714,12 @@ class MainWindowFrame(QDialog):
 
         # Request
         request_group = QGroupBox(_('Request'))
+        self.concurrency_limit = QSpinBox()
+        self.concurrency_limit.setRange(0, 9999)
+        self.concurrency_limit.setValue(self.config.get('concurrency_limit'))
+        if sys.version_info < (3, 4, 0):
+            self.concurrency_limit.setValue(1)
+            self.concurrency_limit.setDisabled(True)
         self.attempt_limit = QSpinBox()
         self.attempt_limit.setRange(0, 9999)
         self.attempt_limit.setValue(self.config.get('request_attempt'))
@@ -720,6 +727,8 @@ class MainWindowFrame(QDialog):
         self.interval_max.setRange(1, 9999)
         self.interval_max.setValue(self.config.get('request_interval'))
         request_layout = QVBoxLayout(request_group)
+        request_layout.addWidget(QLabel(_('Concurrency limit (Default 1):')))
+        request_layout.addWidget(self.concurrency_limit)
         request_layout.addWidget(QLabel(_('Attempt times (Default 3):')))
         request_layout.addWidget(self.attempt_limit)
         request_layout.addWidget(QLabel(_('Max interval (Default 5s):')))
@@ -879,6 +888,7 @@ class MainWindowFrame(QDialog):
 
         # Request
         self.config.update(
+            concurrency_limit=self.concurrency_limit.value(),
             request_attempt=self.attempt_limit.value(),
             request_interval=self.interval_max.value())
 

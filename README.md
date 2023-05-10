@@ -202,8 +202,9 @@ Enabling the caching function can avoid re-translation of the translated content
 
 __[ Request ]__
 
-* __Attempt Times__ [default 3]: The number of times to attempt if failed to request translation engine
-* __Maximum Interval__ [default 5 seconds]: The maximum time interval to request translation engine
+* __Concurrency limit__ [Default 1]: The number of concurrent requests.
+* __Attempt times__ [default 3]: The number of times to attempt if failed to request translation engine
+* __Maximum interval__ [default 5 seconds]: The maximum time interval to request translation engine
 
 A single request to translation engine can last up to 300 seconds. After the timeout, it will retry according to the specified attempt times, and the waiting time for each retry will be gradually increased. The request interval will be a random number between 1 and the maximum interval specified.
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-05-10 17:10+0800\n"
+"POT-Creation-Date: 2023-05-11 00:24+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -320,6 +320,9 @@ msgstr "Cache"
 
 msgid "Request"
 msgstr "Pedido"
+
+msgid "Concurrency limit (Default 1):"
+msgstr "límite de concurrencia"
 
 msgid "Attempt times (Default 3):"
 msgstr "Tiempos de intento (predeterminado 3):"

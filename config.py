@@ -11,6 +11,7 @@ default_config = {
     'api_key': {},
     'proxy_enabled': False,
     'proxy_setting': [],
+    'concurrency_limit': 1,
     'request_attempt': 3,
     'request_interval': 5,
     'cache_enabled': True,

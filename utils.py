@@ -26,6 +26,15 @@ def trim(text):
     return re.sub(r'^\s+|\s+$', '', text)
 
 
+def chunk(data, length=0):
+    length = 1 if length < 1 else length
+    data_length = len(data)
+    length = data_length if length > data_length else length
+    chunk_size = data_length / length
+    for i in range(length):
+        yield data[int(chunk_size*i):int(chunk_size*(i+1))]
+
+
 def sorted_mixed_keys(s):
     return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', s)]
 
