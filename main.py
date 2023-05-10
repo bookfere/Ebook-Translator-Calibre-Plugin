@@ -717,7 +717,7 @@ class MainWindowFrame(QDialog):
         self.concurrency_limit = QSpinBox()
         self.concurrency_limit.setRange(0, 9999)
         self.concurrency_limit.setValue(self.config.get('concurrency_limit'))
-        if sys.version_info < (3, 4, 0):
+        if sys.version_info < (3, 7, 0):
             self.concurrency_limit.setValue(1)
             self.concurrency_limit.setDisabled(True)
         self.attempt_limit = QSpinBox()
