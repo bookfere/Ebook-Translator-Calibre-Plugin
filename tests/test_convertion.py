@@ -127,3 +127,8 @@ class TestElement(unittest.TestCase):
         for markup in markups:
             with self.subTest(markup=markup):
                 self.assertFalse(filter_content(etree.XML(markup)))
+
+        markups = ['<p><b>a</b>.</p>']
+        for markup in markups:
+            with self.subTest(markup=markup):
+                self.assertTrue(filter_content(etree.XML(markup)))
