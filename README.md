@@ -97,11 +97,15 @@ The Eiffel Tower
 
 La Estatua de la Libertad</pre>
 
-__[ Do not Translate ]__
+__[ Ignore Paragraph ]__
 
-* __Normal__ [default]: Exclude paragraph by keyword (one keyword per line)
-* __Normal(case-sensitive)__: Exclude paragraph by case-sensitive keyword (one keyword per line)
-* __Regular Expression__: Exclude paragraph by Regular Expression rule (one rule per line)
+* Mode
+    * __Normal__ [default]: Exclude paragraph by keyword (one keyword per line)
+    * __Normal (case-sensitive)__: Exclude paragraph by case-sensitive keyword (one keyword per line)
+    * __Regular Expression__: Exclude paragraph by Regular Expression rule (one rule per line)
+* Scope
+    * __Text only__ [default]: Matches only the text
+    * __HTML element__: Matches the entire HTML element
 
 For regular expression syntax, please refer to "__[Regular Expression Syntax](https://docs.python.org/3/library/re.html#regular-expression-syntax)__" on Python documentation.
 
