@@ -2,7 +2,7 @@ import re
 import copy
 
 from lxml import etree
-from calibre import prepare_string_for_xml as escape
+from calibre import prepare_string_for_xml as xml_escape
 from calibre_plugins.ebook_translator.utils import ns, uid, trim
 
 
@@ -46,11 +46,17 @@ class Element:
 
     def add_translation(
             self, translation, position=None, lang=None, color=None):
-        translation = escape(translation)
+        translation = xml_escape(translation)
         for rid, reserve in enumerate(self.reserves):
+            # Escape the potential regex metacharacters in text.
+            for item in reserve.getiterator():
+                if item.text is not None:
+                    item.text = re.escape(item.text)
+                if item.tail is not None:
+                    item.tail = re.escape(item.tail)
             translation = re.sub(
                 # Escape the markups to replace escaped markups.
-                escape(self.placeholder[1].format(rid + 10000)),
+                xml_escape(self.placeholder[1].format(rid + 10000)),
                 get_string(reserve), translation)
 
         new_element = etree.XML('<{0} xmlns="{1}">{2}</{0}>'.format(
