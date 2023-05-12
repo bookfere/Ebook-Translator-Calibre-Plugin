@@ -807,14 +807,14 @@ class MainWindowFrame(QDialog):
 
         # Filter rules
         rule_content = self.filter_rules.toPlainText()
-        filter_rules = filter(None, [r for r in rule_content.split('\n')])
+        filter_rules = [r for r in rule_content.split('\n') if r]
         if self.config.get('rule_mode') == 'regex':
             for rule in filter_rules:
                 if not self.is_valid_regex(rule):
                     return self.pop_alert(
                         _('{} is not a valid regular expression.')
                         .format(rule), 'warning')
-        self.config.update(filter_rules=list(filter_rules))
+        self.config.update(filter_rules=filter_rules)
 
         save_config(self.config)
         self.pop_alert(_('The setting has been saved.'))

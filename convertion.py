@@ -57,7 +57,7 @@ def filter_content(element):
     if content == '':
         return False
 
-    default_rules = [r'^[\d\s\._-]+$', r'^<[^>]>[\d\s\._-]+</[^>]>$']
+    default_rules = [r'^[\d\s\.:_-]+$', r'^<[^>]+>[\d\s\.:_-]+</[^>]+>$']
     patterns = [re.compile(rule) for rule in default_rules]
 
     mode, rules = get_config('rule_mode'), get_config('filter_rules')

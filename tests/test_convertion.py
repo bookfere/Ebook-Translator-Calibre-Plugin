@@ -7,7 +7,7 @@ from calibre_plugins.ebook_translator.convertion import (
     get_sorted_pages, extract_elements, get_elements, filter_content)
 
 
-class TestElement(unittest.TestCase):
+class TestConvertion(unittest.TestCase):
     def setUp(self):
         self.page_1 = MagicMock(
             media_type='text/html', href='test1.xhtml', data=etree.XML("""
