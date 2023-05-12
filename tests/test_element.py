@@ -42,7 +42,7 @@ class TestElement(unittest.TestCase):
             <span>g <img src="w2.jpg"/> h</span>
             <img src="w3.jpg"/> i
             <img src="w3.jpg"/>
-            <code>[CODE]</code> k
+            <code>App\Http</code> k
         </p>
     </body>
 </html>""")
@@ -71,7 +71,7 @@ class TestElement(unittest.TestCase):
                        '<img src="icon.jpg"/> A <img src="w1.jpg"/> '
                        'B C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
                        'F G <img src="w2.jpg"/> H <img src="w3.jpg"/> I '
-                       '<img src="w3.jpg"/> <code>[CODE]</code> K</p>')
+                       '<img src="w3.jpg"/> <code>App\Http</code> K</p>')
         self.assertEqual(translation, get_string(new))
         self.assertIsNone(new.get('lang'))
         self.assertIsNone(new.get('style'))
