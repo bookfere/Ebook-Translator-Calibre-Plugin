@@ -109,16 +109,18 @@ class CustomTranslate(Base):
         if need_restore and not is_json:
             data = json.loads(data)
 
-        def parse(response):
-            try:
-                response = json.loads(response)
-            except Exception:
-                response = etree.fromstring(response)
-            result = eval(
-                self.engine_data.get('response'), {"response": response})
-            if not is_str(result):
-                raise Exception(_('Response was parsed incorrectly.'))
-            return result
+        return self.get_result(endpoint, data, headers, method=method)
 
-        return self.get_result(
-            endpoint, data, headers, method=method, callback=parse)
+    def parse(self, response):
+        try:
+            response = json.loads(response)
+        except Exception:
+            try:
+                response = etree.fromstring(response)
+            except Exception:
+                return response
+        result = eval(
+            self.engine_data.get('response'), {"response": response})
+        if not is_str(result):
+            raise Exception(_('Response was parsed incorrectly.'))
+        return result
