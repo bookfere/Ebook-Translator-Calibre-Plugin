@@ -2,13 +2,12 @@ import time
 import uuid
 from types import GeneratorType
 
-from calibre_plugins.ebook_translator.utils import sorted_mixed_keys
-from calibre_plugins.ebook_translator.engines.custom import (
-    get_engine_template, load_engine_data)
-from calibre_plugins.ebook_translator.components.lang import (
-    SourceLang, TargetLang)
-from calibre_plugins.ebook_translator.config import save_config, default_config
-from calibre_plugins.ebook_translator.components.alert import pop_alert
+from .lang import SourceLang, TargetLang
+from .alert import AlertMessage
+from ..utils import sorted_mixed_keys
+from ..engines.custom import get_engine_template, load_engine_data
+from ..config import defaults, get_config
+from ..engines import builtin_engines
 
 
 try:
@@ -23,9 +22,25 @@ except ImportError:
 load_translations()
 
 
-class Worker(QObject):
+class EngineList(QComboBox):
+    def __init__(self, default=None, parent=None):
+        QComboBox.__init__(self, parent)
+        self.wheelEvent = lambda event: None
+        self.refresh(default)
+
+    def refresh(self, default=None):
+        self.clear()
+        for engine in builtin_engines:
+            self.addItem(_(engine.alias), engine.name)
+        custom_engines = get_config().get('custom_engines')
+        for name in sorted(custom_engines.keys(), key=sorted_mixed_keys):
+            self.addItem(name, name)
+        default and self.setCurrentIndex(self.findData(default))
+
+
+class EngineWorker(QObject):
     clear = pyqtSignal()
-    translate = pyqtSignal(str, str, str)
+    translate = pyqtSignal(str)
     result = pyqtSignal(str)
     complete = pyqtSignal()
     check = pyqtSignal()
@@ -37,12 +52,10 @@ class Worker(QObject):
         self.translate.connect(self.translate_text)
         self.check.connect(self.check_usage)
 
-    @pyqtSlot(str, str, str)
-    def translate_text(self, text, source_lang, target_lang):
+    @pyqtSlot(str)
+    def translate_text(self, text):
         self.clear.emit()
         self.result.emit(_('Translating...'))
-        self.translator.set_source_lang(source_lang)
-        self.translator.set_target_lang(target_lang)
         try:
             translation = self.translator.translate(text)
             if isinstance(translation, GeneratorType):
@@ -60,6 +73,7 @@ class Worker(QObject):
         except Exception as e:
             self.clear.emit()
             self.result.emit(str(e))
+            # raise e
 
     @pyqtSlot()
     def check_usage(self):
@@ -68,7 +82,7 @@ class Worker(QObject):
 
 class EngineTester(QDialog):
     usage_thread = QThread()
-    translate_thread = QThread()
+    translation_thread = QThread()
 
     def __init__(self, parent, translator):
         QDialog.__init__(self, parent)
@@ -83,6 +97,7 @@ class EngineTester(QDialog):
 
     def layout(self):
         layout = QGridLayout(self)
+
         source = QPlainTextEdit()
         source.setPlainText('Hello World!')
         cursor = source.textCursor()
@@ -90,25 +105,40 @@ class EngineTester(QDialog):
             getattr(QTextCursor, 'End', None) or QTextCursor.MoveOperation.End)
         source.setTextCursor(cursor)
         layout.addWidget(source, 0, 0, 1, 3)
+
         target = QPlainTextEdit()
         layout.addWidget(target, 1, 0, 1, 3)
+
         source_lang = SourceLang()
         source_lang.set_codes(self.translator.source_codes,
                               not self.translator.is_custom())
         layout.addWidget(source_lang, 2, 0)
+
+        def change_source_lang(lang):
+            self.translator.set_source_lang(lang)
+        change_source_lang(source_lang.currentText())
+        source_lang.currentTextChanged.connect(change_source_lang)
+
         target_lang = TargetLang()
         target_lang.set_codes(self.translator.target_codes,
-                              self.parent.preferred_target.currentText())
+                              self.parent.target_lang.currentText())
         layout.addWidget(target_lang, 2, 1)
+
+        def change_target_lang(lang):
+            self.translator.set_target_lang(lang)
+        change_target_lang(target_lang.currentText())
+        target_lang.currentTextChanged.connect(change_target_lang)
+
         translate = QPushButton(_('Translate'))
         layout.addWidget(translate, 2, 2)
         layout.setColumnStretch(0, 1)
         layout.setColumnStretch(1, 1)
+
         usage = QLabel(_('Usage: checking...'))
         usage.setVisible(False)
         layout.addWidget(usage, 3, 0, 1, 3)
 
-        self.usage_worker = Worker(self.translator)
+        self.usage_worker = EngineWorker(self.translator)
         self.usage_worker.moveToThread(self.usage_thread)
         self.usage_thread.finished.connect(self.usage_worker.deleteLater)
         self.usage_thread.start()
@@ -122,32 +152,31 @@ class EngineTester(QDialog):
         self.usage_worker.usage.connect(check_usage)
         self.usage_worker.check.emit()
 
-        self.translate_worker = Worker(self.translator)
-        self.translate_worker.moveToThread(self.translate_thread)
-        self.translate_thread.finished.connect(
+        self.translate_worker = EngineWorker(self.translator)
+        self.translate_worker.moveToThread(self.translation_thread)
+        self.translation_thread.finished.connect(
             self.translate_worker.deleteLater)
-        self.translate_thread.start()
+        self.translation_thread.start()
 
         self.translate_worker.clear.connect(target.clear)
         self.translate_worker.result.connect(target.insertPlainText)
         self.translate_worker.complete.connect(self.usage_worker.check.emit)
 
         def test_translate():
-            self.translate_worker.translate.emit(
-                source.toPlainText(), source_lang.currentText(),
-                target_lang.currentText())
+            self.translate_worker.translate.emit(source.toPlainText())
         translate.clicked.connect(test_translate)
 
     def done(self, result):
         self.usage_thread.terminate()
-        self.translate_thread.terminate()
+        self.translation_thread.terminate()
         QDialog.done(self, result)
 
 
 class ManageCustomEngine(QDialog):
-    def __init__(self, parent, config):
+    def __init__(self, parent):
         QDialog.__init__(self, parent)
-        self.config = config
+        self.config = get_config()
+        self.alert = AlertMessage(self)
         self.setWindowTitle(_('Custom Translation Engine'))
         self.setModal(True)
         self.setMinimumWidth(600)
@@ -177,9 +206,9 @@ class ManageCustomEngine(QDialog):
         layout.setColumnStretch(2, 1)
 
         custom_engines = self.config.get('custom_engines').copy()
-        default_engine = default_config.get('translate_engine')
+        default_engine = defaults.get('translate_engine')
         current_engine = self.config.get('translate_engine')
-        preferred_language = self.config.get('preferred_language')
+        engine_preferences = self.config.get('engine_preferences')
 
         def refresh_list():
             custom_list.clear()
@@ -204,8 +233,8 @@ class ManageCustomEngine(QDialog):
         def verify_data():
             valid, data = load_engine_data(custom_engine_data.toPlainText())
             if not valid:
-                return pop_alert(self, data, 'warning')
-            pop_alert(self, _('Valid engine data format.'))
+                return self.alert.pop(data, 'warning')
+            self.alert.pop(_('Valid engine data format.'))
 
         def save_data():
             current_name = custom_list.currentText()
@@ -216,35 +245,33 @@ class ManageCustomEngine(QDialog):
                 raw_data = custom_engine_data.toPlainText()
                 valid, data = load_engine_data(raw_data)
                 if not valid:
-                    return pop_alert(self, data, 'warning')
+                    return self.alert.pop(data, 'warning')
                 new_name = data.get('name')
                 if current_name.lower() != new_name.lower():
                     exist_names = [name.lower() for name in custom_engines]
                     if new_name.lower() in exist_names:
-                        return pop_alert(
-                            self, _('The engine name is already in use.'),
-                            'warning')
+                        return self.alert.pop(
+                            _('The engine name is already in use.'), 'warning')
                 del custom_engines[current_name]
                 custom_engines[new_name] = raw_data
                 self.config.update(custom_engines=custom_engines)
                 refresh_list()
                 custom_list.setCurrentText(new_name)
-            save_config(self.config)
-            pop_alert(self, _('The setting has been saved.'))
+            self.config.commit()
+            self.alert.pop(_('The setting has been saved.'))
             # self.done(0)
 
         def delete_data():
             if custom_list.count() < 1:
-                return pop_alert(
-                    self, _('No custom engine to delete.'))
+                return self.alert.pop(_('No custom engine to delete.'))
             current_index = custom_list.currentIndex()
             current_name = custom_list.itemText(current_index)
             del custom_engines[current_name]
             custom_list.removeItem(current_index)
             if current_name == current_engine:
                 self.config.update(translate_engine=default_engine)
-            if current_name in preferred_language:
-                del preferred_language[current_name]
+            if current_name in engine_preferences:
+                del engine_preferences[current_name]
 
         custom_list.currentTextChanged.connect(reset_data)
         custom_add.clicked.connect(add_data)

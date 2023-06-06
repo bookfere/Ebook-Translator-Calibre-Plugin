@@ -1,12 +1,16 @@
 import os
 import sys
 import time
+import json
 import random
 from types import GeneratorType
 
-from calibre_plugins.ebook_translator.utils import sep, trim
-from calibre_plugins.ebook_translator.config import get_config
-from calibre_plugins.ebook_translator.element import ElementHandler
+from .utils import sep, trim, dummy
+from .config import get_config
+from .engines import builtin_engines
+from .engines import GoogleFreeTranslate
+from .engines.custom import CustomTranslate
+from .exceptions.engine import IncorrectApiKeyFormat
 
 
 load_translations()
@@ -16,26 +20,25 @@ class Translation:
     def __init__(self, translator):
         self.translator = translator
 
-        self.glossary = Glossary()
-        self.merge_length = 0
-        self.translation_position = None
-        self.translation_color = None
+        self.glossary = None
+        self.concurrency_limit = 1
         self.request_attempt = 3
         self.request_interval = 5
-        self.cache = None
-        self.progress = None
-        self.log = None
-
         self.need_sleep = False
+        self.cancelled = False
 
-    def set_merge_length(self, length):
-        self.merge_length = length
+        self.fresh = False
+        self.progress = dummy
+        self.log = dummy
+        self.streaming = dummy
+        self.callback = dummy
+        self.cancel_request = dummy
 
-    def set_translation_position(self, position):
-        self.translation_position = position
+    def set_glossary(self, glossary):
+        self.glossary = glossary
 
-    def set_translation_color(self, color):
-        self.translation_color = color
+    def set_concurrency_limit(self, limit):
+        self.concurrency_limit = limit
 
     def set_request_attempt(self, limit):
         self.request_attempt = limit
@@ -43,104 +46,139 @@ class Translation:
     def set_request_interval(self, max):
         self.request_interval = max
 
-    def set_cache(self, cache):
-        self.cache = cache
+    def set_fresh(self, fresh):
+        self.fresh = fresh
 
     def set_progress(self, progress):
         self.progress = progress
 
-    def set_log(self, log):
+    def set_logging(self, log):
         self.log = log
 
-    def _progress(self, *args):
-        if self.progress:
-            self.progress(*args)
+    def set_streaming(self, streaming):
+        self.streaming = streaming
 
-    def _log(self, *args, **kwargs):
-        if self.log:
-            self.log.info(*args, **kwargs)
+    def set_callback(self, callback):
+        self.callback = callback
+
+    def set_cancel_request(self, cancel_request):
+        self.cancel_request = cancel_request
+
+    def is_cancelled(self):
+        self.cancelled = self.cancel_request()
+        return self.cancelled
 
     def _translate_text(self, text, count=0, interval=5):
         try:
             return self.translator.translate(text)
+        except IncorrectApiKeyFormat:
+            raise IncorrectApiKeyFormat(
+                self.translator.api_key_error_message())
         except Exception as e:
+            if self.is_cancelled():
+                return
+            if self.translator.has_api_key_error(str(e)):
+                if not self.translator.change_api_key():
+                    raise Exception(_('No available API key.'))
+                self.log(
+                    _('API key was Changed due to previous one unavailable.'))
+                return self._translate_text(text, count, interval)
             message = _('Failed to retreive data from translate engine API.')
             if count >= self.request_attempt:
                 raise Exception('{} {}'.format(message, str(e)))
             count += 1
             interval *= count
-            self._log(message)
-            self._log(_('Will retry in {} seconds.').format(interval))
+            self.log(message)
+            self.log(_('Will retry in {} seconds.').format(interval))
             time.sleep(interval)
-            self._log(_('[{}] Retrying {} ... (timeout is {} seconds).')
-                      .format(time.strftime('%Y-%m-%d %H:%I:%S'), count,
-                              int(self.translator.timeout)))
+            self.log(
+                _('[{}] Retrying {} ... (timeout is {} seconds).')
+                .format(time.strftime('%Y-%m-%d %H:%I:%S'), count,
+                        int(self.translator.timeout)))
             return self._translate_text(text, count, interval)
 
-    def _get_translation(self, identity, original):
-        self._log('-' * 30)
-        self._log(_('Original: {}').format(original))
-        translation = None
+    def _prepare_translation(self, paragraph):
+        original = paragraph.original
+        translation = paragraph.translation
 
-        if self.cache and self.cache.exists():
-            translation = self.cache.get(identity)
-        if translation is not None:
-            self._log(_('Translation (Cached): {}').format(translation))
-            self.need_sleep = False
-        else:
+        self.log('-' * 30)
+        self.log(_('Original: {}').format(original))
+
+        if self.glossary is not None:
             original = self.glossary.replace(original)
+
+        self.streaming(paragraph)
+        self.streaming('')
+        self.streaming(_('Translating...'))
+
+        if not translation or self.fresh:
             translation = self._translate_text(original)
-            # TODO: translation monitor display streaming text
+            if self.is_cancelled():
+                return
+            # Process streaming text
             if isinstance(translation, GeneratorType):
-                translation = ''.join(text for text in translation)
-                translation = translation.replace('\n', ' ')
-            translation = self.glossary.restore(trim(translation))
-            self.cache and self.cache.add(identity, translation)
-            self._log(_('Translation: {}').format(translation))
+                temp = ''
+                clear = True
+                for char in translation:
+                    if clear:
+                        self.streaming('')
+                        clear = False
+                    self.streaming(char)
+                    time.sleep(0.05)
+                    temp += char
+                translation = temp.replace('\n', ' ')
+
+            if self.glossary is not None:
+                translation = self.glossary.restore(trim(translation))
+            self.log(_('Translation: {}').format(translation))
             self.need_sleep = True
-        return translation
+        else:
+            self.log(_('Translation (Cached): {}').format(translation))
+            self.need_sleep = False
 
-    def handle(self, elements):
-        element_handler = ElementHandler(
-            elements, self.translator.placeholder, self.merge_length,
-            self.translator.get_target_code(), self.translation_position,
-            self.translation_color)
+        paragraph.translation = translation
+        paragraph.engine_name = self.translator.name
+        paragraph.target_lang = self.translator.get_target_lang()
+        self.callback(paragraph)
 
-        original_group = element_handler.get_original()
-        total = len(original_group)
+    def handle(self, paragraphs=[]):
+        total = len(paragraphs)
+        self.log(sep)
+        self.log(_('Start to translate ebook content'))
+        self.log(sep)
+        self.log(_('Total items: {}').format(total))
         if total < 1:
             raise Exception(_('There is no content need to translate.'))
-        self._log(sep, _('Start to translate ebook content:'), sep, sep='\n')
-        self._log(_('Total items: {}').format(total))
 
-        # count, process, step = 0, 0.0, 1.0 / total
         progress = {'count': 0, 'length': 0.0, 'step': 1.0 / total}
 
-        def write_progress():
+        def process_translation(paragraph):
             progress['count'] += 1
-            self._progress(
-                progress.get('length'),
-                _('Translating: {}/{}').format(progress['count'], total))
+            self.progress(
+                progress.get('length'), _('Translating: {}/{}')
+                .format(progress['count'], total))
             progress['length'] += progress.get('step')
+            self._prepare_translation(paragraph)
 
-        if sys.version_info < (3, 7, 0):
-            for identity, original in original_group:
-                write_progress()
-                element_handler.add_translation(
-                    self._get_translation(identity, original))
-                if self.need_sleep and progress.get('count') < total:
-                    time.sleep(random.randint(1, self.request_interval))
+        if sys.version_info >= (3, 7, 0):
+            from .request import AsyncRequest
+            async_request = AsyncRequest(paragraphs, self, process_translation)
+            async_request.run()
         else:
-            # Only for Python 3.7+
-            from calibre_plugins.ebook_translator.concurrency import async_
-            async_(get_config('concurrency_limit'), original_group,
-                   self._get_translation, write_progress,
-                   element_handler.add_translation)
+            for paragraph in paragraphs:
+                if self.is_cancelled():
+                    return
+                process_translation(paragraph)
+                if self.need_sleep and progress.get('count') < total:
+                    time.sleep(random.randint(0, self.request_interval))
 
-        element_handler.apply_translation()
-
-        self._progress(1, _('Translation completed.'))
-        self._log(sep, _('Start to convert ebook format:'), sep, sep='\n')
+        message = _('Translation completed.')
+        if self.cancelled:
+            message = _('Translation cancelled.')
+        self.log(sep)
+        self.log(message)
+        self.progress(1, message)
+        return paragraphs
 
 
 class Glossary:
@@ -153,10 +191,8 @@ class Glossary:
                 content = f.read().strip()
         except Exception as e:
             raise Exception(_('Can not open glossary file: {}').format(str(e)))
-
         if not content:
             return
-
         for group in content.split(os.linesep*2):
             group = group.strip().split(os.linesep)
             if len(group) > 2:
@@ -164,6 +200,7 @@ class Glossary:
             if len(group) == 1:
                 group.append(group[0])
             self.glossary.append(group)
+        return self
 
     def replace(self, text):
         for word in self.glossary:
@@ -176,14 +213,43 @@ class Glossary:
         return text
 
 
-def get_translation(translator):
+def get_engine_class(engine_name=None):
+    config = get_config()
+    engines = {engine.name: engine for engine in builtin_engines}
+    engine_name = engine_name or config.get('translate_engine') \
+        or GoogleFreeTranslate.name
+    engine_class = engines.get(engine_name) or CustomTranslate
+    if engine_class.is_custom():
+        engine_data = config.get('custom_engines.%s' % engine_name)
+        if engine_data is not None:
+            engine_data = json.loads(engine_data)
+            engine_class.set_engine_data(engine_data)
+    else:
+        engine_config = config.get('engine_preferences.%s' % engine_class.name)
+        engine_config and engine_class.set_config(engine_config)
+    return engine_class
+
+
+def get_translator(engine_class=None):
+    config = get_config()
+    engine_class = engine_class or get_engine_class()
+    translator = engine_class()
+    if config.get('proxy_enabled'):
+        translator.set_proxy(config.get('proxy_setting'))
+    translator.set_merge_enabled(config.get('merge_enabled'))
+    translator.set_timeout(config.get('request_timeout'))
+    return translator
+
+
+def get_translation(translator, log=None):
+    config = get_config()
     translation = Translation(translator)
-    if get_config('glossary_enabled'):
-        translation.glossary.load(get_config('glossary_path'))
-    if get_config('merge_enabled'):
-        translation.set_merge_length(get_config('merge_length'))
-    translation.set_translation_position(get_config('translation_position'))
-    translation.set_translation_color(get_config('translation_color'))
-    translation.set_request_attempt(get_config('request_attempt'))
-    translation.set_request_interval(get_config('request_interval'))
+    if config.get('glossary_enabled'):
+        glossary = Glossary().load(config.get('glossary_path'))
+        translation.set_glossary(glossary)
+    if config.get('log_translation'):
+        translation.set_logging(log)
+    translation.set_concurrency_limit(config.get('concurrency_limit'))
+    translation.set_request_attempt(config.get('request_attempt'))
+    translation.set_request_interval(config.get('request_interval'))
     return translation

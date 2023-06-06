@@ -1,66 +1,94 @@
 import json
 
-from calibre_plugins.ebook_translator.engines.base import Base
+from .base import load_lang_codes, Base
+from .languages import google
 
 
 load_translations()
 
+lang_codes = load_lang_codes(google)
+
 
 class ChatgptTranslate(Base):
     name = 'ChatGPT'
-    alias = 'ChatGPT'
-    support_lang = 'google.json'
+    alias = 'ChatGPT (OpenAI)'
+    lang_codes = lang_codes
     endpoint = 'https://api.openai.com/v1/chat/completions'
     # api_key_hint = 'sk-xxx...xxx'
+    api_key_errors = ['429', 'Unauthorized']
 
-    default_prompts = {
-        'auto': 'Translate the content into {tlang} only: {text}',
-        'lang': 'Translate the content from {slang} to {tlang} only: {text}',
-    }
+    prompt = (
+        'You are a meticulous translator who translates any given content. '
+        'Translate the content from <slang> to <tlang>.')
+    models = ['gpt-3.5-turbo', 'gpt-3.5-turbo-0301', 'gpt-4', 'gpt-4-0314',
+              'gpt-4-32k', 'gpt-4-32k-0314']
+    model = 'gpt-3.5-turbo'
+    samplings = ['temperature', 'top_p']
+    sampling = 'temperature'
+    temperature = 1
+    top_p = 1
+    stream = True
 
     def __init__(self):
         Base.__init__(self)
-        self.prompts = self.default_prompts.copy()
-        self.keep_mark = False
+        self.endpoint = self.config.get('endpoint', self.endpoint)
+        self.prompt = self.config.get('prompt', self.prompt)
+        self.model = self.config.get('model', self.model)
+        self.sampling = self.config.get('sampling', self.sampling)
+        self.temperature = self.config.get('temperature', self.temperature)
+        self.top_p = self.config.get('top_p', self.top_p)
+        self.stream = self.config.get('stream', self.stream)
 
-    def set_keep_mark(self):
-        self.keep_mark = True
+    def set_prompt(self, prompt):
+        self.prompt = prompt
 
-    def set_prompt(self, auto=None, lang=None):
-        auto and self.prompts.update(auto=auto)
-        lang and self.prompts.update(lang=lang)
+    def get_prompt(self):
+        prompt = self.prompt.replace('<tlang>', self.target_lang)
+        if self._is_auto_lang():
+            prompt = prompt.replace('<slang>', 'detect language')
+        else:
+            prompt = prompt.replace('<slang>', self.source_lang)
+        # Recommend setting temperature to 0.5 for retaining the placeholder.
+        if self.merge_enabled:
+            prompt += (' Ensure that placeholders matching the pattern'
+                       '{{id_\\d+}} in the content are retained.')
+        return prompt
 
-    def translate(self, text):
-        headers = {
+    def get_headers(self):
+        return {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer %s' % self.api_key
         }
 
-        if self._is_auto_lang():
-            content = self.prompts.get('auto').format(
-                tlang=self.target_lang, text=text)
-        else:
-            content = self.prompts.get('lang').format(
-                slang=self.source_lang, tlang=self.target_lang, text=text)
+    def translate(self, text):
+        prompt = self.get_prompt()
+        headers = self.get_headers()
 
-        # TODO: We need to optimize the prompt to retain placeholders.
-        if self.keep_mark:
-            # 'Retain placeholder similar to {{id_0}} and %s'
-            content = 'Retain intentionally added placeholders that matches ' \
-                      'pattern "{{id_\\d+}}" and then %s' % content.lower()
+        data = {
+            'stream': self.stream,
+            'model': self.model,
+            'messages': [
+                {'role': 'system', 'content': prompt},
+                {'role': 'user', 'content': text}
+            ]
+        }
 
-        data = json.dumps({
-            'stream': True,
-            'model': 'gpt-3.5-turbo',
-            'messages': [{'role': 'user', 'content': content}]
-        })
+        sampling_value = getattr(self, self.sampling)
+        data.update({self.sampling: sampling_value})
 
+        callback = self.parse_stream if self.stream else self.parse
         return self.get_result(
-            self.endpoint, data, headers, method='POST', stream=True)
+            self.endpoint, json.dumps(data), headers, method='POST',
+            stream=self.stream, callback=callback)
 
-    def parse(self, data):
+    def parse_stream(self, data):
         while True:
-            line = data.readline().decode('utf-8').strip()
+            try:
+                line = data.readline().decode('utf-8').strip()
+            except Exception as e:
+                raise Exception(
+                    _('Can not parse returned response. Raw data: {}')
+                    .format(str(e)))
             if line.startswith('data:'):
                 chunk = line.split('data: ')[1]
                 if chunk == '[DONE]':
@@ -69,5 +97,19 @@ class ChatgptTranslate(Base):
                 if 'content' in delta:
                     yield delta['content']
 
-    # def parse(self, data):
-    #     return json.loads(data)['choices'][0]['message']['content']
+    def parse(self, data):
+        return json.loads(data)['choices'][0]['message']['content']
+
+
+class AzureChatgptTranslate(ChatgptTranslate):
+    name = 'ChatGPT(Azure)'
+    alias = 'ChatGPT (Azure)'
+    endpoint = ('https://{your-resource-name}.openai.azure.com/openai/'
+                'deployments/{deployment-id}/chat/completions'
+                '?api-version={api-version}')
+
+    def get_headers(self):
+        return {
+            'Content-Type': 'application/json',
+            'api-key': self.api_key
+        }

@@ -5,16 +5,20 @@ import json
 import os.path
 from subprocess import Popen, PIPE
 
-from calibre_plugins.ebook_translator.engines.base import Base
+from ..exceptions.engine import IncorrectApiKeyFormat
+from .base import load_lang_codes, Base
+from .languages import google
 
 
 load_translations()
+
+lang_codes = load_lang_codes(google)
 
 
 class GoogleFreeTranslate(Base):
     name = 'Google(Free)'
     alias = 'Google (Free)'
-    support_lang = 'google.json'
+    lang_codes = lang_codes
     endpoint = 'https://translate.googleapis.com/translate_a/single'
     need_api_key = False
 
@@ -70,14 +74,14 @@ class GoogleTranslate:
 class GoogleBasicTranslate(Base, GoogleTranslate):
     name = 'Google(Basic)'
     alias = 'Google (Basic)'
-    support_lang = 'google.json'
+    lang_codes = lang_codes
     endpoint = 'https://translation.googleapis.com/language/translate/v2'
     api_key_hint = 'API key or KEY_PATH'
     api_key_cache = []
+    api_key_errors = ['429']
 
     def translate(self, text):
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-
         data = {
             'format': 'html',
             'model': 'nmt',
@@ -85,15 +89,16 @@ class GoogleBasicTranslate(Base, GoogleTranslate):
             'q': text
         }
 
-        if os.path.sep not in self.api_key:
-            data.update(key=self.api_key)
-        else:
-            api_key = self._get_credential(self.api_key)
-            headers = {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer %s' % api_key
-            }
-            data = json.dumps(data)
+        if self.api_key:
+            if os.path.sep not in self.api_key:
+                data.update(key=self.api_key)
+            else:
+                api_key = self._get_credential(self.api_key)
+                headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer %s' % api_key
+                }
+                data = json.dumps(data)
 
         if not self._is_auto_lang():
             data.update(source=self._get_source_code())
@@ -108,17 +113,18 @@ class GoogleBasicTranslate(Base, GoogleTranslate):
 class GoogleAdvancedTranslate(Base, GoogleTranslate):
     name = 'Google(Advanced)'
     alias = 'Google (Advanced)'
-    support_lang = 'google.json'
+    lang_codes = lang_codes
     endpoint = 'https://translation.googleapis.com/v3/projects/{}'
     api_key_hint = 'PROJECT_NUMBER_OR_ID|KEY_PATH'
     api_key_rule = r'^[^\s\|]+?\|.+$'
+    api_key_errors = ['429']
     api_key_cache = []
 
     def translate(self, text):
         try:
             project_id, key_file_path = re.split(r'\|', self.api_key)
         except Exception:
-            raise Exception(self.get_api_key_error())
+            raise IncorrectApiKeyFormat(self.api_key_error_message())
 
         endpoint = self.endpoint.format('%s:translateText' % project_id)
         api_key = self._get_credential(key_file_path)

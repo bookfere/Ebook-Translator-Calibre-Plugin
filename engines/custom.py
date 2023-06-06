@@ -1,9 +1,9 @@
 import json
 from lxml import etree
 
-from calibre_plugins.ebook_translator.utils import is_str
-from calibre_plugins.ebook_translator.engines import builtin_engines
-from calibre_plugins.ebook_translator.engines.base import Base
+from ..utils import is_str
+from . import builtin_engines
+from .base import load_lang_codes, Base
 
 
 load_translations()
@@ -89,6 +89,13 @@ class CustomTranslate(Base):
     name = 'Custom'
     alias = 'Custom'
     need_api_key = False
+    engine_data = {}
+
+    @classmethod
+    def set_engine_data(cls, data):
+        cls.name = data.get('name')  # rename custom engine
+        cls.engine_data = data
+        cls.lang_codes = load_lang_codes(data.get('languages'))
 
     def translate(self, text):
         request = self.engine_data.get('request')

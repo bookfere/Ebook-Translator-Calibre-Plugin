@@ -11,7 +11,7 @@ load_translations()
 
 
 class SourceLang(QComboBox):
-    refresh = pyqtSignal(dict, bool)
+    refresh = pyqtSignal(dict, str, bool)
 
     def __init__(self, parent=None, book_lang=None):
         QComboBox.__init__(self, parent)
@@ -19,8 +19,8 @@ class SourceLang(QComboBox):
         self.refresh.connect(self.set_codes)
         self.wheelEvent = lambda event: None
 
-    @pyqtSlot(dict, bool)
-    def set_codes(self, codes, auto_detect=True):
+    @pyqtSlot(dict, str, bool)
+    def set_codes(self, codes, preferred=None, auto_detect=True):
         current = self.currentText()
         self.clear()
         self.book_lang = lang_as_iso639_1(self.book_lang)
@@ -32,7 +32,9 @@ class SourceLang(QComboBox):
                 self.addItem(lang)
         if auto_detect:
             self.insertItem(0, _('Auto detect'))
-        if current and current in codes:
+        if preferred and preferred in codes:
+            self.setCurrentText(preferred)
+        elif current and current in codes:
             self.setCurrentText(current)
         else:
             self.setCurrentIndex(0)

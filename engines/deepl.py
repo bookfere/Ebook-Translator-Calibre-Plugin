@@ -2,22 +2,26 @@ import json
 import time
 import random
 
-from calibre_plugins.ebook_translator.engines.base import Base
+from .base import load_lang_codes, Base
+from .languages import deepl
 
 
 load_translations()
+
+lang_codes = load_lang_codes(deepl)
 
 
 class DeeplTranslate(Base):
     name = 'DeepL'
     alias = 'DeepL'
-    support_lang = 'deepl.json'
+    lang_codes = lang_codes
     endpoint = {
         'translate': 'https://api-free.deepl.com/v2/translate',
         'usage': 'https://api-free.deepl.com/v2/usage',
     }
     # api_key_hint = 'xxx-xxx-xxx:fx'
     placeholder = ('<m id={} />', r'<m\s+id={}\s+/>')
+    api_key_errors = ['403', '456']
 
     def get_usage(self):
         # See: https://www.deepl.com/docs-api/general/get-usage/
@@ -62,7 +66,7 @@ class DeeplProTranslate(DeeplTranslate):
 class DeeplFreeTranslate(Base):
     name = 'DeepL(Free)'
     alias = 'DeepL (Free)'
-    support_lang = 'deepl.json'
+    lang_codes = lang_codes
     endpoint = 'https://www2.deepl.com/jsonrpc?client=chrome-extension,1.4.0'
     need_api_key = False
     placeholder = DeeplTranslate.placeholder
