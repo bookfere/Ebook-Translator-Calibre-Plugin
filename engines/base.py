@@ -3,63 +3,91 @@ import traceback
 from mechanize import Browser, Request
 from calibre.constants import DEBUG
 from calibre.utils.localization import lang_as_iso639_1
-from calibre_plugins.ebook_translator.utils import is_test
+
+from ..utils import is_test
 
 
 load_translations()
 
 
+def load_lang_codes(codes):
+    if not ('source' in codes or 'target' in codes):
+        codes = {'source': codes, 'target': codes}
+    return codes
+
+
 class Base:
     name = None
     alias = None
-    support_lang = None
-    engine_data = {}
+    config = {}
     lang_codes = {}
     endpoint = None
     need_api_key = True
     api_key_hint = _('API Key')
     api_key_rule = r'^[^\s]+$'
+    api_key_errors = ['401']
     placeholder = ('{{{{id_{}}}}}', r'({{\s*)*id\s*_\s*{}\s*(\s*}})*')
 
     def __init__(self):
-        self.api_key = ''
         self.source_lang = None
         self.target_lang = None
         self.proxy_uri = None
 
         self.br = Browser()
         self.br.set_handle_robots(False)
-        self.timeout = 300.0
+        self.timeout = 30.0
 
+        self.merge_enabled = False
         self.source_codes = self.lang_codes.get('source')
         self.target_codes = self.lang_codes.get('target')
 
+        self.api_keys = self.config.get('api_keys', [])[:]
+        self.bad_api_keys = []
+        self.api_key = self.get_api_key()
+
     @classmethod
-    def get_api_key_error(cls):
+    def set_config(cls, config):
+        cls.config = config
+
+    @classmethod
+    def api_key_error_message(cls):
         return _('A correct key format "{}" is required.') \
             .format(cls.api_key_hint)
 
     @classmethod
-    def set_engine_data(cls, data):
-        cls.name = data.get('name')  # rename custom engine
-        cls.engine_data = data
-
-    @classmethod
-    def set_lang_codes(cls, codes):
-        if not ('source' in codes or 'target' in codes):
-            codes = {'source': codes, 'target': codes}
-        cls.lang_codes = codes
-
-    @classmethod
     def is_chatgpt(cls):
-        return cls.__name__ == 'ChatgptTranslate'
+        return 'chatgpt' in cls.__name__.lower()
 
     @classmethod
     def is_custom(cls):
         return cls.__name__ == 'CustomTranslate'
 
-    def set_api_key(self, api_key):
-        self.api_key = api_key
+    def get_api_key(self):
+        if self.need_api_key and self.api_keys:
+            return self.api_keys.pop(0)
+        return None
+
+    def change_api_key(self):
+        """Change the API key if the previous one cannot be used."""
+        if self.api_key not in self.bad_api_keys:
+            self.bad_api_keys.append(self.api_key)
+            self.api_key = self.get_api_key()
+            if self.api_key is not None:
+                return True
+        return False
+
+    def has_api_key_error(self, message):
+        if self.need_api_key:
+            for error in self.api_key_errors:
+                if error in message:
+                    return True
+        return False
+
+    def set_endpoint(self, endpoint):
+        self.endpoint = endpoint
+
+    def set_merge_enabled(self, enable):
+        self.merge_enabled = enable
 
     def set_source_lang(self, source_lang):
         self.source_lang = source_lang
@@ -73,6 +101,15 @@ class Base:
             if not self.proxy_uri.startswith('http'):
                 self.proxy_uri = 'http://%s' % self.proxy_uri
 
+    def set_timeout(self, timeout):
+        self.timeout = timeout
+
+    def get_target_lang(self):
+        return self.target_lang
+
+    def get_target_lang_code(self):
+        return lang_as_iso639_1(self._get_target_code())
+
     def _get_source_code(self):
         return 'auto' if self.source_lang == _('Auto detect') else \
            self.source_codes.get(self.source_lang)
@@ -83,11 +120,15 @@ class Base:
     def _is_auto_lang(self):
         return self._get_source_code() == 'auto'
 
-    def get_target_code(self):
-        return lang_as_iso639_1(self._get_target_code())
-
     def get_result(self, url, data=None, headers={}, method='GET',
                    stream=False, silence=False, callback=None):
+        """Translation engine service error code documentation:
+        * https://cloud.google.com/apis/design/errors
+        * https://www.deepl.com/docs-api/api-access/error-handling/
+        * https://platform.openai.com/docs/guides/error-codes/api-errors
+        * https://ai.youdao.com/DOCSIRMA/html/trans/api/wbfy/index.html
+        * https://api.fanyi.baidu.com/doc/21
+        """
         result = None
         self.proxy_uri and self.br.set_proxies(
             {'http': self.proxy_uri, 'https': self.proxy_uri})
@@ -97,8 +138,7 @@ class Base:
                 url, data, headers=headers, timeout=self.timeout,
                 method=method)
         except Exception:
-            request = Request(
-                url, data, headers=headers, timeout=self.timeout)
+            request = Request(url, data, headers=headers, timeout=self.timeout)
         try:
             self.br.open(request)
             response = self.br.response()
@@ -106,6 +146,7 @@ class Base:
                 response.read().decode('utf-8').strip()
             return callback(result) if callback else self.parse(result)
         except Exception as e:
+            # Only show the trackback when debugging is enabled.
             if not is_test and DEBUG:
                 traceback.print_exc()
             if silence:

@@ -5,11 +5,20 @@ import hashlib
 
 from calibre.utils.logging import Log
 
+from .lib.cssselect import GenericTranslator, SelectorError
+
 
 ns = {'x': 'http://www.w3.org/1999/xhtml'}
 sep = '=' * 30
 log = Log()
 is_test = 'unittest' in sys.modules
+
+
+def css(seletor):
+    try:
+        return GenericTranslator().css_to_xpath(seletor, prefix='self::x:')
+    except SelectorError:
+        return None
 
 
 def uid(*args):
@@ -23,16 +32,36 @@ def trim(text):
     # Remove \xa0 to be compitable with Python2.x
     text = re.sub(u'\u00a0|\u3000', ' ', text)
     text = re.sub(u'\u200b', '', text)
-    return re.sub(r'^\s+|\s+$', '', text)
+    text = re.sub(r'\s+', ' ', text)
+    return text.strip()
 
 
-def chunk(data, length=0):
-    length = 1 if length < 1 else length
-    data_length = len(data)
-    length = data_length if length > data_length else length
-    chunk_size = data_length / length
+def chunk(items, length=0):
+    if length < 1:
+        for item in items:
+            yield [item]
+        return
+    item_length = len(items)
+    length = item_length if length > item_length else length
+    chunk_size = item_length / length
     for i in range(length):
-        yield data[int(chunk_size*i):int(chunk_size*(i+1))]
+        yield items[int(chunk_size*i):int(chunk_size*(i+1))]
+
+
+def group(numbers):
+    ranges = []
+    current_range = []
+    numbers = sorted(numbers)
+    for number in numbers:
+        if not current_range:
+            current_range = [number, number]
+        elif number - current_range[-1] == 1:
+            current_range[-1] = number
+        else:
+            ranges.append(tuple(current_range))
+            current_range = [number, number]
+    ranges.append(tuple(current_range))
+    return ranges
 
 
 def sorted_mixed_keys(s):
@@ -50,3 +79,7 @@ def is_proxy_availiable(host, port, timeout=1):
     except Exception as e:
         return False
     return True
+
+
+def dummy(*args, **kwargs):
+    pass

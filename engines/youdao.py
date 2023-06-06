@@ -4,20 +4,25 @@ import time
 import uuid
 import hashlib
 
-from calibre_plugins.ebook_translator import _z
-from calibre_plugins.ebook_translator.engines.base import Base
+from .. import _z
+from ..exceptions.engine import IncorrectApiKeyFormat
+from .base import load_lang_codes, Base
+from .languages import youdao
 
 
 load_translations()
+
+lang_codes = load_lang_codes(youdao)
 
 
 class YoudaoTranslate(Base):
     name = 'Youdao'
     alias = _z('Youdao')
-    support_lang = 'youdao.json'
+    lang_codes = lang_codes
     endpoint = 'https://openapi.youdao.com/api'
     api_key_hint = 'appid|appsecret'
     api_key_rule = r'^[^\s:\|]+?[:\|][^\s:\|]+$'
+    api_key_errors = ['401']
 
     def encrypt(self, signStr):
         hash_algorithm = hashlib.sha256()
@@ -35,7 +40,7 @@ class YoudaoTranslate(Base):
         try:
             app_key, app_secret = re.split(r'[:\|]', self.api_key)
         except Exception:
-            raise Exception(self.get_api_key_error())
+            raise IncorrectApiKeyFormat(self.api_key_error_message())
 
         curtime = str(int(time.time()))
         salt = str(uuid.uuid1())

@@ -1,13 +1,12 @@
-from calibre_plugins.ebook_translator.engines.google import (
+from .google import (
     GoogleFreeTranslate, GoogleBasicTranslate, GoogleAdvancedTranslate)
-from calibre_plugins.ebook_translator.engines.chatgpt import ChatgptTranslate
-from calibre_plugins.ebook_translator.engines.deepl import (
-    DeeplTranslate, DeeplProTranslate, DeeplFreeTranslate)
-from calibre_plugins.ebook_translator.engines.youdao import YoudaoTranslate
-from calibre_plugins.ebook_translator.engines.baidu import BaiduTranslate
+from .chatgpt import ChatgptTranslate, AzureChatgptTranslate
+from .deepl import DeeplTranslate, DeeplProTranslate, DeeplFreeTranslate
+from .youdao import YoudaoTranslate
+from .baidu import BaiduTranslate
 
 
 builtin_engines = (
     GoogleFreeTranslate, GoogleBasicTranslate, GoogleAdvancedTranslate,
-    ChatgptTranslate, DeeplTranslate, DeeplProTranslate, DeeplFreeTranslate,
-    YoudaoTranslate, BaiduTranslate)
+    ChatgptTranslate, AzureChatgptTranslate, DeeplTranslate, DeeplProTranslate,
+    DeeplFreeTranslate, YoudaoTranslate, BaiduTranslate)

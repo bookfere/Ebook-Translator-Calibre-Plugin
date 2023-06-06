@@ -3,26 +3,31 @@ import json
 import random
 import hashlib
 
-from calibre_plugins.ebook_translator import _z
-from calibre_plugins.ebook_translator.engines.base import Base
+from .. import _z
+from ..exceptions.engine import IncorrectApiKeyFormat
+from .base import Base, load_lang_codes
+from .languages import baidu
 
 
 load_translations()
+
+lang_codes = load_lang_codes(baidu)
 
 
 class BaiduTranslate(Base):
     name = 'Baidu'
     alias = _z('Baidu')
-    support_lang = 'baidu.json'
+    lang_codes = lang_codes
     endpoint = 'https://fanyi-api.baidu.com/api/trans/vip/translate'
     api_key_hint = 'appid|appkey'
     api_key_rule = r'^[^\s:\|]+?[:\|][^\s:\|]+$'
+    api_key_errors = ['54004']
 
     def translate(self, text):
         try:
             app_id, app_key = re.split(r'[:\|]', self.api_key)
         except Exception:
-            raise Exception(self.get_api_key_error())
+            raise IncorrectApiKeyFormat(self.api_key_error_message())
 
         salt = random.randint(32768, 65536)
         sign_str = app_id + text + str(salt) + app_key

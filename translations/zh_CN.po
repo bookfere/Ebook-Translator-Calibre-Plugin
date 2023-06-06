@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-05-11 00:24+0800\n"
+"POT-Creation-Date: 2023-06-06 20:27+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -25,14 +25,116 @@ msgid ""
 "keeping the original content)."
 msgstr "一个可以将电子书翻译成指定语言（原文译文对照）的插件。"
 
+msgid "Extracting ebook content..."
+msgstr "提取电子书内容..."
+
+msgid "Filter original content..."
+msgstr "过滤原文内容..."
+
+msgid "Preparing user interface..."
+msgstr "准备用户界面..."
+
+msgid "Translation Failed"
+msgstr "翻译失败"
+
+msgid "Start"
+msgstr "开始"
+
+msgid "Input Format"
+msgstr "输入格式"
+
+msgid "Target Language"
+msgstr "目标语言"
+
+msgid "Translation completed."
+msgstr "翻译已完成。"
+
+msgid "Failed"
+msgstr "失败"
+
+msgid "There is no content that needs to be translated."
+msgstr "没有需要翻译的内容"
+
+msgid "Reading ebook data, please wait..."
+msgstr "读取电子书数据中，请稍候..."
+
+msgid "Review"
+msgstr "校对"
+
+msgid "Log"
+msgstr "日志"
+
+msgid "Translate All"
+msgstr "翻译全部"
+
+msgid "Translate Selected"
+msgstr "翻译所选"
+
+msgid "Delete"
+msgstr "删除"
+
+msgid "Stop"
+msgstr "停止"
+
+msgid "Stopping..."
+msgstr "停止中..."
+
+msgid "Translation Engine"
+msgstr "翻译引擎"
+
+msgid "Source Language"
+msgstr "来源语言"
+
+msgid "Output Ebook"
+msgstr "输出电子书"
+
+msgid "Output"
+msgstr "输出"
+
+msgid "Title"
+msgstr "书名"
+
+msgid "Translated"
+msgstr "已翻译"
+
+msgid "No translation yet"
+msgstr "尚未翻译"
+
+msgid "Save"
+msgstr "保存"
+
+msgid "Your changes have been saved."
+msgstr "更改已保存。"
+
+msgid "Translation log"
+msgstr "翻译日志"
+
+msgid "Are you sure you want to translate all {:n} paragraphs?"
+msgstr "你确定要翻译所有 {:n} 个段落吗？"
+
+msgid "Are you sure you want to stop the translation progress?"
+msgstr "你确定要停止翻译过程吗？"
+
+msgid "Output Format"
+msgstr "输出格式"
+
+msgid "Translate"
+msgstr "翻译"
+
+msgid "Unknown"
+msgstr "未知"
+
+msgid "The specified path does not exist."
+msgstr "指定路径不存在。"
+
+msgid "The specified glossary file does not exist."
+msgstr "指定的词汇表文件不存在。"
+
 msgid "Translating..."
 msgstr "翻译中……"
 
 msgid "Test Translation Engine"
 msgstr "测试翻译引擎"
-
-msgid "Translate"
-msgstr "翻译"
 
 msgid "Usage: checking..."
 msgstr "用量：检查中……"
@@ -46,9 +148,6 @@ msgstr "自定义翻译引擎"
 msgid "Add"
 msgstr "添加"
 
-msgid "Delete"
-msgstr "删除"
-
 msgid "Clear"
 msgstr "清除"
 
@@ -57,9 +156,6 @@ msgstr "重置"
 
 msgid "Verify"
 msgstr "验证"
-
-msgid "Save"
-msgstr "保存"
 
 msgid "Valid engine data format."
 msgstr "有效的引擎数据格式。"
@@ -73,8 +169,84 @@ msgstr "设置已保存。"
 msgid "No custom engine to delete."
 msgstr "没有可以删除的自定义引擎。"
 
+msgid "Ebook Specific"
+msgstr "自动选择"
+
+msgid "Donate"
+msgstr "赞赏"
+
+msgid "Feedback"
+msgstr "反馈"
+
 msgid "Auto detect"
 msgstr "自动探测"
+
+msgid "Choose a translation mode for clicking the icon button."
+msgstr "为图标按钮选择一个默认模式"
+
+msgid "Advanced Mode"
+msgstr "高级模式"
+
+msgid ""
+"This mode provides additional options for the translation process, allowing "
+"for more control and customization."
+msgstr "此模式为翻译过程提供了额外选项，允许更多的控制和自定义。"
+
+msgid "Choose"
+msgstr "选择"
+
+msgid "Batch Mode"
+msgstr "批量模式"
+
+msgid ""
+"This mode allows users to translate multiple ebooks at once, streamlining "
+"the translation process and saving time."
+msgstr "此模式允许用户一次性翻译多本电子书，提升翻译效率节省时间。"
+
+msgid "Engine"
+msgstr "引擎"
+
+msgid "Language"
+msgstr "语言"
+
+msgid "Original"
+msgstr "原文"
+
+msgid "Status"
+msgstr "状态"
+
+msgid "Untranslated"
+msgstr "未翻译"
+
+msgid "Select the whole chapter"
+msgstr "选择所在章节"
+
+msgid "Select similar paragraphs: {}=\"{}\""
+msgstr "选择相似段落：{}=\"{}\""
+
+msgid "Retain at least one row."
+msgstr "至少保留一行。"
+
+msgid "[{} > {}] Translating \"{}\""
+msgstr "[{} > {}] 翻译 \"{}\""
+
+msgid "Translation job failed"
+msgstr "翻译失败"
+
+msgid "completed"
+msgstr "已结束"
+
+msgid "Ebook Translation Log"
+msgstr "电子书翻译日志"
+
+msgid "Translation Completed"
+msgstr "翻译已完成"
+
+msgid "The translation of \"{}\" was completed. Do you want to open the book?"
+msgstr "\"{}\"的翻译已完成。是否想要立即阅读这本电子书？"
+
+msgid "Start to convert ebook format:"
+msgstr "开始转换电子书格式："
 
 msgid "Baidu"
 msgstr "百度"
@@ -95,7 +267,7 @@ msgid "Invalid engine data."
 msgstr "无效的引擎数据。"
 
 msgid "Engine name is required."
-msgstr "API密钥是必填项。"
+msgstr "API 密钥是必填项。"
 
 msgid "Engine name must be different from builtin engine name."
 msgstr "引擎名称不能与内置的引擎名称相同。"
@@ -136,62 +308,113 @@ msgstr "无法获取 Google API 密钥。原因：{}"
 msgid "Youdao"
 msgstr "有道"
 
+msgid "General"
+msgstr "通用"
+
 msgid "Content"
 msgstr "内容"
 
-msgid "Setting"
-msgstr "设置"
+msgid "Preferred Mode"
+msgstr "偏好模式"
 
-msgid "About"
-msgstr "关于"
+msgid "Output Path"
+msgstr "输出路径"
 
-msgid "Donate"
-msgstr "赞赏"
+msgid "Library"
+msgstr "书库"
 
-msgid "Feedback"
-msgstr "反馈"
+msgid "Path"
+msgstr "路径"
 
-msgid "Input Format"
-msgstr "输入格式"
+msgid "Choose a path to store translated book(s)"
+msgstr "选择一个路径用来存放翻译后的电子书"
 
-msgid "Output Format"
-msgstr "输出格式"
+msgid "Choose..."
+msgstr "选择..."
 
-msgid "Title"
-msgstr "书名"
+msgid "Preferred Format"
+msgstr "偏好格式"
 
-msgid "Source Language"
-msgstr "来源语言"
+msgid "(Beta)"
+msgstr "(测试版）"
 
-msgid "Target Language"
-msgstr "目标语言"
+msgid "Merge to Translate"
+msgstr "合并翻译"
 
-msgid "Unknown"
-msgstr "未知"
+msgid "Enable"
+msgstr "开启"
 
-msgid "The specified path does not exist."
-msgstr "指定路径不存在。"
+msgid "The number of characters to translate at once."
+msgstr "单次要翻译的字符数量"
 
-msgid "The specified glossary file does not exist."
-msgstr "指定的词汇表文件不存在。"
+msgid "HTTP Proxy"
+msgstr "HTTP 代理"
 
-msgid "[{} > {}] Translating \"{}\""
-msgstr "[{} > {}] 翻译 \"{}\""
+msgid "Host"
+msgstr "主机"
 
-msgid "Translation job failed"
-msgstr "翻译失败"
+msgid "Port"
+msgstr "端口"
 
-msgid "completed"
-msgstr "已结束"
+msgid "Test"
+msgstr "测试"
 
-msgid "Ebook Translation Log"
-msgstr "电子书翻译日志"
+msgid "HTTP Request"
+msgstr "HTTP 请求"
 
-msgid "Translation Completed"
-msgstr "翻译已完成"
+msgid "Concurrency limit (Default 1)"
+msgstr "并发限制（默认1）"
 
-msgid "The translation of \"{}\" was completed. Do you want to open the book?"
-msgstr "\"{}\"的翻译已完成。是否想要立即阅读这本电子书？"
+msgid "Attempt times (Default 3)"
+msgstr "重试次数（默认3次）"
+
+msgid "Max interval (Default 5s)"
+msgstr "最大间隔（默认5秒）"
+
+msgid "Timeout (Default 10s)"
+msgstr "超时（默认 10 秒）"
+
+msgid "Cache"
+msgstr "缓存"
+
+msgid "Reveal"
+msgstr "打开"
+
+msgid "Total: {}"
+msgstr "总计：{}"
+
+msgid "No cache exists."
+msgstr "缓存不存在。"
+
+msgid "Show translation"
+msgstr "显示译文"
+
+msgid "Custom"
+msgstr "自定义"
+
+msgid "Preferred Language"
+msgstr "偏好语言"
+
+msgid "Tune ChatGPT"
+msgstr "调节 ChatGPT"
+
+msgid "Prompt"
+msgstr "提示词"
+
+msgid "Endpoint"
+msgstr "端点"
+
+msgid "Model"
+msgstr "模型"
+
+msgid "Sampling"
+msgstr "采样"
+
+msgid "Enable streaming text like in ChatGPT"
+msgstr "启用类似 ChatGPT 的文本流"
+
+msgid "Stream"
+msgstr "文本流"
 
 msgid "Translation Position"
 msgstr "译文位置"
@@ -211,32 +434,35 @@ msgstr "译文颜色"
 msgid "CSS color value, e.g., #666666, grey, rgb(80, 80, 80)"
 msgstr "CSS 颜色值，如 #666666, gry, rgb(80, 80, 80)"
 
-msgid "Choose"
-msgstr "选择"
-
-msgid "(Beta)"
-msgstr "(测试版）"
-
-msgid "Merge to Translate"
-msgstr "合并翻译"
-
-msgid "Enable"
-msgstr "开启"
-
-msgid "The number of characters to translate at one time"
-msgstr "单次要翻译的字符数量"
-
 msgid "Translation Glossary"
 msgstr "翻译词汇表"
 
 msgid "Choose a glossary file"
 msgstr "选择一个词汇表文件"
 
+msgid "Ignore Element"
+msgstr "忽略元素"
+
+msgid "CSS selectors to exclude elements. One rule per line:"
+msgstr "用来排除元素的 CSS 选择器。一行一条规则："
+
+msgid "e.g."
+msgstr "如"
+
 msgid "Ignore Paragraph"
 msgstr "忽略段落"
 
-msgid "Mode:"
-msgstr "模式："
+msgid "Scope"
+msgstr "范围"
+
+msgid "Text only"
+msgstr "仅文本"
+
+msgid "HTML element"
+msgstr "HTML元素"
+
+msgid "Mode"
+msgstr "模式"
 
 msgid "Normal"
 msgstr "普通"
@@ -247,15 +473,6 @@ msgstr "普通（区分大小写）"
 msgid "Regular Expression"
 msgstr "正则表达式"
 
-msgid "Scope:"
-msgstr "范围："
-
-msgid "Text only"
-msgstr "仅文本"
-
-msgid "HTML element"
-msgstr "HTML元素"
-
 msgid "Exclude paragraph by keyword. One keyword per line:"
 msgstr "排除带指定关键词的段落。一行一条关键词："
 
@@ -264,78 +481,6 @@ msgstr "排除带指定关键词的段落（区分字母大小写）。一行一
 
 msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
 msgstr "排除匹配正则表达式规则的段落。一行一条规则："
-
-msgid "Output Path"
-msgstr "输出路径"
-
-msgid "Library"
-msgstr "书库"
-
-msgid "Path"
-msgstr "路径"
-
-msgid "Choose a path to store translated book(s)"
-msgstr "选择一个路径用来存放翻译后的电子书"
-
-msgid "Choose ..."
-msgstr "选择 ..."
-
-msgid "Translation Engine"
-msgstr "翻译引擎"
-
-msgid "Test"
-msgstr "测试"
-
-msgid "Custom"
-msgstr "自定义"
-
-msgid "ChatGPT Prompt"
-msgstr "ChatGPT提示词"
-
-msgid "For auto detecting source language:"
-msgstr "自动探测来源语言时的提示词"
-
-msgid "For specifying source language:"
-msgstr "指定来源语言时的提示词"
-
-msgid "Preferred Language"
-msgstr "偏好语言"
-
-msgid "Network Proxy"
-msgstr "网络代理"
-
-msgid "Host"
-msgstr "主机"
-
-msgid "Port"
-msgstr "端口"
-
-msgid "Cache"
-msgstr "缓存"
-
-msgid "Request"
-msgstr "请求"
-
-msgid "Concurrency limit (Default 1):"
-msgstr "并发限制（默认1）"
-
-msgid "Attempt times (Default 3):"
-msgstr "重试次数（默认3次）："
-
-msgid "Max interval (Default 5s):"
-msgstr "最大间隔（默认5秒）"
-
-msgid "Log"
-msgstr "日志"
-
-msgid "Show translation"
-msgstr "显示译文"
-
-msgid "Cannot clear cache while there are running jobs."
-msgstr "有运行中的任务，无法清理缓存。"
-
-msgid "Total: {}"
-msgstr "总计：{}"
 
 msgid "Proxy host or port is incorrect."
 msgstr "代理的主机或端口填写有误。"
@@ -346,20 +491,23 @@ msgstr "网络代理可用。"
 msgid "The proxy is not available."
 msgstr "网络代理不可用。"
 
+msgid "the prompt must include {}."
+msgstr "提示词必须包含 {}。"
+
 msgid "Invalid color value."
 msgstr "无效的颜色值。"
 
 msgid "{} is not a valid regular expression."
 msgstr "{} 不是有效的正则表达式。"
 
-msgid "Prompt must include {} and {}."
-msgstr "提示词必须包含 {} 和 {}。"
+msgid "{} is not a valid CSS seletor."
+msgstr "{} 不是一个有效的 CSS 选择器。"
 
-msgid "Prompt must include {}, {} and {}."
-msgstr "提示词必须包含 {}、{} 和 {}。"
+msgid "No available API key."
+msgstr "没有可用的 API 密钥。"
 
-msgid "Please add a custom translation engine first."
-msgstr "请先添加一个自定义翻译引擎。"
+msgid "API key was Changed due to previous one unavailable."
+msgstr "由于上一个 API 密钥不可用，已自动更换。"
 
 msgid "Failed to retreive data from translate engine API."
 msgstr "无法从翻译引擎API获取数据。"
@@ -373,29 +521,26 @@ msgstr "[{}] 正在重试 {} ...（{}秒后超时）"
 msgid "Original: {}"
 msgstr "原文：{}"
 
-msgid "Translation (Cached): {}"
-msgstr "译文（缓存）：{}"
-
 msgid "Translation: {}"
 msgstr "译文：{}"
 
-msgid "There is no content need to translate."
-msgstr "没有需要翻译的内容。"
+msgid "Translation (Cached): {}"
+msgstr "译文（缓存）：{}"
 
-msgid "Start to translate ebook content:"
-msgstr "开始翻译电子书内容："
+msgid "Start to translate ebook content"
+msgstr "开始翻译电子书内容"
 
 msgid "Total items: {}"
 msgstr "全部条目：{}"
 
+msgid "There is no content need to translate."
+msgstr "没有需要翻译的内容。"
+
 msgid "Translating: {}/{}"
 msgstr "翻译：{}/{}"
 
-msgid "Translation completed."
-msgstr "翻译已完成"
-
-msgid "Start to convert ebook format:"
-msgstr "开始转换电子书格式："
+msgid "Translation cancelled."
+msgstr "翻译已取消。"
 
 msgid "Can not open glossary file: {}"
 msgstr "无法打开词汇表文件：{}"
@@ -406,5 +551,26 @@ msgstr "翻译书籍"
 msgid "Translate Ebook Content"
 msgstr "翻译电子书内容"
 
+msgid "Setting"
+msgstr "设置"
+
+msgid "About"
+msgstr "关于"
+
+msgid "Clear all caches"
+msgstr "清除所有缓存"
+
+msgid "Please choose one single book."
+msgstr "请选择一本书籍。"
+
 msgid "Please choose at least one book."
 msgstr "必须选择至少一本电子书。"
+
+msgid "Choose Translation Mode"
+msgstr "选择翻译模式"
+
+msgid "Cannot clear cache while there are running jobs."
+msgstr "有运行中的任务，无法清理缓存。"
+
+msgid "Are you sure you want clear all caches?"
+msgstr "你确定要清除所有缓存吗？"

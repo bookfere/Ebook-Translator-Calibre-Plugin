@@ -1,123 +1,95 @@
-import re
+import os.path
 from types import MethodType
+from tempfile import gettempdir
 
 from calibre.constants import __version__
 from calibre.ebooks.conversion.plumber import Plumber
-from calibre_plugins.ebook_translator import EbookTranslator
-from calibre_plugins.ebook_translator.config import get_config
-from calibre_plugins.ebook_translator.utils import (
-    ns, log, uid, trim, sorted_mixed_keys)
-from calibre_plugins.ebook_translator.cache import TranslationCache
-from calibre_plugins.ebook_translator.element import get_string, get_name
-from calibre_plugins.ebook_translator.translator import get_translator
-from calibre_plugins.ebook_translator.translation import get_translation
+
+from . import EbookTranslator
+from .utils import log, uid, sep
+from .cache import get_cache
+from .element import get_ebook_elements, get_element_handler, Extraction
+from .translation import get_translator, get_translation
 
 
 load_translations()
 
 
-def get_sorted_pages(pages):
-    return sorted(
-        [page for page in pages if 'html' in page.media_type],
-        key=lambda page: sorted_mixed_keys(page.href))
+def ebook_pages(input_path):
+    pages = []
 
+    output_path = os.path.join(gettempdir(), 'temp.epub')
+    plumber = Plumber(input_path, output_path, log=log)
 
-def extract_elements(pages):
-    elements = []
-    for page in get_sorted_pages(pages):
-        body = page.data.find('./x:body', namespaces=ns)
-        elements.extend(get_elements(body, []))
-    return list(filter(filter_content, elements))
+    def convert(self, oeb, output_path, input_plugin, opts, log):
+        pages.extend(oeb.manifest.items)
+    plumber.output_plugin.convert = MethodType(convert, plumber.output_plugin)
+    plumber.run()
 
-
-def get_elements(root, elements=[]):
-    ignore_tags = ['pre', 'code']
-    for element in root.findall('./*'):
-        if get_name(element) in ignore_tags:
-            continue
-        element_has_content = False
-        if element.text is not None and trim(element.text) != '':
-            element_has_content = True
-        else:
-            children = element.findall('./*')
-            for child in children:
-                if child.tail is not None and trim(child.tail) != '':
-                    element_has_content = True
-                    break
-        if element_has_content:
-            elements.append(element)
-        else:
-            get_elements(element, elements)
-    # Return root if all children have no content
-    return elements if elements else [root]
-
-
-def filter_content(element):
-    content = trim(''.join(element.itertext()))
-    if content == '':
-        return False
-
-    default_rules = [r'^[\d\s\.:_-]+$', r'^<[^>]+>[\d\s\.:_-]+</[^>]+>$']
-    patterns = [re.compile(rule) for rule in default_rules]
-
-    mode, rules = get_config('rule_mode'), get_config('filter_rules')
-    for rule in rules:
-        if mode == 'regex':
-            patterns.append(re.compile(rule))
-        else:
-            args = [re.escape(rule)]
-            if mode == 'normal':
-                args.append(re.I)
-            patterns.append(re.compile(*args))
-    if get_config('filter_scope') == 'html':
-        content = get_string(element, True)
-    for pattern in patterns:
-        if pattern.search(content):
-            return False
-    return True
+    return pages
 
 
 def convert_book(input_path, output_path, source_lang, target_lang,
-                 notification):
-    """parameter notification is automatically added by arbitrary_n."""
+                 cache_only, notification):
+    """ The following parameters need attention:"
+    :cache_only: Only use the translation which exists in the cache.
+    :notification: It is automatically added by arbitrary_n.
+    """
     translator = get_translator()
     translator.set_source_lang(source_lang)
     translator.set_target_lang(target_lang)
+
+    element_handler = get_element_handler(translator.get_target_lang_code())
+
+    cache = get_cache(uid(
+        input_path, translator.name, target_lang, Extraction.__version__,
+        str(element_handler.get_merge_length())))
+    cache.set_cache_only(cache_only)
+
     translation = get_translation(translator)
+    translation.set_logging(log.info)
+    translation.set_callback(
+        lambda paragraph: cache.update_paragraph(paragraph))
 
-    if get_config('cache_enabled'):
-        cache = TranslationCache(uid(
-            translator.name, input_path, source_lang, target_lang))
-        translation.set_cache(cache)
-
-    if get_config('log_translation'):
-        translation.set_log(log)
-
-    diagnosis_info = """==============================
-| Diagnosis Information
-==============================
-| Calibre Version: {}
-| Plugin Version: {}
-| Translate Engine: {}
-| Source Language: {}
-| Target Language: {}
-| Input Path: {}
-| Output Path: {}"""
-    diagnosis_info = diagnosis_info.format(
-        __version__, EbookTranslator.__version__, translator.name,
-        source_lang, target_lang, input_path, output_path)
+    info = '=' * 30
+    info += '\n| Diagnosis Information\n'
+    info += '=' * 30
+    info += '\n| Calibre Version: %s\n' % __version__
+    info += '| Plugin Version: %s\n' % EbookTranslator.__version__
+    info += '| Translate Engine: %s\n' % translator.name
+    info += '| Source Language: %s\n' % source_lang
+    info += '| Target Language: %s\n' % target_lang
+    info += '| Cache Enabled: %s\n' % cache.is_persistence()
+    info += '| Merge Length: %s\n' % element_handler.merge_length
+    info += '| Concurrency: %s\n' % translation.concurrency_limit
+    info += '| Attempt Limit: %s\n' % translation.request_attempt
+    info += '| Max Interval: %s\n' % translation.request_interval
+    info += '| Timeout: %s\n' % translator.timeout
+    info += '| Input Path: %s\n' % input_path
+    info += '| Output Path: %s' % output_path
 
     plumber = Plumber(
         input_path, output_path, log=log, report_progress=notification)
-
     _convert = plumber.output_plugin.convert
 
     def convert(self, oeb, output_path, input_plugin, opts, log):
-        log.info('translating ebook content ... (this will take a while)')
-        log.info(diagnosis_info)
+        log.info('Translating ebook content ... (this will take a while)')
+        log.info(info)
         translation.set_progress(self.report_progress)
-        translation.handle(extract_elements(oeb.manifest.items))
+
+        elements = get_ebook_elements(
+            oeb.manifest.items, translator.placeholder)
+        original_group = element_handler.prepare_original(elements)
+        cache.save(original_group)
+
+        paragraphs = cache.all_paragraphs()
+        translations = translation.handle(paragraphs)
+        element_handler.add_translations(translations)
+
+        log('\n'.join((sep, _('Start to convert ebook format:'), sep)))
         _convert(oeb, output_path, input_plugin, opts, log)
 
     plumber.output_plugin.convert = MethodType(convert, plumber.output_plugin)
     plumber.run()
+
+    cache.done()

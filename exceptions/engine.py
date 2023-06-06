@@ -1,0 +1,2 @@
+class IncorrectApiKeyFormat(Exception):
+    pass
