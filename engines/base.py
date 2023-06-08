@@ -76,10 +76,10 @@ class Base:
                 return True
         return False
 
-    def has_api_key_error(self, message):
-        if self.need_api_key:
+    def need_change_api_key(self, error_message):
+        if self.need_api_key and len(self.api_keys) > 1:
             for error in self.api_key_errors:
-                if error in message:
+                if error in error_message:
                     return True
         return False
 

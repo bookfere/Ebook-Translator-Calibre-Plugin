@@ -384,11 +384,17 @@ class TranslationSetting(QDialog):
         # API Keys
         self.keys_group = QGroupBox(_('API Key'))
         keys_layout = QVBoxLayout(self.keys_group)
-        self.api_key = QPlainTextEdit()
-        self.api_key.setMinimumHeight(100)
-        self.api_key.setMaximumHeight(100)
-        keys_layout.addWidget(self.api_key)
+        self.api_keys = QPlainTextEdit()
+        self.api_keys.setFixedHeight(100)
+        auto_change = QLabel('%s %s' % (_('Tip:'), _(
+            'API keys will auto-switch if the previous one is unavailable.')))
+        auto_change.setVisible(False)
+        keys_layout.addWidget(self.api_keys)
+        keys_layout.addWidget(auto_change)
         layout.addWidget(self.keys_group)
+
+        self.api_keys.textChanged.connect(lambda: auto_change.setVisible(
+            len(self.api_keys.toPlainText().strip().split('\n')) > 1))
 
         # preferred Language
         language_group = QGroupBox(_('Preferred Language'))
@@ -503,15 +509,7 @@ class TranslationSetting(QDialog):
             if self.current_engine.name != engine_name:
                 self.current_engine = get_engine_class(engine_name)
             # show api key setting
-            need_api_key = self.current_engine.need_api_key
-            self.keys_group.setVisible(need_api_key)
-            if need_api_key:
-                self.api_key.clear()
-                self.api_key.setPlaceholderText(
-                    self.current_engine.api_key_hint)
-                api_keys = self.current_engine.config.get('api_keys', [])
-                for api_key in api_keys:
-                    self.api_key.appendPlainText(api_key)
+            self.set_api_keys()
             # refresh preferred language
             source_lang = self.current_engine.config.get('source_lang')
             self.source_lang.refresh.emit(
@@ -548,6 +546,17 @@ class TranslationSetting(QDialog):
         layout.addStretch(1)
 
         return widget
+
+    def set_api_keys(self):
+        need_api_key = self.current_engine.need_api_key
+        self.keys_group.setVisible(need_api_key)
+        if need_api_key:
+            self.api_keys.clear()
+            self.api_keys.setPlaceholderText(
+                self.current_engine.api_key_hint)
+            api_keys = self.current_engine.config.get('api_keys', [])
+            for api_key in api_keys:
+                self.api_keys.appendPlainText(api_key)
 
     @layout_scroll_area
     def layout_content(self):
@@ -797,14 +806,15 @@ class TranslationSetting(QDialog):
             api_keys = []
             api_key_validator = QRegularExpressionValidator(
                 QRegularExpression(self.current_engine.api_key_rule))
-            for api_key in self.api_key.toPlainText().split('\n'):
-                api_key = api_key.strip()
-                if not self.is_valid_data(api_key_validator, api_key):
+            key_str = re.sub('\n+', '\n', self.api_keys.toPlainText()).strip()
+            for key in [key.strip() for key in key_str.split('\n')]:
+                if not self.is_valid_data(api_key_validator, key):
                     self.alert.pop(
                         self.current_engine.api_key_error_message(), 'warning')
                     return None
-                api_keys.append(api_key)
+                api_keys.append(key)
             config.update(api_keys=api_keys)
+            self.set_api_keys()
 
         # ChatGPT prefrence
         if self.current_engine.is_chatgpt():
@@ -832,12 +842,13 @@ class TranslationSetting(QDialog):
 
     def update_engine_config(self):
         config = self.get_engine_config()
-        if config is not None and len(config) > 0:
-            # Do not update directly as you may get default preferences!
-            engine_config = self.config.get('engine_preferences').copy()
-            engine_config.update({self.current_engine.name: config})
-            self.config.update(engine_preferences=engine_config)
-            self.config.commit()
+        if not config:
+            return
+        # Do not update directly as you may get default preferences!
+        engine_config = self.config.get('engine_preferences').copy()
+        engine_config.update({self.current_engine.name: config})
+        self.config.update(engine_preferences=engine_config)
+        self.config.commit()
         self.alert.pop(_('The setting has been saved.'))
 
     def update_content_config(self):

@@ -77,7 +77,7 @@ class Translation:
         except Exception as e:
             if self.is_cancelled():
                 return
-            if self.translator.has_api_key_error(str(e)):
+            if self.translator.need_change_api_key(str(e).lower()):
                 if not self.translator.change_api_key():
                     raise Exception(_('No available API key.'))
                 self.log(
