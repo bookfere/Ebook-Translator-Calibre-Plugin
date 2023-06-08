@@ -1,4 +1,5 @@
 import json
+from http.client import IncompleteRead
 
 from .base import load_lang_codes, Base
 from .languages import google
@@ -85,6 +86,8 @@ class ChatgptTranslate(Base):
         while True:
             try:
                 line = data.readline().decode('utf-8').strip()
+            except IncompleteRead:
+                continue
             except Exception as e:
                 raise Exception(
                     _('Can not parse returned response. Raw data: {}')
