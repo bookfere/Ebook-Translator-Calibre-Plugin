@@ -221,7 +221,7 @@ class TestExtraction(unittest.TestCase):
 
         # normal:text
         markups = ['<p></p>', '<p>\xa0</p>', '<p>\u3000</p>', '<p>\u200b</p>',
-                   '<p> </p>', '<p>”.</p>', '<p>‘’</p>', '<p>2 &lt;= 2</p>',
+                   '<p> </p>', '<p>”.—…‘’</p>', '<p>2 &lt;= 2</p>',
                    '<p><span>  </span><span>  </span></p>']
         for markup in markups:
             with self.subTest(markup=markup):

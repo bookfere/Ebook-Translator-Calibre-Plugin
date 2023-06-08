@@ -72,30 +72,30 @@ class PreparationWorker(QObject):
         cache = get_cache(cache_id)
 
         if cache.is_fresh() or not cache.is_persistence():
-            starting_time = time.time()
+            a = time.time()
             # --------------------------
             self.progress_message.emit(_('Extracting ebook content...'))
             elements = get_ebook_elements(
                 ebook_pages(input_path), self.engine_class.placeholder)
             self.progress.emit(30)
-            extraction_time = time.time()
-            print('extract: ', extraction_time - starting_time)
+            b = time.time()
+            print('extract: ', b - a)
             if self.cancel():
                 return
             # --------------------------
             self.progress_message.emit(_('Filter original content...'))
             original_group = element_handler.prepare_original(elements)
             self.progress.emit(80)
-            prepare_time = time.time()
-            print('filter: ', prepare_time - extraction_time)
+            c = time.time()
+            print('filter: ', c - b)
             if self.cancel():
                 return
             # --------------------------
             self.progress_message.emit(_('Preparing user interface...'))
             cache.save(original_group)
             self.progress.emit(100)
-            caching_time = time.time()
-            print('cache: ', caching_time - prepare_time)
+            d = time.time()
+            print('cache: ', d - c)
             if self.cancel():
                 return
 

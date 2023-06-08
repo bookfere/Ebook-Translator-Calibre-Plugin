@@ -159,7 +159,7 @@ class Extraction:
 
     def filter_content(self, element):
         self.filter_rules.append(
-            r'^[-\d\s\.\'\\"‘’“”,=~!@#$%^&º*|<>?/`+:_(){}[\]]+$')
+            r'^[-\d\s\.\'\\"‘’“”,=~!@#$%^&º*|<>?/`—…+:_(){}[\]]+$')
 
         patterns = []
         for rule in self.filter_rules:

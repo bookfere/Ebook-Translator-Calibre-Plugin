@@ -1,3 +1,7 @@
+__English__ · [简体中文](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.zh-CN.md) · [正體中文](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.zh-TW.md)
+
+---
+
 # Ebook Translator (A Calibre plugin)
 
 ![Ebook Translator Calibre Plugin](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/raw/master/images/logo.png)
@@ -6,6 +10,7 @@
 
 ## Features
 
+* Support both "Advanced Mode" and "Batch Mode" for different situation usages.
 * Support languages supported by the selected translation engine (e.g. Google Translate supports 134 languages)
 * Support multiple translation engines, including Google Translate, ChatGPT, and DeepL
 * Support for custom translation engines (you can configure to parse response in JSON or XML format)
