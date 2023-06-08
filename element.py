@@ -184,10 +184,10 @@ class Extraction:
             patterns.append(rule)
         # Ignore the element contains empty content
         content = element.get_text()
-        for entity in ('&lt;', '&gt;'):
-            content = content.replace(entity, '')
         if content == '':
             element.set_ignored(True)
+        for entity in ('&lt;', '&gt;'):
+            content = content.replace(entity, '')
         for pattern in patterns:
             if pattern.match(content):
                 element.set_ignored(True)
@@ -255,13 +255,13 @@ class ElementHandler:
                 continue
             elif content:
                 self.original.append(
-                    (count, uid(content), raw, content, element.ignored))
+                    (count, uid(content), raw, content, False))
                 count += 1
             raw = code
             content = text
         if content:
             self.original.append(
-                (count, uid(content), raw, content, element.ignored))
+                (count, uid(content), raw, content, False))
 
         return self.original
 
@@ -296,9 +296,10 @@ class ElementHandler:
             end = content.find(placeholder)
             part = content[:end]
             content = content.replace(part + placeholder, '', 1)
-            element.add_translation(
-                part.strip(), self.position, self.lang, self.color)
-            self.elements.pop(eid)
+            if not element.ignored:
+                element.add_translation(
+                    part.strip(), self.position, self.lang, self.color)
+                self.elements.pop(eid)
         self.remove_unused_elements()
 
 

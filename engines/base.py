@@ -26,7 +26,7 @@ class Base:
     api_key_hint = _('API Key')
     api_key_rule = r'^[^\s]+$'
     api_key_errors = ['401']
-    placeholder = ('{{{{id_{}}}}}', r'({{\s*)*id\s*_\s*{}\s*(\s*}})*')
+    placeholder = ('{{{{id_{}}}}}', r'({{\s*)+id\s*_\s*{}\s*(\s*}})+')
 
     def __init__(self):
         self.source_lang = None
