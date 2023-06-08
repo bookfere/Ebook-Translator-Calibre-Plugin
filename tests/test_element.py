@@ -60,9 +60,17 @@ class TestElement(unittest.TestCase):
             '<ruby>b<rt>B</rt></ruby>', get_string(elements[2], True))
 
     def test_get_raw(self):
-        div = etree.XML('<div xmlns="http://www.w3.org/1999/xhtml">123</div>')
-        self.assertEqual('<div>123</div>',
-                         Element(div, 'test', Base.placeholder).get_raw())
+        text = (
+            '<p class="abc"> <img src="icon.jpg"/> a <img src="w1.jpg"/> '
+            '<ruby>b<rt>B</rt></ruby> c <span><img src="w2.jpg"/> d</span> '
+            '<span>e <img src="w2.jpg"/></span> f <span>g <img src="w2.jpg"/> '
+            'h</span> <img src="w3.jpg"/> i <img src="w3.jpg"/> '
+            r'<code>App\Http</code> k </p>')
+        self.assertEqual(text, self.element.get_raw())
+
+    def test_get_text(self):
+        self.assertEqual(r'a bB c d e f g h i App\Http k',
+                         self.element.get_text())
 
     def test_get_content(self):
         content = ('{{id_00000}} a {{id_00001}} b c {{id_00002}} d e '
@@ -225,12 +233,13 @@ class TestExtraction(unittest.TestCase):
 
         def elements(markups):
             return [Element(etree.XML(markup), 'test', Base.placeholder)
-             for markup in markups]
+                    for markup in markups]
 
         # normal - text
         markups = ['<p></p>', '<p>\xa0</p>', '<p>\u3000</p>', '<p>\u200b</p>',
                    '<p> </p>', '<p>”.—…‘’</p>', '<p>2 &lt;= 2</p>',
-                   '<p><span>  </span><span>  </span></p>']
+                   '<p><span>  </span><span>  </span></p>',
+                   '<p><img src="/abc.jpg" /></p>']
         for element in elements(markups):
             with self.subTest(element=element):
                 self.extraction.filter_content(element)
@@ -283,7 +292,7 @@ class TestExtraction(unittest.TestCase):
         markups = ['<pre>a</pre>', '<code>b</code>', '<p class="c">c</p>',
                    '<p>\xa0</p>', '<p>\u3000</p>', '<p>\u200b</p>', '<p></p>',
                    '<p> </p>', '<p>”.</p>', '<p>‘’</p>', '<p>2 &lt;= 2</p>',
-                   '<p><span>123</span></p>',
+                   '<p><span>123</span></p>', '<p><img src="/abc.jpg" /></p>',
                    '<p><span>  </span><span>  </span></p>']
         for element in elements(markups):
             with self.subTest(element=element):
