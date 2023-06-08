@@ -25,10 +25,17 @@ class Element:
         self.element = element
         self.page_id = page_id
         self.placeholder = placeholder
+        self.ignored = False
 
         self.element_copy = copy.deepcopy(element)
         self.reserves = []
         self.original = []
+
+    def set_ignored(self, ignored):
+        self.ignored = ignored
+
+    def get_name(self):
+        return get_name(self.element)
 
     def get_descendents(self, tags):
         xpath = './/*[%s]' % ' or '.join(['self::x:%s' % tag for tag in tags])
@@ -60,6 +67,9 @@ class Element:
         attributes = dict(self.element.attrib.items())
         return json.dumps(attributes) if attributes else None
 
+    def delete(self):
+        self.element.getparent().remove(self.element)
+
     def add_translation(self, translation, position=None, lang=None,
                         color=None):
         translation = xml_escape(translation)
@@ -90,12 +100,12 @@ class Element:
         else:
             self.element.addnext(new_element)
         if position == 'only':
-            self.element.getparent().remove(self.element)
+            self.delete()
         return new_element
 
 
 class Extraction:
-    __version__ = '20230601'
+    __version__ = '20230608'
 
     def __init__(self, pages, placeholder):
         self.pages = pages
@@ -133,22 +143,22 @@ class Extraction:
         return False
 
     def extract_elements(self, page_id, root, elements=[]):
-        priority = ['p']
+        priority_elements = ['p', 'pre']
         for element in root.findall('./*'):
             if self.need_ignore(element):
-                continue
-            if get_name(element) in priority:
-                elements.append(Element(element, page_id, self.placeholder))
                 continue
             element_has_content = False
             if element.text is not None and trim(element.text) != '':
                 element_has_content = True
             else:
                 children = element.findall('./*')
-                for child in children:
-                    if child.tail is not None and trim(child.tail) != '':
-                        element_has_content = True
-                        break
+                if children and get_name(element) in priority_elements:
+                    element_has_content = True
+                else:
+                    for child in children:
+                        if child.tail is not None and trim(child.tail) != '':
+                            element_has_content = True
+                            break
             if element_has_content:
                 elements.append(Element(element, page_id, self.placeholder))
             else:
@@ -175,16 +185,16 @@ class Extraction:
         for entity in ('&lt;', '&gt;'):
             content = content.replace(entity, '')
         if content == '':
-            return False
+            element.set_ignored(True)
         for pattern in patterns:
             if pattern.match(content):
-                return False
+                element.set_ignored(True)
         # Filter HTML according to the rules
         if self.filter_scope == 'html':
             markup = element.get_raw()
             for pattern in patterns:
                 if pattern.match(markup):
-                    return False
+                    element.set_ignored(True)
         return True
 
 
@@ -224,7 +234,8 @@ class ElementHandler:
                 raw = element.get_raw()
                 attrs = element.get_attributes()
                 self.original.append(
-                    (eid, uid(content), raw, content, attrs, element.page_id))
+                    (eid, uid(content), raw, content, element.ignored, attrs,
+                     element.page_id))
             return self.original
 
         raw = ''
@@ -242,15 +253,20 @@ class ElementHandler:
                 continue
             elif content:
                 self.original.append(
-                    (count, uid(content), raw, content))
+                    (count, uid(content), raw, content, element.ignored))
                 count += 1
             raw = code
             content = text
         if content:
             self.original.append(
-                (count, uid(content), raw, content))
+                (count, uid(content), raw, content, element.ignored))
 
         return self.original
+
+    def remove_unused_elements(self):
+        if self.position == 'only':
+            for element in self.elements.values():
+                element.delete()
 
     def add_translations(self, paragraphs):
         if self.merge_length == 0:
@@ -259,15 +275,18 @@ class ElementHandler:
                 if not element:
                     continue
                 translation = paragraph.translation
-                translation and element.add_translation(
-                    translation, self.position, self.lang, self.color)
+                if translation:
+                    element.add_translation(
+                        translation, self.position, self.lang, self.color)
+                    self.elements.pop(paragraph.id)
+            self.remove_unused_elements()
             return
 
         content = ''.join(
             paragraph.translation for paragraph in paragraphs
             if paragraph.translation)
 
-        for eid, element in self.elements.items():
+        for eid, element in self.elements.copy().items():
             matches = re.search(element.placeholder[1].format(eid), content)
             if not matches:
                 continue
@@ -277,6 +296,8 @@ class ElementHandler:
             content = content.replace(part + placeholder, '', 1)
             element.add_translation(
                 part.strip(), self.position, self.lang, self.color)
+            self.elements.pop(eid)
+        self.remove_unused_elements()
 
 
 def get_ebook_elements(pages, placeholder):

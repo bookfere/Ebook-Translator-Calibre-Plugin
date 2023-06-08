@@ -41,9 +41,9 @@ def convert_book(input_path, output_path, source_lang, target_lang,
 
     element_handler = get_element_handler(translator.get_target_lang_code())
 
-    cache = get_cache(uid(
-        input_path, translator.name, target_lang, Extraction.__version__,
-        str(element_handler.get_merge_length())))
+    cache = get_cache(
+        input_path + translator.name + target_lang
+        + str(element_handler.get_merge_length()))
     cache.set_cache_only(cache_only)
 
     translation = get_translation(translator)

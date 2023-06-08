@@ -115,6 +115,9 @@ class AdvancedTranslationTable(QTableWidget):
                 item_range.topRow(), item_range.bottomRow() + 1)))
         return sorted(rows)
 
+    def selected_count(self):
+        return len(self.get_selected_rows())
+
     def get_seleted_items(self, ignore_done=False, selete_all=False):
         items = []
         rows = range(self.rowCount()) if selete_all else \
