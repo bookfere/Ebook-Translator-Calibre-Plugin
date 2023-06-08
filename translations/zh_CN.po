@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-06-06 20:27+0800\n"
+"POT-Creation-Date: 2023-06-08 19:20+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -391,6 +391,12 @@ msgstr "显示译文"
 
 msgid "Custom"
 msgstr "自定义"
+
+msgid "Tip:"
+msgstr "提示："
+
+msgid "API keys will auto-switch if the previous one is unavailable."
+msgstr "API 密钥将会自动切换如果上一个不可用。"
 
 msgid "Preferred Language"
 msgstr "偏好语言"

@@ -16,7 +16,8 @@ class ChatgptTranslate(Base):
     lang_codes = lang_codes
     endpoint = 'https://api.openai.com/v1/chat/completions'
     # api_key_hint = 'sk-xxx...xxx'
-    api_key_errors = ['429', 'Unauthorized']
+    # https://help.openai.com/en/collections/3808446-api-error-codes-explained
+    api_key_errors = ['401', 'unauthorized', 'quota']
 
     prompt = (
         'You are a meticulous translator who translates any given content. '

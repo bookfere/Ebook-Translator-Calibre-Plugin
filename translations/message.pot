@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-06-06 20:27+0800\n"
+"POT-Creation-Date: 2023-06-08 19:20+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -51,7 +51,7 @@ msgstr ""
 msgid "Input Format"
 msgstr ""
 
-#: advanced.py:195 advanced.py:485 batch.py:55 setting.py:399
+#: advanced.py:195 advanced.py:485 batch.py:55 setting.py:405
 msgid "Target Language"
 msgstr ""
 
@@ -103,7 +103,7 @@ msgstr ""
 msgid "Translation Engine"
 msgstr ""
 
-#: advanced.py:479 batch.py:55 setting.py:398
+#: advanced.py:479 batch.py:55 setting.py:404
 msgid "Source Language"
 msgstr ""
 
@@ -159,11 +159,11 @@ msgstr ""
 msgid "Unknown"
 msgstr ""
 
-#: batch.py:134 setting.py:770
+#: batch.py:134 setting.py:779
 msgid "The specified path does not exist."
 msgstr ""
 
-#: batch.py:140 setting.py:855
+#: batch.py:140 setting.py:866
 msgid "The specified glossary file does not exist."
 msgstr ""
 
@@ -211,7 +211,7 @@ msgstr ""
 msgid "The engine name is already in use."
 msgstr ""
 
-#: components/engine.py:261 setting.py:790 setting.py:841 setting.py:882
+#: components/engine.py:261 setting.py:799 setting.py:852 setting.py:893
 msgid "The setting has been saved."
 msgstr ""
 
@@ -231,7 +231,7 @@ msgstr ""
 msgid "Feedback"
 msgstr ""
 
-#: components/lang.py:34 engines/base.py:114 setting.py:827
+#: components/lang.py:34 engines/base.py:114 setting.py:837
 msgid "Auto detect"
 msgstr ""
 
@@ -249,7 +249,7 @@ msgid ""
 "for more control and customization."
 msgstr ""
 
-#: components/mode.py:41 components/mode.py:51 setting.py:597 setting.py:631
+#: components/mode.py:41 components/mode.py:51 setting.py:606 setting.py:640
 msgid "Choose"
 msgstr ""
 
@@ -335,7 +335,7 @@ msgstr ""
 msgid "A correct key format \"{}\" is required."
 msgstr ""
 
-#: engines/base.py:156 engines/chatgpt.py:90 tests/test_engine.py:64
+#: engines/base.py:156 engines/chatgpt.py:94 tests/test_engine.py:64
 msgid "Can not parse returned response. Raw data: {}"
 msgstr ""
 
@@ -447,7 +447,7 @@ msgstr ""
 msgid "Merge to Translate"
 msgstr ""
 
-#: setting.py:202 setting.py:223 setting.py:312 setting.py:628
+#: setting.py:202 setting.py:223 setting.py:312 setting.py:637
 msgid "Enable"
 msgstr ""
 
@@ -515,151 +515,159 @@ msgstr ""
 msgid "Custom"
 msgstr ""
 
-#: setting.py:394
+#: setting.py:389
+msgid "Tip:"
+msgstr ""
+
+#: setting.py:390
+msgid "API keys will auto-switch if the previous one is unavailable."
+msgstr ""
+
+#: setting.py:400
 msgid "Preferred Language"
 msgstr ""
 
-#: setting.py:405
+#: setting.py:411
 msgid "Tune ChatGPT"
 msgstr ""
 
-#: setting.py:413
+#: setting.py:419
 msgid "Prompt"
 msgstr ""
 
-#: setting.py:415
+#: setting.py:421
 msgid "Endpoint"
 msgstr ""
 
-#: setting.py:418
+#: setting.py:424
 msgid "Model"
 msgstr ""
 
-#: setting.py:441
+#: setting.py:447
 msgid "Sampling"
 msgstr ""
 
-#: setting.py:446
+#: setting.py:452
 msgid "Enable streaming text like in ChatGPT"
 msgstr ""
 
-#: setting.py:447
+#: setting.py:453
 msgid "Stream"
 msgstr ""
 
-#: setting.py:558
+#: setting.py:567
 msgid "Translation Position"
 msgstr ""
 
-#: setting.py:560
+#: setting.py:569
 msgid "Add after original"
 msgstr ""
 
-#: setting.py:562
+#: setting.py:571
 msgid "Add before original"
 msgstr ""
 
-#: setting.py:563
+#: setting.py:572
 msgid "Add without original"
 msgstr ""
 
-#: setting.py:586
+#: setting.py:595
 msgid "Translation Color"
 msgstr ""
 
-#: setting.py:590
+#: setting.py:599
 msgid "CSS color value, e.g., #666666, grey, rgb(80, 80, 80)"
 msgstr ""
 
-#: setting.py:626
+#: setting.py:635
 msgid "Translation Glossary"
 msgstr ""
 
-#: setting.py:630
+#: setting.py:639
 msgid "Choose a glossary file"
 msgstr ""
 
-#: setting.py:649
+#: setting.py:658
 msgid "Ignore Element"
 msgstr ""
 
-#: setting.py:657
+#: setting.py:666
 msgid "CSS selectors to exclude elements. One rule per line:"
 msgstr ""
 
-#: setting.py:660
+#: setting.py:669
 msgid "e.g."
 msgstr ""
 
-#: setting.py:664
+#: setting.py:673
 msgid "Ignore Paragraph"
 msgstr ""
 
-#: setting.py:670
+#: setting.py:679
 msgid "Scope"
 msgstr ""
 
-#: setting.py:671
+#: setting.py:680
 msgid "Text only"
 msgstr ""
 
-#: setting.py:673
+#: setting.py:682
 msgid "HTML element"
 msgstr ""
 
-#: setting.py:680
+#: setting.py:689
 msgid "Mode"
 msgstr ""
 
-#: setting.py:681
+#: setting.py:690
 msgid "Normal"
 msgstr ""
 
-#: setting.py:683
+#: setting.py:692
 msgid "Normal (case-sensitive)"
 msgstr ""
 
-#: setting.py:684
+#: setting.py:693
 msgid "Regular Expression"
 msgstr ""
 
-#: setting.py:726
+#: setting.py:735
 msgid "Exclude paragraph by keyword. One keyword per line:"
 msgstr ""
 
-#: setting.py:727
+#: setting.py:736
 msgid "Exclude paragraph by case-sensitive keyword. One keyword per line:"
 msgstr ""
 
-#: setting.py:729
+#: setting.py:738
 msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
 msgstr ""
 
-#: setting.py:753 setting.py:783
+#: setting.py:762 setting.py:792
 msgid "Proxy host or port is incorrect."
 msgstr ""
 
-#: setting.py:755
+#: setting.py:764
 msgid "The proxy is available."
 msgstr ""
 
-#: setting.py:756
+#: setting.py:765
 msgid "The proxy is not available."
 msgstr ""
 
-#: setting.py:814
+#: setting.py:824
 msgid "the prompt must include {}."
 msgstr ""
 
-#: setting.py:847
+#: setting.py:858
 msgid "Invalid color value."
 msgstr ""
 
-#: setting.py:866
+#: setting.py:877
 msgid "{} is not a valid regular expression."
 msgstr ""
 
-#: setting.py:876
+#: setting.py:887
 msgid "{} is not a valid CSS seletor."
 msgstr ""
 
