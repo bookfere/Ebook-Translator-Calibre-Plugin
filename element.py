@@ -27,7 +27,6 @@ class Element:
         self.placeholder = placeholder
         self.ignored = False
 
-        self.element_copy = copy.deepcopy(element)
         self.reserves = []
         self.original = []
 
@@ -39,10 +38,13 @@ class Element:
 
     def get_descendents(self, tags):
         xpath = './/*[%s]' % ' or '.join(['self::x:%s' % tag for tag in tags])
-        return self.element_copy.xpath(xpath, namespaces=ns)
+        return self.element.xpath(xpath, namespaces=ns)
 
     def get_raw(self):
         return get_string(self.element, True)
+
+    def get_text(self):
+        return trim(''.join(self.element.itertext()))
 
     def get_content(self):
         for noise in self.get_descendents(('rt', 'rp', 'sup')):
@@ -61,7 +63,7 @@ class Element:
                 parent.text = (parent.text or '') + placeholder
                 parent.text += (reserve.tail or '')
             parent.remove(reserve)
-        return trim(''.join(self.element_copy.itertext()))
+        return trim(''.join(self.element.itertext()))
 
     def get_attributes(self):
         attributes = dict(self.element.attrib.items())
@@ -181,7 +183,7 @@ class Extraction:
                 rule = re.compile(rule)
             patterns.append(rule)
         # Ignore the element contains empty content
-        content = trim(''.join(element.get_content()))
+        content = element.get_text()
         for entity in ('&lt;', '&gt;'):
             content = content.replace(entity, '')
         if content == '':

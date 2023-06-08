@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import time
 import json
@@ -209,7 +210,7 @@ class Glossary:
 
     def restore(self, text):
         for word in self.glossary:
-            text = text.replace('id_%d' % id(word), word[1])
+            text = re.sub(r'id\s*_\s*%s' % id(word), word[1], text, flags=re.I)
         return text
 
 
