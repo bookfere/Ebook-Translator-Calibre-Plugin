@@ -6,23 +6,25 @@ import os.path
 import tempfile
 from glob import glob
 
+from .utils import uid
 from .config import get_config
+from .element import Extraction
 
 
 class Paragraph:
-    def __init__(self, id, md5, raw, original, attributes=None, page=None,
-                 translation=None, engine_name=None, target_lang=None,
-                 ignored=0):
+    def __init__(self, id, md5, raw, original, ignored=False, attributes=None,
+                 page=None, translation=None, engine_name=None,
+                 target_lang=None):
         self.id = id
         self.md5 = md5
         self.raw = raw
         self.original = original
+        self.ignored = ignored
         self.attributes = attributes
         self.page = page
         self.translation = translation
         self.engine_name = engine_name
         self.target_lang = target_lang
-        self.ignored = ignored
 
     def get_attributes(self):
         if self.attributes:
@@ -35,16 +37,18 @@ class TranslationCache:
     and another one is used to cache translations, which avoids the need for
     retranslation. This is controlled by the parameter `enabled`.
     """
+    __version__ = '20230608'
+
     fresh = True
     dir_path = os.path.join(
         tempfile.gettempdir(), 'com.bookfere.Calibre.EbookTranslator')
     cache_path = os.path.join(dir_path, 'cache')
     temp_path = os.path.join(dir_path, 'temp')
 
-    def __init__(self, uid, persistence=True):
-        self.uid = uid
+    def __init__(self, identity, persistence=True):
         self.persistence = persistence
-        self.file_path = self._path(self.uid)
+        self.file_path = self._path(
+            uid(identity + self.__version__ + Extraction.__version__))
         if os.path.exists(self.file_path):
             self.fresh = False
         self.cache_only = False
@@ -52,10 +56,10 @@ class TranslationCache:
         self.cursor = self.connection.cursor()
         self.cursor.execute(
             'CREATE TABLE IF NOT EXISTS cache('
-            'id UNIQUE, md5 UNIQUE, raw, original, attributes DEFAULT NULL, '
-            'page DEFAULT NULL, translation DEFAULT NULL, '
-            'engine_name DEFAULT NULL, target_lang DEFAULT NULL, '
-            'ignored DEFAULT 0)')
+            'id UNIQUE, md5 UNIQUE, raw, original, ignored, '
+            'attributes DEFAULT NULL, page DEFAULT NULL,'
+            'translation DEFAULT NULL, engine_name DEFAULT NULL, '
+            'target_lang DEFAULT NULL)')
 
     @classmethod
     def count(cls):
@@ -71,9 +75,6 @@ class TranslationCache:
     @classmethod
     def get_dir(cls):
         return cls.dir_path
-
-    def get_uid(self):
-        return self.uid
 
     def is_fresh(self):
         return self.fresh
@@ -118,16 +119,17 @@ class TranslationCache:
             resource = self.cursor.execute('SELECT * FROM cache LIMIT 1')
         return resource.fetchone()
 
-    def add(self, id, md5, raw, original, attributes=None, page=None):
+    def add(self, id, md5, raw, original, ignored=False, attributes=None,
+            page=None):
         self.cursor.execute(
             'INSERT INTO cache VALUES ('
-            '?1, ?2, ?3, ?4, ?5, ?6, NULL, NULL, NULL, 0'
+            '?1, ?2, ?3, ?4, ?5, ?6, ?7, NULL, NULL, NULL'
             ') ON CONFLICT DO NOTHING',
             # 'ON CONFLICT (md5) DO UPDATE SET original=excluded.original',
             # 'translation=excluded.translation, '
             # 'engine_name=excluded.engine_name, '
             # 'target_lang=excluded.target_lang',
-            (id, md5, raw, original, attributes, page))
+            (id, md5, raw, original, ignored, attributes, page))
         self.connection.commit()
 
     def update(self, ids, **kwargs):
@@ -140,7 +142,7 @@ class TranslationCache:
         self.connection.commit()
 
     def ignore(self, ids):
-        self.update(ids, ignored=1)
+        self.update(ids, ignored=True)
 
     def delete(self, ids):
         placeholders = ', '.join(['?'] * len(ids))

@@ -19,7 +19,7 @@ def get_test_suite():
 
 if __name__ == '__main__':
     args = sys.argv[1:]
-    patterns = None if len(args) < 1 else ['*%s*' % p for p in args]
+    patterns = None if len(args) < 1 else ['*%s' % p for p in args]
     unittest.defaultTestLoader.testNamePatterns = patterns
     runner = unittest.TextTestRunner(verbosity=1)
     runner.run(get_test_suite())

@@ -50,6 +50,9 @@ class TestElement(unittest.TestCase):
         self.paragraph = self.xhtml.find('.//x:p', namespaces=ns)
         self.element = Element(self.paragraph, 'test', Base.placeholder)
 
+    def test_get_name(self):
+        self.assertEqual('p', self.element.get_name())
+
     def test_get_descendents(self):
         elements = self.element.get_descendents(('ruby', 'img'))
         self.assertEqual(8, len(elements))
@@ -128,7 +131,7 @@ class TestExtraction(unittest.TestCase):
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head><title>Test Document</title></head>
     <body>
-        <div class="abc">abc</div>
+        <div class="def">def</div>
         <div></div>
     </body>
 </html>"""))
@@ -151,7 +154,11 @@ class TestExtraction(unittest.TestCase):
         elements = list(elements)
         self.assertEqual(2, len(elements))
         self.assertIsInstance(elements[0], Element)
+        self.assertEqual('p', get_name(elements[0].get_name()))
+        self.assertEqual('abc', elements[0].get_content())
         self.assertIsInstance(elements[1], Element)
+        self.assertEqual('div', get_name(elements[1].get_name()))
+        self.assertEqual('def', elements[1].get_content())
 
     def test_get_element_rules(self):
         self.extraction.element_rules = [
@@ -216,58 +223,59 @@ class TestExtraction(unittest.TestCase):
         self.extraction.filter_scope = 'text'
         self.extraction.filter_rules = []
 
-        def element(markup):
-            return Element(etree.XML(markup), 'test', Base.placeholder)
+        def elements(markups):
+            return [Element(etree.XML(markup), 'test', Base.placeholder)
+             for markup in markups]
 
-        # normal:text
+        # normal - text
         markups = ['<p></p>', '<p>\xa0</p>', '<p>\u3000</p>', '<p>\u200b</p>',
                    '<p> </p>', '<p>”.—…‘’</p>', '<p>2 &lt;= 2</p>',
                    '<p><span>  </span><span>  </span></p>']
-        for markup in markups:
-            with self.subTest(markup=markup):
-                self.assertFalse(
-                    self.extraction.filter_content(element(markup)))
+        for element in elements(markups):
+            with self.subTest(element=element):
+                self.extraction.filter_content(element)
+                self.assertTrue(element.ignored)
 
         self.extraction.filter_rules = ['a', 'b', 'c']
         markups = ['<p>xxxaxxx</p>', '<p>xxxbxxx</p>', '<p>xxxcxxx</p>']
-        for markup in markups:
-            with self.subTest(markup=markup):
-                self.assertFalse(
-                    self.extraction.filter_content(element(markup)))
+        for element in elements(markups):
+            with self.subTest(element=element):
+                self.extraction.filter_content(element)
+                self.assertTrue(element.ignored)
 
         self.extraction.filter_rules = ['A', 'B', 'C']
         markups = ['<p>xxxaxxx</p>', '<p>xxxbxxx</p>', '<p>xxxcxxx</p>']
-        for markup in markups:
-            with self.subTest(markup=markup):
-                self.assertFalse(
-                    self.extraction.filter_content(element(markup)))
+        for element in elements(markups):
+            with self.subTest(element=element):
+                self.extraction.filter_content(element)
+                self.assertTrue(element.ignored)
 
-        # case:text
+        # case - text
         self.extraction.rule_mode = 'case'
         markups = ['<p>xxxAxxx</p>', '<p>xxxBxxx</p>', '<p>xxxCxxx</p>']
-        for markup in markups:
-            with self.subTest(markup=markup):
-                self.assertFalse(
-                    self.extraction.filter_content(element(markup)))
+        for element in elements(markups):
+            with self.subTest(element=element):
+                self.extraction.filter_content(element)
+                self.assertTrue(element.ignored)
 
         self.extraction.filter_rules = ['a', 'b', 'c']
         markups = ['<p>xxxAxxx</p>', '<p>xxxBxxx</p>', '<p>xxxCxxx</p>']
-        for markup in markups:
-            with self.subTest(markup=markup):
-                self.assertTrue(
-                    self.extraction.filter_content(element(markup)))
+        for element in elements(markups):
+            with self.subTest(element=element):
+                self.extraction.filter_content(element)
+                self.assertFalse(element.ignored)
 
-        # regex:text
+        # regex - text
         self.extraction.rule_mode = 'regex'
         self.extraction.filter_rules = ['^.*?a', 'f.*$', '[^z]']
         markups = ['<p>5.</p>', '<p>5-5.</p>', '<p>5-5_5.</p>',
                    '<p>abc</p>', '<p>def</p>', '<p>ghi</p>']
-        for markup in markups:
-            with self.subTest(markup=markup):
-                self.assertFalse(
-                    self.extraction.filter_content(element(markup)))
+        for element in elements(markups):
+            with self.subTest(element=element):
+                self.extraction.filter_content(element)
+                self.assertTrue(element.ignored)
 
-        # regex:html
+        # regex - html
         self.extraction.rule_mode = 'regex'
         self.extraction.filter_scope = 'html'
         self.extraction.filter_rules = [
@@ -277,16 +285,16 @@ class TestExtraction(unittest.TestCase):
                    '<p> </p>', '<p>”.</p>', '<p>‘’</p>', '<p>2 &lt;= 2</p>',
                    '<p><span>123</span></p>',
                    '<p><span>  </span><span>  </span></p>']
-        for markup in markups:
-            with self.subTest(markup=markup):
-                self.assertFalse(
-                    self.extraction.filter_content(element(markup)))
+        for element in elements(markups):
+            with self.subTest(element=element):
+                self.extraction.filter_content(element)
+                self.assertTrue(element.ignored)
 
         markups = ['<p><b>a</b>.</p>']
-        for markup in markups:
-            with self.subTest(markup=markup):
-                self.assertTrue(
-                    self.extraction.filter_content(element(markup)))
+        for element in elements(markups):
+            with self.subTest(element=element):
+                self.extraction.filter_content(element)
+                self.assertFalse(element.ignored)
 
 
 class TestElementHandler(unittest.TestCase):
@@ -296,8 +304,8 @@ class TestElementHandler(unittest.TestCase):
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head><title>Test Document</title></head>
     <body>
-        <p class="a">a</p>
-        <p name="b">b</p>
+        <p id="a">a</p>
+        <p id="b">b</p>
         <p id="c">c</p>
     </body>
 </html>""")
@@ -308,10 +316,10 @@ class TestElementHandler(unittest.TestCase):
     @patch('calibre_plugins.ebook_translator.element.uid')
     def test_prepare_original(self, mock_uid):
         mock_uid.side_effect = ['m1', 'm2', 'm3']
-        self.assertEqual(
-            [(0, 'm1', '<p class="a">a</p>', 'a', '{"class": "a"}', 'test'),
-             (1, 'm2', '<p name="b">b</p>', 'b', '{"name": "b"}', 'test'),
-             (2, 'm3', '<p id="c">c</p>', 'c', '{"id": "c"}', 'test')],
+        self.assertEqual([
+            (0, 'm1', '<p id="a">a</p>', 'a', False, '{"id": "a"}', 'test'),
+            (1, 'm2', '<p id="b">b</p>', 'b', False, '{"id": "b"}', 'test'),
+            (2, 'm3', '<p id="c">c</p>', 'c', False, '{"id": "c"}', 'test')],
             self.handler.prepare_original(self.elements))
 
     @patch('calibre_plugins.ebook_translator.element.uid')
@@ -319,25 +327,91 @@ class TestElementHandler(unittest.TestCase):
         mock_uid.return_value = 'm1'
         self.handler.merge_length = 1000
         self.assertEqual([(
-            0, 'm1', '<p class="a">a</p><p name="b">b</p><p id="c">c</p>',
-            'a {{id_0}} b {{id_1}} c {{id_2}} ')],
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
+            'a {{id_0}} b {{id_1}} c {{id_2}} ', False)],
             self.handler.prepare_original(self.elements))
 
     def test_add_translations(self):
         self.handler.prepare_original(self.elements)
-        self.handler.add_translations(
-            [Paragraph(0, 'm1', '<p>a</p>', 'a', 'A', 'Google', 'Chinese'),
-             Paragraph(1, 'm2', '<p>b</p>', 'b', 'B', 'Google', 'Chinese'),
-             Paragraph(2, 'm3', '<p>c</p>', 'c', 'C', 'Google', 'Chinese')])
+        self.handler.add_translations([
+            Paragraph(0, 'm1', '<p>a</p>', 'a', False, None, 'test', 'A',
+                      'ENGINE', 'LANG'),
+            Paragraph(1, 'm2', '<p>b</p>', 'b', False, None, 'test', 'B',
+                      'ENGINE', 'LANG'),
+            Paragraph(2, 'm3', '<p>c</p>', 'c', False, None, 'test', 'C',
+                      'ENGINE', 'LANG')])
 
-        self.assertEqual(6, len(self.xhtml.findall('.//x:p', namespaces=ns)))
+        elements = self.xhtml.findall('.//x:p', namespaces=ns)
+        self.assertEqual(6, len(elements))
+        self.assertEqual('a', elements[0].text)
+        self.assertEqual('A', elements[1].text)
+        self.assertEqual('b', elements[2].text)
+        self.assertEqual('B', elements[3].text)
+        self.assertEqual('c', elements[4].text)
+        self.assertEqual('C', elements[5].text)
+
+    def test_add_translations_translation_only(self):
+        self.handler.position = 'only'
+
+        self.handler.prepare_original(self.elements)
+        self.handler.add_translations([
+            Paragraph(0, 'm1', '<p>a</p>', 'a', False, None, 'test', 'A',
+                      'ENGINE', 'LANG'),
+            Paragraph(1, 'm2', '<p>b</p>', 'b', False, None, 'test', 'B',
+                      'ENGINE', 'LANG'),
+            Paragraph(2, 'm3', '<p>c</p>', 'c', False, None, 'test', 'C',
+                      'ENGINE', 'LANG')])
+
+        elements = self.xhtml.findall('.//x:p', namespaces=ns)
+        self.assertEqual(3, len(elements))
+        self.assertEqual('A', elements[0].text)
+        self.assertEqual('B', elements[1].text)
+        self.assertEqual('C', elements[2].text)
 
     def test_add_translations_merged(self):
         self.handler.merge_length = 1000
         self.handler.prepare_original(self.elements)
         self.handler.add_translations([Paragraph(
-            0, 'm1', '<p class="a">a</p><p name="b">b</p><p id="c">c</p>',
-            None, None, 'a {{id_0}} b {{id_1}} c {{id_2}} ',
-            'A {{id_0}} B {{id_1}} C {{id_2}} ')])
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
+            'a {{id_0}} b {{id_1}} c {{id_2}} ', False, None, None,
+            'A {{id_0}} B {{id_1}} C {{id_2}} ', 'ENGINE', 'LANG')])
 
-        self.assertEqual(6, len(self.xhtml.findall('.//x:p', namespaces=ns)))
+        elements = self.xhtml.findall('.//x:p', namespaces=ns)
+        self.assertEqual(6, len(elements))
+        self.assertEqual('a', elements[0].text)
+        self.assertEqual('A', elements[1].text)
+        self.assertEqual('b', elements[2].text)
+        self.assertEqual('B', elements[3].text)
+        self.assertEqual('c', elements[4].text)
+        self.assertEqual('C', elements[5].text)
+
+    def test_add_translations_merged_missing_id(self):
+        self.handler.merge_length = 1000
+        self.handler.prepare_original(self.elements)
+        self.handler.add_translations([Paragraph(
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
+            'a {{id_0}} b {{id_1}} c {{id_2}} ', False, None, None,
+            'A {{id_0}} B C {{id_2}} ', 'ENGINE', 'LANG')])
+
+        elements = self.xhtml.findall('.//x:p', namespaces=ns)
+        self.assertEqual(5, len(elements))
+        self.assertEqual('a', elements[0].text)
+        self.assertEqual('A', elements[1].text)
+        self.assertEqual('b', elements[2].text)
+        self.assertEqual('c', elements[3].text)
+        self.assertEqual('B C', elements[4].text)
+
+    def test_add_translations_merged_translation_only(self):
+        self.handler.position = 'only'
+
+        self.handler.merge_length = 1000
+        self.handler.prepare_original(self.elements)
+        self.handler.add_translations([Paragraph(
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
+            'a {{id_0}} b {{id_1}} c {{id_2}} ', False, None, None,
+            'A {{id_0}} B C {{id_2}} ', 'ENGINE', 'LANG')])
+
+        elements = self.xhtml.findall('.//x:p', namespaces=ns)
+        self.assertEqual(2, len(elements))
+        self.assertEqual('A', elements[0].text)
+        self.assertEqual('B C', elements[1].text)

@@ -8,7 +8,7 @@ from .utils import uid
 from .config import get_config
 from .cache import Paragraph, get_cache
 from .translation import get_engine_class, get_translator, get_translation
-from .element import get_ebook_elements, get_element_handler, Extraction
+from .element import get_ebook_elements, get_element_handler
 from .convertion import ebook_pages
 from .components import (
     EngineList, layout_info, SourceLang, TargetLang, InputFormat, OutputFormat,
@@ -66,9 +66,9 @@ class PreparationWorker(QObject):
         input_path = self.ebook.get_input_path()
         target_lang = self.ebook.target_lang
         element_handler = get_element_handler(target_lang)
-        cache_id = uid(
-            input_path, self.engine_class.name, target_lang,
-            Extraction.__version__, str(element_handler.get_merge_length()))
+        cache_id = (
+            input_path + self.engine_class.name + target_lang
+            + str(element_handler.get_merge_length()))
         cache = get_cache(cache_id)
 
         if cache.is_fresh() or not cache.is_persistence():
@@ -358,7 +358,8 @@ class AdvancedTranslation(QDialog):
         tabs.setStyleSheet('QTabBar::tab {min-width:120px;}')
 
         self.trans_worker.start.connect(
-            lambda: self.translate_all and tabs.setCurrentIndex(1))
+            lambda: (self.translate_all or self.table.selected_count() > 1)
+            and tabs.setCurrentIndex(1))
         self.trans_worker.finished.connect(
             lambda success: success and self.translate_all
             and tabs.setCurrentIndex(0))
@@ -417,12 +418,12 @@ class AdvancedTranslation(QDialog):
         translate_selected.clicked.connect(self.translate_selected_paragraph)
         self.table.itemSelectionChanged.connect(
             lambda: translate_selected.setDisabled(
-                len(self.table.get_selected_rows()) < 1))
+                self.table.selected_count() < 1))
 
         delete_button.clicked.connect(self.table.delete_by_rows)
         self.table.itemSelectionChanged.connect(
             lambda: delete_button.setDisabled(
-                len(self.table.get_selected_rows()) < 1))
+                self.table.selected_count() < 1))
 
         action_layout.addWidget(delete_button)
         action_layout.addStretch(1)
@@ -542,8 +543,7 @@ class AdvancedTranslation(QDialog):
         save_ebook.clicked.connect(output_ebook)
 
         def working_start():
-            if self.translate_all:
-                widget.setVisible(False)
+            self.translate_all and widget.setVisible(False)
             widget.setDisabled(True)
         self.trans_worker.start.connect(working_start)
 
