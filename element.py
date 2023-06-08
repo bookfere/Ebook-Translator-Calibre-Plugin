@@ -38,7 +38,7 @@ class Element:
         return get_string(self.element, True)
 
     def get_content(self):
-        for noise in self.get_descendents(('rt', 'sup')):
+        for noise in self.get_descendents(('rt', 'rp', 'sup')):
             parent = noise.getparent()
             parent.text = (parent.text or '') + (noise.tail or '')
             parent.remove(noise)
@@ -164,7 +164,7 @@ class Extraction:
         patterns = []
         for rule in self.filter_rules:
             if self.rule_mode == 'normal':
-                rule = re.compile(r'^.*?%s' %  rule, re.I)
+                rule = re.compile(r'^.*?%s' % rule, re.I)
             elif self.rule_mode == 'case':
                 rule = re.compile(r'^.*?%s' % rule)
             else:
