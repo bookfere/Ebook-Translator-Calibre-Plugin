@@ -101,7 +101,7 @@ class TranslationCache:
                 self.add(*original_unit)
 
     def all(self):
-        resource = self.cursor.execute('SELECT * FROM cache')
+        resource = self.cursor.execute('SELECT * FROM cache WHERE NOT ignored')
         return resource.fetchall()
 
     def get(self, ids):

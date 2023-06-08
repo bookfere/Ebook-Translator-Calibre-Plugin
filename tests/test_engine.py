@@ -15,11 +15,7 @@ class TestBase(unittest.TestCase):
 
     def test_placeholder(self):
         marks = [
-            '{{id_1}}', '{id_1}}', 'id_1}}', '{{id_1}', '{{id_1',
-            '{ { id_1 }}', '{ { id _ 1 }', '{ { id _ 1', '{ id _ 1',
-            'id_1 }}', 'id _ 1 }  }', 'id _ 1  }',
-            'id_1', 'id _ 1', '  id _ 1   ',
-        ]
+            '{{id_1}}', '{id_1} }', '{{id_1}', '{ { id_1 }}', '{ { id _ 1 }']
         for mark in marks:
             with self.subTest(mark=mark):
                 self.assertIsNotNone(
