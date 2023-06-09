@@ -1,3 +1,4 @@
+import os
 import re
 import json
 import copy
@@ -20,14 +21,33 @@ def get_name(element):
     return etree.QName(element).localname
 
 
+class Glossary(dict):
+    def load_from_file(self, path):
+        try:
+            with open(path) as f:
+                content = f.read().strip()
+            if not content:
+                return
+            for group in content.split(os.linesep * 2):
+                group = group.strip().split(os.linesep)
+                if len(group) > 2:
+                    continue
+                self[group[0]] = group[0] if len(group) == 1 else group[1]
+        except Exception:
+            pass
+
+
 class Element:
-    def __init__(self, element, page_id, placeholder):
+    def __init__(self, element, page_id, placeholder, glossary):
         self.element = element
+        self.element_copy = copy.deepcopy(element)
         self.page_id = page_id
         self.placeholder = placeholder
+        self.glossary = glossary
         self.ignored = False
 
-        self.reserves = []
+        self.reserve_elements = []
+        self.reserve_words = []
         self.original = []
 
     def set_ignored(self, ignored):
@@ -38,7 +58,7 @@ class Element:
 
     def get_descendents(self, tags):
         xpath = './/*[%s]' % ' or '.join(['self::x:%s' % tag for tag in tags])
-        return self.element.xpath(xpath, namespaces=ns)
+        return self.element_copy.xpath(xpath, namespaces=ns)
 
     def get_raw(self):
         return get_string(self.element, True)
@@ -47,14 +67,15 @@ class Element:
         return trim(''.join(self.element.itertext()))
 
     def get_content(self):
-        for noise in self.get_descendents(('rt', 'rp', 'sup')):
+        for noise in self.get_descendents(('rt', 'rp', 'sup', 'sub')):
             parent = noise.getparent()
             parent.text = (parent.text or '') + (noise.tail or '')
             parent.remove(noise)
 
-        self.reserves = self.get_descendents(('img', 'code'))
-        for rid, reserve in enumerate(self.reserves):
-            placeholder = self.placeholder[0].format(format(rid, '05'))
+        self.reserve_elements = self.get_descendents(('img', 'code'))
+        count = 0
+        for reserve in self.reserve_elements:
+            placeholder = self.placeholder[0].format(format(count, '05'))
             previous, parent = reserve.getprevious(), reserve.getparent()
             if previous is not None:
                 previous.tail = (previous.tail or '') + placeholder
@@ -63,7 +84,16 @@ class Element:
                 parent.text = (parent.text or '') + placeholder
                 parent.text += (reserve.tail or '')
             parent.remove(reserve)
-        return trim(''.join(self.element.itertext()))
+            count += 1
+
+        content = trim(''.join(self.element_copy.itertext()))
+
+        for word in self.glossary.keys():
+            placeholder = self.placeholder[0].format(format(count, '05'))
+            content = content.replace(word, placeholder)
+            count += 1
+
+        return content
 
     def get_attributes(self):
         attributes = dict(self.element.attrib.items())
@@ -75,17 +105,24 @@ class Element:
     def add_translation(self, translation, position=None, lang=None,
                         color=None):
         translation = xml_escape(translation)
-        for rid, reserve in enumerate(self.reserves):
+        count = 0
+        for reserve in self.reserve_elements:
             # Escape the potential regex metacharacters in text.
             for item in reserve.getiterator():
                 if item.text is not None:
                     item.text = re.escape(item.text)
                 if item.tail is not None:
                     item.tail = re.escape(item.tail)
+            # Escape the markups (<m id=1 />) to replace escaped markups.
+            pattern = self.placeholder[1].format(format(count, '05'))
             translation = re.sub(
-                # Escape the markups to replace escaped markups.
-                xml_escape(self.placeholder[1].format(format(rid, '05'))),
-                get_string(reserve), translation)
+                xml_escape(pattern), get_string(reserve), translation)
+            count += 1
+
+        for word in self.glossary.values():
+            pattern = self.placeholder[1].format(format(count, '05'))
+            translation = re.sub(xml_escape(pattern), word, translation)
+            count += 1
 
         new_element = etree.XML('<{0} xmlns="{1}">{2}</{0}>'.format(
             get_name(self.element), ns['x'], translation))
@@ -109,9 +146,10 @@ class Element:
 class Extraction:
     __version__ = '20230608'
 
-    def __init__(self, pages, placeholder):
+    def __init__(self, pages, placeholder, glossary):
         self.pages = pages
         self.placeholder = placeholder
+        self.glossary = glossary
         # TODO: Refactor these attributes.
         self.config = get_config()
         self.element_rules = self.config.get('element_rules', [])
@@ -162,17 +200,17 @@ class Extraction:
                             element_has_content = True
                             break
             if element_has_content:
-                elements.append(Element(element, page_id, self.placeholder))
+                elements.append(
+                    Element(element, page_id, self.placeholder, self.glossary))
             else:
                 self.extract_elements(page_id, element, elements)
         # Return root if all children have no content
-        root = Element(root, page_id, self.placeholder)
+        root = Element(root, page_id, self.placeholder, self.glossary)
         return elements if elements else [root]
 
     def filter_content(self, element):
         self.filter_rules.append(
             r'^[-\d\s\.\'\\"‘’“”,=~!@#$%^&º*|<>?/`—…+:_(){}[\]]+$')
-
         patterns = []
         for rule in self.filter_rules:
             if self.rule_mode == 'normal':
@@ -185,7 +223,7 @@ class Extraction:
         # Ignore the element contains empty content
         content = element.get_text()
         if content == '':
-            element.set_ignored(True)
+            return False
         for entity in ('&lt;', '&gt;'):
             content = content.replace(entity, '')
         for pattern in patterns:
@@ -259,10 +297,8 @@ class ElementHandler:
                 count += 1
             raw = code
             content = text
-        if content:
-            self.original.append(
+        content and self.original.append(
                 (count, uid(content), raw, content, False))
-
         return self.original
 
     def remove_unused_elements(self):
@@ -304,7 +340,12 @@ class ElementHandler:
 
 
 def get_ebook_elements(pages, placeholder):
-    return Extraction(pages, placeholder).get_elements()
+    config = get_config()
+    glossary = Glossary()
+    if config.get('glossary_enabled'):
+        glossary.load_from_file(config.get('glossary_path'))
+    extraction = Extraction(pages, placeholder, glossary)
+    return extraction.get_elements()
 
 
 def get_element_handler(lang_code):

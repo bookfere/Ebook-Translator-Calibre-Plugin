@@ -1,10 +1,11 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, Mock, DEFAULT
 
 from lxml import etree
 from ..utils import ns
 from ..cache import Paragraph
-from ..element import get_string, get_name, Element, Extraction, ElementHandler
+from ..element import (
+    get_string, get_name, Glossary, Element, Extraction, ElementHandler)
 from ..engines.base import Base
 
 
@@ -28,6 +29,33 @@ class TestFunction(unittest.TestCase):
         self.assertEqual('p', get_name(etree.XML(xhtml)))
 
 
+class TestGlossary(unittest.TestCase):
+    def test_instance_type(self):
+        glossary = Glossary()
+        self.assertIsInstance(glossary, dict)
+        self.assertEqual(0, len(glossary))
+
+    @patch('calibre_plugins.ebook_translator.element.open')
+    def test_load_from_file(self, mock_open):
+        def mock_open_method(path):
+            if path == 'path/to/glossary.txt':
+                file = Mock()
+                file.read.return_value.strip.return_value = 'a\n\nb\nZ'
+                mock_open.__enter__.return_value = file
+                return mock_open
+            else:
+                raise Exception('any glossary error.')
+        mock_open.side_effect = mock_open_method
+
+        glossary = Glossary()
+        glossary.load_from_file('path/to/glossary.txt')
+        self.assertEqual({'a': 'a', 'b': 'Z'}, glossary)
+
+        glossary = Glossary()
+        glossary.load_from_file('path/to/fake.txt')
+        self.assertEqual({}, glossary)
+
+
 class TestElement(unittest.TestCase):
     def setUp(self):
         self.xhtml = etree.XML(rb"""<?xml version="1.0" encoding="utf-8"?>
@@ -48,7 +76,8 @@ class TestElement(unittest.TestCase):
     </body>
 </html>""")
         self.paragraph = self.xhtml.find('.//x:p', namespaces=ns)
-        self.element = Element(self.paragraph, 'test', Base.placeholder)
+        self.element = Element(
+            self.paragraph, 'test', Base.placeholder, {'a': 'a', 'b': 'Z'})
 
     def test_get_name(self):
         self.assertEqual('p', self.element.get_name())
@@ -69,13 +98,13 @@ class TestElement(unittest.TestCase):
         self.assertEqual(text, self.element.get_raw())
 
     def test_get_text(self):
-        self.assertEqual(r'a bB c d e f g h i App\Http k',
-                         self.element.get_text())
+        self.assertEqual(
+            r'a bB c d e f g h i App\Http k', self.element.get_text())
 
     def test_get_content(self):
-        content = ('{{id_00000}} a {{id_00001}} b c {{id_00002}} d e '
-                   '{{id_00003}} f g {{id_00004}} h {{id_00005}} i '
-                   '{{id_00006}} {{id_00007}} k')
+        content = ('{{id_00000}} {{id_00008}} {{id_00001}} {{id_00009}} c '
+                   '{{id_00002}} d e {{id_00003}} f g {{id_00004}} h '
+                   '{{id_00005}} i {{id_00006}} {{id_00007}} k')
         self.assertEqual(content, self.element.get_content())
 
     def test_get_attributes(self):
@@ -83,13 +112,13 @@ class TestElement(unittest.TestCase):
 
     def test_add_translation(self):
         self.element.get_content()  # remove rt and reserve images
-        translation = ('{{id_00000}} A {{id_00001}} B C {{id_00002}} D E '
-                       '{{id_00003}} F G {{id_00004}} H {{id_00005}} I '
-                       '{{id_00006}} {{id_00007}} K')
+        translation = ('{{id_00000}} {{id_00008}} {{id_00001}} {{id_00009}} C '
+                       '{{id_00002}} D E {{id_00003}} F G {{id_00004}} H '
+                       '{{id_00005}} I {{id_00006}} {{id_00007}} K')
         new = self.element.add_translation(translation)
         translation = ('<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
-                       '<img src="icon.jpg"/> A <img src="w1.jpg"/> '
-                       'B C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
+                       '<img src="icon.jpg"/> a <img src="w1.jpg"/> '
+                       'Z C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
                        'F G <img src="w2.jpg"/> H <img src="w3.jpg"/> I '
                        r'<img src="w3.jpg"/> <code>App\Http</code> K</p>')
         self.assertEqual(translation, get_string(new))
@@ -121,7 +150,7 @@ class TestElement(unittest.TestCase):
 
 class TestExtraction(unittest.TestCase):
     def setUp(self):
-        self.page_1 = MagicMock(
+        self.page_1 = Mock(
             id='a', media_type='text/html', href='test1.xhtml', data=etree.XML(
                 b"""<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html>
@@ -132,7 +161,7 @@ class TestExtraction(unittest.TestCase):
         <p></p>
     </body>
 </html>"""))
-        self.page_2 = MagicMock(
+        self.page_2 = Mock(
             id='b', media_type='text/html', href='test2.xhtml', data=etree.XML(
                 b"""<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html>
@@ -143,10 +172,10 @@ class TestExtraction(unittest.TestCase):
         <div></div>
     </body>
 </html>"""))
-        self.page_3 = MagicMock(media_type='text/css')
+        self.page_3 = Mock(media_type='text/css')
 
         self.extraction = Extraction(
-            [self.page_3, self.page_2, self.page_1], Base.placeholder)
+            [self.page_3, self.page_2, self.page_1], Base.placeholder, {})
 
     def test_get_sorted_pages(self):
         self.assertEqual(
@@ -232,24 +261,23 @@ class TestExtraction(unittest.TestCase):
         self.extraction.filter_rules = []
 
         def elements(markups):
-            return [Element(etree.XML(markup), 'test', Base.placeholder)
+            return [Element(etree.XML(markup), 'test', Base.placeholder, {})
                     for markup in markups]
 
         # normal - text
-        markups = ['<p></p>', '<p>\xa0</p>', '<p>\u3000</p>', '<p>\u200b</p>',
-                   '<p> </p>', '<p>”.—…‘’</p>', '<p>2 &lt;= 2</p>',
-                   '<p><span>  </span><span>  </span></p>',
-                   '<p><img src="/abc.jpg" /></p>']
+        markups = ['<p>\xa0</p>', '<p>\u3000</p>', '<p>\u200b</p>',
+                   '<p></p>', '<p> </p>', '<p><img src="/abc.jpg" /></p>',
+                   '<p><span>  </span><span>  </span></p>']
         for element in elements(markups):
             with self.subTest(element=element):
-                self.extraction.filter_content(element)
-                self.assertTrue(element.ignored)
+                self.assertFalse(self.extraction.filter_content(element))
 
         self.extraction.filter_rules = ['a', 'b', 'c']
-        markups = ['<p>xxxaxxx</p>', '<p>xxxbxxx</p>', '<p>xxxcxxx</p>']
+        markups = ['<p>xxxaxxx</p>', '<p>xxxbxxx</p>', '<p>xxxcxxx</p>',
+                   '<p>2 &lt;= 2</p>', '<p>”.—…‘’</p>']
         for element in elements(markups):
             with self.subTest(element=element):
-                self.extraction.filter_content(element)
+                self.assertTrue(self.extraction.filter_content(element))
                 self.assertTrue(element.ignored)
 
         self.extraction.filter_rules = ['A', 'B', 'C']
@@ -289,21 +317,20 @@ class TestExtraction(unittest.TestCase):
         self.extraction.filter_scope = 'html'
         self.extraction.filter_rules = [
             '^<pre>', '^.*</code>$', '^.*?class="c"']
-        markups = ['<pre>a</pre>', '<code>b</code>', '<p class="c">c</p>',
-                   '<p>\xa0</p>', '<p>\u3000</p>', '<p>\u200b</p>', '<p></p>',
-                   '<p> </p>', '<p>”.</p>', '<p>‘’</p>', '<p>2 &lt;= 2</p>',
-                   '<p><span>123</span></p>', '<p><img src="/abc.jpg" /></p>',
+        markups = ['<p>\xa0</p>', '<p>\u3000</p>', '<p>\u200b</p>',
+                   '<p></p>', '<p> </p>', '<p><img src="/abc.jpg" /></p>',
                    '<p><span>  </span><span>  </span></p>']
         for element in elements(markups):
             with self.subTest(element=element):
-                self.extraction.filter_content(element)
-                self.assertTrue(element.ignored)
+                self.assertFalse(self.extraction.filter_content(element))
 
-        markups = ['<p><b>a</b>.</p>']
+        markups = ['<pre>a</pre>', '<code>b</code>', '<p class="c">c</p>',
+                   '<p>2 &lt;= 2</p>', '<p><span>123</span></p>',
+                   '<p>”.—…‘’</p>']
         for element in elements(markups):
             with self.subTest(element=element):
-                self.extraction.filter_content(element)
-                self.assertFalse(element.ignored)
+                self.assertTrue(self.extraction.filter_content(element))
+                self.assertTrue(element.ignored)
 
 
 class TestElementHandler(unittest.TestCase):
@@ -320,8 +347,10 @@ class TestElementHandler(unittest.TestCase):
         <p></p>
     </body>
 </html>""")
-        self.elements = [Element(element, 'p1', Base.placeholder) for element
-                         in self.xhtml.findall('.//x:p', namespaces=ns)]
+
+        self.elements = [
+            Element(element, 'p1', Base.placeholder, {})
+            for element in self.xhtml.findall('.//x:p', namespaces=ns)]
         self.elements[-1].set_ignored(True)
         self.elements[-3].set_ignored(True)
         self.handler = ElementHandler()
@@ -332,7 +361,8 @@ class TestElementHandler(unittest.TestCase):
         self.assertEqual([
             (0, 'm1', '<p id="a">a</p>', 'a', False, '{"id": "a"}', 'p1'),
             (1, 'm2', '<p id="b">b</p>', 'b', False, '{"id": "b"}', 'p1'),
-            (2, 'm3', '<p>{{id_00000}}</p>', '{{id_00000}}', True, None, 'p1'),
+            (2, 'm3', '<p><img src="abc.jpg"/></p>', '{{id_00000}}', True,
+             None, 'p1'),
             (3, 'm4', '<p id="c">c</p>', 'c', False, '{"id": "c"}', 'p1'),
             (4, 'm5', '<p></p>', '', True, None, 'p1')],
             self.handler.prepare_original(self.elements))
