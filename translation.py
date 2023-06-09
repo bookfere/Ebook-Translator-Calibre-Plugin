@@ -4,7 +4,7 @@ import json
 import random
 from types import GeneratorType
 
-from .utils import sep, trim, dummy
+from .utils import sep, dummy
 from .config import get_config
 from .engines import builtin_engines
 from .engines import GoogleFreeTranslate
@@ -80,6 +80,7 @@ class Translation:
                 return self._translate_text(text, count, interval)
             message = _('Failed to retreive data from translate engine API.')
             if count >= self.request_attempt:
+                self.log(message)
                 raise Exception('{} {}'.format(message, str(e)))
             count += 1
             interval *= count

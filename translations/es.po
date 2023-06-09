@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-06-08 19:20+0800\n"
+"POT-Creation-Date: 2023-06-09 23:59+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -31,7 +31,7 @@ msgstr ""
 msgid "Extracting ebook content..."
 msgstr ""
 
-msgid "Filter original content..."
+msgid "Filtering ebook content..."
 msgstr ""
 
 msgid "Preparing user interface..."
@@ -552,9 +552,6 @@ msgstr "Traduciendo: {}/{}"
 
 msgid "Translation cancelled."
 msgstr ""
-
-msgid "Can not open glossary file: {}"
-msgstr "No se puede abrir el archivo de glosario: {}"
 
 msgid "Translate Book"
 msgstr "Traducir libro"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-06-08 19:20+0800\n"
+"POT-Creation-Date: 2023-06-09 23:59+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,123 +27,123 @@ msgid ""
 "keeping the original content)."
 msgstr ""
 
-#: advanced.py:77
+#: advanced.py:76
 msgid "Extracting ebook content..."
 msgstr ""
 
-#: advanced.py:86
-msgid "Filter original content..."
+#: advanced.py:85
+msgid "Filtering ebook content..."
 msgstr ""
 
-#: advanced.py:94
+#: advanced.py:93
 msgid "Preparing user interface..."
 msgstr ""
 
-#: advanced.py:155
+#: advanced.py:161
 msgid "Translation Failed"
 msgstr ""
 
-#: advanced.py:170
+#: advanced.py:176
 msgid "Start"
 msgstr ""
 
-#: advanced.py:184 batch.py:54 setting.py:180
+#: advanced.py:190 batch.py:54 setting.py:180
 msgid "Input Format"
 msgstr ""
 
-#: advanced.py:195 advanced.py:485 batch.py:55 setting.py:405
+#: advanced.py:201 advanced.py:489 batch.py:55 setting.py:405
 msgid "Target Language"
 msgstr ""
 
-#: advanced.py:282 translation.py:175
+#: advanced.py:285 translation.py:165
 msgid "Translation completed."
 msgstr ""
 
-#: advanced.py:289
+#: advanced.py:292
 msgid "Failed"
 msgstr ""
 
-#: advanced.py:296
+#: advanced.py:299
 msgid "There is no content that needs to be translated."
 msgstr ""
 
-#: advanced.py:333
+#: advanced.py:336
 msgid "Reading ebook data, please wait..."
 msgstr ""
 
-#: advanced.py:356
+#: advanced.py:359
 msgid "Review"
 msgstr ""
 
-#: advanced.py:357 setting.py:350
+#: advanced.py:360 setting.py:350
 msgid "Log"
 msgstr ""
 
-#: advanced.py:412
+#: advanced.py:416
 msgid "Translate All"
 msgstr ""
 
-#: advanced.py:413
+#: advanced.py:417
 msgid "Translate Selected"
 msgstr ""
 
-#: advanced.py:414 components/engine.py:190 components/table.py:80
+#: advanced.py:418 components/engine.py:190 components/table.py:80
 msgid "Delete"
 msgstr ""
 
-#: advanced.py:436 advanced.py:447
+#: advanced.py:440 advanced.py:451
 msgid "Stop"
 msgstr ""
 
-#: advanced.py:442
+#: advanced.py:446
 msgid "Stopping..."
 msgstr ""
 
-#: advanced.py:473 setting.py:374
+#: advanced.py:477 setting.py:374
 msgid "Translation Engine"
 msgstr ""
 
-#: advanced.py:479 batch.py:55 setting.py:404
+#: advanced.py:483 batch.py:55 setting.py:404
 msgid "Source Language"
 msgstr ""
 
-#: advanced.py:491
+#: advanced.py:495
 msgid "Output Ebook"
 msgstr ""
 
-#: advanced.py:493
+#: advanced.py:497
 msgid "Output"
 msgstr ""
 
-#: advanced.py:499 batch.py:54
+#: advanced.py:503 batch.py:54
 msgid "Title"
 msgstr ""
 
-#: advanced.py:537 components/table.py:69
+#: advanced.py:544 components/table.py:69
 msgid "Translated"
 msgstr ""
 
-#: advanced.py:568
+#: advanced.py:574
 msgid "No translation yet"
 msgstr ""
 
-#: advanced.py:615 components/engine.py:196 setting.py:92
+#: advanced.py:621 components/engine.py:196 setting.py:92
 msgid "Save"
 msgstr ""
 
-#: advanced.py:670
+#: advanced.py:676
 msgid "Your changes have been saved."
 msgstr ""
 
-#: advanced.py:683
+#: advanced.py:689
 msgid "Translation log"
 msgstr ""
 
-#: advanced.py:696
+#: advanced.py:702
 msgid "Are you sure you want to translate all {:n} paragraphs?"
 msgstr ""
 
-#: advanced.py:731
+#: advanced.py:737
 msgid "Are you sure you want to stop the translation progress?"
 msgstr ""
 
@@ -167,7 +167,7 @@ msgstr ""
 msgid "The specified glossary file does not exist."
 msgstr ""
 
-#: components/engine.py:58 translation.py:112
+#: components/engine.py:58 translation.py:105
 msgid "Translating..."
 msgstr ""
 
@@ -291,31 +291,31 @@ msgstr ""
 msgid "Select similar paragraphs: {}=\"{}\""
 msgstr ""
 
-#: components/table.py:132
+#: components/table.py:135
 msgid "Retain at least one row."
 msgstr ""
 
-#: components/worker.py:43
+#: components/worker.py:42
 msgid "[{} > {}] Translating \"{}\""
 msgstr ""
 
-#: components/worker.py:52
+#: components/worker.py:51
 msgid "Translation job failed"
 msgstr ""
 
-#: components/worker.py:68
+#: components/worker.py:74
 msgid "completed"
 msgstr ""
 
-#: components/worker.py:76
+#: components/worker.py:82
 msgid "Ebook Translation Log"
 msgstr ""
 
-#: components/worker.py:77
+#: components/worker.py:83
 msgid "Translation Completed"
 msgstr ""
 
-#: components/worker.py:78
+#: components/worker.py:84
 msgid "The translation of \"{}\" was completed. Do you want to open the book?"
 msgstr ""
 
@@ -335,7 +335,7 @@ msgstr ""
 msgid "A correct key format \"{}\" is required."
 msgstr ""
 
-#: engines/base.py:156 engines/chatgpt.py:94 tests/test_engine.py:64
+#: engines/base.py:156 engines/chatgpt.py:94 tests/test_engine.py:60
 msgid "Can not parse returned response. Raw data: {}"
 msgstr ""
 
@@ -391,7 +391,7 @@ msgstr ""
 msgid "Response was parsed incorrectly."
 msgstr ""
 
-#: engines/deepl.py:33 tests/test_engine.py:48
+#: engines/deepl.py:33 tests/test_engine.py:44
 msgid "{} total, {} used, {} left"
 msgstr ""
 
@@ -671,60 +671,56 @@ msgstr ""
 msgid "{} is not a valid CSS seletor."
 msgstr ""
 
-#: translation.py:82
+#: translation.py:77
 msgid "No available API key."
 msgstr ""
 
-#: translation.py:84
+#: translation.py:79
 msgid "API key was Changed due to previous one unavailable."
 msgstr ""
 
-#: translation.py:86
+#: translation.py:81
 msgid "Failed to retreive data from translate engine API."
 msgstr ""
 
-#: translation.py:92
+#: translation.py:88
 msgid "Will retry in {} seconds."
 msgstr ""
 
-#: translation.py:95
+#: translation.py:91
 msgid "[{}] Retrying {} ... (timeout is {} seconds)."
 msgstr ""
 
-#: translation.py:105
+#: translation.py:101
 msgid "Original: {}"
 msgstr ""
 
-#: translation.py:133
+#: translation.py:123
 msgid "Translation: {}"
 msgstr ""
 
-#: translation.py:136
+#: translation.py:126
 msgid "Translation (Cached): {}"
 msgstr ""
 
-#: translation.py:147
+#: translation.py:137
 msgid "Start to translate ebook content"
 msgstr ""
 
-#: translation.py:149
+#: translation.py:139
 msgid "Total items: {}"
 msgstr ""
 
-#: translation.py:151
+#: translation.py:141
 msgid "There is no content need to translate."
 msgstr ""
 
-#: translation.py:158
+#: translation.py:148
 msgid "Translating: {}/{}"
 msgstr ""
 
-#: translation.py:177
+#: translation.py:167
 msgid "Translation cancelled."
-msgstr ""
-
-#: translation.py:193
-msgid "Can not open glossary file: {}"
 msgstr ""
 
 #: ui.py:33
