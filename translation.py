@@ -1,5 +1,3 @@
-import os
-import re
 import sys
 import time
 import json
@@ -21,7 +19,6 @@ class Translation:
     def __init__(self, translator):
         self.translator = translator
 
-        self.glossary = None
         self.concurrency_limit = 1
         self.request_attempt = 3
         self.request_interval = 5
@@ -34,9 +31,6 @@ class Translation:
         self.streaming = dummy
         self.callback = dummy
         self.cancel_request = dummy
-
-    def set_glossary(self, glossary):
-        self.glossary = glossary
 
     def set_concurrency_limit(self, limit):
         self.concurrency_limit = limit
@@ -105,9 +99,6 @@ class Translation:
         self.log('-' * 30)
         self.log(_('Original: {}').format(original))
 
-        if self.glossary is not None:
-            original = self.glossary.replace(original)
-
         self.streaming(paragraph)
         self.streaming('')
         self.streaming(_('Translating...'))
@@ -128,9 +119,6 @@ class Translation:
                     time.sleep(0.05)
                     temp += char
                 translation = temp.replace('\n', ' ')
-
-            if self.glossary is not None:
-                translation = self.glossary.restore(trim(translation))
             self.log(_('Translation: {}').format(translation))
             self.need_sleep = True
         else:
@@ -182,38 +170,6 @@ class Translation:
         return paragraphs
 
 
-class Glossary:
-    def __init__(self):
-        self.glossary = []
-
-    def load(self, path):
-        try:
-            with open(path) as f:
-                content = f.read().strip()
-        except Exception as e:
-            raise Exception(_('Can not open glossary file: {}').format(str(e)))
-        if not content:
-            return
-        for group in content.split(os.linesep*2):
-            group = group.strip().split(os.linesep)
-            if len(group) > 2:
-                continue
-            if len(group) == 1:
-                group.append(group[0])
-            self.glossary.append(group)
-        return self
-
-    def replace(self, text):
-        for word in self.glossary:
-            text = text.replace(word[0], 'id_%d' % id(word))
-        return text
-
-    def restore(self, text):
-        for word in self.glossary:
-            text = re.sub(r'id\s*_\s*%s' % id(word), word[1], text, flags=re.I)
-        return text
-
-
 def get_engine_class(engine_name=None):
     config = get_config()
     engines = {engine.name: engine for engine in builtin_engines}
@@ -245,9 +201,6 @@ def get_translator(engine_class=None):
 def get_translation(translator, log=None):
     config = get_config()
     translation = Translation(translator)
-    if config.get('glossary_enabled'):
-        glossary = Glossary().load(config.get('glossary_path'))
-        translation.set_glossary(glossary)
     if config.get('log_translation'):
         translation.set_logging(log)
     translation.set_concurrency_limit(config.get('concurrency_limit'))

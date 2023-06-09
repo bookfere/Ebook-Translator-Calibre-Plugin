@@ -4,7 +4,6 @@ from types import MethodType
 
 from calibre.gui2.dialogs.message_box import JobError
 
-from .utils import uid
 from .config import get_config
 from .cache import Paragraph, get_cache
 from .translation import get_engine_class, get_translator, get_translation
@@ -116,12 +115,19 @@ class TranslationWorker(QObject):
 
     def __init__(self, ebook, engine_class):
         QObject.__init__(self)
-        self.ebook = ebook
+        self.source_lang = ebook.source_lang
+        self.target_lang = ebook.target_lang
         self.engine_class = engine_class
 
         self.cancelled = False
         self.translate.connect(self.translate_paragraphs)
         self.finished.connect(lambda: self.set_cancelled(False))
+
+    def set_source_lang(self, lang):
+        self.source_lang = lang
+
+    def set_target_lang(self, lang):
+        self.target_lang = lang
 
     def set_engine_class(self, engine_class):
         self.engine_class = engine_class
@@ -136,8 +142,8 @@ class TranslationWorker(QObject):
     def translate_paragraphs(self, paragraphs=[], fresh=False):
         self.start.emit()
         translator = get_translator(self.engine_class)
-        translator.set_source_lang(self.ebook.source_lang)
-        translator.set_target_lang(self.ebook.target_lang)
+        translator.set_source_lang(self.source_lang)
+        translator.set_target_lang(self.target_lang)
         translation = get_translation(translator)
         translation.set_fresh(fresh)
         translation.set_logging(self.logging.emit)
@@ -202,11 +208,8 @@ class CreateTranslationProject(QDialog):
         target_lang.refresh.emit(
             engine_class.lang_codes.get('target'),
             engine_class.config.get('target_lang'))
-
-        def change_target_lang(lang):
-            self.ebook.target_lang = lang
-        change_target_lang(target_lang.currentText())
-        target_lang.currentTextChanged.connect(change_target_lang)
+        self.ebook.set_target_lang(target_lang.currentText())
+        target_lang.currentTextChanged.connect(self.ebook.set_target_lang)
 
         layout.addWidget(input_group)
         layout.addWidget(target_group)
@@ -509,18 +512,21 @@ class AdvancedTranslation(QDialog):
         layout.addWidget(target_group)
         layout.addWidget(save_group)
 
+        source_lang.currentTextChanged.connect(
+            self.trans_worker.set_source_lang)
+        target_lang.currentTextChanged.connect(
+            self.trans_worker.set_target_lang)
+
         def refresh_languages():
             source_lang.refresh.emit(
                 self.current_engine.lang_codes.get('source'),
                 self.current_engine.config.get('source_lang'),
                 not self.current_engine.is_custom())
-            self.ebook.set_source_lang(source_lang.currentText())
             target_lang.refresh.emit(
                 self.current_engine.lang_codes.get('target'),
                 self.ebook.target_lang)
-            source_lang.currentTextChanged.connect(self.ebook.set_source_lang)
-            target_lang.currentTextChanged.connect(self.ebook.set_target_lang)
         refresh_languages()
+        self.ebook.set_source_lang(source_lang.currentText())
 
         def choose_engine(index):
             engine_name = engine_list.itemData(index)

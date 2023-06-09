@@ -48,7 +48,7 @@ class TranslationCache:
     def __init__(self, identity, persistence=True):
         self.persistence = persistence
         self.file_path = self._path(
-            uid(identity + self.__version__ + Extraction.__version__))
+            uid(identity, self.__version__, Extraction.__version__))
         if os.path.exists(self.file_path):
             self.fresh = False
         self.cache_only = False
@@ -60,6 +60,9 @@ class TranslationCache:
             'attributes DEFAULT NULL, page DEFAULT NULL,'
             'translation DEFAULT NULL, engine_name DEFAULT NULL, '
             'target_lang DEFAULT NULL)')
+        self.cursor.execute(
+            'CREATE TABLE IF NOT EXISTS info('
+            'key UNIQUE, value)')
 
     @classmethod
     def count(cls):
@@ -95,6 +98,18 @@ class TranslationCache:
             os.mkdir(cache_dir)
         return os.path.join(cache_dir, '%s.db' % name)
 
+    def set_info(self, key, value):
+        self.cursor.execute(
+            'INSERT INTO info VALUES (?1, ?2) '
+            'ON CONFLICT (KEY) DO UPDATE SET VALUE=excluded.VALUE',
+            (key, value))
+        self.connection.commit()
+
+    def get_info(self, key):
+        resource = self.cursor.execute(
+            'SELECT * FROM info WHERE key=?', (key,))
+        return resource.fetchone()[0]
+
     def save(self, original_group):
         if self.is_fresh():
             for original_unit in original_group:
@@ -125,10 +140,6 @@ class TranslationCache:
             'INSERT INTO cache VALUES ('
             '?1, ?2, ?3, ?4, ?5, ?6, ?7, NULL, NULL, NULL'
             ') ON CONFLICT DO NOTHING',
-            # 'ON CONFLICT (md5) DO UPDATE SET original=excluded.original',
-            # 'translation=excluded.translation, '
-            # 'engine_name=excluded.engine_name, '
-            # 'target_lang=excluded.target_lang',
             (id, md5, raw, original, ignored, attributes, page))
         self.connection.commit()
 
