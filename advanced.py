@@ -82,7 +82,7 @@ class PreparationWorker(QObject):
             if self.cancel():
                 return
             # --------------------------
-            self.progress_message.emit(_('Filter original content...'))
+            self.progress_message.emit(_('Filtering ebook content...'))
             original_group = element_handler.prepare_original(elements)
             self.progress.emit(80)
             c = time.time()
