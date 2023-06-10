@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-06-09 23:59+0800\n"
+"POT-Creation-Date: 2023-06-10 23:19+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -165,9 +165,6 @@ msgstr "引擎名称已使用。"
 
 msgid "The setting has been saved."
 msgstr "设置已保存。"
-
-msgid "No custom engine to delete."
-msgstr "没有可以删除的自定义引擎。"
 
 msgid "Ebook Specific"
 msgstr "自动选择"
