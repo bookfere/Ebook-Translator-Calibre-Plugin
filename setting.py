@@ -4,13 +4,14 @@ import sys
 import os.path
 from subprocess import Popen
 
+from .components import (
+    layout_info, AlertMessage, TargetLang, SourceLang, EngineList,
+    EngineTester, get_divider, ManageCustomEngine, InputFormat, OutputFormat)
 from .config import get_config
 from .utils import css, is_proxy_availiable
 from .cache import TranslationCache
 from .translation import get_engine_class
-from .components import (
-    layout_info, AlertMessage, TargetLang, SourceLang, EngineList,
-    EngineTester, get_divider, ManageCustomEngine, InputFormat, OutputFormat)
+from .engines import builtin_engines
 
 
 try:
@@ -40,12 +41,10 @@ class TranslationSetting(QDialog):
     def __init__(self, plugin, parent, icon):
         QDialog.__init__(self, parent)
         self.plugin = plugin
-        self.gui = parent
         self.icon = icon
         self.alert = AlertMessage(self)
 
         self.config = get_config()
-        # self.config.refresh()
         self.current_engine = get_engine_class()
 
         self.main_layout()
@@ -373,7 +372,7 @@ class TranslationSetting(QDialog):
         # Translate Engine
         engine_group = QGroupBox(_('Translation Engine'))
         engine_layout = QHBoxLayout(engine_group)
-        engine_list = EngineList()
+        engine_list = EngineList(self.current_engine.name)
         engine_test = QPushButton(_('Test'))
         manage_engine = QPushButton(_('Custom'))
         engine_layout.addWidget(engine_list, 1)
@@ -505,11 +504,9 @@ class TranslationSetting(QDialog):
 
         def choose_default_engine(index):
             engine_name = engine_list.itemData(index)
-            self.config.update(translate_engine=engine_name)
             if self.current_engine.name != engine_name:
+                self.config.update(translate_engine=engine_name)
                 self.current_engine = get_engine_class(engine_name)
-            # show api key setting
-            self.set_api_keys()
             # refresh preferred language
             source_lang = self.current_engine.config.get('source_lang')
             self.source_lang.refresh.emit(
@@ -518,18 +515,23 @@ class TranslationSetting(QDialog):
             target_lang = self.current_engine.config.get('target_lang')
             self.target_lang.refresh.emit(
                 self.current_engine.lang_codes.get('target'), target_lang)
-            # show prompt setting
-            show_chatgpt_preferences()
+            self.set_api_keys()  # show api key setting
+            show_chatgpt_preferences()  # show prompt setting
+        choose_default_engine(engine_list.findData(self.current_engine.name))
         engine_list.currentIndexChanged.connect(choose_default_engine)
 
-        default_index = engine_list.findData(self.current_engine.name)
-        engine_list.setCurrentIndex(default_index)
-        choose_default_engine(default_index)
+        def refresh_engine_list():
+            """Prevent engine list auto intercept the text changed signal."""
+            engine_list.currentIndexChanged.disconnect(choose_default_engine)
+            engine_list.refresh()
+            index = engine_list.findData(self.config.get('translate_engine'))
+            choose_default_engine(index)
+            engine_list.setCurrentIndex(index)
+            engine_list.currentIndexChanged.connect(choose_default_engine)
 
         def manage_custom_translation_engine():
             manager = ManageCustomEngine(self)
-            manager.finished.connect(
-                lambda: engine_list.refresh(self.current_engine.name))
+            manager.finished.connect(refresh_engine_list)
             manager.show()
         manage_engine.clicked.connect(manage_custom_translation_engine)
 
@@ -847,6 +849,13 @@ class TranslationSetting(QDialog):
         # Do not update directly as you may get default preferences!
         engine_config = self.config.get('engine_preferences').copy()
         engine_config.update({self.current_engine.name: config})
+        # Cleanup unused engine preferences
+        engine_names = [engine.name for engine in builtin_engines]
+        engine_names += self.config.get('custom_engines').keys()
+        for name in engine_config.copy():
+            if name not in engine_names:
+                engine_config.pop(name)
+        # Update modified engine preferences
         self.config.update(engine_preferences=engine_config)
         self.config.commit()
         self.alert.pop(_('The setting has been saved.'))

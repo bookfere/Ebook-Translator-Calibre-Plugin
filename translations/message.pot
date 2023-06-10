@@ -196,7 +196,7 @@ msgid "Clear"
 msgstr ""
 
 #: components/engine.py:194
-msgid "Reset"
+msgid "Restore"
 msgstr ""
 
 #: components/engine.py:195

@@ -60,6 +60,9 @@ class PreparationWorker(QObject):
         self.engine_class = engine_class
         self.start.connect(self.prepare_ebook_data)
 
+    def clean_cache(self, cache):
+        cache.is_fresh() and cache.destroy()
+
     @pyqtSlot()
     def prepare_ebook_data(self):
         input_path = self.ebook.get_input_path()
@@ -80,6 +83,7 @@ class PreparationWorker(QObject):
             b = time.time()
             print('extract: ', b - a)
             if self.cancel():
+                self.clean_cache(cache)
                 return
             # --------------------------
             self.progress_message.emit(_('Filtering ebook content...'))
@@ -88,6 +92,7 @@ class PreparationWorker(QObject):
             c = time.time()
             print('filter: ', c - b)
             if self.cancel():
+                self.clean_cache(cache)
                 return
             # --------------------------
             self.progress_message.emit(_('Preparing user interface...'))
@@ -96,6 +101,7 @@ class PreparationWorker(QObject):
             d = time.time()
             print('cache: ', d - c)
             if self.cancel():
+                self.clean_cache(cache)
                 return
 
         self.finished.emit(cache_id)

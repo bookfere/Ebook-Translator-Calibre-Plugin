@@ -151,7 +151,7 @@ msgstr "添加"
 msgid "Clear"
 msgstr "清除"
 
-msgid "Reset"
+msgid "Restore"
 msgstr "重置"
 
 msgid "Verify"

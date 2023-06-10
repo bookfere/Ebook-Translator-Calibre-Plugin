@@ -9,7 +9,7 @@ from .base import load_lang_codes, Base
 load_translations()
 
 
-def get_engine_template(name):
+def create_engine_template(name):
     return """{
     "name": "%s",
     "languages": {

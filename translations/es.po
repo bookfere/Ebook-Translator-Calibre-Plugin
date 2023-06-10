@@ -154,7 +154,7 @@ msgstr "Agregar"
 msgid "Clear"
 msgstr "Limpiar"
 
-msgid "Reset"
+msgid "Restore"
 msgstr "Restablecer"
 
 msgid "Verify"

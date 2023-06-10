@@ -173,18 +173,19 @@ class Translation:
 
 def get_engine_class(engine_name=None):
     config = get_config()
+    engine_name = engine_name or config.get('translate_engine')
     engines = {engine.name: engine for engine in builtin_engines}
-    engine_name = engine_name or config.get('translate_engine') \
-        or GoogleFreeTranslate.name
-    engine_class = engines.get(engine_name) or CustomTranslate
-    if engine_class.is_custom():
-        engine_data = config.get('custom_engines.%s' % engine_name)
-        if engine_data is not None:
-            engine_data = json.loads(engine_data)
-            engine_class.set_engine_data(engine_data)
+    custom_engines = config.get('custom_engines')
+    if engine_name in engines:
+        engine_class = engines.get(engine_name)
+    elif engine_name in custom_engines:
+        engine_class = CustomTranslate
+        engine_data = json.loads(custom_engines.get(engine_name))
+        engine_class.set_engine_data(engine_data)
     else:
-        engine_config = config.get('engine_preferences.%s' % engine_class.name)
-        engine_config and engine_class.set_config(engine_config)
+        engine_class = GoogleFreeTranslate
+    engine_config = config.get('engine_preferences.%s' % engine_class.name)
+    engine_config and engine_class.set_config(engine_config)
     return engine_class
 
 
