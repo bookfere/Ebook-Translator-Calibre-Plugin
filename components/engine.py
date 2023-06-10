@@ -2,12 +2,12 @@ import time
 import uuid
 from types import GeneratorType
 
+from ..utils import sorted_mixed_keys
+from ..config import get_config
+from ..engines.custom import create_engine_template, load_engine_data
+from ..engines import builtin_engines, GoogleFreeTranslate
 from .lang import SourceLang, TargetLang
 from .alert import AlertMessage
-from ..utils import sorted_mixed_keys
-from ..engines.custom import get_engine_template, load_engine_data
-from ..config import defaults, get_config
-from ..engines import builtin_engines
 
 
 try:
@@ -23,19 +23,23 @@ load_translations()
 
 
 class EngineList(QComboBox):
-    def __init__(self, default=None, parent=None):
-        QComboBox.__init__(self, parent)
+    def __init__(self, default=None):
+        QComboBox.__init__(self)
+        self.default = default
         self.wheelEvent = lambda event: None
-        self.refresh(default)
+        self.refresh()
 
-    def refresh(self, default=None):
-        self.clear()
+    def layout(self):
         for engine in builtin_engines:
             self.addItem(_(engine.alias), engine.name)
         custom_engines = get_config().get('custom_engines')
         for name in sorted(custom_engines.keys(), key=sorted_mixed_keys):
             self.addItem(name, name)
-        default and self.setCurrentIndex(self.findData(default))
+        self.default and self.setCurrentIndex(self.findData(self.default))
+
+    def refresh(self):
+        self.clear()
+        self.layout()
 
 
 class EngineWorker(QObject):
@@ -175,13 +179,18 @@ class EngineTester(QDialog):
 class ManageCustomEngine(QDialog):
     def __init__(self, parent):
         QDialog.__init__(self, parent)
-        self.config = get_config()
+        self.parent = parent
+        self.config = parent.config
         self.alert = AlertMessage(self)
+
+        self.custom_engines = self.config.get('custom_engines').copy()
+        self.engine_config = self.config.get('engine_preferences').copy()
+        self.default_name = self.config.get('translate_engine')
+
         self.setWindowTitle(_('Custom Translation Engine'))
         self.setModal(True)
         self.setMinimumWidth(600)
         self.layout()
-        # self.show()
 
     def layout(self):
         layout = QGridLayout(self)
@@ -191,7 +200,7 @@ class ManageCustomEngine(QDialog):
         custom_engine_data = QPlainTextEdit()
         custom_engine_data.setMinimumHeight(400)
         custom_clear = QPushButton(_('Clear'))
-        custom_reset = QPushButton(_('Reset'))
+        custom_restore = QPushButton(_('Restore'))
         custom_verify = QPushButton(_('Verify'))
         custom_save = QPushButton(_('Save'))
         layout.addWidget(custom_list, 0, 0, 1, 3)
@@ -199,36 +208,34 @@ class ManageCustomEngine(QDialog):
         layout.addWidget(custom_del, 0, 4)
         layout.addWidget(custom_engine_data, 1, 0, 1, 5)
         layout.addWidget(custom_clear, 2, 0)
-        layout.addWidget(custom_reset, 2, 1)
+        layout.addWidget(custom_restore, 2, 1)
         layout.addItem(QSpacerItem(0, 0), 2, 2)
         layout.addWidget(custom_verify, 2, 3)
         layout.addWidget(custom_save, 2, 4)
         layout.setColumnStretch(2, 1)
 
-        custom_engines = self.config.get('custom_engines').copy()
-        default_engine = defaults.get('translate_engine')
-        current_engine = self.config.get('translate_engine')
-        engine_preferences = self.config.get('engine_preferences')
-
         def refresh_list():
             custom_list.clear()
-            for name in sorted(custom_engines.keys(), key=sorted_mixed_keys):
-                custom_list.addItem(name)
+            engines = sorted(self.custom_engines.keys(), key=sorted_mixed_keys)
+            for engine in engines:
+                custom_list.addItem(engine)
         refresh_list()
-        custom_list.setCurrentText(current_engine)
+        index = custom_list.findText(self.default_name)
+        custom_list.setCurrentIndex(index if index != -1 else 0)
 
         def add_data():
             name = 'New Engine - %s' % uuid.uuid4().hex[:5]
-            data = get_engine_template(name)
+            template = create_engine_template(name)
             custom_list.addItem(name)
             custom_list.setCurrentText(name)
-            custom_engine_data.setPlainText(data)
-            custom_engines[name] = data
+            custom_engine_data.setPlainText(template)
+            self.custom_engines[name] = template
 
-        def reset_data(text=None):
-            content = custom_engines.get(text or custom_list.currentText())
+        def restore_data(name=None):
+            name = name or custom_list.currentText()
+            content = self.custom_engines.get(name)
             custom_engine_data.setPlainText(content)
-        reset_data()
+        restore_data()
 
         def verify_data():
             valid, data = load_engine_data(custom_engine_data.toPlainText())
@@ -238,45 +245,70 @@ class ManageCustomEngine(QDialog):
 
         def save_data():
             current_name = custom_list.currentText()
-            if not current_name:
-                self.config.update(
-                    translate_engine=default_engine, custom_engines={})
+            if not current_name:  # If all engine was deleted
+                self.default_name = GoogleFreeTranslate.name
             else:
+                # Validate the custom engine data
                 raw_data = custom_engine_data.toPlainText()
                 valid, data = load_engine_data(raw_data)
                 if not valid:
                     return self.alert.pop(data, 'warning')
+                # Check if the engine name exists
                 new_name = data.get('name')
-                if current_name.lower() != new_name.lower():
-                    exist_names = [name.lower() for name in custom_engines]
+                if new_name.lower() != current_name.lower():
+                    exist_names = [
+                        name.lower() for name in self.custom_engines]
                     if new_name.lower() in exist_names:
                         return self.alert.pop(
                             _('The engine name is already in use.'), 'warning')
-                del custom_engines[current_name]
-                custom_engines[new_name] = raw_data
-                self.config.update(custom_engines=custom_engines)
+                # Refresh custom engine data
+                if self.default_name == current_name:
+                    self.default_name = new_name
+                    if current_name in self.engine_config:
+                        data = self.engine_config.pop(current_name)
+                        self.engine_config[new_name] = data
+                del self.custom_engines[current_name]
+                self.custom_engines[new_name] = raw_data
+                # Refresh the custom engine list
                 refresh_list()
                 custom_list.setCurrentText(new_name)
+            # Update the custom engine
+            self.config.update(custom_engines=self.custom_engines)
+            self.config.update(engine_preferences=self.engine_config)
+            self.config.update(translate_engine=self.default_name)
             self.config.commit()
             self.alert.pop(_('The setting has been saved.'))
-            # self.done(0)
 
         def delete_data():
-            if custom_list.count() < 1:
-                return self.alert.pop(_('No custom engine to delete.'))
             current_index = custom_list.currentIndex()
             current_name = custom_list.itemText(current_index)
-            del custom_engines[current_name]
+            if current_name in self.custom_engines:
+                del self.custom_engines[current_name]
+            if current_name in self.engine_config:
+                del self.engine_config[current_name]
+            if current_name == self.default_name:
+                self.default_name = GoogleFreeTranslate.name
             custom_list.removeItem(current_index)
-            if current_name == current_engine:
-                self.config.update(translate_engine=default_engine)
-            if current_name in engine_preferences:
-                del engine_preferences[current_name]
 
-        custom_list.currentTextChanged.connect(reset_data)
+        def disable_save_button():
+            disabled = custom_list.count() < 1
+            custom_del.setDisabled(disabled)
+            custom_clear.setDisabled(disabled)
+            custom_restore.setDisabled(disabled)
+            custom_verify.setDisabled(disabled)
+            custom_save.setDisabled(disabled)
+        disable_save_button()
+
+        custom_list.currentTextChanged.connect(disable_save_button)
+        custom_list.currentTextChanged.connect(restore_data)
         custom_add.clicked.connect(add_data)
         custom_del.clicked.connect(delete_data)
         custom_clear.clicked.connect(custom_engine_data.clear)
-        custom_reset.clicked.connect(reset_data)
+        custom_restore.clicked.connect(restore_data)
         custom_verify.clicked.connect(verify_data)
         custom_save.clicked.connect(save_data)
+
+    def done(self, result):
+        QDialog.done(self, result)
+        self.parent.raise_()
+        self.parent.activateWindow()

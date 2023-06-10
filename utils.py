@@ -65,6 +65,7 @@ def group(numbers):
 
 
 def sorted_mixed_keys(s):
+    # https://docs.python.org/3/reference/expressions.html#value-comparisons
     return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', s)]
 
 
