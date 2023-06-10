@@ -6,9 +6,9 @@ from calibre.constants import __version__
 from calibre.ebooks.conversion.plumber import Plumber
 
 from . import EbookTranslator
-from .utils import log, uid, sep
+from .utils import log, sep
 from .cache import get_cache
-from .element import get_ebook_elements, get_element_handler, Extraction
+from .element import get_ebook_elements, get_element_handler
 from .translation import get_translator, get_translation
 
 

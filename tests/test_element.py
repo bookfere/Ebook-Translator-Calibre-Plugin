@@ -372,9 +372,8 @@ class TestElementHandler(unittest.TestCase):
         mock_uid.return_value = 'm1'
         self.handler.merge_length = 1000
         self.assertEqual([(
-            0, 'm1', '<p id="a">a</p><p id="b">b</p><p><img src="abc.jpg"/>'
-            '</p><p id="c">c</p><p></p>', 'a {{id_0}} b {{id_1}} {{id_00000}} '
-            '{{id_2}} c {{id_3}}  {{id_4}} ', False)],
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
+            'a {{id_0}} b {{id_1}} c {{id_3}} ', False)],
             self.handler.prepare_original(self.elements))
 
     def test_add_translations(self):
@@ -418,11 +417,9 @@ class TestElementHandler(unittest.TestCase):
         self.handler.merge_length = 1000
         self.handler.prepare_original(self.elements)
         self.handler.add_translations([Paragraph(
-            0, 'm1', '<p id="a">a</p><p id="b">b</p><p><img src="abc.jpg"/>'
-            '</p><p id="c">c</p><p></p>', 'a {{id_0}} b {{id_1}} {{id_00000}} '
-            '{{id_2}} c {{id_3}}  {{id_4}} ', False, None, None,
-            'A {{id_0}} B {{id_1}} {{id_00000}} {{id_2}} C {{id_3}} {{id_4}}',
-            'ENGINE', 'LANG')])
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
+            'a {{id_0}} b {{id_1}} c {{id_3}} ', False, None, None,
+            'A {{id_0}} B {{id_1}} C {{id_3}} ', 'ENGINE', 'LANG')])
 
         elements = self.xhtml.findall('.//x:p', namespaces=ns)
         self.assertEqual(8, len(elements))
@@ -438,11 +435,9 @@ class TestElementHandler(unittest.TestCase):
         self.handler.merge_length = 1000
         self.handler.prepare_original(self.elements)
         self.handler.add_translations([Paragraph(
-            0, 'm1', '<p id="a">a</p><p id="b">b</p><p><img src="abc.jpg"/>'
-            '</p><p id="c">c</p><p></p>', 'a {{id_0}} b {{id_1}} {{id_00000}} '
-            '{{id_2}} c {{id_3}}  {{id_4}} ', False, None, None,
-            'A B {{id_1}} {{id_00000}} {{id_2}} C {{id_3}} {{id_4}}',
-            'ENGINE', 'LANG')])
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
+            'a {{id_0}} b {{id_1}} c {{id_3}} ', False, None, None,
+            'A B {{id_1}} C {{id_3}} ', 'ENGINE', 'LANG')])
 
         elements = self.xhtml.findall('.//x:p', namespaces=ns)
         self.assertEqual(7, len(elements))
@@ -459,13 +454,29 @@ class TestElementHandler(unittest.TestCase):
         self.handler.merge_length = 1000
         self.handler.prepare_original(self.elements)
         self.handler.add_translations([Paragraph(
-            0, 'm1', '<p id="a">a</p><p id="b">b</p><p><img src="abc.jpg"/>'
-            '</p><p id="c">c</p><p></p>', 'a {{id_0}} b {{id_1}} {{id_00000}} '
-            '{{id_2}} c {{id_3}}  {{id_4}} ', False, None, None,
-            'A B {{id_1}} {{id_00000}} {{id_2}} C {{id_3}} {{id_4}}',
-            'ENGINE', 'LANG')])
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
+            'a {{id_0}} b {{id_1}} c {{id_3}} ', False, None, None,
+            'A {{id_0} B {{id_1}} C {{id_3}}', 'ENGINE', 'LANG')])
 
         elements = self.xhtml.findall('.//x:p', namespaces=ns)
-        self.assertEqual(2, len(elements))
+        self.assertEqual(5, len(elements))
+        self.assertEqual('A', elements[0].text)
+        self.assertEqual('B', elements[1].text)
+
+        self.assertEqual('C', elements[3].text)
+
+    def test_add_translations_merged_translation_only_missing_id(self):
+        self.handler.position = 'only'
+
+        self.handler.merge_length = 1000
+        self.handler.prepare_original(self.elements)
+        self.handler.add_translations([Paragraph(
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
+            'a {{id_0}} b {{id_1}} c {{id_3}} ', False, None, None,
+            'A B {{id_1}} C {{id_3}}', 'ENGINE', 'LANG')])
+
+        elements = self.xhtml.findall('.//x:p', namespaces=ns)
+        self.assertEqual(4, len(elements))
         self.assertEqual('A B', elements[0].text)
-        self.assertEqual('C', elements[1].text)
+
+        self.assertEqual('C', elements[2].text)

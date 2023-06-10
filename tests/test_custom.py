@@ -3,14 +3,14 @@ import unittest
 from unittest.mock import MagicMock
 
 from ..engines.custom import (
-    get_engine_template, load_engine_data, CustomTranslate)
+    create_engine_template, load_engine_data, CustomTranslate)
 
 
 load_translations()
 
 
 class TestFunction(unittest.TestCase):
-    def test_get_engine_template(self):
+    def test_create_engine_template(self):
         expect = """{
     "name": "New Engine",
     "languages": {
@@ -36,7 +36,7 @@ class TestFunction(unittest.TestCase):
     "response": "response"
 }"""
 
-        self.assertEqual(expect, get_engine_template('New Engine'))
+        self.assertEqual(expect, create_engine_template('New Engine'))
 
     def test_load_engine_data(self):
         self.assertEqual(
