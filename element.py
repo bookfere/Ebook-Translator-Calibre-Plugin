@@ -282,6 +282,8 @@ class ElementHandler:
         content = ''
         count = 0
         for eid, element in enumerate(elements):
+            if element.ignored:
+                continue
             self.elements[eid] = element
             placeholder = ' %s ' % element.placeholder[0].format(eid)
             code = element.get_raw()
