@@ -150,12 +150,28 @@ class Extraction:
         self.pages = pages
         self.placeholder = placeholder
         self.glossary = glossary
+
         # TODO: Refactor these attributes.
         self.config = get_config()
         self.element_rules = self.config.get('element_rules', [])
         self.rule_mode = self.config.get('rule_mode')
         self.filter_scope = self.config.get('filter_scope')
         self.filter_rules = self.config.get('filter_rules')[:]
+        self.patterns = self.load_patterns()
+
+    def load_patterns(self):
+        self.filter_rules.append(
+            r'^[-\d\s\.\'\\"‘’“”,=~!@#$%^&º*|<>?/`—…+:_(){}[\]]+$')
+        patterns = []
+        for rule in self.filter_rules:
+            if self.rule_mode == 'normal':
+                rule = re.compile(r'^.*?%s' % rule, re.I)
+            elif self.rule_mode == 'case':
+                rule = re.compile(r'^.*?%s' % rule)
+            else:
+                rule = re.compile(rule)
+            patterns.append(rule)
+        return patterns
 
     def get_sorted_pages(self):
         return sorted(
@@ -209,30 +225,19 @@ class Extraction:
         return elements if elements else [root]
 
     def filter_content(self, element):
-        self.filter_rules.append(
-            r'^[-\d\s\.\'\\"‘’“”,=~!@#$%^&º*|<>?/`—…+:_(){}[\]]+$')
-        patterns = []
-        for rule in self.filter_rules:
-            if self.rule_mode == 'normal':
-                rule = re.compile(r'^.*?%s' % rule, re.I)
-            elif self.rule_mode == 'case':
-                rule = re.compile(r'^.*?%s' % rule)
-            else:
-                rule = re.compile(rule)
-            patterns.append(rule)
         # Ignore the element contains empty content
         content = element.get_text()
         if content == '':
             return False
         for entity in ('&lt;', '&gt;'):
             content = content.replace(entity, '')
-        for pattern in patterns:
+        for pattern in self.patterns:
             if pattern.match(content):
                 element.set_ignored(True)
         # Filter HTML according to the rules
         if self.filter_scope == 'html':
             markup = element.get_raw()
-            for pattern in patterns:
+            for pattern in self.patterns:
                 if pattern.match(markup):
                     element.set_ignored(True)
         return True
