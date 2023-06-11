@@ -146,32 +146,43 @@ class Element:
 class Extraction:
     __version__ = '20230608'
 
-    def __init__(self, pages, placeholder, glossary):
+    def __init__(self, pages, placeholder, glossary, rule_mode, filter_scope,
+                 filter_rules, element_rules):
         self.pages = pages
         self.placeholder = placeholder
         self.glossary = glossary
 
-        # TODO: Refactor these attributes.
-        self.config = get_config()
-        self.element_rules = self.config.get('element_rules', [])
-        self.rule_mode = self.config.get('rule_mode')
-        self.filter_scope = self.config.get('filter_scope')
-        self.filter_rules = self.config.get('filter_rules')[:]
-        self.patterns = self.load_patterns()
+        self.rule_mode = rule_mode
+        self.filter_scope = filter_scope
+        self.filter_rules = filter_rules
+        self.element_rules = element_rules
 
-    def load_patterns(self):
-        self.filter_rules.append(
-            r'^[-\d\s\.\'\\"‘’“”,=~!@#$%^&º*|<>?/`—…+:_(){}[\]]+$')
+        self.filter_patterns = []
+        self.element_patterns = []
+
+        self.load_filter_patterns()
+        self.load_element_patterns()
+
+    def load_filter_patterns(self):
+        rules = [r'^[-\d\s\.\'\\"‘’“”,=~!@#$%^&º*|<>?/`—…+:_(){}[\]]+$']
+        rules.extend(self.filter_rules)
         patterns = []
-        for rule in self.filter_rules:
+        for rule in rules:
             if self.rule_mode == 'normal':
-                rule = re.compile(r'^.*?%s' % rule, re.I)
-            elif self.rule_mode == 'case':
-                rule = re.compile(r'^.*?%s' % rule)
+                rule = re.compile(rule, re.I)
             else:
                 rule = re.compile(rule)
             patterns.append(rule)
-        return patterns
+        self.filter_patterns = patterns
+
+    def load_element_patterns(self):
+        rules = ['pre', 'code']
+        rules.extend(self.element_rules)
+        patterns = []
+        for selector in rules:
+            rule = css(selector)
+            rule and patterns.append(rule)
+        self.element_patterns = patterns
 
     def get_sorted_pages(self):
         return sorted(
@@ -185,16 +196,9 @@ class Extraction:
             elements.extend(self.extract_elements(page.id, body, []))
         return filter(self.filter_content, elements)
 
-    def get_element_rules(self):
-        rules = [css('pre'), css('code')]
-        for selector in self.element_rules:
-            rule = css(selector)
-            rule and rules.append(rule)
-        return rules
-
     def need_ignore(self, element):
-        for rule in self.get_element_rules():
-            if element.xpath(rule, namespaces=ns):
+        for pattern in self.element_patterns:
+            if element.xpath(pattern, namespaces=ns):
                 return True
         return False
 
@@ -231,14 +235,14 @@ class Extraction:
             return False
         for entity in ('&lt;', '&gt;'):
             content = content.replace(entity, '')
-        for pattern in self.patterns:
-            if pattern.match(content):
+        for pattern in self.filter_patterns:
+            if pattern.search(content):
                 element.set_ignored(True)
         # Filter HTML according to the rules
         if self.filter_scope == 'html':
             markup = element.get_raw()
-            for pattern in self.patterns:
-                if pattern.match(markup):
+            for pattern in self.filter_patterns:
+                if pattern.search(markup):
                     element.set_ignored(True)
         return True
 
@@ -351,7 +355,12 @@ def get_ebook_elements(pages, placeholder):
     glossary = Glossary()
     if config.get('glossary_enabled'):
         glossary.load_from_file(config.get('glossary_path'))
-    extraction = Extraction(pages, placeholder, glossary)
+    rule_mode = config.get('rule_mode')
+    filter_scope = config.get('filter_scope')
+    filter_rules = config.get('filter_rules')[:]
+    element_rules = config.get('element_rules', [])
+    extraction = Extraction(pages, placeholder, glossary, rule_mode,
+                            filter_scope, filter_rules, element_rules)
     return extraction.get_elements()
 
 
