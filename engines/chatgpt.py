@@ -1,9 +1,13 @@
 import json
-from http.client import IncompleteRead
 
 from .base import load_lang_codes, Base
 from .languages import google
 
+
+try:
+    from http.client import IncompleteRead
+except ImportError:
+    from httplib import IncompleteRead
 
 load_translations()
 
