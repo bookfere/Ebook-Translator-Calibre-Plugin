@@ -175,7 +175,8 @@ class TestExtraction(unittest.TestCase):
         self.page_3 = Mock(media_type='text/css')
 
         self.extraction = Extraction(
-            [self.page_3, self.page_2, self.page_1], Base.placeholder, {})
+            [self.page_3, self.page_2, self.page_1], Base.placeholder, {},
+            'normal', 'text', [], [])
 
     def test_get_sorted_pages(self):
         self.assertEqual(
@@ -197,13 +198,26 @@ class TestExtraction(unittest.TestCase):
         self.assertEqual('div', get_name(elements[1].get_name()))
         self.assertEqual('def', elements[1].get_content())
 
-    def test_get_element_rules(self):
+    def test_load_filter_patterns(self):
+        self.extraction.load_filter_patterns()
+        self.assertEqual(1, len(self.extraction.filter_patterns))
+
+        self.extraction.filter_rules = ['^a', 'b$']
+        self.extraction.load_filter_patterns()
+        self.assertEqual(3, len(self.extraction.filter_patterns))
+
+    def test_load_element_patterns(self):
+        self.extraction.load_element_patterns()
+        self.assertEqual(2, len(self.extraction.element_patterns))
+
         self.extraction.element_rules = [
             'table', 'table.list', 'invalid:class']
-        self.assertEqual(4, len(self.extraction.get_element_rules()))
+        self.extraction.load_element_patterns()
+        self.assertEqual(4, len(self.extraction.element_patterns))
 
     def test_need_ignore(self):
         self.extraction.element_rules = ['table', 'p.a']
+        self.extraction.load_element_patterns()
 
         self.extraction.rules = []
         items = ['<pre xmlns="http://www.w3.org/1999/xhtml">abc</pre>',
@@ -242,7 +256,7 @@ class TestExtraction(unittest.TestCase):
 </html>""")
         root = xhtml.find('x:body', namespaces=ns)
         self.assertEqual(
-            7, len(self.extraction.extract_elements('test', root, [])))
+            7, len(self.extraction.extract_elements('p1', root, [])))
 
         xhtml = etree.XML(b"""<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html>
@@ -255,11 +269,6 @@ class TestExtraction(unittest.TestCase):
             1, len(self.extraction.extract_elements('test', root, [])))
 
     def test_filter_content(self):
-        self.extraction.element_rules = []
-        self.extraction.rule_mode = 'normal'
-        self.extraction.filter_scope = 'text'
-        self.extraction.filter_rules = []
-
         def elements(markups):
             return [Element(etree.XML(markup), 'test', Base.placeholder, {})
                     for markup in markups]
@@ -273,6 +282,7 @@ class TestExtraction(unittest.TestCase):
                 self.assertFalse(self.extraction.filter_content(element))
 
         self.extraction.filter_rules = ['a', 'b', 'c']
+        self.extraction.load_filter_patterns()
         markups = ['<p>xxxaxxx</p>', '<p>xxxbxxx</p>', '<p>xxxcxxx</p>',
                    '<p>2 &lt;= 2</p>', '<p>”.—…‘’</p>']
         for element in elements(markups):
@@ -296,6 +306,7 @@ class TestExtraction(unittest.TestCase):
                 self.assertTrue(element.ignored)
 
         self.extraction.filter_rules = ['a', 'b', 'c']
+        self.extraction.load_filter_patterns()
         markups = ['<p>xxxAxxx</p>', '<p>xxxBxxx</p>', '<p>xxxCxxx</p>']
         for element in elements(markups):
             with self.subTest(element=element):
@@ -304,7 +315,8 @@ class TestExtraction(unittest.TestCase):
 
         # regex - text
         self.extraction.rule_mode = 'regex'
-        self.extraction.filter_rules = ['^.*?a', 'f.*$', '[^z]']
+        self.extraction.filter_rules = ['a', 'f', 'h']
+        self.extraction.load_filter_patterns()
         markups = ['<p>5.</p>', '<p>5-5.</p>', '<p>5-5_5.</p>',
                    '<p>abc</p>', '<p>def</p>', '<p>ghi</p>']
         for element in elements(markups):
@@ -315,8 +327,8 @@ class TestExtraction(unittest.TestCase):
         # regex - html
         self.extraction.rule_mode = 'regex'
         self.extraction.filter_scope = 'html'
-        self.extraction.filter_rules = [
-            '^<pre>', '^.*</code>$', '^.*?class="c"']
+        self.extraction.filter_rules = ['^<pre>', '</code>$', 'class="c"']
+        self.extraction.load_filter_patterns()
         markups = ['<p>\xa0</p>', '<p>\u3000</p>', '<p>\u200b</p>',
                    '<p></p>', '<p> </p>', '<p><img src="/abc.jpg" /></p>',
                    '<p><span>  </span><span>  </span></p>']
