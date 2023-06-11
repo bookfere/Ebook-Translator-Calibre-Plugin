@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-06-10 23:19+0800\n"
+"POT-Creation-Date: 2023-06-11 16:19+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -68,7 +68,7 @@ msgid "There is no content that needs to be translated."
 msgstr ""
 
 #: advanced.py:342
-msgid "Reading ebook data, please wait..."
+msgid "Loading ebook data, please wait..."
 msgstr ""
 
 #: advanced.py:365
@@ -393,6 +393,14 @@ msgstr ""
 
 #: engines/google.py:64
 msgid "Can not obtain Google API key. Reason: {}"
+msgstr ""
+
+#: engines/microsoft.py:36
+msgid "Failed get APP key due to an invalid Token."
+msgstr ""
+
+#: engines/microsoft.py:40
+msgid "Failed get APP key due to and invalid Base64 URL."
 msgstr ""
 
 #: engines/youdao.py:20

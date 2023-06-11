@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-06-10 23:19+0800\n"
+"POT-Creation-Date: 2023-06-11 16:19+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -55,7 +55,7 @@ msgstr "失败"
 msgid "There is no content that needs to be translated."
 msgstr "没有需要翻译的内容"
 
-msgid "Reading ebook data, please wait..."
+msgid "Loading ebook data, please wait..."
 msgstr "读取电子书数据中，请稍候..."
 
 msgid "Review"
@@ -301,6 +301,12 @@ msgstr "总计 {}，已用 {}，剩余 {}"
 
 msgid "Can not obtain Google API key. Reason: {}"
 msgstr "无法获取 Google API 密钥。原因：{}"
+
+msgid "Failed get APP key due to an invalid Token."
+msgstr "因错误的令牌导致 APP 密钥获取失败。"
+
+msgid "Failed get APP key due to and invalid Base64 URL."
+msgstr "因错误的 Base64 URL 导致 APP 密钥获取失败。"
 
 msgid "Youdao"
 msgstr "有道"
