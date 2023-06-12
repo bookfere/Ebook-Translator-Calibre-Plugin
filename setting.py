@@ -753,7 +753,7 @@ class TranslationSetting(QDialog):
         mode_btn_click.connect(choose_filter_mode)
 
         # Ebook Metadata
-        metadata_group = QGroupBox('Ebook Metadata')
+        metadata_group = QGroupBox(_('Ebook Metadata'))
         metadata_layout = QFormLayout(metadata_group)
         self.set_form_layout_policy(metadata_layout)
         self.metadata_lang = QCheckBox(_('Set "Target Language" to metadata'))

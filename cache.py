@@ -101,7 +101,7 @@ class TranslationCache:
     def set_info(self, key, value):
         self.cursor.execute(
             'INSERT INTO info VALUES (?1, ?2) '
-            'ON CONFLICT (KEY) DO UPDATE SET VALUE=excluded.VALUE',
+            'ON CONFLICT (KEY) DO UPDATE SET value=excluded.value',
             (key, value))
         self.connection.commit()
 

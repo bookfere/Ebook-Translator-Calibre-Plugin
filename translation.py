@@ -70,6 +70,13 @@ class Translation:
             raise IncorrectApiKeyFormat(
                 self.translator.api_key_error_message())
         except Exception as e:
+            """Translation engine service error code documentation:
+            * https://cloud.google.com/apis/design/errors
+            * https://www.deepl.com/docs-api/api-access/error-handling/
+            * https://platform.openai.com/docs/guides/error-codes/api-errors
+            * https://ai.youdao.com/DOCSIRMA/html/trans/api/wbfy/index.html
+            * https://api.fanyi.baidu.com/doc/21
+            """
             if self.is_cancelled():
                 return
             if self.translator.need_change_api_key(str(e).lower()):
@@ -120,16 +127,15 @@ class Translation:
                     time.sleep(0.05)
                     temp += char
                 translation = temp.replace('\n', ' ')
+            paragraph.target_lang = self.translator.get_target_lang()
+            paragraph.translation = translation
+            paragraph.engine_name = self.translator.name
+            self.callback(paragraph)
             self.log(_('Translation: {}').format(translation))
             self.need_sleep = True
         else:
             self.log(_('Translation (Cached): {}').format(translation))
             self.need_sleep = False
-
-        paragraph.translation = translation
-        paragraph.engine_name = self.translator.name
-        paragraph.target_lang = self.translator.get_target_lang()
-        self.callback(paragraph)
 
     def handle(self, paragraphs=[]):
         total = len(paragraphs)
