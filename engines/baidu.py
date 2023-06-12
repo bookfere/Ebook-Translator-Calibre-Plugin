@@ -5,22 +5,20 @@ import hashlib
 
 from .. import _z
 from ..exceptions.engine import IncorrectApiKeyFormat
-from .base import Base, load_lang_codes
+from .base import Base
 from .languages import baidu
 
 
 load_translations()
 
-lang_codes = load_lang_codes(baidu)
-
 
 class BaiduTranslate(Base):
     name = 'Baidu'
     alias = _z('Baidu')
-    lang_codes = lang_codes
+    lang_codes = Base.load_lang_codes(baidu)
     endpoint = 'https://fanyi-api.baidu.com/api/trans/vip/translate'
     api_key_hint = 'appid|appkey'
-    api_key_rule = r'^[^\s:\|]+?[:\|][^\s:\|]+$'
+    api_key_pattern = r'^[^\s:\|]+?[:\|][^\s:\|]+$'
     api_key_errors = ['54004']
 
     def translate(self, text):

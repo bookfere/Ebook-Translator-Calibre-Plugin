@@ -381,7 +381,7 @@ class TranslationSetting(QDialog):
         layout.addWidget(engine_group)
 
         # API Keys
-        self.keys_group = QGroupBox(_('API Key'))
+        self.keys_group = QGroupBox(_('API Keys'))
         keys_layout = QVBoxLayout(self.keys_group)
         self.api_keys = QPlainTextEdit()
         self.api_keys.setFixedHeight(100)
@@ -752,6 +752,23 @@ class TranslationSetting(QDialog):
             mode_btn_group.buttonClicked[int]
         mode_btn_click.connect(choose_filter_mode)
 
+        # Ebook Metadata
+        metadata_group = QGroupBox('Ebook Metadata')
+        metadata_layout = QFormLayout(metadata_group)
+        self.set_form_layout_policy(metadata_layout)
+        self.metadata_lang = QCheckBox(_('Set "Target Language" to metadata'))
+        self.metadata_subject = QPlainTextEdit()
+        self.metadata_subject.setPlaceholderText(
+            _('Subjects of ebook (one subject per line)'))
+        metadata_layout.addRow(_('Language'), self.metadata_lang)
+        metadata_layout.addRow(_('Subject'), self.metadata_subject)
+        layout.addWidget(metadata_group)
+
+        self.metadata_lang.setChecked(
+            self.config.get('ebook_metadata.language', False))
+        self.metadata_subject.setPlainText(
+            '\n'.join(self.config.get('ebook_metadata.subjects', [])))
+
         layout.addStretch(1)
 
         return widget
@@ -807,7 +824,7 @@ class TranslationSetting(QDialog):
         if self.current_engine.need_api_key:
             api_keys = []
             api_key_validator = QRegularExpressionValidator(
-                QRegularExpression(self.current_engine.api_key_rule))
+                QRegularExpression(self.current_engine.api_key_pattern))
             key_str = re.sub('\n+', '\n', self.api_keys.toPlainText()).strip()
             for key in [key.strip() for key in key_str.split('\n')]:
                 if not self.is_valid_data(api_key_validator, key):
@@ -888,6 +905,7 @@ class TranslationSetting(QDialog):
         self.config.delete('filter_rules')
         filter_rules and self.config.update(filter_rules=filter_rules)
 
+        # Element rules
         rule_content = self.element_rules.toPlainText()
         element_rules = [r for r in rule_content.split('\n') if r]
         for rule in element_rules:
@@ -897,6 +915,22 @@ class TranslationSetting(QDialog):
                     .format(rule), 'warning')
         self.config.delete('element_rules')
         element_rules and self.config.update(element_rules=element_rules)
+
+        # Ebook metadata
+        ebook_metadata = self.config.get('ebook_metadata').copy()
+        self.config.delete('ebook_metadata')
+        if self.metadata_lang.isChecked():
+            ebook_metadata.update(language=True)
+        elif 'language' in ebook_metadata:
+            del ebook_metadata['language']
+        subject_content = self.metadata_subject.toPlainText().strip()
+        if subject_content:
+            subjects = [s.strip() for s in subject_content.split('\n')]
+            ebook_metadata.update(subjects=subjects)
+        elif 'subjects' in ebook_metadata:
+            del ebook_metadata['subjects']
+        if ebook_metadata:
+            self.config.update(ebook_metadata=ebook_metadata)
 
         self.config.commit()
         self.alert.pop(_('The setting has been saved.'))

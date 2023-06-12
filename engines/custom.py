@@ -3,7 +3,7 @@ from lxml import etree
 
 from ..utils import is_str
 from . import builtin_engines
-from .base import load_lang_codes, Base
+from .base import Base
 
 
 load_translations()
@@ -95,7 +95,7 @@ class CustomTranslate(Base):
     def set_engine_data(cls, data):
         cls.name = data.get('name')  # rename custom engine
         cls.engine_data = data
-        cls.lang_codes = load_lang_codes(data.get('languages'))
+        cls.lang_codes = cls.load_lang_codes(data.get('languages'))
 
     def translate(self, text):
         request = self.engine_data.get('request')

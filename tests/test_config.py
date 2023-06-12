@@ -34,6 +34,7 @@ class TestFunction(unittest.TestCase):
             'glossary_path': None,
             'merge_enabled': False,
             'merge_length': 2000,
+            'ebook_metadata': {},
         }
 
         self.assertEqual(defaults, self.config.preferences.defaults)

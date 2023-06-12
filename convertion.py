@@ -39,11 +39,12 @@ def convert_book(input_path, output_path, source_lang, target_lang,
     translator.set_source_lang(source_lang)
     translator.set_target_lang(target_lang)
 
-    element_handler = get_element_handler(translator.get_target_lang_code())
+    element_handler = get_element_handler()
+    element_handler.set_translation_lang(
+        translator.get_iso639_target_code(target_lang))
 
-    cache = get_cache(
-        input_path + translator.name + target_lang
-        + str(element_handler.get_merge_length()))
+    cache = get_cache(input_path + translator.name + target_lang
+                      + str(element_handler.get_merge_length()))
     cache.set_cache_only(cache_only)
 
     translation = get_translation(translator)
@@ -60,11 +61,11 @@ def convert_book(input_path, output_path, source_lang, target_lang,
     info += '| Source Language: %s\n' % source_lang
     info += '| Target Language: %s\n' % target_lang
     info += '| Cache Enabled: %s\n' % cache.is_persistence()
-    info += '| Merge Length: %s\n' % element_handler.merge_length
-    info += '| Concurrency: %s\n' % translation.concurrency_limit
-    info += '| Attempt Limit: %s\n' % translation.request_attempt
-    info += '| Max Interval: %s\n' % translation.request_interval
-    info += '| Timeout: %s\n' % translator.timeout
+    info += '| Merging Length: %s\n' % element_handler.merge_length
+    info += '| Concurrent requests: %s\n' % translation.concurrency_limit
+    info += '| Request attempt: %s\n' % translation.request_attempt
+    info += '| Request Interval: %s\n' % translation.request_interval
+    info += '| Request Timeout: %s\n' % translator.timeout
     info += '| Input Path: %s\n' % input_path
     info += '| Output Path: %s' % output_path
 
@@ -91,5 +92,4 @@ def convert_book(input_path, output_path, source_lang, target_lang,
 
     plumber.output_plugin.convert = MethodType(convert, plumber.output_plugin)
     plumber.run()
-
     cache.done()

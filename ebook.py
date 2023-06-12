@@ -1,14 +1,24 @@
 class Ebooks:
     class Ebook:
-        def __init__(self, id, title, files, input_format, output_format,
-                     source_lang, target_lang):
+        def __init__(self, id, title, files, input_format, source_lang):
             self.id = id
             self.title = title
             self.files = files
             self.input_format = input_format
-            self.output_format = output_format
             self.source_lang = source_lang
-            self.target_lang = target_lang
+
+            self.output_format = None
+            self.target_lang = None
+            self.lang_code = None
+
+        def set_title(self, title):
+            self.title = title
+
+        def set_input_format(self, format):
+            self.input_format = format
+
+        def set_output_format(self, format):
+            self.output_format = format
 
         def set_source_lang(self, lang):
             self.source_lang = lang
@@ -16,20 +26,18 @@ class Ebooks:
         def set_target_lang(self, lang):
             self.target_lang = lang
 
+        def set_lang_code(self, code):
+            self.lang_code = code
+
         def get_input_path(self):
             return self.files.get(self.input_format)
-
-        def set_title(self, title):
-            self.title = title
 
     def __init__(self):
         self.ebooks = []
 
-    def add(self, id, title, files, input_format, output_format,
-            source_lang, target_lang):
-        self.ebooks.append(self.Ebook(
-            id, title, files, input_format, output_format, source_lang,
-            target_lang))
+    def add(self, id, title, files, input_format, source_lang):
+        self.ebooks.append(
+            self.Ebook(id, title, files, input_format, source_lang))
 
     def first(self):
         return self.ebooks.pop(0)

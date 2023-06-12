@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-06-11 16:19+0800\n"
+"POT-Creation-Date: 2023-06-12 15:00+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -227,31 +227,13 @@ msgstr ""
 msgid "Retain at least one row."
 msgstr ""
 
-msgid "[{} > {}] Translating \"{}\""
-msgstr "[{} > {}] Traduciendo \"{}\""
-
-msgid "Translation job failed"
-msgstr "Error al traducir"
-
-msgid "completed"
-msgstr "completado"
-
-msgid "Ebook Translation Log"
-msgstr "Registro de traducción de libros electrónicos"
-
-msgid "Translation Completed"
-msgstr "Traducción completada"
-
-msgid "The translation of \"{}\" was completed. Do you want to open the book?"
-msgstr "La traducción de \"{}\" se completó. ¿Quieres abrir el libro?"
-
 msgid "Start to convert ebook format:"
 msgstr "Comienza a convertir el formato de libro electrónico:"
 
 msgid "Baidu"
 msgstr "Baidu"
 
-msgid "API Key"
+msgid "API Keys"
 msgstr "Clave API"
 
 msgid "A correct key format \"{}\" is required."
@@ -496,6 +478,15 @@ msgstr ""
 msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
 msgstr "Excluir párrafo por patrón de expresión regular. Un patrón por línea:"
 
+msgid "Set \"Target Language\" to metadata"
+msgstr ""
+
+msgid "Subjects of ebook (one subject per line)"
+msgstr ""
+
+msgid "Subject"
+msgstr ""
+
 msgid "Proxy host or port is incorrect."
 msgstr "El host o puerto proxy es incorrecto."
 
@@ -585,3 +576,21 @@ msgstr "No se puede borrar el caché mientras se ejecuta el trabajo(s)."
 
 msgid "Are you sure you want clear all caches?"
 msgstr ""
+
+msgid "[{} > {}] Translating \"{}\""
+msgstr "[{} > {}] Traduciendo \"{}\""
+
+msgid "Translation job failed"
+msgstr "Error al traducir"
+
+msgid "completed"
+msgstr "completado"
+
+msgid "Ebook Translation Log"
+msgstr "Registro de traducción de libros electrónicos"
+
+msgid "Translation Completed"
+msgstr "Traducción completada"
+
+msgid "The translation of \"{}\" was completed. Do you want to open the book?"
+msgstr "La traducción de \"{}\" se completó. ¿Quieres abrir el libro?"

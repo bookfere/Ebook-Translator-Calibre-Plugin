@@ -6,22 +6,20 @@ import hashlib
 
 from .. import _z
 from ..exceptions.engine import IncorrectApiKeyFormat
-from .base import load_lang_codes, Base
+from .base import Base
 from .languages import youdao
 
 
 load_translations()
 
-lang_codes = load_lang_codes(youdao)
-
 
 class YoudaoTranslate(Base):
     name = 'Youdao'
     alias = _z('Youdao')
-    lang_codes = lang_codes
+    lang_codes = Base.load_lang_codes(youdao)
     endpoint = 'https://openapi.youdao.com/api'
     api_key_hint = 'appid|appsecret'
-    api_key_rule = r'^[^\s:\|]+?[:\|][^\s:\|]+$'
+    api_key_pattern = r'^[^\s:\|]+?[:\|][^\s:\|]+$'
     api_key_errors = ['401']
 
     def encrypt(self, signStr):

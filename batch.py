@@ -21,12 +21,12 @@ load_translations()
 
 
 class BatchTranslation(QDialog):
-    def __init__(self, parent, ebooks, worker):
+    def __init__(self, parent, worker, ebooks):
         QDialog.__init__(self, parent)
 
         self.gui = parent
-        self.ebooks = ebooks
         self.worker = worker
+        self.ebooks = ebooks
         self.alert = AlertMessage(self)
 
         self.config = get_config()
@@ -70,7 +70,7 @@ class BatchTranslation(QDialog):
             table.setCellWidget(row, 1, input_fmt)
 
             def change_input_format(format, row=row):
-                self.ebooks[row].input_format = format
+                self.ebooks[row].set_input_format(format)
             change_input_format(input_fmt.currentText(), row)
             input_fmt.currentTextChanged.connect(change_input_format)
 
@@ -78,7 +78,7 @@ class BatchTranslation(QDialog):
             table.setCellWidget(row, 2, output_format)
 
             def change_output_format(format, row=row):
-                self.ebooks[row].output_format = format
+                self.ebooks[row].set_output_format(format)
             change_output_format(output_format.currentText(), row)
             output_format.currentTextChanged.connect(change_output_format)
 
@@ -87,7 +87,7 @@ class BatchTranslation(QDialog):
             self.source_langs.append(source_lang)
 
             def change_source_lang(lang, row=row):
-                self.ebooks[row].source_lang = lang
+                self.ebooks[row].set_source_lang(lang)
             change_source_lang(source_lang.currentText(), row)
             source_lang.currentTextChanged.connect(change_source_lang)
 
@@ -101,7 +101,10 @@ class BatchTranslation(QDialog):
             self.target_langs.append(target_lang)
 
             def change_target_lang(lang, row=row):
-                self.ebooks[row].target_lang = lang
+                ebook = self.ebooks[row]
+                ebook.set_target_lang(lang)
+                ebook.set_lang_code(
+                    translation_engine.get_iso639_target_code(lang))
             change_target_lang(target_lang.currentText(), row)
             target_lang.currentTextChanged.connect(change_target_lang)
 

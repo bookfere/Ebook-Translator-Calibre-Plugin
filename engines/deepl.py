@@ -2,19 +2,17 @@ import json
 import time
 import random
 
-from .base import load_lang_codes, Base
+from .base import Base
 from .languages import deepl
 
 
 load_translations()
 
-lang_codes = load_lang_codes(deepl)
-
 
 class DeeplTranslate(Base):
     name = 'DeepL'
     alias = 'DeepL'
-    lang_codes = lang_codes
+    lang_codes = Base.load_lang_codes(deepl)
     endpoint = {
         'translate': 'https://api-free.deepl.com/v2/translate',
         'usage': 'https://api-free.deepl.com/v2/usage',
@@ -66,7 +64,7 @@ class DeeplProTranslate(DeeplTranslate):
 class DeeplFreeTranslate(Base):
     name = 'DeepL(Free)'
     alias = 'DeepL (Free)'
-    lang_codes = lang_codes
+    lang_codes = Base.load_lang_codes(deepl)
     endpoint = 'https://www2.deepl.com/jsonrpc?client=chrome-extension,1.4.0'
     need_api_key = False
     placeholder = DeeplTranslate.placeholder

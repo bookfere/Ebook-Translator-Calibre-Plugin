@@ -3,23 +3,21 @@ import base64
 from datetime import datetime
 
 from .languages import microsoft
-from .base import load_lang_codes, Base
+from .base import Base
 
 
 try:
     from urllib.parse import urlencode
 except ImportError:
-     from urllib import urlencode
+    from urllib import urlencode
 
 load_translations()
-
-lang_codes = load_lang_codes(microsoft)
 
 
 class MicrosoftEdgeTranslate(Base):
     name = 'MicrosoftEdge(Free))'
     alias = 'Microsoft Edge (Free)'
-    lang_codes = lang_codes
+    lang_codes = Base.load_lang_codes(microsoft)
     endpoint = 'https://api-edge.cognitive.microsofttranslator.com/translate'
     need_api_key = False
     access_info = None
