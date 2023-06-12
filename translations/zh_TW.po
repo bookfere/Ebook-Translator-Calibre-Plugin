@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-06-12 15:00+0800\n"
+"POT-Creation-Date: 2023-06-12 17:53+0800\n"
 "PO-Revision-Date: 2023-04-25 15:36+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -473,6 +473,9 @@ msgstr "依關鍵字排除段落 (區分大小寫)。每行一條關鍵字："
 
 msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
 msgstr "依規則運算式模式排除段落。每行一條模式："
+
+msgid "Ebook Metadata"
+msgstr ""
 
 msgid "Set \"Target Language\" to metadata"
 msgstr ""

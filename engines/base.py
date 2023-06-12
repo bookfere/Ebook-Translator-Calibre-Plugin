@@ -130,13 +130,6 @@ class Base:
 
     def get_result(self, url, data=None, headers={}, method='GET',
                    stream=False, silence=False, callback=None):
-        """Translation engine service error code documentation:
-        * https://cloud.google.com/apis/design/errors
-        * https://www.deepl.com/docs-api/api-access/error-handling/
-        * https://platform.openai.com/docs/guides/error-codes/api-errors
-        * https://ai.youdao.com/DOCSIRMA/html/trans/api/wbfy/index.html
-        * https://api.fanyi.baidu.com/doc/21
-        """
         result = None
         self.proxy_uri and self.br.set_proxies(
             {'http': self.proxy_uri, 'https': self.proxy_uri})

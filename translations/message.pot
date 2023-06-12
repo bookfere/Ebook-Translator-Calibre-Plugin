@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-06-12 15:00+0800\n"
+"POT-Creation-Date: 2023-06-12 17:53+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,7 +55,7 @@ msgstr ""
 msgid "Target Language"
 msgstr ""
 
-#: advanced.py:293 translation.py:165
+#: advanced.py:293 translation.py:172
 msgid "Translation completed."
 msgstr ""
 
@@ -167,7 +167,7 @@ msgstr ""
 msgid "The specified glossary file does not exist."
 msgstr ""
 
-#: components/engine.py:62 translation.py:105
+#: components/engine.py:62 translation.py:112
 msgid "Translating..."
 msgstr ""
 
@@ -307,7 +307,7 @@ msgstr ""
 msgid "A correct key format \"{}\" is required."
 msgstr ""
 
-#: engines/base.py:164 engines/chatgpt.py:96 tests/test_engine.py:60
+#: engines/base.py:157 engines/chatgpt.py:96 tests/test_engine.py:60
 msgid "Can not parse returned response. Raw data: {}"
 msgstr ""
 
@@ -623,6 +623,10 @@ msgstr ""
 msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
 msgstr ""
 
+#: setting.py:756
+msgid "Ebook Metadata"
+msgstr ""
+
 #: setting.py:759
 msgid "Set \"Target Language\" to metadata"
 msgstr ""
@@ -663,55 +667,55 @@ msgstr ""
 msgid "{} is not a valid CSS seletor."
 msgstr ""
 
-#: translation.py:77
+#: translation.py:84
 msgid "No available API key."
 msgstr ""
 
-#: translation.py:79
+#: translation.py:86
 msgid "API key was Changed due to previous one unavailable."
 msgstr ""
 
-#: translation.py:81
+#: translation.py:88
 msgid "Failed to retreive data from translate engine API."
 msgstr ""
 
-#: translation.py:88
+#: translation.py:95
 msgid "Will retry in {} seconds."
 msgstr ""
 
-#: translation.py:91
+#: translation.py:98
 msgid "[{}] Retrying {} ... (timeout is {} seconds)."
 msgstr ""
 
-#: translation.py:101
+#: translation.py:108
 msgid "Original: {}"
 msgstr ""
 
-#: translation.py:123
+#: translation.py:130
 msgid "Translation: {}"
 msgstr ""
 
-#: translation.py:126
+#: translation.py:133
 msgid "Translation (Cached): {}"
 msgstr ""
 
-#: translation.py:137
+#: translation.py:144
 msgid "Start to translate ebook content"
 msgstr ""
 
-#: translation.py:139
+#: translation.py:146
 msgid "Total items: {}"
 msgstr ""
 
-#: translation.py:141
+#: translation.py:148
 msgid "There is no content need to translate."
 msgstr ""
 
-#: translation.py:148
+#: translation.py:155
 msgid "Translating: {}/{}"
 msgstr ""
 
-#: translation.py:167
+#: translation.py:174
 msgid "Translation cancelled."
 msgstr ""
 
