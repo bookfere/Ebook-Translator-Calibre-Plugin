@@ -1,6 +1,6 @@
 import json
 
-from .base import load_lang_codes, Base
+from .base import Base
 from .languages import google
 
 
@@ -11,13 +11,11 @@ except ImportError:
 
 load_translations()
 
-lang_codes = load_lang_codes(google)
-
 
 class ChatgptTranslate(Base):
     name = 'ChatGPT'
     alias = 'ChatGPT (OpenAI)'
-    lang_codes = lang_codes
+    lang_codes = Base.load_lang_codes(google)
     endpoint = 'https://api.openai.com/v1/chat/completions'
     # api_key_hint = 'sk-xxx...xxx'
     # https://help.openai.com/en/collections/3808446-api-error-codes-explained

@@ -54,7 +54,7 @@ class PreparationWorker(QObject):
     progress_message = pyqtSignal(str)
     finished = pyqtSignal(str)
 
-    def __init__(self, ebook, engine_class):
+    def __init__(self, engine_class, ebook):
         QObject.__init__(self)
         self.ebook = ebook
         self.engine_class = engine_class
@@ -66,10 +66,9 @@ class PreparationWorker(QObject):
     @pyqtSlot()
     def prepare_ebook_data(self):
         input_path = self.ebook.get_input_path()
-        target_lang = self.ebook.target_lang
-        element_handler = get_element_handler(target_lang)
+        element_handler = get_element_handler()
         cache_id = (
-            input_path + self.engine_class.name + target_lang
+            input_path + self.engine_class.name + self.ebook.target_lang
             + str(element_handler.get_merge_length()))
         cache = get_cache(cache_id)
 
@@ -119,7 +118,7 @@ class TranslationWorker(QObject):
     streaming = pyqtSignal(object)
     callback = pyqtSignal(object)
 
-    def __init__(self, ebook, engine_class):
+    def __init__(self, engine_class, ebook):
         QObject.__init__(self)
         self.source_lang = ebook.source_lang
         self.target_lang = ebook.target_lang
@@ -200,7 +199,7 @@ class CreateTranslationProject(QDialog):
         input_layout.addWidget(input_format)
 
         def change_input_format(format):
-            self.ebook.input_format = format
+            self.ebook.set_input_format(format)
         change_input_format(input_format.currentText())
         input_format.currentTextChanged.connect(change_input_format)
 
@@ -214,8 +213,11 @@ class CreateTranslationProject(QDialog):
         target_lang.refresh.emit(
             engine_class.lang_codes.get('target'),
             engine_class.config.get('target_lang'))
-        self.ebook.set_target_lang(target_lang.currentText())
-        target_lang.currentTextChanged.connect(self.ebook.set_target_lang)
+
+        def change_target_format(format):
+            self.ebook.set_target_lang(format)
+        change_target_format(target_lang.currentText())
+        target_lang.currentTextChanged.connect(change_target_format)
 
         layout.addWidget(input_group)
         layout.addWidget(target_group)
@@ -240,12 +242,12 @@ class AdvancedTranslation(QDialog):
     trans_thread = QThread()
     status_thread = QThread()
 
-    def __init__(self, parent, icon, ebook, worker):
+    def __init__(self, parent, icon, worker, ebook):
         QDialog.__init__(self, parent)
         self.api = parent.current_db.new_api
         self.icon = icon
-        self.ebook = ebook
         self.worker = worker
+        self.ebook = ebook
         self.config = get_config()
         self.alert = AlertMessage(self)
         self.error = JobError(self)
@@ -261,13 +263,13 @@ class AdvancedTranslation(QDialog):
         self.status_thread.finished.connect(self.status_worker.deleteLater)
         self.status_thread.start()
 
-        self.trans_worker = TranslationWorker(self.ebook, self.current_engine)
+        self.trans_worker = TranslationWorker(self.current_engine, self.ebook)
         self.trans_worker.moveToThread(self.trans_thread)
         self.trans_thread.finished.connect(self.trans_worker.deleteLater)
         self.trans_thread.start()
 
         self.preparation_worker = PreparationWorker(
-            self.ebook, self.current_engine)
+            self.current_engine, self.ebook)
         self.preparation_worker.moveToThread(self.preparation_thread)
         self.preparation_thread.finished.connect(
             self.preparation_worker.deleteLater)
@@ -339,7 +341,7 @@ class AdvancedTranslation(QDialog):
         # progress_bar.setMinimum(0)
         self.preparation_worker.progress.connect(progress_bar.setValue)
 
-        label = QLabel(_('Reading ebook data, please wait...'))
+        label = QLabel(_('Loading ebook data, please wait...'))
         label.setAlignment(Qt.AlignCenter)
         self.preparation_worker.progress_message.connect(label.setText)
 
@@ -542,7 +544,7 @@ class AdvancedTranslation(QDialog):
         engine_list.currentIndexChanged.connect(choose_engine)
 
         def change_output_format(format):
-            self.ebook.output_format = format
+            self.ebook.set_output_format(format)
         change_output_format(output_format.currentText())
         output_format.currentTextChanged.connect(change_output_format)
 
@@ -550,6 +552,9 @@ class AdvancedTranslation(QDialog):
             if len(self.table.findItems(_('Translated'), Qt.MatchExactly)) < 1:
                 self.alert.pop('The ebook has not been translated yet.')
                 return
+            lang_code = self.current_engine.get_iso639_target_code(
+                self.ebook.target_lang)
+            self.ebook.set_lang_code(lang_code)
             self.worker.translate_ebook(self.ebook, cache_only=True)
             self.done(1)
         save_ebook.clicked.connect(output_ebook)

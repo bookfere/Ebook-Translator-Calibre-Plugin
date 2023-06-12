@@ -4,7 +4,6 @@ from .lang import SourceLang, TargetLang
 from .format import InputFormat, OutputFormat
 from .alert import AlertMessage
 from .table import AdvancedTranslationTable
-from .worker import TranslationWorker
 from .mode import ModeSelection
 
 

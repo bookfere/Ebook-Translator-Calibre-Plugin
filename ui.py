@@ -9,7 +9,8 @@ from .batch import BatchTranslation
 from .cache import TranslationCache
 from .setting import TranslationSetting
 from .about import AboutDialog
-from .components import AlertMessage, ModeSelection, TranslationWorker
+from .worker import ConvertionWorker
+from .components import AlertMessage, ModeSelection
 from .advanced import CreateTranslationProject, AdvancedTranslation
 
 
@@ -75,9 +76,9 @@ class EbookTranslatorGui(InterfaceAction):
             name = 'advanced_' + uid(ebook.get_input_path())
             if self.show_window(name):
                 return
-            worker = TranslationWorker(self.gui, self.icon)
+            worker = ConvertionWorker(self.gui, self.icon)
             window = AdvancedTranslation(
-                self.gui, self.qaction.icon(), ebook, worker)
+                self.gui, self.qaction.icon(), worker, ebook)
             window.setMinimumWidth(1200)
             window.setMinimumHeight(700)
             window.setWindowTitle(
@@ -98,8 +99,8 @@ class EbookTranslatorGui(InterfaceAction):
         if len(ebooks) < 1:
             return self.alert.pop(
                 _('Please choose at least one book.'), 'warning')
-        worker = TranslationWorker(self.gui, self.icon)
-        window = BatchTranslation(self.gui, ebooks, worker)
+        worker = ConvertionWorker(self.gui, self.icon)
+        window = BatchTranslation(self.gui, worker, ebooks)
         # window.setModal(True)
         window.setMinimumWidth(600)
         window.setMinimumHeight(520)
@@ -202,8 +203,6 @@ class EbookTranslatorGui(InterfaceAction):
                         fmts),  # Format 2
                 )),
                 fmt.lower(),  # Input format
-                None,  # Output format
                 book_metadata.language,  # Source language
-                None,  # Target Language
             )
         return ebooks

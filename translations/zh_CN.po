@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-06-11 16:19+0800\n"
+"POT-Creation-Date: 2023-06-12 15:00+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -224,31 +224,13 @@ msgstr "选择相似段落：{}=\"{}\""
 msgid "Retain at least one row."
 msgstr "至少保留一行。"
 
-msgid "[{} > {}] Translating \"{}\""
-msgstr "[{} > {}] 翻译 \"{}\""
-
-msgid "Translation job failed"
-msgstr "翻译失败"
-
-msgid "completed"
-msgstr "已结束"
-
-msgid "Ebook Translation Log"
-msgstr "电子书翻译日志"
-
-msgid "Translation Completed"
-msgstr "翻译已完成"
-
-msgid "The translation of \"{}\" was completed. Do you want to open the book?"
-msgstr "\"{}\"的翻译已完成。是否想要立即阅读这本电子书？"
-
 msgid "Start to convert ebook format:"
 msgstr "开始转换电子书格式："
 
 msgid "Baidu"
 msgstr "百度"
 
-msgid "API Key"
+msgid "API Keys"
 msgstr "API密钥"
 
 msgid "A correct key format \"{}\" is required."
@@ -491,6 +473,15 @@ msgstr "排除带指定关键词的段落（区分字母大小写）。一行一
 msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
 msgstr "排除匹配正则表达式规则的段落。一行一条规则："
 
+msgid "Set \"Target Language\" to metadata"
+msgstr "将目标语言设为原数据中的语言"
+
+msgid "Subjects of ebook (one subject per line)"
+msgstr "电子书主题（每行一个主题）"
+
+msgid "Subject"
+msgstr "主题"
+
 msgid "Proxy host or port is incorrect."
 msgstr "代理的主机或端口填写有误。"
 
@@ -580,3 +571,21 @@ msgstr "有运行中的任务，无法清理缓存。"
 
 msgid "Are you sure you want clear all caches?"
 msgstr "你确定要清除所有缓存吗？"
+
+msgid "[{} > {}] Translating \"{}\""
+msgstr "[{} > {}] 翻译 \"{}\""
+
+msgid "Translation job failed"
+msgstr "翻译失败"
+
+msgid "completed"
+msgstr "已结束"
+
+msgid "Ebook Translation Log"
+msgstr "电子书翻译日志"
+
+msgid "Translation Completed"
+msgstr "翻译已完成"
+
+msgid "The translation of \"{}\" was completed. Do you want to open the book?"
+msgstr "\"{}\"的翻译已完成。是否想要立即阅读这本电子书？"

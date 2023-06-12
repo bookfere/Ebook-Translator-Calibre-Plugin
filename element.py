@@ -364,7 +364,7 @@ def get_ebook_elements(pages, placeholder):
     return extraction.get_elements()
 
 
-def get_element_handler(lang_code):
+def get_element_handler():
     config = get_config()
     handler = ElementHandler()
     if config.get('merge_enabled'):
@@ -372,6 +372,5 @@ def get_element_handler(lang_code):
     handler.set_translation_position(
         config.get('translation_position'))
     handler.set_translation_color(config.get('translation_color'))
-    handler.set_translation_lang(lang_code)
 
     return handler

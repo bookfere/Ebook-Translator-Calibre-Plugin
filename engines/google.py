@@ -6,19 +6,17 @@ import os.path
 from subprocess import Popen, PIPE
 
 from ..exceptions.engine import IncorrectApiKeyFormat
-from .base import load_lang_codes, Base
+from .base import Base
 from .languages import google
 
 
 load_translations()
 
-lang_codes = load_lang_codes(google)
-
 
 class GoogleFreeTranslate(Base):
     name = 'Google(Free)'
     alias = 'Google (Free)'
-    lang_codes = lang_codes
+    lang_codes = Base.load_lang_codes(google)
     endpoint = 'https://translate.googleapis.com/translate_a/single'
     need_api_key = False
 
@@ -74,7 +72,7 @@ class GoogleTranslate:
 class GoogleBasicTranslate(Base, GoogleTranslate):
     name = 'Google(Basic)'
     alias = 'Google (Basic)'
-    lang_codes = lang_codes
+    lang_codes = Base.load_lang_codes(google)
     endpoint = 'https://translation.googleapis.com/language/translate/v2'
     api_key_hint = 'API key or KEY_PATH'
     api_key_cache = []
@@ -113,10 +111,10 @@ class GoogleBasicTranslate(Base, GoogleTranslate):
 class GoogleAdvancedTranslate(Base, GoogleTranslate):
     name = 'Google(Advanced)'
     alias = 'Google (Advanced)'
-    lang_codes = lang_codes
+    lang_codes = Base.load_lang_codes(google)
     endpoint = 'https://translation.googleapis.com/v3/projects/{}'
     api_key_hint = 'PROJECT_NUMBER_OR_ID|KEY_PATH'
-    api_key_rule = r'^[^\s\|]+?\|.+$'
+    api_key_pattern = r'^[^\s\|]+?\|.+$'
     api_key_errors = ['429']
     api_key_cache = []
 

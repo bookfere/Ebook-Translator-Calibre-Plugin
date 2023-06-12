@@ -10,21 +10,15 @@ from ..utils import is_test
 load_translations()
 
 
-def load_lang_codes(codes):
-    if not ('source' in codes or 'target' in codes):
-        codes = {'source': codes, 'target': codes}
-    return codes
-
-
 class Base:
     name = None
     alias = None
-    config = {}
     lang_codes = {}
+    config = {}
     endpoint = None
     need_api_key = True
-    api_key_hint = _('API Key')
-    api_key_rule = r'^[^\s]+$'
+    api_key_hint = _('API Keys')
+    api_key_pattern = r'^[^\s]+$'
     api_key_errors = ['401']
     placeholder = ('{{{{id_{}}}}}', r'({{\s*)+id\s*_\s*{}\s*(\s*}})+')
 
@@ -35,15 +29,33 @@ class Base:
 
         self.br = Browser()
         self.br.set_handle_robots(False)
-        self.timeout = 30.0
+        self.timeout = 10.0
 
         self.merge_enabled = False
-        self.source_codes = self.lang_codes.get('source')
-        self.target_codes = self.lang_codes.get('target')
 
         self.api_keys = self.config.get('api_keys', [])[:]
         self.bad_api_keys = []
-        self.api_key = self.get_api_key()
+        self.api_key = self._get_api_key()
+
+    @classmethod
+    def load_lang_codes(cls, codes):
+        if not ('source' in codes or 'target' in codes):
+            codes = {'source': codes, 'target': codes}
+        return codes
+
+    @classmethod
+    def get_source_code(cls, lang):
+        source_codes = cls.lang_codes.get('source')
+        return 'auto' if lang == _('Auto detect') else source_codes.get(lang)
+
+    @classmethod
+    def get_target_code(cls, lang):
+        target_codes = cls.lang_codes.get('target')
+        return target_codes.get(lang)
+
+    @classmethod
+    def get_iso639_target_code(cls, lang):
+        return lang_as_iso639_1(cls.get_target_code(lang))
 
     @classmethod
     def set_config(cls, config):
@@ -62,16 +74,11 @@ class Base:
     def is_custom(cls):
         return cls.__name__ == 'CustomTranslate'
 
-    def get_api_key(self):
-        if self.need_api_key and self.api_keys:
-            return self.api_keys.pop(0)
-        return None
-
     def change_api_key(self):
         """Change the API key if the previous one cannot be used."""
         if self.api_key not in self.bad_api_keys:
             self.bad_api_keys.append(self.api_key)
-            self.api_key = self.get_api_key()
+            self.api_key = self._get_api_key()
             if self.api_key is not None:
                 return True
         return False
@@ -95,6 +102,9 @@ class Base:
     def set_target_lang(self, target_lang):
         self.target_lang = target_lang
 
+    def get_target_lang(self):
+        return self.target_lang
+
     def set_proxy(self, proxy=[]):
         if isinstance(proxy, list) and len(proxy) == 2:
             self.proxy_uri = '%s:%s' % tuple(proxy)
@@ -104,21 +114,19 @@ class Base:
     def set_timeout(self, timeout):
         self.timeout = timeout
 
-    def get_target_lang(self):
-        return self.target_lang
-
-    def get_target_lang_code(self):
-        return lang_as_iso639_1(self._get_target_code())
-
     def _get_source_code(self):
-        return 'auto' if self.source_lang == _('Auto detect') else \
-           self.source_codes.get(self.source_lang)
+        return self.get_source_code(self.source_lang)
 
     def _get_target_code(self):
-        return self.target_codes.get(self.target_lang)
+        return self.get_target_code(self.target_lang)
 
     def _is_auto_lang(self):
         return self._get_source_code() == 'auto'
+
+    def _get_api_key(self):
+        if self.need_api_key and self.api_keys:
+            return self.api_keys.pop(0)
+        return None
 
     def get_result(self, url, data=None, headers={}, method='GET',
                    stream=False, silence=False, callback=None):
