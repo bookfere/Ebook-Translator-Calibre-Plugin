@@ -114,7 +114,7 @@ class EngineTester(QDialog):
         layout.addWidget(target, 1, 0, 1, 3)
 
         source_lang = SourceLang()
-        source_lang.set_codes(self.translator.source_codes,
+        source_lang.set_codes(self.translator.lang_codes.get('source'),
                               not self.translator.is_custom())
         layout.addWidget(source_lang, 2, 0)
 
@@ -124,7 +124,7 @@ class EngineTester(QDialog):
         source_lang.currentTextChanged.connect(change_source_lang)
 
         target_lang = TargetLang()
-        target_lang.set_codes(self.translator.target_codes,
+        target_lang.set_codes(self.translator.lang_codes.get('target'),
                               self.parent.target_lang.currentText())
         layout.addWidget(target_lang, 2, 1)
 
