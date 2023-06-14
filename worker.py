@@ -43,13 +43,12 @@ class ConvertionWorker:
         self.working_jobs[job] = (ebook, output_path)
 
     def translate_done(self, job):
+        ebook, output_path = self.working_jobs.pop(job)
+
         if job.failed:
-            self.working_jobs.clear()
             DEBUG or self.gui.job_exception(
                 job, dialog_title=_('Translation job failed'))
             return
-
-        ebook, output_path = self.working_jobs.pop(job)
 
         if self.config.get('to_library'):
             with open(output_path, 'rb') as file:
