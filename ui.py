@@ -63,7 +63,7 @@ class EbookTranslatorGui(InterfaceAction):
         if not getattr(self.gui, 'bookfere_ebook_translator', None):
             self.gui.bookfere_ebook_translator = self.Status()
 
-        EbookTranslator.version >= (2, 0, 0) and upgrade_config()
+        upgrade_config()
 
     def show_advanced_translation(self):
         ebooks = self.get_selected_ebooks()
