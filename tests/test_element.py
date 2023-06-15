@@ -1,11 +1,12 @@
 import unittest
-from unittest.mock import patch, Mock, DEFAULT
+from unittest.mock import patch, Mock
 
 from lxml import etree
 from ..utils import ns
 from ..cache import Paragraph
 from ..element import (
     get_string, get_name, Glossary, Element, Extraction, ElementHandler)
+from ..engines import DeeplFreeTranslate
 from ..engines.base import Base
 
 
@@ -69,7 +70,7 @@ class TestElement(unittest.TestCase):
             <span><img src="w2.jpg"/> d</span>
             <span>e <img src="w2.jpg"/></span> f
             <span>g <img src="w2.jpg"/> h</span>
-            <img src="w3.jpg"/> i
+            <img alt="{\D}" src="w3.jpg"/> i
             <img src="w3.jpg"/>
             <code>App\Http</code> k
         </p>
@@ -77,7 +78,7 @@ class TestElement(unittest.TestCase):
 </html>""")
         self.paragraph = self.xhtml.find('.//x:p', namespaces=ns)
         self.element = Element(
-            self.paragraph, 'test', Base.placeholder, {'a': 'a', 'b': 'Z'})
+            self.paragraph, 'test', Base.placeholder, {'a': 'a', 'b': '\Z'})
 
     def test_get_name(self):
         self.assertEqual('p', self.element.get_name())
@@ -93,7 +94,7 @@ class TestElement(unittest.TestCase):
             '<p class="abc"> <img src="icon.jpg"/> a <img src="w1.jpg"/> '
             '<ruby>b<rt>B</rt></ruby> c <span><img src="w2.jpg"/> d</span> '
             '<span>e <img src="w2.jpg"/></span> f <span>g <img src="w2.jpg"/> '
-            'h</span> <img src="w3.jpg"/> i <img src="w3.jpg"/> '
+            r'h</span> <img alt="{\D}" src="w3.jpg"/> i <img src="w3.jpg"/> '
             r'<code>App\Http</code> k </p>')
         self.assertEqual(text, self.element.get_raw())
 
@@ -106,6 +107,11 @@ class TestElement(unittest.TestCase):
                    '{{id_00002}} d e {{id_00003}} f g {{id_00004}} h '
                    '{{id_00005}} i {{id_00006}} {{id_00007}} k')
         self.assertEqual(content, self.element.get_content())
+        self.assertEqual(8, len(self.element.reserve_elements))
+
+        for element in self.element.reserve_elements:
+            with self.subTest(element=element):
+                self.assertIsNone(element.tail)
 
     def test_get_attributes(self):
         self.assertEqual('{"class": "abc"}', self.element.get_attributes())
@@ -118,13 +124,30 @@ class TestElement(unittest.TestCase):
         new = self.element.add_translation(translation)
         translation = ('<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
                        '<img src="icon.jpg"/> a <img src="w1.jpg"/> '
-                       'Z C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
-                       'F G <img src="w2.jpg"/> H <img src="w3.jpg"/> I '
+                       '\Z C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
+                       'F G <img src="w2.jpg"/> H '
+                       r'<img alt="{\D}" src="w3.jpg"/> I '
                        r'<img src="w3.jpg"/> <code>App\Http</code> K</p>')
         self.assertEqual(translation, get_string(new))
         self.assertIsNone(new.get('lang'))
         self.assertIsNone(new.get('style'))
         self.assertEqual('abc', new.get('class'))
+
+    def test_add_translation_with_markup(self):
+        self.element.placeholder = DeeplFreeTranslate.placeholder
+        self.element.get_content()
+        translation = ('<m id=00000 /> <m id=00008 /> <m id=00001 /> '
+                       '<m id=00009 /> C <m id=00002 /> D E <m id=00003 /> '
+                       'F G <m id=00004 /> H <m id=00005 /> I <m id=00006 /> '
+                       '<m id=00007 /> K')
+        new = self.element.add_translation(translation)
+        translation = ('<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
+                       '<img src="icon.jpg"/> a <img src="w1.jpg"/> '
+                       '\Z C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
+                       'F G <img src="w2.jpg"/> H '
+                       r'<img alt="{\D}" src="w3.jpg"/> I '
+                       r'<img src="w3.jpg"/> <code>App\Http</code> K</p>')
+        self.assertEqual(translation, get_string(new))
 
     def test_add_translation_next(self):
         new = self.element.add_translation('test', position='next')
