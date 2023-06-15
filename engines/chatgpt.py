@@ -24,8 +24,9 @@ class ChatgptTranslate(Base):
     prompt = (
         'You are a meticulous translator who translates any given content. '
         'Translate the content from <slang> to <tlang>.')
-    models = ['gpt-3.5-turbo', 'gpt-3.5-turbo-0301', 'gpt-4', 'gpt-4-0314',
-              'gpt-4-32k', 'gpt-4-32k-0314']
+    models = ['gpt-3.5-turbo', 'gpt-3.5-turbo-0613', 'gpt-3.5-turbo-16k',
+              'gpt-4', 'gpt-4-0613', 'gpt-4-32k', 'gpt-4-32k-0613',
+              'gpt-3.5-turbo-16k-0613']
     model = 'gpt-3.5-turbo'
     samplings = ['temperature', 'top_p']
     sampling = 'temperature'
@@ -113,6 +114,8 @@ class AzureChatgptTranslate(ChatgptTranslate):
     endpoint = ('https://{your-resource-name}.openai.azure.com/openai/'
                 'deployments/{deployment-id}/chat/completions'
                 '?api-version={api-version}')
+    models = ['gpt-35-turbo', 'gpt-4', 'gpt-4-32k']
+    model = 'gpt-35-turbo'
 
     def get_headers(self):
         return {

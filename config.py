@@ -1,6 +1,7 @@
 from calibre.utils.config import JSONConfig
 
-from .engines import ChatgptTranslate
+from . import EbookTranslator
+from .engines import ChatgptTranslate, AzureChatgptTranslate
 
 
 defaults = {
@@ -86,8 +87,14 @@ def get_config():
 
 
 def upgrade_config():
-    """Upgrade to 1.4.0"""
     config = get_config()
+    version = EbookTranslator.version
+    version >= (2, 0, 0) and ver200_upgrade(config)
+    version >= (2, 0, 3) and ver203_upgrade(config)
+
+
+def ver200_upgrade(config):
+    """Upgrade to 2.0.0"""
     if config.get('engine_preferences'):
         return
 
@@ -124,3 +131,13 @@ def upgrade_config():
     if len(engine_preferences) > 0:
         config.update(engine_preferences=engine_preferences)
         config.commit()
+
+def ver203_upgrade(config):
+    """Upgrade to 2.0.3"""
+    engine_config = config.get('engine_preferences')
+    azure_chatgpt = engine_config.get('ChatGPT(Azure)')
+    if azure_chatgpt and 'model' in azure_chatgpt:
+        model = azure_chatgpt.get('model')
+        if model not in AzureChatgptTranslate.models:
+            del azure_chatgpt['model']
+            config.commit()
