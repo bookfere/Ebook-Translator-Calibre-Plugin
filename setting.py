@@ -846,6 +846,8 @@ class TranslationSetting(QDialog):
             if prompt != self.current_engine.prompt:
                 config.update(prompt=prompt)
             endpoint = self.chatgpt_endpoint.text()
+            if 'endpoint' in config:
+                del config['endpoint']
             if endpoint and endpoint != self.current_engine.endpoint:
                 config.update(endpoint=endpoint)
 
