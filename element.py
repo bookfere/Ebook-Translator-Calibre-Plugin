@@ -12,9 +12,9 @@ from .config import get_config
 
 def get_string(element, remove_ns=False):
     element.text = element.text or ''  # prevent auto-closing empty elements
-    string = trim(etree.tostring(
+    markup = trim(etree.tostring(
         element, encoding='utf-8', with_tail=False).decode('utf-8'))
-    return string if not remove_ns else re.sub(r'\sxmlns(.*?"){2}', '', string)
+    return re.sub(r'\sxmlns([^"]+"){2}', '', markup) if remove_ns else markup
 
 
 def get_name(element):
@@ -83,6 +83,7 @@ class Element:
             else:
                 parent.text = (parent.text or '') + placeholder
                 parent.text += (reserve.tail or '')
+            reserve.tail = None
             parent.remove(reserve)
             count += 1
 
@@ -107,21 +108,18 @@ class Element:
         translation = xml_escape(translation)
         count = 0
         for reserve in self.reserve_elements:
-            # Escape the potential regex metacharacters in text.
-            for item in reserve.getiterator():
-                if item.text is not None:
-                    item.text = re.escape(item.text)
-                if item.tail is not None:
-                    item.tail = re.escape(item.tail)
             # Escape the markups (<m id=1 />) to replace escaped markups.
             pattern = self.placeholder[1].format(format(count, '05'))
+            # Prevent potential invalid escapes from affecting the replacement.
             translation = re.sub(
-                xml_escape(pattern), get_string(reserve), translation)
+                xml_escape(pattern), lambda _: get_string(reserve),
+                translation)
             count += 1
 
         for word in self.glossary.values():
             pattern = self.placeholder[1].format(format(count, '05'))
-            translation = re.sub(xml_escape(pattern), word, translation)
+            translation = re.sub(
+                xml_escape(pattern), lambda _: word, translation)
             count += 1
 
         new_element = etree.XML('<{0} xmlns="{1}">{2}</{0}>'.format(
