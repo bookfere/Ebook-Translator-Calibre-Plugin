@@ -1,3 +1,6 @@
+import re
+
+
 class Ebooks:
     class Ebook:
         def __init__(self, id, title, files, input_format, source_lang):
@@ -12,7 +15,7 @@ class Ebooks:
             self.lang_code = None
 
         def set_title(self, title):
-            self.title = title
+            self.title = re.sub(r'^\.+|[\/\\\\<>:"|?*\n\t]', '', title)
 
         def set_input_format(self, format):
             self.input_format = format
