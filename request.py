@@ -1,4 +1,3 @@
-import random
 import asyncio
 
 from .utils import chunk
@@ -23,10 +22,11 @@ class AsyncRequest:
             self.process_translation(paragraph)
             if self.translation.need_sleep and count < total:
                 await asyncio.sleep(
-                    random.randint(0, self.translation.request_interval))
+                    self.translation.translator.request_interval)
 
     async def create_tasks(self):
-        groups = chunk(self.paragraphs, self.translation.concurrency_limit)
+        groups = chunk(
+            self.paragraphs, self.translation.translator.concurrency_limit)
         for group in groups:
             worker = self.create_worker(group)
             task = asyncio.create_task(worker)

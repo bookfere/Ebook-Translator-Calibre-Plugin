@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-06-12 17:53+0800\n"
+"POT-Creation-Date: 2023-06-19 00:43+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -347,21 +347,6 @@ msgstr "Puerto"
 msgid "Test"
 msgstr "Probar"
 
-msgid "HTTP Request"
-msgstr ""
-
-msgid "Concurrency limit (Default 1)"
-msgstr "límite de concurrencia"
-
-msgid "Attempt times (Default 3)"
-msgstr "Tiempos de intento (predeterminado 3)"
-
-msgid "Max interval (Default 5s)"
-msgstr "Intervalo máximo (predeterminado 5s)"
-
-msgid "Timeout (Default 10s)"
-msgstr ""
-
 msgid "Cache"
 msgstr "Cache"
 
@@ -388,6 +373,21 @@ msgstr ""
 
 msgid "Preferred Language"
 msgstr "Idioma preferido"
+
+msgid "HTTP Request"
+msgstr ""
+
+msgid "Concurrency limit"
+msgstr ""
+
+msgid "Interval (seconds)"
+msgstr ""
+
+msgid "Attempt times"
+msgstr ""
+
+msgid "Timeout (seconds)"
+msgstr ""
 
 msgid "Tune ChatGPT"
 msgstr ""

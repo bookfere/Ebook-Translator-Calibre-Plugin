@@ -1,7 +1,8 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import Mock
 
-from ..config import Configuration, get_config, upgrade_config
+from ..config import (
+    Configuration, get_config, ver200_upgrade, ver203_upgrade)
 
 
 class TestFunction(unittest.TestCase):
@@ -17,10 +18,6 @@ class TestFunction(unittest.TestCase):
             'engine_preferences': {},
             'proxy_enabled': False,
             'proxy_setting': [],
-            'concurrency_limit': 1,
-            'request_attempt': 3,
-            'request_interval': 5,
-            'request_timeout': 10,
             'cache_enabled': True,
             'log_translation': True,
             'translation_position': 'after',
@@ -39,8 +36,7 @@ class TestFunction(unittest.TestCase):
 
         self.assertEqual(defaults, self.config.preferences.defaults)
 
-    @patch('calibre_plugins.ebook_translator.config.get_config')
-    def test_upgrade(self, mock_get_config):
+    def test_ver200_upgrade(self):
         data = {
             'other_config': 'anything',
             'chatgpt_prompt': {
@@ -57,15 +53,12 @@ class TestFunction(unittest.TestCase):
             },
         }
 
-        config = MagicMock()
+        config = Mock()
         config.get.side_effect = lambda key: data.get(key)
         config.delete.side_effect = lambda key: data.pop(key)
         config.update.side_effect = lambda **kwargs: data.update(**kwargs)
 
-        mock_get_config.return_value = config
-
-        upgrade_config()
-
+        ver200_upgrade(config)
         self.assertEqual(data, {
             'other_config': 'anything',
             'engine_preferences': {
@@ -81,11 +74,38 @@ class TestFunction(unittest.TestCase):
             },
         })
 
-        # data = {'chatgpt_prompt': {}}
-        # config.upgrade()
-        # self.assertEqual(data, {})
+        data = {'chatgpt_prompt': {}}
+
+        ver200_upgrade(config)
+        self.assertEqual(data, {})
 
         config.commit.assert_called()
+
+    def test_ver203_upgrade(self):
+        data = {
+            'engine_preferences': {
+                'ChatGPT(Azure)': {
+                    'model': 'xxx'
+                }
+            },
+            'concurrency_limit': 1,
+            'request_attempt': 1,
+            'request_interval': 1,
+            'request_timeout': 1,
+        }
+
+        self.assertIn('model', data['engine_preferences']['ChatGPT(Azure)'])
+
+        config = Mock()
+        config.get.side_effect = lambda key: data.get(key)
+        config.delete.side_effect = lambda key: data.pop(key)
+
+        ver203_upgrade(config)
+        self.assertNotIn('model', data['engine_preferences']['ChatGPT(Azure)'])
+        self.assertNotIn('concurrency_limit', data)
+        self.assertNotIn('request_attempt', data)
+        self.assertNotIn('request_interval', data)
+        self.assertNotIn('request_timeout', data)
 
 
 class TestConfig(unittest.TestCase):
@@ -154,6 +174,6 @@ class TestConfig(unittest.TestCase):
         self.assertEqual({'b': 2}, self.config.preferences)
 
     def test_commit(self):
-        self.config.preferences = MagicMock()
+        self.config.preferences = Mock()
         self.config.commit()
         self.config.preferences.commit.assert_called_once()

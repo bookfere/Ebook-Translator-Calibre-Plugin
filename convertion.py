@@ -47,8 +47,7 @@ def convert_book(input_path, output_path, source_lang, target_lang,
                       + str(element_handler.get_merge_length()))
     cache.set_cache_only(cache_only)
 
-    translation = get_translation(translator)
-    translation.set_logging(log.info)
+    translation = get_translation(translator, log.info )
     translation.set_callback(
         lambda paragraph: cache.update_paragraph(paragraph))
 
@@ -62,10 +61,10 @@ def convert_book(input_path, output_path, source_lang, target_lang,
     info += '| Target Language: %s\n' % target_lang
     info += '| Cache Enabled: %s\n' % cache.is_persistence()
     info += '| Merging Length: %s\n' % element_handler.merge_length
-    info += '| Concurrent requests: %s\n' % translation.concurrency_limit
-    info += '| Request attempt: %s\n' % translation.request_attempt
-    info += '| Request Interval: %s\n' % translation.request_interval
-    info += '| Request Timeout: %s\n' % translator.timeout
+    info += '| Concurrent requests: %s\n' % translator.concurrency_limit
+    info += '| Request Interval: %s\n' % translator.request_interval
+    info += '| Request attempt: %s\n' % translator.request_attempt
+    info += '| Request Timeout: %s\n' % translator.request_timeout
     info += '| Input Path: %s\n' % input_path
     info += '| Output Path: %s' % output_path
 

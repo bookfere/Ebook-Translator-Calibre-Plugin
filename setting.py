@@ -53,13 +53,13 @@ class TranslationSetting(QDialog):
         layout = QVBoxLayout(self)
 
         self.tabs = QTabWidget()
-        tab_1 = self.tabs.addTab(self.layout_setting(), _('General'))
+        tab_1 = self.tabs.addTab(self.layout_general(), _('General'))
         tab_2 = self.tabs.addTab(self.layout_engine(), _('Engine'))
         tab_3 = self.tabs.addTab(self.layout_content(), _('Content'))
         self.tabs.setStyleSheet('QTabBar::tab {min-width:120px;}')
 
         config_actions = {
-            tab_1: self.update_setting_config,
+            tab_1: self.update_general_config,
             tab_2: self.update_engine_config,
             tab_3: self.update_content_config,
         }
@@ -98,7 +98,7 @@ class TranslationSetting(QDialog):
         return scroll_widget
 
     @layout_scroll_area
-    def layout_setting(self):
+    def layout_general(self):
         widget = QWidget()
         layout = QVBoxLayout(widget)
 
@@ -255,49 +255,6 @@ class TranslationSetting(QDialog):
         proxy_group.setLayout(proxy_layout)
         layout.addWidget(proxy_group)
 
-        # Network Request
-        request_group = QGroupBox(_('HTTP Request'))
-        concurrency_limit = QSpinBox()
-        concurrency_limit.setRange(0, 9999)
-        if sys.version_info < (3, 7, 0):
-            concurrency_limit.setValue(1)
-            concurrency_limit.setDisabled(True)
-        request_attempt = QSpinBox()
-        request_attempt.setRange(0, 9999)
-        request_interval = QSpinBox()
-        request_interval.setRange(0, 9999)
-        request_timeout = QSpinBox()
-        request_timeout.setRange(0, 9999)
-        request_layout = QFormLayout(request_group)
-        request_layout.addRow(
-            _('Concurrency limit (Default 1)'), concurrency_limit)
-        request_layout.addRow(_('Attempt times (Default 3)'), request_attempt)
-        request_layout.addRow(
-            _('Max interval (Default 5s)'), request_interval)
-        request_layout.addRow(_('Timeout (Default 10s)'), request_timeout)
-        layout.addWidget(request_group, 1)
-
-        self.set_form_layout_policy(request_layout)
-
-        concurrency_limit.setValue(self.config.get('concurrency_limit'))
-        concurrency_limit.valueChanged.connect(
-            lambda value: self.config.update(
-                concurrency_limit=round(value, 1)))
-        request_attempt.setValue(self.config.get('request_attempt'))
-        request_attempt.valueChanged.connect(
-            lambda value: self.config.update(request_attempt=round(value, 1)))
-        request_interval.setValue(self.config.get('request_interval'))
-        request_interval.valueChanged.connect(
-            lambda value: self.config.update(request_interval=round(value, 1)))
-        request_timeout.setValue(self.config.get('request_timeout'))
-        request_timeout.valueChanged.connect(
-            lambda value: self.config.update(request_timeout=round(value, 1)))
-
-        self.disable_wheel_event(concurrency_limit)
-        self.disable_wheel_event(request_attempt)
-        self.disable_wheel_event(request_interval)
-        self.disable_wheel_event(request_timeout)
-
         # Miscellaneous
         misc_widget = QWidget()
         misc_layout = QHBoxLayout()
@@ -406,6 +363,47 @@ class TranslationSetting(QDialog):
 
         self.set_form_layout_policy(language_layout)
 
+        # Network Request
+        request_group = QGroupBox(_('HTTP Request'))
+        concurrency_limit = QSpinBox()
+        concurrency_limit.setRange(0, 9999)
+        if sys.version_info < (3, 7, 0):
+            concurrency_limit.setValue(1)
+            concurrency_limit.setDisabled(True)
+        request_interval = QDoubleSpinBox()
+        request_interval.setRange(0, 9999)
+        request_interval.setDecimals(1)
+        request_attempt = QSpinBox()
+        request_attempt.setRange(0, 9999)
+        request_timeout = QDoubleSpinBox()
+        request_timeout.setRange(0, 9999)
+        request_timeout.setDecimals(1)
+        request_layout = QFormLayout(request_group)
+        request_layout.addRow(_('Concurrency limit'), concurrency_limit)
+        request_layout.addRow(_('Interval (seconds)'), request_interval)
+        request_layout.addRow(_('Attempt times'), request_attempt)
+        request_layout.addRow(_('Timeout (seconds)'), request_timeout)
+        layout.addWidget(request_group, 1)
+
+        concurrency_limit.valueChanged.connect(
+            lambda value: self.current_engine.config.update(
+            concurrency_limit=round(value, 1)))
+        request_attempt.valueChanged.connect(
+            lambda value: self.current_engine.config.update(
+            request_attempt=round(value, 1)))
+        request_interval.valueChanged.connect(
+            lambda value: self.current_engine.config.update(
+            request_interval=round(value, 1)))
+        request_timeout.valueChanged.connect(
+            lambda value: self.current_engine.config.update(
+            request_timeout=round(value, 1)))
+
+        self.set_form_layout_policy(request_layout)
+        self.disable_wheel_event(concurrency_limit)
+        self.disable_wheel_event(request_attempt)
+        self.disable_wheel_event(request_interval)
+        self.disable_wheel_event(request_timeout)
+
         # ChatGPT Setting
         chatgpt_group = QGroupBox(_('Tune ChatGPT'))
         chatgpt_group.setVisible(False)
@@ -421,6 +419,9 @@ class TranslationSetting(QDialog):
 
         chatgpt_model = QComboBox()
         endpoint_layout.addRow(_('Model'), chatgpt_model)
+
+        chatgpt_model.currentTextChanged.connect(
+            lambda model: self.current_engine.config.update(model=model))
 
         self.disable_wheel_event(chatgpt_model)
 
@@ -451,6 +452,21 @@ class TranslationSetting(QDialog):
         stream_enabled = QCheckBox(_('Enable streaming text like in ChatGPT'))
         endpoint_layout.addRow(_('Stream'), stream_enabled)
 
+        temperature_value.valueChanged.connect(
+            lambda value: self.current_engine.config.update(
+            temperature=round(value, 1)))
+
+        sampling_btn_group = QButtonGroup(sampling_widget)
+        sampling_btn_group.addButton(temperature, 0)
+        sampling_btn_group.addButton(top_p, 1)
+
+        def change_sampling_method(button):
+            self.current_engine.config.update(sampling=button.text())
+        sampling_btn_group.buttonClicked.connect(change_sampling_method)
+
+        top_p_value.valueChanged.connect(
+            lambda value: self.current_engine.config.update(top_p=value))
+
         layout.addWidget(chatgpt_group)
 
         def show_chatgpt_preferences():
@@ -472,29 +488,15 @@ class TranslationSetting(QDialog):
             chatgpt_model.addItems(self.current_engine.models)
             chatgpt_model.setCurrentText(
                 config.get('model', self.current_engine.model))
-            chatgpt_model.currentTextChanged.connect(
-                lambda model: config.update(model=model))
             # Sampling
-            sampling_btn_group = QButtonGroup(sampling_widget)
-            sampling_btn_group.addButton(temperature, 0)
-            sampling_btn_group.addButton(top_p, 1)
-
             sampling = config.get('sampling', self.current_engine.sampling)
             btn_id = self.current_engine.samplings.index(sampling)
             sampling_btn_group.button(btn_id).setChecked(True)
 
-            def change_sampling_method(button):
-                config.update(sampling=button.text())
-            sampling_btn_group.buttonClicked.connect(change_sampling_method)
-
             temperature_value.setValue(
                 config.get('temperature', self.current_engine.temperature))
-            temperature_value.valueChanged.connect(
-                lambda value: config.update(temperature=round(value, 1)))
             top_p_value.setValue(
                 config.get('top_p', self.current_engine.top_p))
-            top_p_value.valueChanged.connect(
-                lambda value: config.update(top_p=value))
             # Stream
             stream_enabled.setChecked(
                 config.get('stream', self.current_engine.stream))
@@ -516,7 +518,21 @@ class TranslationSetting(QDialog):
             self.target_lang.refresh.emit(
                 self.current_engine.lang_codes.get('target'), target_lang)
             self.set_api_keys()  # show api key setting
-            show_chatgpt_preferences()  # show prompt setting
+            # Request setting
+            concurrency_limit.setValue(
+                self.current_engine.config.get(
+                'concurrency_limit', self.current_engine.concurrency_limit))
+            request_attempt.setValue(
+                self.current_engine.config.get(
+                'request_attempt', self.current_engine.request_attempt))
+            request_interval.setValue(
+                self.current_engine.config.get(
+                'request_interval', self.current_engine.request_interval))
+            request_timeout.setValue(
+                self.current_engine.config.get(
+                'request_timeout', self.current_engine.request_timeout))
+            # show prompt setting
+            show_chatgpt_preferences()
         choose_default_engine(engine_list.findData(self.current_engine.name))
         engine_list.currentIndexChanged.connect(choose_default_engine)
 
@@ -789,7 +805,7 @@ class TranslationSetting(QDialog):
             return state == 2  # Compatible with PyQt5
         return state.value == 2
 
-    def update_setting_config(self):
+    def update_general_config(self):
         # Output path
         if not self.config.get('to_library'):
             output_path = self.output_path_entry.text()
