@@ -75,8 +75,8 @@ class GoogleBasicTranslate(Base, GoogleTranslate):
     lang_codes = Base.load_lang_codes(google)
     endpoint = 'https://translation.googleapis.com/language/translate/v2'
     api_key_hint = 'API key or KEY_PATH'
-    api_key_cache = []
     api_key_errors = ['429']
+    api_key_cache = []
 
     def translate(self, text):
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}

@@ -19,9 +19,6 @@ class Translation:
     def __init__(self, translator):
         self.translator = translator
 
-        self.concurrency_limit = 1
-        self.request_attempt = 3
-        self.request_interval = 5
         self.need_sleep = False
         self.cancelled = False
 
@@ -31,15 +28,6 @@ class Translation:
         self.streaming = dummy
         self.callback = dummy
         self.cancel_request = dummy
-
-    def set_concurrency_limit(self, limit):
-        self.concurrency_limit = limit
-
-    def set_request_attempt(self, limit):
-        self.request_attempt = limit
-
-    def set_request_interval(self, max):
-        self.request_interval = max
 
     def set_fresh(self, fresh):
         self.fresh = fresh
@@ -86,7 +74,7 @@ class Translation:
                     _('API key was Changed due to previous one unavailable.'))
                 return self._translate_text(text, count, interval)
             message = _('Failed to retreive data from translate engine API.')
-            if count >= self.request_attempt:
+            if count >= self.translator.request_attempt:
                 self.log(message)
                 raise Exception('{} {}'.format(message, str(e)))
             count += 1
@@ -166,7 +154,7 @@ class Translation:
                     return
                 process_translation(paragraph)
                 if self.need_sleep and progress.get('count') < total:
-                    time.sleep(random.randint(0, self.request_interval))
+                    time.sleep(self.translator.request_interval)
 
         message = _('Translation completed.')
         if self.cancelled:
@@ -191,7 +179,7 @@ def get_engine_class(engine_name=None):
     else:
         engine_class = GoogleFreeTranslate
     engine_config = config.get('engine_preferences.%s' % engine_class.name)
-    engine_config and engine_class.set_config(engine_config)
+    engine_class.set_config(engine_config or {})
     return engine_class
 
 
@@ -202,16 +190,19 @@ def get_translator(engine_class=None):
     if config.get('proxy_enabled'):
         translator.set_proxy(config.get('proxy_setting'))
     translator.set_merge_enabled(config.get('merge_enabled'))
-    translator.set_timeout(config.get('request_timeout'))
+    concurrency_limit = config.get('concurrency_limit')
+    concurrency_limit and translator.set_concurrency_limit(concurrency_limit)
+    request_attempt = config.get('request_attempt')
+    request_attempt and translator.set_request_attempt(request_attempt)
+    request_interval = config.get('request_interval')
+    request_interval and translator.set_request_interval(request_interval)
+    request_timeout = config.get('request_timeout')
+    request_timeout and translator.set_request_timeout(request_timeout)
     return translator
 
 
 def get_translation(translator, log=None):
     config = get_config()
     translation = Translation(translator)
-    if config.get('log_translation'):
-        translation.set_logging(log)
-    translation.set_concurrency_limit(config.get('concurrency_limit'))
-    translation.set_request_attempt(config.get('request_attempt'))
-    translation.set_request_interval(config.get('request_interval'))
+    config.get('log_translation') and translation.set_logging(log)
     return translation

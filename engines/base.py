@@ -22,6 +22,11 @@ class Base:
     api_key_errors = ['401']
     placeholder = ('{{{{id_{}}}}}', r'({{\s*)+id\s*_\s*{}\s*(\s*}})+')
 
+    concurrency_limit = 0
+    request_interval = 0
+    request_attempt = 3
+    request_timeout = 10.0
+
     def __init__(self):
         self.source_lang = None
         self.target_lang = None
@@ -29,7 +34,6 @@ class Base:
 
         self.br = Browser()
         self.br.set_handle_robots(False)
-        self.timeout = 10.0
 
         self.merge_enabled = False
 
@@ -111,8 +115,17 @@ class Base:
             if not self.proxy_uri.startswith('http'):
                 self.proxy_uri = 'http://%s' % self.proxy_uri
 
-    def set_timeout(self, timeout):
-        self.timeout = timeout
+    def set_concurrency_limit(self, limit):
+        self.concurrency_limit = limit
+
+    def set_request_attempt(self, limit):
+        self.request_attempt = limit
+
+    def set_request_interval(self, seconds):
+        self.request_interval = seconds
+
+    def set_request_timeout(self, seconds):
+        self.request_timeout = seconds
 
     def _get_source_code(self):
         return self.get_source_code(self.source_lang)
@@ -136,10 +149,11 @@ class Base:
         # Compatible with mechanize 0.3.0 on Calibre 3.21.
         try:
             request = Request(
-                url, data, headers=headers, timeout=self.timeout,
+                url, data, headers=headers, timeout=self.request_timeout,
                 method=method)
         except Exception:
-            request = Request(url, data, headers=headers, timeout=self.timeout)
+            request = Request(
+                url, data, headers=headers, timeout=self.request_timeout)
         try:
             self.br.open(request)
             response = self.br.response()

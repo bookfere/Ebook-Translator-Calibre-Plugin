@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-06-12 17:53+0800\n"
+"POT-Creation-Date: 2023-06-19 00:43+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -344,21 +344,6 @@ msgstr "端口"
 msgid "Test"
 msgstr "测试"
 
-msgid "HTTP Request"
-msgstr "HTTP 请求"
-
-msgid "Concurrency limit (Default 1)"
-msgstr "并发限制（默认1）"
-
-msgid "Attempt times (Default 3)"
-msgstr "重试次数（默认3次）"
-
-msgid "Max interval (Default 5s)"
-msgstr "最大间隔（默认5秒）"
-
-msgid "Timeout (Default 10s)"
-msgstr "超时（默认 10 秒）"
-
 msgid "Cache"
 msgstr "缓存"
 
@@ -385,6 +370,21 @@ msgstr "API 密钥将会自动切换如果上一个不可用。"
 
 msgid "Preferred Language"
 msgstr "偏好语言"
+
+msgid "HTTP Request"
+msgstr "HTTP 请求"
+
+msgid "Concurrency limit"
+msgstr "并发限制"
+
+msgid "Interval (seconds)"
+msgstr "时间间隔（秒）"
+
+msgid "Attempt times"
+msgstr "重试次数"
+
+msgid "Timeout (seconds)"
+msgstr "超时（秒）"
 
 msgid "Tune ChatGPT"
 msgstr "调节 ChatGPT"

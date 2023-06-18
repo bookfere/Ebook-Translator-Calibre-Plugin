@@ -12,10 +12,6 @@ defaults = {
     'engine_preferences': {},
     'proxy_enabled': False,
     'proxy_setting': [],
-    'concurrency_limit': 1,
-    'request_attempt': 3,
-    'request_interval': 5,
-    'request_timeout': 10,
     'cache_enabled': True,
     'log_translation': True,
     'translation_position': 'after',
@@ -141,3 +137,7 @@ def ver203_upgrade(config):
         if model not in AzureChatgptTranslate.models:
             del azure_chatgpt['model']
             config.commit()
+    config.delete('concurrency_limit')
+    config.delete('request_attempt')
+    config.delete('request_interval')
+    config.delete('request_timeout')
