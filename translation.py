@@ -1,7 +1,6 @@
 import sys
 import time
 import json
-import random
 from types import GeneratorType
 
 from .utils import sep, dummy
@@ -85,7 +84,7 @@ class Translation:
             self.log(
                 _('[{}] Retrying {} ... (timeout is {} seconds).')
                 .format(time.strftime('%Y-%m-%d %H:%I:%S'), count,
-                        int(self.translator.timeout)))
+                        int(self.translator.request_timeout)))
             return self._translate_text(text, count, interval)
 
     def _prepare_translation(self, paragraph):
@@ -190,14 +189,6 @@ def get_translator(engine_class=None):
     if config.get('proxy_enabled'):
         translator.set_proxy(config.get('proxy_setting'))
     translator.set_merge_enabled(config.get('merge_enabled'))
-    concurrency_limit = config.get('concurrency_limit')
-    concurrency_limit and translator.set_concurrency_limit(concurrency_limit)
-    request_attempt = config.get('request_attempt')
-    request_attempt and translator.set_request_attempt(request_attempt)
-    request_interval = config.get('request_interval')
-    request_interval and translator.set_request_interval(request_interval)
-    request_timeout = config.get('request_timeout')
-    request_timeout and translator.set_request_timeout(request_timeout)
     return translator
 
 

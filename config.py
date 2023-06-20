@@ -1,7 +1,8 @@
 from calibre.utils.config import JSONConfig
 
 from . import EbookTranslator
-from .engines import ChatgptTranslate, AzureChatgptTranslate
+from .engines import (
+    GoogleFreeTranslate, ChatgptTranslate, AzureChatgptTranslate)
 
 
 defaults = {
@@ -24,7 +25,7 @@ defaults = {
     'glossary_enabled': False,
     'glossary_path': None,
     'merge_enabled': False,
-    'merge_length': 2000,
+    'merge_length': 1800,
     'ebook_metadata': {},
 }
 
@@ -128,6 +129,7 @@ def ver200_upgrade(config):
         config.update(engine_preferences=engine_preferences)
         config.commit()
 
+
 def ver203_upgrade(config):
     """Upgrade to 2.0.3"""
     engine_config = config.get('engine_preferences')
@@ -136,8 +138,28 @@ def ver203_upgrade(config):
         model = azure_chatgpt.get('model')
         if model not in AzureChatgptTranslate.models:
             del azure_chatgpt['model']
-            config.commit()
+
+    if len(engine_config) < 1:
+        engine_config.update({GoogleFreeTranslate.name: {}})
+
+    old_concurrency_limit = config.get('concurrency_limit')
+    old_request_attempt = config.get('request_attempt')
+    old_request_interval = config.get('request_interval')
+    old_request_timeout = config.get('request_timeout')
+
+    for data in engine_config.values():
+        if old_concurrency_limit is not None and old_concurrency_limit != 1:
+            data.update(concurrency_limit=old_concurrency_limit)
+        if old_request_attempt is not None and old_request_attempt != 3:
+            data.update(request_attempt=old_request_attempt)
+        if old_request_interval is not None and old_request_interval != 5:
+            data.update(request_interval=old_request_interval)
+        if old_request_timeout is not None and old_request_timeout != 10:
+            data.update(request_timeout=old_request_timeout)
+
     config.delete('concurrency_limit')
     config.delete('request_attempt')
     config.delete('request_interval')
     config.delete('request_timeout')
+
+    config.commit()

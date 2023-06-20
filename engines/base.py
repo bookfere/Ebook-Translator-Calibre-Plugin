@@ -23,7 +23,7 @@ class Base:
     placeholder = ('{{{{id_{}}}}}', r'({{\s*)+id\s*_\s*{}\s*(\s*}})+')
 
     concurrency_limit = 0
-    request_interval = 0
+    request_interval = 0.0
     request_attempt = 3
     request_timeout = 10.0
 
@@ -40,6 +40,15 @@ class Base:
         self.api_keys = self.config.get('api_keys', [])[:]
         self.bad_api_keys = []
         self.api_key = self._get_api_key()
+
+        self.concurrency_limit = self.config.get(
+            'concurrency_limit', self.concurrency_limit)
+        self.request_interval = self.config.get(
+            'request_interval', self.request_interval)
+        self.request_attempt = self.config.get(
+            'request_attempt', self.request_attempt)
+        self.request_timeout = self.config.get(
+            'request_timeout', self.request_timeout)
 
     @classmethod
     def load_lang_codes(cls, codes):

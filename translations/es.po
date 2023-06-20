@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-06-19 00:43+0800\n"
+"POT-Creation-Date: 2023-06-20 16:37+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -65,7 +65,7 @@ msgid "Review"
 msgstr ""
 
 msgid "Log"
-msgstr "Registro"
+msgstr ""
 
 msgid "Translate All"
 msgstr ""
@@ -359,6 +359,9 @@ msgstr "Total: {}"
 msgid "No cache exists."
 msgstr ""
 
+msgid "Job Log"
+msgstr ""
+
 msgid "Show translation"
 msgstr "Mostrar traducción"
 
@@ -434,15 +437,6 @@ msgstr "Glosario de traducción"
 msgid "Choose a glossary file"
 msgstr "Elija un archivo de glosario"
 
-msgid "Ignore Element"
-msgstr ""
-
-msgid "CSS selectors to exclude elements. One rule per line:"
-msgstr ""
-
-msgid "e.g."
-msgstr ""
-
 msgid "Ignore Paragraph"
 msgstr "Ignorar párrafo"
 
@@ -477,6 +471,15 @@ msgstr ""
 
 msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
 msgstr "Excluir párrafo por patrón de expresión regular. Un patrón por línea:"
+
+msgid "Ignore Element"
+msgstr ""
+
+msgid "CSS selectors to exclude elements. One rule per line:"
+msgstr ""
+
+msgid "e.g."
+msgstr ""
 
 msgid "Ebook Metadata"
 msgstr ""
