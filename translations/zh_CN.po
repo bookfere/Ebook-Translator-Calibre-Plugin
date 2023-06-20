@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-06-19 00:43+0800\n"
+"POT-Creation-Date: 2023-06-20 16:37+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -62,7 +62,7 @@ msgid "Review"
 msgstr "校对"
 
 msgid "Log"
-msgstr "日志"
+msgstr ""
 
 msgid "Translate All"
 msgstr "翻译全部"
@@ -356,6 +356,9 @@ msgstr "总计：{}"
 msgid "No cache exists."
 msgstr "缓存不存在。"
 
+msgid "Job Log"
+msgstr "任务日志"
+
 msgid "Show translation"
 msgstr "显示译文"
 
@@ -431,15 +434,6 @@ msgstr "翻译词汇表"
 msgid "Choose a glossary file"
 msgstr "选择一个词汇表文件"
 
-msgid "Ignore Element"
-msgstr "忽略元素"
-
-msgid "CSS selectors to exclude elements. One rule per line:"
-msgstr "用来排除元素的 CSS 选择器。一行一条规则："
-
-msgid "e.g."
-msgstr "如"
-
 msgid "Ignore Paragraph"
 msgstr "忽略段落"
 
@@ -472,6 +466,15 @@ msgstr "排除带指定关键词的段落（区分字母大小写）。一行一
 
 msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
 msgstr "排除匹配正则表达式规则的段落。一行一条规则："
+
+msgid "Ignore Element"
+msgstr "忽略元素"
+
+msgid "CSS selectors to exclude elements. One rule per line:"
+msgstr "用来排除元素的 CSS 选择器。一行一条规则："
+
+msgid "e.g."
+msgstr "如"
 
 msgid "Ebook Metadata"
 msgstr "电子书元数据"

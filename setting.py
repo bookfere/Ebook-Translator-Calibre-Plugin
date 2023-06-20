@@ -303,7 +303,7 @@ class TranslationSetting(QDialog):
         cache_reveal.clicked.connect(reveal_cache_files)
 
         # Log
-        log_group = QGroupBox(_('Log'))
+        log_group = QGroupBox(_('Job Log'))
         log_translation = QCheckBox(_('Show translation'))
         log_layout = QVBoxLayout(log_group)
         log_layout.addWidget(log_translation)
@@ -387,16 +387,16 @@ class TranslationSetting(QDialog):
 
         concurrency_limit.valueChanged.connect(
             lambda value: self.current_engine.config.update(
-            concurrency_limit=round(value, 1)))
+                concurrency_limit=round(value, 1)))
         request_attempt.valueChanged.connect(
             lambda value: self.current_engine.config.update(
-            request_attempt=round(value, 1)))
+                request_attempt=round(value, 1)))
         request_interval.valueChanged.connect(
             lambda value: self.current_engine.config.update(
-            request_interval=round(value, 1)))
+                request_interval=round(value, 1)))
         request_timeout.valueChanged.connect(
             lambda value: self.current_engine.config.update(
-            request_timeout=round(value, 1)))
+                request_timeout=round(value, 1)))
 
         self.set_form_layout_policy(request_layout)
         self.disable_wheel_event(concurrency_limit)
@@ -454,7 +454,7 @@ class TranslationSetting(QDialog):
 
         temperature_value.valueChanged.connect(
             lambda value: self.current_engine.config.update(
-            temperature=round(value, 1)))
+                temperature=round(value, 1)))
 
         sampling_btn_group = QButtonGroup(sampling_widget)
         sampling_btn_group.addButton(temperature, 0)
@@ -519,17 +519,13 @@ class TranslationSetting(QDialog):
                 self.current_engine.lang_codes.get('target'), target_lang)
             self.set_api_keys()  # show api key setting
             # Request setting
-            concurrency_limit.setValue(
-                self.current_engine.config.get(
+            concurrency_limit.setValue(self.current_engine.config.get(
                 'concurrency_limit', self.current_engine.concurrency_limit))
-            request_attempt.setValue(
-                self.current_engine.config.get(
+            request_attempt.setValue(self.current_engine.config.get(
                 'request_attempt', self.current_engine.request_attempt))
-            request_interval.setValue(
-                self.current_engine.config.get(
+            request_interval.setValue(self.current_engine.config.get(
                 'request_interval', self.current_engine.request_interval))
-            request_timeout.setValue(
-                self.current_engine.config.get(
+            request_timeout.setValue(self.current_engine.config.get(
                 'request_timeout', self.current_engine.request_timeout))
             # show prompt setting
             show_chatgpt_preferences()
@@ -541,6 +537,7 @@ class TranslationSetting(QDialog):
             engine_list.currentIndexChanged.disconnect(choose_default_engine)
             engine_list.refresh()
             index = engine_list.findData(self.config.get('translate_engine'))
+            index = 0 if index == -1 else index
             choose_default_engine(index)
             engine_list.setCurrentIndex(index)
             engine_list.currentIndexChanged.connect(choose_default_engine)
@@ -672,21 +669,6 @@ class TranslationSetting(QDialog):
             self.glossary_path.setText(path[0])
         glossary_choose.clicked.connect(choose_glossary_file)
 
-        # Filter element
-        element_group = QGroupBox(_('Ignore Element'))
-        element_layout = QVBoxLayout(element_group)
-        self.element_rules = QPlainTextEdit()
-        self.element_rules.setMinimumHeight(100)
-        self.element_rules.insertPlainText(
-            '\n'.join(self.config.get('element_rules')))
-
-        element_layout.addWidget(QLabel(
-            _('CSS selectors to exclude elements. One rule per line:')))
-        element_layout.addWidget(self.element_rules)
-        element_layout.addWidget(QLabel('%s %s' % (
-            _('e.g.'), 'table, table#report, table.list')))
-        layout.addWidget(element_group)
-
         # Filter Content
         filter_group = QGroupBox(_('Ignore Paragraph'))
         filter_layout = QVBoxLayout(filter_group)
@@ -767,6 +749,21 @@ class TranslationSetting(QDialog):
         mode_btn_click = getattr(mode_btn_group, 'idClicked', None) or \
             mode_btn_group.buttonClicked[int]
         mode_btn_click.connect(choose_filter_mode)
+
+        # Filter element
+        element_group = QGroupBox(_('Ignore Element'))
+        element_layout = QVBoxLayout(element_group)
+        self.element_rules = QPlainTextEdit()
+        self.element_rules.setMinimumHeight(100)
+        self.element_rules.insertPlainText(
+            '\n'.join(self.config.get('element_rules')))
+
+        element_layout.addWidget(QLabel(
+            _('CSS selectors to exclude elements. One rule per line:')))
+        element_layout.addWidget(self.element_rules)
+        element_layout.addWidget(QLabel('%s %s' % (
+            _('e.g.'), 'table, table#report, table.list')))
+        layout.addWidget(element_group)
 
         # Ebook Metadata
         metadata_group = QGroupBox(_('Ebook Metadata'))

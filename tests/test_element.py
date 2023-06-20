@@ -78,7 +78,7 @@ class TestElement(unittest.TestCase):
 </html>""")
         self.paragraph = self.xhtml.find('.//x:p', namespaces=ns)
         self.element = Element(
-            self.paragraph, 'test', Base.placeholder, {'a': 'a', 'b': '\Z'})
+            self.paragraph, 'test', Base.placeholder, {'a': 'a', 'b': r'\Z'})
 
     def test_get_name(self):
         self.assertEqual('p', self.element.get_name())
@@ -124,7 +124,7 @@ class TestElement(unittest.TestCase):
         new = self.element.add_translation(translation)
         translation = ('<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
                        '<img src="icon.jpg"/> a <img src="w1.jpg"/> '
-                       '\Z C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
+                       r'\Z C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
                        'F G <img src="w2.jpg"/> H '
                        r'<img alt="{\D}" src="w3.jpg"/> I '
                        r'<img src="w3.jpg"/> <code>App\Http</code> K</p>')
@@ -143,7 +143,7 @@ class TestElement(unittest.TestCase):
         new = self.element.add_translation(translation)
         translation = ('<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
                        '<img src="icon.jpg"/> a <img src="w1.jpg"/> '
-                       '\Z C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
+                       r'\Z C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
                        'F G <img src="w2.jpg"/> H '
                        r'<img alt="{\D}" src="w3.jpg"/> I '
                        r'<img src="w3.jpg"/> <code>App\Http</code> K</p>')

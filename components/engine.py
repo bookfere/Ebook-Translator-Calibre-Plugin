@@ -217,8 +217,7 @@ class ManageCustomEngine(QDialog):
         def refresh_list():
             custom_list.clear()
             engines = sorted(self.custom_engines.keys(), key=sorted_mixed_keys)
-            for engine in engines:
-                custom_list.addItem(engine)
+            custom_list.addItems(engines)
         refresh_list()
         index = custom_list.findText(self.default_name)
         custom_list.setCurrentIndex(index if index != -1 else 0)
@@ -273,8 +272,8 @@ class ManageCustomEngine(QDialog):
                 refresh_list()
                 custom_list.setCurrentText(new_name)
             # Update the custom engine
-            self.config.update(custom_engines=self.custom_engines)
-            self.config.update(engine_preferences=self.engine_config)
+            self.config.update(custom_engines=self.custom_engines.copy())
+            self.config.update(engine_preferences=self.engine_config.copy())
             self.config.update(translate_engine=self.default_name)
             self.config.commit()
             self.alert.pop(_('The setting has been saved.'))
@@ -296,7 +295,6 @@ class ManageCustomEngine(QDialog):
             custom_clear.setDisabled(disabled)
             custom_restore.setDisabled(disabled)
             custom_verify.setDisabled(disabled)
-            custom_save.setDisabled(disabled)
         disable_save_button()
 
         custom_list.currentTextChanged.connect(disable_save_button)

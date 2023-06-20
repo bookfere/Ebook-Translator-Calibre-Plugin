@@ -21,6 +21,9 @@ class ChatgptTranslate(Base):
     # https://help.openai.com/en/collections/3808446-api-error-codes-explained
     api_key_errors = ['401', 'unauthorized', 'quota']
 
+    concurrency_limit = 1
+    request_interval = 20
+
     prompt = (
         'You are a meticulous translator who translates any given content. '
         'Translate the content from <slang> to <tlang>.')

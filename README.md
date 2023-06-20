@@ -13,7 +13,7 @@ __English__ · [简体中文](https://github.com/bookfere/Ebook-Translator-Calib
 * Support both "Advanced Mode" and "Batch Mode" for different usage situations.
 * Support languages supported by the selected translation engine (e.g. Google Translate supports 134 languages)
 * Support multiple translation engines, including Google Translate, ChatGPT, and DeepL
-* Support for custom translation engines (you can configure to parse response in JSON or XML format)
+* Support custom translation engines (you can configure to parse response in JSON or XML format)
 * Support all ebook formats supported by Calibre (48 input formats, 20 output formats)
 * Support to translate more than one ebooks. The translation process of each book is carried out simultaneously without affecting one another
 * Support caching translated content, with no need to re-translate after request failure or network interruption

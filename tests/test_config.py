@@ -88,24 +88,31 @@ class TestFunction(unittest.TestCase):
                     'model': 'xxx'
                 }
             },
-            'concurrency_limit': 1,
-            'request_attempt': 1,
+            'concurrency_limit': 2,
+            'request_attempt': 0,
             'request_interval': 1,
-            'request_timeout': 1,
+            'request_timeout': None,
         }
 
         self.assertIn('model', data['engine_preferences']['ChatGPT(Azure)'])
 
         config = Mock()
         config.get.side_effect = lambda key: data.get(key)
-        config.delete.side_effect = lambda key: data.pop(key)
+        config.delete.side_effect = lambda key: key in data and data.pop(key)
 
         ver203_upgrade(config)
-        self.assertNotIn('model', data['engine_preferences']['ChatGPT(Azure)'])
+        engine = data['engine_preferences']['ChatGPT(Azure)']
+        self.assertNotIn('model', engine)
+        self.assertEqual(2, engine['concurrency_limit'])
+        self.assertEqual(0, engine['request_attempt'])
+        self.assertEqual(1, engine['request_interval'])
+        self.assertNotIn('request_timeout', engine)
         self.assertNotIn('concurrency_limit', data)
         self.assertNotIn('request_attempt', data)
         self.assertNotIn('request_interval', data)
         self.assertNotIn('request_timeout', data)
+
+        config.commit.assert_called()
 
 
 class TestConfig(unittest.TestCase):
