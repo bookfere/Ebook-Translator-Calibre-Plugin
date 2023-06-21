@@ -28,7 +28,7 @@ class Glossary(dict):
                 content = f.read().strip()
             if not content:
                 return
-            for group in content.split(os.linesep * 2):
+            for group in content.split('\n' * 2):
                 group = group.strip().split(os.linesep)
                 if len(group) > 2:
                     continue

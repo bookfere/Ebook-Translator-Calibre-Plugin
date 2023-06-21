@@ -130,6 +130,8 @@ class Translation:
         self.log(_('Start to translate ebook content'))
         self.log(sep)
         self.log(_('Total items: {}').format(total))
+        count = sum([len(paragraph.original) for paragraph in paragraphs])
+        self.log(_('Character count: {}'.format(count)))
         if total < 1:
             raise Exception(_('There is no content need to translate.'))
 
