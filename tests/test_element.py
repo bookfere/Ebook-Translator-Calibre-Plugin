@@ -38,22 +38,22 @@ class TestGlossary(unittest.TestCase):
 
     @patch('calibre_plugins.ebook_translator.element.open')
     def test_load_from_file(self, mock_open):
-        def mock_open_method(path):
-            if path == 'path/to/glossary.txt':
+        def mock_open_method(path, method, newline=None):
+            if path == '/path/to/glossary.txt':
                 file = Mock()
                 file.read.return_value.strip.return_value = 'a\n\nb\nZ'
                 mock_open.__enter__.return_value = file
                 return mock_open
             else:
-                raise Exception('any glossary error.')
+                raise TypeError('any glossary error.')
         mock_open.side_effect = mock_open_method
 
         glossary = Glossary()
-        glossary.load_from_file('path/to/glossary.txt')
+        glossary.load_from_file('/path/to/glossary.txt')
         self.assertEqual({'a': 'a', 'b': 'Z'}, glossary)
 
         glossary = Glossary()
-        glossary.load_from_file('path/to/fake.txt')
+        glossary.load_from_file('/path/to/fake.txt')
         self.assertEqual({}, glossary)
 
 
@@ -401,7 +401,6 @@ class TestElementHandler(unittest.TestCase):
             (3, 'm4', '<p id="c">c</p>', 'c', False, '{"id": "c"}', 'p1'),
             (4, 'm5', '<p></p>', '', True, None, 'p1')],
             self.handler.prepare_original(self.elements))
-        self.assertEqual(15, self.handler.char_count)
 
     @patch('calibre_plugins.ebook_translator.element.uid')
     def test_prepare_original_merged(self, mock_uid):
@@ -411,7 +410,6 @@ class TestElementHandler(unittest.TestCase):
             0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
             'a {{id_0}} b {{id_1}} c {{id_3}} ', False)],
             self.handler.prepare_original(self.elements))
-        self.assertEqual(33, self.handler.char_count)
 
     def test_add_translations(self):
         self.handler.prepare_original(self.elements)

@@ -114,7 +114,9 @@ class TranslationCache:
         return resource.fetchone()[0]
 
     def save(self, original_group):
-        """The cache may be broken if its size less than 50000 bytes."""
+        """An interruption may occur, resulting in the cache size being less
+        than 50,000 bytes. Therefore, we need to resave it again.
+        """
         if self.is_fresh() or self.size() < 50000:
             for original_unit in original_group:
                 self.add(*original_unit)
