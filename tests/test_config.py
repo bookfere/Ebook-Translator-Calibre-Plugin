@@ -30,7 +30,7 @@ class TestFunction(unittest.TestCase):
             'glossary_enabled': False,
             'glossary_path': None,
             'merge_enabled': False,
-            'merge_length': 2000,
+            'merge_length': 1800,
             'ebook_metadata': {},
         }
 

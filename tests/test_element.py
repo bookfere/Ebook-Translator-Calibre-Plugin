@@ -401,6 +401,7 @@ class TestElementHandler(unittest.TestCase):
             (3, 'm4', '<p id="c">c</p>', 'c', False, '{"id": "c"}', 'p1'),
             (4, 'm5', '<p></p>', '', True, None, 'p1')],
             self.handler.prepare_original(self.elements))
+        self.assertEqual(15, self.handler.char_count)
 
     @patch('calibre_plugins.ebook_translator.element.uid')
     def test_prepare_original_merged(self, mock_uid):
@@ -410,6 +411,7 @@ class TestElementHandler(unittest.TestCase):
             0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
             'a {{id_0}} b {{id_1}} c {{id_3}} ', False)],
             self.handler.prepare_original(self.elements))
+        self.assertEqual(33, self.handler.char_count)
 
     def test_add_translations(self):
         self.handler.prepare_original(self.elements)

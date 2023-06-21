@@ -31,7 +31,7 @@ def ebook_pages(input_path):
 
 def convert_book(input_path, output_path, source_lang, target_lang,
                  cache_only, notification):
-    """ The following parameters need attention:"
+    """ The following parameters need attention:
     :cache_only: Only use the translation which exists in the cache.
     :notification: It is automatically added by arbitrary_n.
     """
@@ -51,9 +51,7 @@ def convert_book(input_path, output_path, source_lang, target_lang,
     translation.set_callback(
         lambda paragraph: cache.update_paragraph(paragraph))
 
-    info = '=' * 30
-    info += '\n| Diagnosis Information\n'
-    info += '=' * 30
+    info = '{0}\n| Diagnosis Information\n{0}'.format(sep)
     info += '\n| Calibre Version: %s\n' % __version__
     info += '| Plugin Version: %s\n' % EbookTranslator.__version__
     info += '| Translate Engine: %s\n' % translator.name

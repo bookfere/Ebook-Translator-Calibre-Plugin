@@ -79,6 +79,9 @@ class TranslationCache:
     def get_dir(cls):
         return cls.dir_path
 
+    def size(self):
+        return os.path.getsize(self.file_path)
+
     def is_fresh(self):
         return self.fresh
 
@@ -111,7 +114,8 @@ class TranslationCache:
         return resource.fetchone()[0]
 
     def save(self, original_group):
-        if self.is_fresh():
+        """The cache may be broken if its size less than 50000 bytes."""
+        if self.is_fresh() or self.size() < 50000:
             for original_unit in original_group:
                 self.add(*original_unit)
 
