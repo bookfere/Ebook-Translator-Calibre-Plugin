@@ -23,18 +23,28 @@ def get_name(element):
 
 class Glossary(dict):
     def load_from_file(self, path):
+        """In the universal newlines mode (by adding 'U' to the mode in
+        Python 2.x or keeping newline=None in Python 3.x), there is no need
+        to use `os.linesep`. Instead, using '\n' can properly parse newlines
+        when reading from or writing to files on multiple platforms.
+        """
+        content = None
         try:
-            with open(path) as f:
+            with open(path, 'r', newline=None) as f:
                 content = f.read().strip()
-            if not content:
-                return
-            for group in content.split('\n' * 2):
-                group = group.strip().split(os.linesep)
-                if len(group) > 2:
-                    continue
-                self[group[0]] = group[0] if len(group) == 1 else group[1]
-        except Exception:
-            pass
+        except TypeError as e:
+            try:
+                with open(path, 'rU') as f:
+                    content = f.read().strip()
+            except Exception:
+                pass
+        if not content:
+            return
+        for group in content.split('\n' * 2):
+            group = group.strip().split(os.linesep)
+            if len(group) > 2:
+                continue
+            self[group[0]] = group[0] if len(group) == 1 else group[1]
 
 
 class Element:
