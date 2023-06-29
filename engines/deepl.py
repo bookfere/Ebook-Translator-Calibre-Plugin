@@ -65,13 +65,13 @@ class DeeplFreeTranslate(Base):
     name = 'DeepL(Free)'
     alias = 'DeepL (Free)'
     lang_codes = Base.load_lang_codes(deepl)
-    endpoint = 'https://www2.deepl.com/jsonrpc?client=chrome-extension,1.4.0'
+    endpoint = 'https://www2.deepl.com/jsonrpc?client=chrome-extension,1.5.1'
     need_api_key = False
     placeholder = DeeplTranslate.placeholder
 
     headers = {
         'Accept': '*/*',
-        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Encoding': '*',
         'Accept-Language': 'en-US,en;q=0.9',
         'Authorization': 'None',
         'Authority': 'www2.deepl.com',
