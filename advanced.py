@@ -113,7 +113,7 @@ class TranslationWorker(QObject):
     start = pyqtSignal()
     finished = pyqtSignal(bool)
     translate = pyqtSignal(list, bool)
-    logging = pyqtSignal(str)
+    logging = pyqtSignal(str, bool)
     error = pyqtSignal(str, str, str)
     streaming = pyqtSignal(object)
     callback = pyqtSignal(object)
@@ -151,20 +151,13 @@ class TranslationWorker(QObject):
         translator.set_target_lang(self.target_lang)
         translation = get_translation(translator)
         translation.set_fresh(fresh)
-        translation.set_logging(self.logging.emit)
+        translation.set_logging(
+            lambda text, error=False: self.logging.emit(text, error))
         translation.set_streaming(self.streaming.emit)
         translation.set_callback(self.callback.emit)
         translation.set_cancel_request(self.cancel_request)
-        try:
-            translation.handle(paragraphs)
-            self.finished.emit(not self.cancel_request())
-        except Exception as e:
-            reason = traceback.format_exc()
-            self.logging.emit(reason)
-            self.streaming.emit('')
-            self.streaming.emit(str(e))
-            self.error.emit(_('Translation Failed'), str(e), reason)
-            self.finished.emit(False)
+        translation.handle(paragraphs)
+        self.finished.emit(not self.cancel_request())
         self.cancelled = False
 
 
@@ -290,7 +283,16 @@ class AdvancedTranslation(QDialog):
 
         def working_finished(success):
             if self.translate_all and success:
-                self.alert.pop(_('Translation completed.'))
+                failures = len(self.table.get_seleted_items(True, True))
+                if failures > 0:
+                    message = _(
+                        '{} paragraph(s) were translated unsuccessfully. '
+                        'Would you like to retry?')
+                    if self.alert.ask(message.format(failures)) == 'yes':
+                        self.translate_all_paragraphs()
+                        return
+                else:
+                    self.alert.pop(_('Translation completed.'))
             self.translate_all = False
             self.on_working = False
         self.trans_worker.finished.connect(working_finished)
@@ -366,6 +368,7 @@ class AdvancedTranslation(QDialog):
         tabs = QTabWidget()
         tabs.addTab(self.layout_review(), _('Review'))
         tabs.addTab(self.layout_log(), _('Log'))
+        tabs.addTab(self.layout_errors(), _('Errors'))
         tabs.setStyleSheet('QTabBar::tab {min-width:120px;}')
 
         self.trans_worker.start.connect(
@@ -390,7 +393,7 @@ class AdvancedTranslation(QDialog):
         layout.setContentsMargins(0, 0, 0, 0)
 
         progress_bar = QProgressBar()
-        progress_bar.setMaximum(10000)
+        progress_bar.setMaximum(100000000)
         progress_bar.setVisible(False)
 
         def write_progress():
@@ -654,7 +657,10 @@ class AdvancedTranslation(QDialog):
             self.raw_text.emit(paragraph.raw)
             self.original_text.emit(paragraph.original)
             self.translation_text[str].emit(paragraph.translation)
-            self.cache.update_paragraph(paragraph)
+            try:
+                self.cache.update_paragraph(paragraph)
+            except Exception as e:
+                raise e
             self.progress_bar.emit()
         self.trans_worker.callback.connect(translation_callback)
 
@@ -702,32 +708,50 @@ class AdvancedTranslation(QDialog):
         layout.addWidget(logging_text)
 
         self.trans_worker.start.connect(logging_text.clear)
-        self.trans_worker.logging.connect(logging_text.appendPlainText)
+        self.trans_worker.logging.connect(
+            lambda text, error: not error
+                and logging_text.appendPlainText(text))
+
+        return widget
+
+    def layout_errors(self):
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+
+        errors_text = QPlainTextEdit()
+        errors_text.setPlaceholderText(_('Error log'))
+        errors_text.setReadOnly(True)
+        layout.addWidget(errors_text)
+
+        self.trans_worker.start.connect(errors_text.clear)
+        self.trans_worker.logging.connect(
+            lambda text, error: error and errors_text.appendPlainText(text))
 
         return widget
 
     def get_progress_step(self, total):
-        return int(round(100 / (total or 1), 2) * 100)
+        return int(round(100.0 / (total or 1), 100) * 1000000)
 
     def translate_all_paragraphs(self):
-        message = _('Are you sure you want to translate all {:n} paragraphs?')
+        """Translate the untranslated paragraphs when at least one is selected.
+        Otherwise, retranslate all paragraphs regardless of prior translation.
+        """
         paragraphs = self.table.get_seleted_items(True, True)
-        self.prgress_step = self.get_progress_step(len(paragraphs))
-        if len(paragraphs) < 1:
+        is_fresh = len(paragraphs) < 1
+        if is_fresh:
             paragraphs = self.table.get_seleted_items(False, True)
-            self.prgress_step = self.get_progress_step(len(paragraphs))
-            action = self.alert.ask(message.format(len(paragraphs)))
-            if action == 'yes':
-                self.translate_all = True
-                self.trans_worker.translate.emit(paragraphs, True)
-            return
-        action = self.alert.ask(message.format(len(paragraphs)))
-        if action == 'yes':
-            self.translate_all = True
-            self.trans_worker.translate.emit(paragraphs, False)
+        self.prgress_step = self.get_progress_step(len(paragraphs))
+        if not self.translate_all:
+            message = _(
+                'Are you sure you want to translate all {:n} paragraphs?')
+            if self.alert.ask(message.format(len(paragraphs))) != 'yes':
+                return
+        self.translate_all = True
+        self.trans_worker.translate.emit(paragraphs, is_fresh)
 
     def translate_selected_paragraph(self):
         paragraphs = self.table.get_seleted_items()
+        # If all paragraphs are selected, consider it as translating all.
         if len(paragraphs) == self.table.rowCount():
             self.translate_all_paragraphs()
         else:

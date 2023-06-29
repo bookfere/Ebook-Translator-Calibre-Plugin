@@ -9,9 +9,12 @@ from .lib.cssselect import GenericTranslator, SelectorError
 
 
 ns = {'x': 'http://www.w3.org/1999/xhtml'}
-sep = '=' * 30
 log = Log()
 is_test = 'unittest' in sys.modules
+
+
+def sep(char='=', count=30):
+    return char * count
 
 
 def css(seletor):

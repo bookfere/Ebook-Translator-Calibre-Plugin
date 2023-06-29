@@ -516,7 +516,7 @@ msgstr ""
 msgid "API key was Changed due to previous one unavailable."
 msgstr ""
 
-msgid "Failed to retreive data from translate engine API."
+msgid "Failed to retrieve data from translate engine API."
 msgstr "無法從翻譯引擎 API 擷取資料。"
 
 msgid "Will retry in {} seconds."
@@ -546,7 +546,7 @@ msgstr "沒有需要翻譯的內容。"
 msgid "Translating: {}/{}"
 msgstr "翻譯：{}/{}"
 
-msgid "Translation cancelled."
+msgid "Translation canceled."
 msgstr ""
 
 msgid "Translate Book"

@@ -680,7 +680,7 @@ msgid "API key was Changed due to previous one unavailable."
 msgstr ""
 
 #: translation.py:75
-msgid "Failed to retreive data from translate engine API."
+msgid "Failed to retrieve data from translate engine API."
 msgstr ""
 
 #: translation.py:82
