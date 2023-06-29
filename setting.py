@@ -21,7 +21,8 @@ try:
         QIntValidator, QScrollArea, QRadioButton, QGridLayout, QCheckBox,
         QButtonGroup, QColorDialog, QSpinBox, QPalette, QApplication,
         QComboBox, QRegularExpression, pyqtSignal, QFormLayout, QDoubleSpinBox,
-        QSpacerItem, QRegularExpressionValidator)
+        QSpacerItem, QRegularExpressionValidator, QListWidget, QListWidgetItem,
+        QSize)
 except ImportError:
     from PyQt5.Qt import (
         Qt, QLabel, QDialog, QWidget, QLineEdit, QPushButton, QPlainTextEdit,
@@ -29,7 +30,8 @@ except ImportError:
         QIntValidator, QScrollArea, QRadioButton, QGridLayout, QCheckBox,
         QButtonGroup, QColorDialog, QSpinBox, QPalette, QApplication,
         QComboBox, QRegularExpression, pyqtSignal, QFormLayout, QDoubleSpinBox,
-        QSpacerItem, QRegularExpressionValidator)
+        QSpacerItem, QRegularExpressionValidator, QListWidget, QListWidgetItem,
+        QSize)
 
 load_translations()
 
@@ -56,17 +58,19 @@ class TranslationSetting(QDialog):
         tab_1 = self.tabs.addTab(self.layout_general(), _('General'))
         tab_2 = self.tabs.addTab(self.layout_engine(), _('Engine'))
         tab_3 = self.tabs.addTab(self.layout_content(), _('Content'))
+        tab_4 = self.tabs.addTab(self.layout_cache(), _('Cache'))
         self.tabs.setStyleSheet('QTabBar::tab {min-width:120px;}')
 
         config_actions = {
             tab_1: self.update_general_config,
             tab_2: self.update_engine_config,
             tab_3: self.update_content_config,
+            tab_4: self.update_cache_config,
         }
         self.save_config.connect(lambda index: config_actions.get(index)())
 
         def tabs_clicked(index):
-            index == 0 and self.cache_count.emit()
+            index == 3 and self.cache_count.emit()
             self.config.refresh()
         self.tabs.tabBarClicked.connect(tabs_clicked)
 
@@ -255,67 +259,19 @@ class TranslationSetting(QDialog):
         proxy_group.setLayout(proxy_layout)
         layout.addWidget(proxy_group)
 
-        # Miscellaneous
-        misc_widget = QWidget()
-        misc_layout = QHBoxLayout()
-        misc_layout.setContentsMargins(0, 0, 0, 0)
-
-        # Cache
-        cache_group = QGroupBox(_('Cache'))
-        cache_button = QPushButton(_('Clear'))
-        cache_reveal = QPushButton(_('Reveal'))
-        cache_size = QLabel()
-        cache_enabled = QCheckBox(_('Enable'))
-        cache_layout = QVBoxLayout(cache_group)
-        cache_layout.addWidget(cache_enabled)
-        cache_layout.addWidget(get_divider())
-        cache_layout.addWidget(cache_size)
-        cache_layout.addWidget(cache_button)
-        cache_layout.addWidget(cache_reveal)
-        cache_layout.addStretch(1)
-        misc_layout.addWidget(cache_group, 1)
-
-        def recount_translation_cache():
-            return cache_size.setText(
-                _('Total: {}').format(TranslationCache.count()))
-        self.cache_count.connect(recount_translation_cache)
-
-        cache_enabled.setChecked(self.config.get('cache_enabled'))
-        cache_enabled.toggled.connect(
-            lambda checked: self.config.update(cache_enabled=checked))
-
-        def clear_translation_cache():
-            self.plugin.clear_caches()
-            self.cache_count.emit()
-        self.cache_count.emit()
-        cache_button.clicked.connect(clear_translation_cache)
-
-        def reveal_cache_files():
-            cache_dir = TranslationCache.get_dir()
-            if not os.path.exists(cache_dir):
-                return self.alert.pop(_('No cache exists.'), 'warning')
-            cmd = 'open'
-            if sys.platform.startswith('win32'):
-                cmd = 'explorer'
-            if sys.platform.startswith('linux'):
-                cmd = 'xdg-open'
-            Popen([cmd, cache_dir])
-        cache_reveal.clicked.connect(reveal_cache_files)
-
-        # Log
+        # Job Log
         log_group = QGroupBox(_('Job Log'))
         log_translation = QCheckBox(_('Show translation'))
         log_layout = QVBoxLayout(log_group)
         log_layout.addWidget(log_translation)
         log_layout.addStretch(1)
-        misc_layout.addWidget(log_group, 1)
+        layout.addWidget(log_group, 1)
 
         log_translation.setChecked(self.config.get('log_translation'))
         log_translation.toggled.connect(
             lambda checked: self.config.update(log_translation=checked))
 
-        misc_widget.setLayout(misc_layout)
-        layout.addWidget(misc_widget)
+        layout.addWidget(log_group)
 
         layout.addStretch(1)
 
@@ -367,9 +323,6 @@ class TranslationSetting(QDialog):
         request_group = QGroupBox(_('HTTP Request'))
         concurrency_limit = QSpinBox()
         concurrency_limit.setRange(0, 9999)
-        if sys.version_info < (3, 7, 0):
-            concurrency_limit.setValue(1)
-            concurrency_limit.setDisabled(True)
         request_interval = QDoubleSpinBox()
         request_interval.setRange(0, 9999)
         request_interval.setDecimals(1)
@@ -384,19 +337,6 @@ class TranslationSetting(QDialog):
         request_layout.addRow(_('Attempt times'), request_attempt)
         request_layout.addRow(_('Timeout (seconds)'), request_timeout)
         layout.addWidget(request_group, 1)
-
-        concurrency_limit.valueChanged.connect(
-            lambda value: self.current_engine.config.update(
-                concurrency_limit=round(value, 1)))
-        request_attempt.valueChanged.connect(
-            lambda value: self.current_engine.config.update(
-                request_attempt=round(value, 1)))
-        request_interval.valueChanged.connect(
-            lambda value: self.current_engine.config.update(
-                request_interval=round(value, 1)))
-        request_timeout.valueChanged.connect(
-            lambda value: self.current_engine.config.update(
-                request_timeout=round(value, 1)))
 
         self.set_form_layout_policy(request_layout)
         self.disable_wheel_event(concurrency_limit)
@@ -527,6 +467,18 @@ class TranslationSetting(QDialog):
                 'request_interval', self.current_engine.request_interval))
             request_timeout.setValue(self.current_engine.config.get(
                 'request_timeout', self.current_engine.request_timeout))
+            concurrency_limit.valueChanged.connect(
+                lambda value: self.current_engine.config.update(
+                    concurrency_limit=value))
+            request_interval.valueChanged.connect(
+                lambda value: self.current_engine.config.update(
+                    request_interval=round(value, 1)))
+            request_attempt.valueChanged.connect(
+                lambda value: self.current_engine.config.update(
+                    request_attempt=value))
+            request_timeout.valueChanged.connect(
+                lambda value: self.current_engine.config.update(
+                    request_timeout=round(value, 1)))
             # show prompt setting
             show_chatgpt_preferences()
         choose_default_engine(engine_list.findData(self.current_engine.name))
@@ -786,6 +738,72 @@ class TranslationSetting(QDialog):
 
         return widget
 
+    @layout_scroll_area
+    def layout_cache(self):
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+
+        control_widget = QWidget()
+        control_layout = QHBoxLayout(control_widget)
+        control_layout.setContentsMargins(0, 0, 0, 0)
+        cache_button = QPushButton(_('Clear'))
+        cache_reveal = QPushButton(_('Reveal'))
+        cache_size = QLabel()
+        cache_enabled = QCheckBox(_('Enable'))
+        control_layout.addWidget(cache_enabled)
+        control_layout.addStretch(1)
+        control_layout.addWidget(cache_size)
+        control_layout.addWidget(cache_button)
+        control_layout.addWidget(cache_reveal)
+        layout.addWidget(control_widget)
+
+        def recount_translation_cache():
+            return cache_size.setText(
+                _('Total: {}').format(TranslationCache.count()))
+        self.cache_count.connect(recount_translation_cache)
+
+        cache_enabled.setChecked(self.config.get('cache_enabled'))
+        cache_enabled.toggled.connect(
+            lambda checked: self.config.update(cache_enabled=checked))
+
+        def clear_translation_cache():
+            self.plugin.clear_caches()
+            self.cache_count.emit()
+        self.cache_count.emit()
+        cache_button.clicked.connect(clear_translation_cache)
+
+        def reveal_cache_files():
+            cache_dir = TranslationCache.get_dir()
+            if not os.path.exists(cache_dir):
+                return self.alert.pop(_('No cache exists.'), 'warning')
+            cmd = 'open'
+            if sys.platform.startswith('win32'):
+                cmd = 'explorer'
+            if sys.platform.startswith('linux'):
+                cmd = 'xdg-open'
+            Popen([cmd, cache_dir])
+        cache_reveal.clicked.connect(reveal_cache_files)
+
+        cache_list = QListWidget()
+        item = QListWidgetItem('aaaa')
+        item.setSizeHint(QSize(0, 24))
+        cache_list.addItem(item)
+        layout.addWidget(cache_list)
+
+        control_widget = QWidget()
+        control_layout = QHBoxLayout(control_widget)
+        control_layout.setContentsMargins(0, 0, 0, 0)
+        control_layout.addStretch(1)
+        delete_cache = QPushButton(_('Delete'))
+        fresh_cache = QPushButton(_('Refresh'))
+        control_layout.addWidget(delete_cache)
+        control_layout.addWidget(fresh_cache)
+        layout.addWidget(control_widget)
+
+        layout.addStretch(1)
+
+        return widget
+
     def test_proxy_connection(self):
         host = self.proxy_host.text()
         port = self.proxy_port.text()
@@ -947,6 +965,10 @@ class TranslationSetting(QDialog):
         if ebook_metadata:
             self.config.update(ebook_metadata=ebook_metadata)
 
+        self.config.commit()
+        self.alert.pop(_('The setting has been saved.'))
+
+    def update_cache_config(self):
         self.config.commit()
         self.alert.pop(_('The setting has been saved.'))
 

@@ -26,6 +26,8 @@ class Paragraph:
         self.engine_name = engine_name
         self.target_lang = target_lang
 
+        self.error = None
+
     def get_attributes(self):
         if self.attributes:
             return json.loads(self.attributes)
@@ -52,7 +54,8 @@ class TranslationCache:
         if os.path.exists(self.file_path):
             self.fresh = False
         self.cache_only = False
-        self.connection = sqlite3.connect(self.file_path)
+        self.connection = sqlite3.connect(
+            self.file_path, check_same_thread=False)
         self.cursor = self.connection.cursor()
         self.cursor.execute(
             'CREATE TABLE IF NOT EXISTS cache('
@@ -61,8 +64,7 @@ class TranslationCache:
             'translation DEFAULT NULL, engine_name DEFAULT NULL, '
             'target_lang DEFAULT NULL)')
         self.cursor.execute(
-            'CREATE TABLE IF NOT EXISTS info('
-            'key UNIQUE, value)')
+            'CREATE TABLE IF NOT EXISTS info(key UNIQUE, value)')
 
     @classmethod
     def count(cls):
@@ -151,7 +153,7 @@ class TranslationCache:
 
     def update(self, ids, **kwargs):
         ids = ids if isinstance(ids, list) else [ids]
-        data = ', '.join(['%s=?' % column for column in kwargs])
+        data = ', '.join(['%s=?' % column for column in kwargs.keys()])
         placeholders = ', '.join(['?'] * len(ids))
         self.cursor.execute(
             'UPDATE cache SET %s WHERE id IN (%s)' % (data, placeholders),

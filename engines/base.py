@@ -22,7 +22,7 @@ class Base:
     api_key_errors = ['401']
     placeholder = ('{{{{id_{}}}}}', r'({{\s*)+id\s*_\s*{}\s*(\s*}})+')
 
-    concurrency_limit = 0
+    concurrency_limit = 10
     request_interval = 0.0
     request_attempt = 3
     request_timeout = 10.0
@@ -32,21 +32,18 @@ class Base:
         self.target_lang = None
         self.proxy_uri = None
 
-        self.br = Browser()
-        self.br.set_handle_robots(False)
-
         self.merge_enabled = False
 
         self.api_keys = self.config.get('api_keys', [])[:]
         self.bad_api_keys = []
         self.api_key = self._get_api_key()
 
-        self.concurrency_limit = self.config.get(
-            'concurrency_limit', self.concurrency_limit)
+        self.concurrency_limit = int(self.config.get(
+            'concurrency_limit', self.concurrency_limit))
         self.request_interval = self.config.get(
             'request_interval', self.request_interval)
-        self.request_attempt = self.config.get(
-            'request_attempt', self.request_attempt)
+        self.request_attempt = int(self.config.get(
+            'request_attempt', self.request_attempt))
         self.request_timeout = self.config.get(
             'request_timeout', self.request_timeout)
 
@@ -97,7 +94,7 @@ class Base:
         return False
 
     def need_change_api_key(self, error_message):
-        if self.need_api_key and len(self.api_keys) > 1:
+        if self.need_api_key and len(self.api_keys) > 0:
             for error in self.api_key_errors:
                 if error in error_message:
                     return True
@@ -153,7 +150,9 @@ class Base:
     def get_result(self, url, data=None, headers={}, method='GET',
                    stream=False, silence=False, callback=None):
         result = None
-        self.proxy_uri and self.br.set_proxies(
+        br = Browser()
+        br.set_handle_robots(False)
+        self.proxy_uri and br.set_proxies(
             {'http': self.proxy_uri, 'https': self.proxy_uri})
         # Compatible with mechanize 0.3.0 on Calibre 3.21.
         try:
@@ -164,8 +163,8 @@ class Base:
             request = Request(
                 url, data, headers=headers, timeout=self.request_timeout)
         try:
-            self.br.open(request)
-            response = self.br.response()
+            br.open(request)
+            response = br.response()
             result = response if stream else \
                 response.read().decode('utf-8').strip()
             return callback(result) if callback else self.parse(result)
@@ -175,7 +174,8 @@ class Base:
                 traceback.print_exc()
             if silence:
                 return None
-            raw_data = str(e) if result is None else result + ' ' + str(e)
+            error = traceback.format_exc()
+            raw_data = error if result is None else result + ' ' + error
             raise Exception(
                 _('Can not parse returned response. Raw data: {}')
                 .format(raw_data))

@@ -118,9 +118,9 @@ class AdvancedTranslationTable(QTableWidget):
     def selected_count(self):
         return len(self.get_selected_rows())
 
-    def get_seleted_items(self, ignore_done=False, selete_all=False):
+    def get_seleted_items(self, ignore_done=False, select_all=False):
         items = []
-        rows = range(self.rowCount()) if selete_all else \
+        rows = range(self.rowCount()) if select_all else \
             self.get_selected_rows()
         for row in rows:
             paragraph = self.paragraph(row)

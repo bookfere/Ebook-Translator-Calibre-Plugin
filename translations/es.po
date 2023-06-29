@@ -520,7 +520,7 @@ msgstr ""
 msgid "API key was Changed due to previous one unavailable."
 msgstr ""
 
-msgid "Failed to retreive data from translate engine API."
+msgid "Failed to retrieve data from translate engine API."
 msgstr "No se pudieron recuperar los datos de la API del motor de traducción."
 
 msgid "Will retry in {} seconds."
@@ -550,7 +550,7 @@ msgstr "No hay necesidad de traducir el contenido."
 msgid "Translating: {}/{}"
 msgstr "Traduciendo: {}/{}"
 
-msgid "Translation cancelled."
+msgid "Translation canceled."
 msgstr ""
 
 msgid "Translate Book"
