@@ -65,8 +65,8 @@ class AdvancedTranslationTable(QTableWidget):
         items = ['--', '--', _('Untranslated')]
         paragraph = self.paragraph(row)
         if paragraph.translation:
-            items = [paragraph.engine_name, paragraph.target_lang,
-                     _('Translated')]
+            items = [
+                paragraph.engine_name, paragraph.target_lang, _('Translated')]
         for column, text in enumerate(items, 1):
             self.item(row, column).setText(text)
 

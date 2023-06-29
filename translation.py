@@ -1,6 +1,7 @@
 import sys
 import time
 import json
+import traceback
 from types import GeneratorType
 
 from .utils import sep, dummy
@@ -9,16 +10,33 @@ from .engines import builtin_engines
 from .engines import GoogleFreeTranslate
 from .engines.custom import CustomTranslate
 from .exceptions import (
-    IncorrectApiKeyFormat, NoAvailableApiKey, TranslationCanceled,
-    TranslationFailed)
+    BadApiKeyFormat, NoAvailableApiKey, TranslationCanceled, TranslationFailed)
 
 
 load_translations()
 
 
+class ProgressBar:
+    total = 0
+    count = 0
+    length = 0.0
+    step = 0
+
+    def __init__(self, total):
+        self.total = total
+        self.step = 1.0 / total
+
+    def increase_count(self):
+        self.count += 1
+
+    def increase_length(self):
+        self.length += self.step
+
+
 class Translation:
     def __init__(self, translator):
         self.translator = translator
+        self.abort_count = 0
 
         self.fresh = False
         self.progress = dummy
@@ -45,7 +63,7 @@ class Translation:
     def set_cancel_request(self, cancel_request):
         self.cancel_request = cancel_request
 
-    def _translate_text(self, text, count=0, interval=5):
+    def _translate_text(self, text, retry=0, interval=5):
         """Translation engine service error code documentation:
         * https://cloud.google.com/apis/design/errors
         * https://www.deepl.com/docs-api/api-access/error-handling/
@@ -57,32 +75,35 @@ class Translation:
             raise TranslationCanceled(_('Translation canceled.'))
         try:
             time.sleep(self.translator.request_interval)
-            return self.translator.translate(text)
-        except IncorrectApiKeyFormat:
-            raise IncorrectApiKeyFormat(
-                self.translator.api_key_error_message())
+            translation = self.translator.translate(text)
+            self.abort_count = 0
+            return translation
+        except BadApiKeyFormat:
+            raise TranslationCanceled(_('Translation canceled.'))
         except Exception as e:
-            if self.cancel_request():
+            self.abort_count += 1
+            if self.cancel_request() or self.abort_count >= 10:
                 raise TranslationCanceled(_('Translation canceled.'))
             if self.translator.need_change_api_key(str(e).lower()):
                 if not self.translator.change_api_key():
                     raise NoAvailableApiKey(_('No available API key.'))
                 self.log(
                     _('API key was Changed due to previous one unavailable.'))
-                return self._translate_text(text, count, interval)
-            if count >= self.translator.request_attempt:
-                message = _(
-                    'Failed to retrieve data from translate engine API.')
-                # paragraph.error = traceback.format_exc()
-                raise TranslationFailed('{} {}'.format(message, str(e)))
-            count += 1
-            interval *= count
+                return self._translate_text(text, retry, interval)
+            message = _('Failed to retrieve data from translate engine API.')
+            if retry >= self.translator.request_attempt:
+                raise TranslationFailed('{}\n{}'.format(
+                    message, traceback.format_exc()))
+            # TODO: Display how many jobs are retrying.
+            retry += 1
+            interval *= retry
             time.sleep(interval)
-            return self._translate_text(text, count, interval)
+            return self._translate_text(text, retry, interval)
 
     def translate_paragraph(self, paragraph):
         if paragraph.translation and not self.fresh:
             return
+        self.streaming(paragraph)
         self.streaming('')
         self.streaming(_('Translating...'))
         translation = self._translate_text(paragraph.original)
@@ -102,6 +123,8 @@ class Translation:
         paragraph.engine_name = self.translator.name
         paragraph.target_lang = self.translator.get_target_lang()
 
+        self.callback(paragraph)
+
     def handle(self, paragraphs=[]):
         start_time = time.time()
         total = 0
@@ -118,17 +141,13 @@ class Translation:
         if total < 1:
             raise Exception(_('There is no content need to translate.'))
 
-        progress = {'count': 0, 'length': 0.0, 'step': 1.0 / total}
+        progress_bar = ProgressBar(total)
 
         def process_translation(paragraph):
-            progress['count'] += 1
-            self.progress(
-                progress.get('length'),
-                _('Translating: {}/{}').format(progress['count'], total))
-            progress['length'] += progress.get('step')
-
-            self.streaming(paragraph)
-            self.callback(paragraph)
+            progress_bar.increase_count()
+            self.progress(progress_bar.length, _('Translating: {}/{}')
+                          .format(progress_bar.count, progress_bar.total))
+            progress_bar.increase_length()
 
             if paragraph.error is None:
                 self.log(sep('-'))
@@ -138,6 +157,7 @@ class Translation:
                 self.log(sep('-'), True)
                 self.log(_('Original: {}').format(paragraph.original), True)
                 self.log(_('Error: {}').format(paragraph.error), True)
+                paragraph.error = None
 
         if sys.version_info >= (3, 7, 0):
             from .concurrency.async_handler import AsyncHandler
@@ -148,8 +168,8 @@ class Translation:
         else:
             from .concurrency.thread_handler import ThreadHandler
             handler = ThreadHandler(
-                paragraphs, self.translate_paragraph,
-                self.translator.concurrency_limit)
+                self.translator.concurrency_limit, self.translate_paragraph,
+                process_translation, paragraphs)
             handler.handle()
 
         message = _('Translation completed.')
