@@ -5,7 +5,7 @@ import uuid
 import hashlib
 
 from .. import _z
-from ..exceptions.engine import IncorrectApiKeyFormat
+from ..exceptions.engine import BadApiKeyFormat
 from .base import Base
 from .languages import youdao
 
@@ -38,7 +38,7 @@ class YoudaoTranslate(Base):
         try:
             app_key, app_secret = re.split(r'[:\|]', self.api_key)
         except Exception:
-            raise IncorrectApiKeyFormat(self.api_key_error_message())
+            raise BadApiKeyFormat(self.api_key_error_message())
 
         curtime = str(int(time.time()))
         salt = str(uuid.uuid1())

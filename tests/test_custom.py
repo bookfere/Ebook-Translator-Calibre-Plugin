@@ -1,6 +1,6 @@
 import json
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import patch, Mock
 
 from ..engines.custom import (
     create_engine_template, load_engine_data, CustomTranslate)
@@ -128,14 +128,13 @@ class TestCustom(unittest.TestCase):
         engine_data = json.loads(engine_data)
         CustomTranslate.set_engine_data(engine_data)
 
-    def test_translate(self):
+    @patch('calibre_plugins.ebook_translator.engines.base.Browser')
+    def test_translate(self, mock_browser):
         translator = CustomTranslate()
         translator.set_source_lang('English')
         translator.set_target_lang('Chinese')
-        translator.br = MagicMock()
-        result = translator.br.response.return_value.read.return_value.decode
-
-        result.return_value = '{"text": "你好世界！"}'
+        mock_browser.return_value.response.return_value.read.return_value \
+            .decode.return_value = '{"text": "你好世界！"}'
         self.assertEqual('你好世界！', translator.translate('Hello World!'))
 
     def test_parse(self):

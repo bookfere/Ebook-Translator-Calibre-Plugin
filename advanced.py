@@ -535,7 +535,7 @@ class AdvancedTranslation(QDialog):
                 not self.current_engine.is_custom())
             target_lang.refresh.emit(
                 self.current_engine.lang_codes.get('target'),
-                self.ebook.target_lang)
+                self.current_engine.config.get('target_lang'))
         refresh_languages()
         self.ebook.set_source_lang(source_lang.currentText())
 
@@ -709,8 +709,7 @@ class AdvancedTranslation(QDialog):
 
         self.trans_worker.start.connect(logging_text.clear)
         self.trans_worker.logging.connect(
-            lambda text, error: not error
-                and logging_text.appendPlainText(text))
+            lambda text, error: error or logging_text.appendPlainText(text))
 
         return widget
 

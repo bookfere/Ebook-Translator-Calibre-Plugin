@@ -4,7 +4,7 @@ import random
 import hashlib
 
 from .. import _z
-from ..exceptions.engine import IncorrectApiKeyFormat
+from ..exceptions.engine import BadApiKeyFormat
 from .base import Base
 from .languages import baidu
 
@@ -25,7 +25,7 @@ class BaiduTranslate(Base):
         try:
             app_id, app_key = re.split(r'[:\|]', self.api_key)
         except Exception:
-            raise IncorrectApiKeyFormat(self.api_key_error_message())
+            raise BadApiKeyFormat(self.api_key_error_message())
 
         salt = random.randint(32768, 65536)
         sign_str = app_id + text + str(salt) + app_key

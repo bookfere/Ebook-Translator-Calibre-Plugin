@@ -1,10 +1,7 @@
 import traceback
 
 from mechanize import Browser, Request
-from calibre.constants import DEBUG
 from calibre.utils.localization import lang_as_iso639_1
-
-from ..utils import is_test
 
 
 load_translations()
@@ -149,7 +146,6 @@ class Base:
 
     def get_result(self, url, data=None, headers={}, method='GET',
                    stream=False, silence=False, callback=None):
-        result = None
         br = Browser()
         br.set_handle_robots(False)
         self.proxy_uri and br.set_proxies(
@@ -163,19 +159,17 @@ class Base:
             request = Request(
                 url, data, headers=headers, timeout=self.request_timeout)
         try:
+            result = None
             br.open(request)
             response = br.response()
             result = response if stream else \
                 response.read().decode('utf-8').strip()
             return callback(result) if callback else self.parse(result)
         except Exception as e:
-            # Only show the trackback when debugging is enabled.
-            if not is_test and DEBUG:
-                traceback.print_exc()
             if silence:
                 return None
             error = traceback.format_exc()
-            raw_data = error if result is None else result + ' ' + error
+            raw_data = error if result is None else result + '\n' + error
             raise Exception(
                 _('Can not parse returned response. Raw data: {}')
                 .format(raw_data))

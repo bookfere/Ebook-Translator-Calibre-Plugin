@@ -5,7 +5,7 @@ import json
 import os.path
 from subprocess import Popen, PIPE
 
-from ..exceptions.engine import IncorrectApiKeyFormat
+from ..exceptions.engine import BadApiKeyFormat
 from .base import Base
 from .languages import google
 
@@ -122,7 +122,7 @@ class GoogleAdvancedTranslate(Base, GoogleTranslate):
         try:
             project_id, key_file_path = re.split(r'\|', self.api_key)
         except Exception:
-            raise IncorrectApiKeyFormat(self.api_key_error_message())
+            raise BadApiKeyFormat(self.api_key_error_message())
 
         endpoint = self.endpoint.format('%s:translateText' % project_id)
         api_key = self._get_credential(key_file_path)

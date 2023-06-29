@@ -69,6 +69,9 @@ class DeeplFreeTranslate(Base):
     need_api_key = False
     placeholder = DeeplTranslate.placeholder
 
+    concurrency_limit = 1
+    request_interval = 1.0
+
     headers = {
         'Accept': '*/*',
         'Accept-Encoding': '*',

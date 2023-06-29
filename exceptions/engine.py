@@ -1,5 +1,6 @@
-class IncorrectApiKeyFormat(Exception):
+class BadApiKeyFormat(Exception):
     pass
+
 
 class NoAvailableApiKey(Exception):
     pass
