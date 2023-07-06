@@ -6,9 +6,9 @@ from calibre.constants import __version__
 from calibre.ebooks.conversion.plumber import Plumber
 
 from . import EbookTranslator
-from .utils import log, sep
-from .cache import get_cache
-from .element import get_ebook_elements, get_element_handler
+from .utils import log, sep, uid
+from .cache import get_cache, TranslationCache
+from .element import get_ebook_elements, get_element_handler, Extraction
 from .translation import get_translator, get_translation
 
 
@@ -43,8 +43,11 @@ def convert_book(input_path, output_path, source_lang, target_lang,
     element_handler.set_translation_lang(
         translator.get_iso639_target_code(target_lang))
 
-    cache = get_cache(input_path + translator.name + target_lang
-                      + str(element_handler.get_merge_length()))
+    identity = uid(
+        input_path + translator.name + target_lang
+        + str(element_handler.get_merge_length())
+        + TranslationCache.__version__ + Extraction.__version__)
+    cache = get_cache(identity)
     cache.set_cache_only(cache_only)
 
     translation = get_translation(

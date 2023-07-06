@@ -20,7 +20,7 @@ class ThreadHandler:
 
         self.process_translation = process_translation
         self.translate_paragraph = translate_paragraph
-        self.concurrency_limit = concurrency_limit or 30
+        self.concurrency_limit = concurrency_limit or 10  # 0 or 10
 
     def translation_thread(self):
         while not self.queue.empty():

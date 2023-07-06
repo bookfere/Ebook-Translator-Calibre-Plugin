@@ -85,5 +85,13 @@ def is_proxy_availiable(host, port, timeout=1):
     return True
 
 
+def size_by_unit(number, unit='KB'):
+    unit = unit.upper()
+    multiple = {'KB': 1, 'MB': 2}
+    if unit not in multiple:
+        unit = 'KB'
+    return round(float(number) / (1000 ** multiple[unit]), 2)
+
+
 def dummy(*args, **kwargs):
     pass

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-06-20 16:37+0800\n"
+"POT-Creation-Date: 2023-06-30 07:10+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -34,9 +34,6 @@ msgstr "过滤电子书内容..."
 msgid "Preparing user interface..."
 msgstr "准备用户界面..."
 
-msgid "Translation Failed"
-msgstr "翻译失败"
-
 msgid "Start"
 msgstr "开始"
 
@@ -45,6 +42,10 @@ msgstr "输入格式"
 
 msgid "Target Language"
 msgstr "目标语言"
+
+msgid ""
+"{} paragraph(s) were translated unsuccessfully. Would you like to retry?"
+msgstr "{} 个段落未能翻译成功。是否需要重试？"
 
 msgid "Translation completed."
 msgstr "翻译已完成。"
@@ -62,7 +63,10 @@ msgid "Review"
 msgstr "校对"
 
 msgid "Log"
-msgstr ""
+msgstr "日志"
+
+msgid "Errors"
+msgstr "错误"
 
 msgid "Translate All"
 msgstr "翻译全部"
@@ -108,6 +112,9 @@ msgstr "更改已保存。"
 
 msgid "Translation log"
 msgstr "翻译日志"
+
+msgid "Error log"
+msgstr "错误日志"
 
 msgid "Are you sure you want to translate all {:n} paragraphs?"
 msgstr "你确定要翻译所有 {:n} 个段落吗？"
@@ -299,6 +306,9 @@ msgstr "通用"
 msgid "Content"
 msgstr "内容"
 
+msgid "Cache"
+msgstr "缓存"
+
 msgid "Preferred Mode"
 msgstr "偏好模式"
 
@@ -343,18 +353,6 @@ msgstr "端口"
 
 msgid "Test"
 msgstr "测试"
-
-msgid "Cache"
-msgstr "缓存"
-
-msgid "Reveal"
-msgstr "打开"
-
-msgid "Total: {}"
-msgstr "总计：{}"
-
-msgid "No cache exists."
-msgstr "缓存不存在。"
 
 msgid "Job Log"
 msgstr "任务日志"
@@ -488,6 +486,18 @@ msgstr "电子书主题（每行一个主题）"
 msgid "Subject"
 msgstr "主题"
 
+msgid "Reveal"
+msgstr "打开"
+
+msgid "Total: {}"
+msgstr "总计：{}"
+
+msgid "No cache exists."
+msgstr "缓存不存在。"
+
+msgid "Refresh"
+msgstr "刷新"
+
 msgid "Proxy host or port is incorrect."
 msgstr "代理的主机或端口填写有误。"
 
@@ -509,6 +519,9 @@ msgstr "{} 不是有效的正则表达式。"
 msgid "{} is not a valid CSS seletor."
 msgstr "{} 不是一个有效的 CSS 选择器。"
 
+msgid "Translation canceled."
+msgstr "翻译已取消。"
+
 msgid "No available API key."
 msgstr "没有可用的 API 密钥。"
 
@@ -518,11 +531,20 @@ msgstr "由于上一个 API 密钥不可用，已自动更换。"
 msgid "Failed to retrieve data from translate engine API."
 msgstr "无法从翻译引擎API获取数据。"
 
-msgid "Will retry in {} seconds."
-msgstr "{} 秒后重试。"
+msgid "Start to translate ebook content"
+msgstr "开始翻译电子书内容"
 
-msgid "[{}] Retrying {} ... (timeout is {} seconds)."
-msgstr "[{}] 正在重试 {} ...（{}秒后超时）"
+msgid "Total items: {}"
+msgstr "全部条目：{}"
+
+msgid "Character count: {}"
+msgstr "字符总数：{}"
+
+msgid "There is no content need to translate."
+msgstr "没有需要翻译的内容。"
+
+msgid "Translating: {}/{}"
+msgstr "翻译：{}/{}"
 
 msgid "Original: {}"
 msgstr "原文：{}"
@@ -533,20 +555,8 @@ msgstr "译文：{}"
 msgid "Translation (Cached): {}"
 msgstr "译文（缓存）：{}"
 
-msgid "Start to translate ebook content"
-msgstr "开始翻译电子书内容"
-
-msgid "Total items: {}"
-msgstr "全部条目：{}"
-
-msgid "There is no content need to translate."
-msgstr "没有需要翻译的内容。"
-
-msgid "Translating: {}/{}"
-msgstr "翻译：{}/{}"
-
-msgid "Translation canceled."
-msgstr "翻译已取消。"
+msgid "Error: {}"
+msgstr "错误信息：{}"
 
 msgid "Translate Book"
 msgstr "翻译书籍"
@@ -595,3 +605,12 @@ msgstr "翻译已完成"
 
 msgid "The translation of \"{}\" was completed. Do you want to open the book?"
 msgstr "\"{}\"的翻译已完成。是否想要立即阅读这本电子书？"
+
+#~ msgid "Translation Failed"
+#~ msgstr "翻译失败"
+
+#~ msgid "Will retry in {} seconds."
+#~ msgstr "{} 秒后重试。"
+
+#~ msgid "[{}] Retrying {} ... (timeout is {} seconds)."
+#~ msgstr "[{}] 正在重试 {} ...（{}秒后超时）"

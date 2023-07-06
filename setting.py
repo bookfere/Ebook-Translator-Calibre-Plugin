@@ -6,12 +6,13 @@ from subprocess import Popen
 
 from .components import (
     layout_info, AlertMessage, TargetLang, SourceLang, EngineList,
-    EngineTester, get_divider, ManageCustomEngine, InputFormat, OutputFormat)
+    EngineTester, get_divider, ManageCustomEngine, InputFormat, OutputFormat,
+    CacheManager)
 from .config import get_config
 from .utils import css, is_proxy_availiable
-from .cache import TranslationCache
 from .translation import get_engine_class
 from .engines import builtin_engines
+from .cache import TranslationCache
 
 
 try:
@@ -22,7 +23,7 @@ try:
         QButtonGroup, QColorDialog, QSpinBox, QPalette, QApplication,
         QComboBox, QRegularExpression, pyqtSignal, QFormLayout, QDoubleSpinBox,
         QSpacerItem, QRegularExpressionValidator, QListWidget, QListWidgetItem,
-        QSize)
+        QSize, QAbstractItemView)
 except ImportError:
     from PyQt5.Qt import (
         Qt, QLabel, QDialog, QWidget, QLineEdit, QPushButton, QPlainTextEdit,
@@ -31,7 +32,7 @@ except ImportError:
         QButtonGroup, QColorDialog, QSpinBox, QPalette, QApplication,
         QComboBox, QRegularExpression, pyqtSignal, QFormLayout, QDoubleSpinBox,
         QSpacerItem, QRegularExpressionValidator, QListWidget, QListWidgetItem,
-        QSize)
+        QSize, QAbstractItemView)
 
 load_translations()
 
@@ -459,14 +460,22 @@ class TranslationSetting(QDialog):
                 self.current_engine.lang_codes.get('target'), target_lang)
             self.set_api_keys()  # show api key setting
             # Request setting
-            concurrency_limit.setValue(self.current_engine.config.get(
-                'concurrency_limit', self.current_engine.concurrency_limit))
-            request_attempt.setValue(self.current_engine.config.get(
-                'request_attempt', self.current_engine.request_attempt))
-            request_interval.setValue(self.current_engine.config.get(
-                'request_interval', self.current_engine.request_interval))
-            request_timeout.setValue(self.current_engine.config.get(
-                'request_timeout', self.current_engine.request_timeout))
+            value = self.current_engine.config.get('concurrency_limit')
+            if value is None:
+                value = self.current_engine.concurrency_limit
+            concurrency_limit.setValue(value)
+            value = self.current_engine.config.get('request_interval')
+            if value is None:
+                value = self.current_engine.request_interval
+            request_interval.setValue(float(value))
+            value = self.current_engine.config.get('request_attempt')
+            if value is None:
+                value = self.current_engine.request_attempt
+            request_attempt.setValue(value)
+            value = self.current_engine.config.get('request_timeout')
+            if value is None:
+                value = self.current_engine.request_timeout
+            request_timeout.setValue(float(value))
             concurrency_limit.valueChanged.connect(
                 lambda value: self.current_engine.config.update(
                     concurrency_limit=value))
@@ -740,69 +749,40 @@ class TranslationSetting(QDialog):
 
     @layout_scroll_area
     def layout_cache(self):
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
+        cache_manager = CacheManager(TranslationCache.get_list())
 
-        control_widget = QWidget()
-        control_layout = QHBoxLayout(control_widget)
-        control_layout.setContentsMargins(0, 0, 0, 0)
-        cache_button = QPushButton(_('Clear'))
-        cache_reveal = QPushButton(_('Reveal'))
-        cache_size = QLabel()
-        cache_enabled = QCheckBox(_('Enable'))
-        control_layout.addWidget(cache_enabled)
-        control_layout.addStretch(1)
-        control_layout.addWidget(cache_size)
-        control_layout.addWidget(cache_button)
-        control_layout.addWidget(cache_reveal)
-        layout.addWidget(control_widget)
-
-        def recount_translation_cache():
-            return cache_size.setText(
-                _('Total: {}').format(TranslationCache.count()))
-        self.cache_count.connect(recount_translation_cache)
-
-        cache_enabled.setChecked(self.config.get('cache_enabled'))
-        cache_enabled.toggled.connect(
+        cache_manager.cache_enabled.setChecked(
+            self.config.get('cache_enabled'))
+        cache_manager.cache_enabled.toggled.connect(
             lambda checked: self.config.update(cache_enabled=checked))
 
-        def clear_translation_cache():
-            self.plugin.clear_caches()
-            self.cache_count.emit()
-        self.cache_count.emit()
-        cache_button.clicked.connect(clear_translation_cache)
+        def recount_translation_cache():
+            return cache_manager.cache_size.setText(
+                _('Total: {}').format('%sMB' % TranslationCache.count()))
+        self.cache_count.connect(recount_translation_cache)
 
         def reveal_cache_files():
-            cache_dir = TranslationCache.get_dir()
-            if not os.path.exists(cache_dir):
+            cache_path = TranslationCache.cache_path
+            if not os.path.exists(cache_path):
                 return self.alert.pop(_('No cache exists.'), 'warning')
             cmd = 'open'
             if sys.platform.startswith('win32'):
                 cmd = 'explorer'
             if sys.platform.startswith('linux'):
                 cmd = 'xdg-open'
-            Popen([cmd, cache_dir])
-        cache_reveal.clicked.connect(reveal_cache_files)
+            Popen([cmd, cache_path])
+        cache_manager.cache_reveal.clicked.connect(reveal_cache_files)
 
-        cache_list = QListWidget()
-        item = QListWidgetItem('aaaa')
-        item.setSizeHint(QSize(0, 24))
-        cache_list.addItem(item)
-        layout.addWidget(cache_list)
+        def clear_translation_cache():
+            self.plugin.clear_caches()
+            self.cache_count.emit()
+            cache_manager.clear()
+        self.cache_count.emit()
+        cache_manager.clear_button.clicked.connect(clear_translation_cache)
 
-        control_widget = QWidget()
-        control_layout = QHBoxLayout(control_widget)
-        control_layout.setContentsMargins(0, 0, 0, 0)
-        control_layout.addStretch(1)
-        delete_cache = QPushButton(_('Delete'))
-        fresh_cache = QPushButton(_('Refresh'))
-        control_layout.addWidget(delete_cache)
-        control_layout.addWidget(fresh_cache)
-        layout.addWidget(control_widget)
+        cache_manager.delete_button.clicked.connect(cache_manager.delete)
 
-        layout.addStretch(1)
-
-        return widget
+        return cache_manager
 
     def test_proxy_connection(self):
         host = self.proxy_host.text()

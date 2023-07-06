@@ -102,6 +102,7 @@ class Translation:
 
     def translate_paragraph(self, paragraph):
         if paragraph.translation and not self.fresh:
+            paragraph.is_cache = True
             return
         self.streaming(paragraph)
         self.streaming('')
@@ -122,8 +123,7 @@ class Translation:
         paragraph.translation = translation
         paragraph.engine_name = self.translator.name
         paragraph.target_lang = self.translator.get_target_lang()
-
-        self.callback(paragraph)
+        paragraph.is_cache = False
 
     def handle(self, paragraphs=[]):
         start_time = time.time()
@@ -149,10 +149,15 @@ class Translation:
                           .format(progress_bar.count, progress_bar.total))
             progress_bar.increase_length()
 
+            self.callback(paragraph)
+
             if paragraph.error is None:
                 self.log(sep('-'))
                 self.log(_('Original: {}').format(paragraph.original))
-                self.log(_('Translation: {}').format(paragraph.translation))
+                message = _('Translation: {}')
+                if paragraph.is_cache:
+                    message = _('Translation (Cached): {}')
+                self.log(message.format(paragraph.translation))
             else:
                 self.log(sep('-'), True)
                 self.log(_('Original: {}').format(paragraph.original), True)
@@ -160,13 +165,13 @@ class Translation:
                 paragraph.error = None
 
         if sys.version_info >= (3, 7, 0):
-            from .concurrency.async_handler import AsyncHandler
+            from .concurrency import AsyncHandler
             handler = AsyncHandler(
                 self.translator.concurrency_limit, self.translate_paragraph,
                 process_translation, paragraphs)
             handler.handle()
         else:
-            from .concurrency.thread_handler import ThreadHandler
+            from .concurrency import ThreadHandler
             handler = ThreadHandler(
                 self.translator.concurrency_limit, self.translate_paragraph,
                 process_translation, paragraphs)
@@ -178,7 +183,6 @@ class Translation:
         self.log(sep())
         consuming = round((time.time() - start_time) / 60, 2)
         self.log('Time consuming: %s minutes' % consuming)
-        # self.log('Failed translation: %s' % failed_count)
         self.log(message)
         self.progress(1, message)
 

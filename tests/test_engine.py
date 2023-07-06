@@ -60,6 +60,6 @@ class TestDeepl(unittest.TestCase):
         with self.assertRaises(Exception) as e:
             self.translator.translate('Hello World!')
         self.assertIn(
-            _('Can not parse returned response. Raw data: {}\n')
-            .format('<dummy info>') + 'Traceback',
+            _('Can not parse returned response. Raw data: {}')
+            .format('\n<dummy info>\n') + 'Traceback',
             str(e.exception))
