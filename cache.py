@@ -6,9 +6,8 @@ import os.path
 import tempfile
 from glob import glob
 
-from .utils import uid
+from .utils import size_by_unit
 from .config import get_config
-from .element import Extraction
 
 
 class Paragraph:
@@ -26,6 +25,7 @@ class Paragraph:
         self.engine_name = engine_name
         self.target_lang = target_lang
 
+        self.is_cache = False
         self.error = None
 
     def get_attributes(self):
@@ -48,10 +48,12 @@ class TranslationCache:
     temp_path = os.path.join(dir_path, 'temp')
 
     def __init__(self, identity, persistence=True):
+        """An interruption may occur, resulting in the cache size being less
+        than 50,000 bytes. Therefore, we need to resave it again.
+        """
         self.persistence = persistence
-        self.file_path = self._path(
-            uid(identity, self.__version__, Extraction.__version__))
-        if os.path.exists(self.file_path):
+        self.file_path = self._path(identity)
+        if os.path.exists(self.file_path) and self.size() > 50000:
             self.fresh = False
         self.cache_only = False
         self.connection = sqlite3.connect(
@@ -71,15 +73,22 @@ class TranslationCache:
         total = 0
         for cache in glob(os.path.join(cls.cache_path, '*.db')):
             total += os.path.getsize(cache)
-        return '%sMB' % round(float(total) / (1000 ** 2), 2)
+        return size_by_unit(total, 'MB')
 
     @classmethod
     def clean(cls):
         shutil.rmtree(cls.dir_path, ignore_errors=True)
 
     @classmethod
-    def get_dir(cls):
-        return cls.dir_path
+    def get_list(cls):
+        names = []
+        for file_path in glob(os.path.join(cls.cache_path, '*.db')):
+            name = os.path.basename(file_path)
+            cache = cls(os.path.splitext(name)[0])
+            title = cache.get_info('title') or 'Unknown'
+            size = size_by_unit(os.path.getsize(file_path), 'MB')
+            names.append((title, size, name, file_path))
+        return names
 
     def size(self):
         return os.path.getsize(self.file_path)
@@ -112,14 +121,12 @@ class TranslationCache:
 
     def get_info(self, key):
         resource = self.cursor.execute(
-            'SELECT * FROM info WHERE key=?', (key,))
-        return resource.fetchone()[0]
+            'SELECT value FROM info WHERE key=?', (key,))
+        result = resource.fetchone()
+        return result[0] if result else None
 
     def save(self, original_group):
-        """An interruption may occur, resulting in the cache size being less
-        than 50,000 bytes. Therefore, we need to resave it again.
-        """
-        if self.is_fresh() or self.size() < 50000:
+        if self.is_fresh():
             for original_unit in original_group:
                 self.add(*original_unit)
 

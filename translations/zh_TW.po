@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-06-20 16:37+0800\n"
+"POT-Creation-Date: 2023-06-30 07:10+0800\n"
 "PO-Revision-Date: 2023-04-25 15:36+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -35,9 +35,6 @@ msgstr ""
 msgid "Preparing user interface..."
 msgstr ""
 
-msgid "Translation Failed"
-msgstr ""
-
 msgid "Start"
 msgstr ""
 
@@ -46,6 +43,10 @@ msgstr "輸入格式"
 
 msgid "Target Language"
 msgstr "目標語言"
+
+msgid ""
+"{} paragraph(s) were translated unsuccessfully. Would you like to retry?"
+msgstr ""
 
 msgid "Translation completed."
 msgstr "翻譯已完成。"
@@ -63,6 +64,9 @@ msgid "Review"
 msgstr ""
 
 msgid "Log"
+msgstr ""
+
+msgid "Errors"
 msgstr ""
 
 msgid "Translate All"
@@ -108,6 +112,9 @@ msgid "Your changes have been saved."
 msgstr ""
 
 msgid "Translation log"
+msgstr ""
+
+msgid "Error log"
 msgstr ""
 
 msgid "Are you sure you want to translate all {:n} paragraphs?"
@@ -300,6 +307,9 @@ msgstr ""
 msgid "Content"
 msgstr "內容"
 
+msgid "Cache"
+msgstr "快取"
+
 msgid "Preferred Mode"
 msgstr ""
 
@@ -344,18 +354,6 @@ msgstr "連接埠"
 
 msgid "Test"
 msgstr "測試"
-
-msgid "Cache"
-msgstr "快取"
-
-msgid "Reveal"
-msgstr ""
-
-msgid "Total: {}"
-msgstr "總計：{}"
-
-msgid "No cache exists."
-msgstr ""
 
 msgid "Job Log"
 msgstr "工作記錄"
@@ -489,6 +487,18 @@ msgstr ""
 msgid "Subject"
 msgstr ""
 
+msgid "Reveal"
+msgstr ""
+
+msgid "Total: {}"
+msgstr "總計：{}"
+
+msgid "No cache exists."
+msgstr ""
+
+msgid "Refresh"
+msgstr ""
+
 msgid "Proxy host or port is incorrect."
 msgstr "代理的主機或連接埠不正確。"
 
@@ -510,6 +520,9 @@ msgstr "{} 不是有效的規則運算式。"
 msgid "{} is not a valid CSS seletor."
 msgstr ""
 
+msgid "Translation canceled."
+msgstr ""
+
 msgid "No available API key."
 msgstr ""
 
@@ -519,11 +532,20 @@ msgstr ""
 msgid "Failed to retrieve data from translate engine API."
 msgstr "無法從翻譯引擎 API 擷取資料。"
 
-msgid "Will retry in {} seconds."
-msgstr "將在 {} 秒後重試。"
+msgid "Start to translate ebook content"
+msgstr "開始翻譯電子書內容"
 
-msgid "[{}] Retrying {} ... (timeout is {} seconds)."
-msgstr "[{}] 正在重試 {} ... ({} 秒後逾時)"
+msgid "Total items: {}"
+msgstr "項目總計：{}"
+
+msgid "Character count: {}"
+msgstr ""
+
+msgid "There is no content need to translate."
+msgstr "沒有需要翻譯的內容。"
+
+msgid "Translating: {}/{}"
+msgstr "翻譯：{}/{}"
 
 msgid "Original: {}"
 msgstr "原文：{}"
@@ -534,19 +556,7 @@ msgstr "譯文：{}"
 msgid "Translation (Cached): {}"
 msgstr "譯文 (快取)：{}"
 
-msgid "Start to translate ebook content"
-msgstr "開始翻譯電子書內容"
-
-msgid "Total items: {}"
-msgstr "項目總計：{}"
-
-msgid "There is no content need to translate."
-msgstr "沒有需要翻譯的內容。"
-
-msgid "Translating: {}/{}"
-msgstr "翻譯：{}/{}"
-
-msgid "Translation canceled."
+msgid "Error: {}"
 msgstr ""
 
 msgid "Translate Book"
@@ -596,3 +606,9 @@ msgstr "翻譯已完成"
 
 msgid "The translation of \"{}\" was completed. Do you want to open the book?"
 msgstr "「{}」的翻譯已完成。是否想要立即閱讀這本電子書？"
+
+#~ msgid "Will retry in {} seconds."
+#~ msgstr "將在 {} 秒後重試。"
+
+#~ msgid "[{}] Retrying {} ... (timeout is {} seconds)."
+#~ msgstr "[{}] 正在重試 {} ... ({} 秒後逾時)"

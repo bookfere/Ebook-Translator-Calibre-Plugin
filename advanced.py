@@ -1,13 +1,15 @@
 import time
-import traceback
 from types import MethodType
 
+from calibre.constants import __version__
 from calibre.gui2.dialogs.message_box import JobError
 
+from . import EbookTranslator
 from .config import get_config
-from .cache import Paragraph, get_cache
+from .utils import uid
+from .cache import Paragraph, TranslationCache, get_cache
 from .translation import get_engine_class, get_translator, get_translation
-from .element import get_ebook_elements, get_element_handler
+from .element import get_ebook_elements, get_element_handler, Extraction
 from .convertion import ebook_pages
 from .components import (
     EngineList, layout_info, SourceLang, TargetLang, InputFormat, OutputFormat,
@@ -67,12 +69,21 @@ class PreparationWorker(QObject):
     def prepare_ebook_data(self):
         input_path = self.ebook.get_input_path()
         element_handler = get_element_handler()
-        cache_id = (
+        merge_lenth = str(element_handler.get_merge_length())
+        cache_id = uid(
             input_path + self.engine_class.name + self.ebook.target_lang
-            + str(element_handler.get_merge_length()))
+            + merge_lenth + TranslationCache.__version__
+            + Extraction.__version__)
         cache = get_cache(cache_id)
 
         if cache.is_fresh() or not cache.is_persistence():
+            cache.set_info('title', self.ebook.title)
+            cache.set_info('engine_name', self.engine_class.name)
+            cache.set_info('target_lang', self.ebook.target_lang)
+            cache.set_info('merge_length', merge_lenth)
+            cache.set_info('plugin_version', EbookTranslator.__version__)
+            cache.set_info('calibre_version', __version__)
+            # --------------------------
             a = time.time()
             # --------------------------
             self.progress_message.emit(_('Extracting ebook content...'))
@@ -145,6 +156,7 @@ class TranslationWorker(QObject):
 
     @pyqtSlot(list, bool)
     def translate_paragraphs(self, paragraphs=[], fresh=False):
+        """:fresh: retranslate all paragraphs."""
         self.start.emit()
         translator = get_translator(self.engine_class)
         translator.set_source_lang(self.source_lang)
@@ -533,9 +545,11 @@ class AdvancedTranslation(QDialog):
                 self.current_engine.lang_codes.get('source'),
                 self.current_engine.config.get('source_lang'),
                 not self.current_engine.is_custom())
+            lang = self.current_engine.config.get('target_lang')
+            if target_lang.findText(self.ebook.target_lang):
+                lang = self.ebook.target_lang
             target_lang.refresh.emit(
-                self.current_engine.lang_codes.get('target'),
-                self.current_engine.config.get('target_lang'))
+                self.current_engine.lang_codes.get('target'), lang)
         refresh_languages()
         self.ebook.set_source_lang(source_lang.currentText())
 

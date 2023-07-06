@@ -35,14 +35,18 @@ class Base:
         self.bad_api_keys = []
         self.api_key = self._get_api_key()
 
-        self.concurrency_limit = int(self.config.get(
-            'concurrency_limit', self.concurrency_limit))
-        self.request_interval = self.config.get(
-            'request_interval', self.request_interval)
-        self.request_attempt = int(self.config.get(
-            'request_attempt', self.request_attempt))
-        self.request_timeout = self.config.get(
-            'request_timeout', self.request_timeout)
+        concurrency_limit = self.config.get('concurrency_limit')
+        if concurrency_limit is not None:
+            self.concurrency_limit = int(concurrency_limit)
+        request_interval = self.config.get('request_interval')
+        if request_interval is not None:
+            self.request_interval = request_interval
+        request_attempt = self.config.get('request_attempt')
+        if request_attempt is not None:
+            self.request_attempt = int(request_attempt)
+        request_timeout = self.config.get('request_timeout')
+        if request_timeout is not None:
+            self.request_timeout = request_timeout
 
     @classmethod
     def load_lang_codes(cls, codes):
@@ -168,11 +172,10 @@ class Base:
         except Exception as e:
             if silence:
                 return None
-            error = traceback.format_exc()
-            raw_data = error if result is None else result + '\n' + error
-            raise Exception(
-                _('Can not parse returned response. Raw data: {}')
-                .format(raw_data))
+            error = '\n%s' % traceback.format_exc()
+            data = error if result is None else '\n%s%s' % (result, error)
+            raise Exception(_('Can not parse returned response. Raw data: {}')
+                            .format(data))
 
     def get_usage(self):
         return None

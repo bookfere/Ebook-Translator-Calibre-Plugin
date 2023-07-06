@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-06-20 16:37+0800\n"
+"POT-Creation-Date: 2023-06-30 07:10+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -37,9 +37,6 @@ msgstr ""
 msgid "Preparing user interface..."
 msgstr ""
 
-msgid "Translation Failed"
-msgstr ""
-
 msgid "Start"
 msgstr ""
 
@@ -48,6 +45,10 @@ msgstr "Formato de entrada"
 
 msgid "Target Language"
 msgstr "Lenguaje a traducir"
+
+msgid ""
+"{} paragraph(s) were translated unsuccessfully. Would you like to retry?"
+msgstr ""
 
 msgid "Translation completed."
 msgstr "Traducción completada."
@@ -65,6 +66,9 @@ msgid "Review"
 msgstr ""
 
 msgid "Log"
+msgstr ""
+
+msgid "Errors"
 msgstr ""
 
 msgid "Translate All"
@@ -110,6 +114,9 @@ msgid "Your changes have been saved."
 msgstr ""
 
 msgid "Translation log"
+msgstr ""
+
+msgid "Error log"
 msgstr ""
 
 msgid "Are you sure you want to translate all {:n} paragraphs?"
@@ -302,6 +309,9 @@ msgstr ""
 msgid "Content"
 msgstr "Contenido"
 
+msgid "Cache"
+msgstr "Cache"
+
 msgid "Preferred Mode"
 msgstr ""
 
@@ -346,18 +356,6 @@ msgstr "Puerto"
 
 msgid "Test"
 msgstr "Probar"
-
-msgid "Cache"
-msgstr "Cache"
-
-msgid "Reveal"
-msgstr ""
-
-msgid "Total: {}"
-msgstr "Total: {}"
-
-msgid "No cache exists."
-msgstr ""
 
 msgid "Job Log"
 msgstr ""
@@ -493,6 +491,18 @@ msgstr ""
 msgid "Subject"
 msgstr ""
 
+msgid "Reveal"
+msgstr ""
+
+msgid "Total: {}"
+msgstr "Total: {}"
+
+msgid "No cache exists."
+msgstr ""
+
+msgid "Refresh"
+msgstr ""
+
 msgid "Proxy host or port is incorrect."
 msgstr "El host o puerto proxy es incorrecto."
 
@@ -514,6 +524,9 @@ msgstr "{} no es una expresión regular válida."
 msgid "{} is not a valid CSS seletor."
 msgstr ""
 
+msgid "Translation canceled."
+msgstr ""
+
 msgid "No available API key."
 msgstr ""
 
@@ -523,11 +536,20 @@ msgstr ""
 msgid "Failed to retrieve data from translate engine API."
 msgstr "No se pudieron recuperar los datos de la API del motor de traducción."
 
-msgid "Will retry in {} seconds."
-msgstr "Se volverá a intentar en {} segundos."
+msgid "Start to translate ebook content"
+msgstr "Comience a traducir contenido de libros electrónicos"
 
-msgid "[{}] Retrying {} ... (timeout is {} seconds)."
-msgstr "[{}] Reintentando {} ... (el tiempo de espera es de {} segundos)."
+msgid "Total items: {}"
+msgstr "Articulos totales: {}"
+
+msgid "Character count: {}"
+msgstr ""
+
+msgid "There is no content need to translate."
+msgstr "No hay necesidad de traducir el contenido."
+
+msgid "Translating: {}/{}"
+msgstr "Traduciendo: {}/{}"
 
 msgid "Original: {}"
 msgstr "Original: {}"
@@ -538,19 +560,7 @@ msgstr "Traducción: {}"
 msgid "Translation (Cached): {}"
 msgstr "Traducción (En caché): {}"
 
-msgid "Start to translate ebook content"
-msgstr "Comience a traducir contenido de libros electrónicos"
-
-msgid "Total items: {}"
-msgstr "Articulos totales: {}"
-
-msgid "There is no content need to translate."
-msgstr "No hay necesidad de traducir el contenido."
-
-msgid "Translating: {}/{}"
-msgstr "Traduciendo: {}/{}"
-
-msgid "Translation canceled."
+msgid "Error: {}"
 msgstr ""
 
 msgid "Translate Book"
@@ -600,3 +610,9 @@ msgstr "Traducción completada"
 
 msgid "The translation of \"{}\" was completed. Do you want to open the book?"
 msgstr "La traducción de \"{}\" se completó. ¿Quieres abrir el libro?"
+
+#~ msgid "Will retry in {} seconds."
+#~ msgstr "Se volverá a intentar en {} segundos."
+
+#~ msgid "[{}] Retrying {} ... (timeout is {} seconds)."
+#~ msgstr "[{}] Reintentando {} ... (el tiempo de espera es de {} segundos)."
