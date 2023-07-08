@@ -1,5 +1,6 @@
 import time
 import uuid
+import traceback
 from types import GeneratorType
 
 from ..lib.utils import sorted_mixed_keys
@@ -75,10 +76,9 @@ class EngineWorker(QObject):
                 self.clear.emit()
                 self.result.emit(translation)
             self.complete.emit()
-        except Exception as e:
+        except Exception:
             self.clear.emit()
-            self.result.emit(str(e))
-            # raise e
+            self.result.emit(traceback.format_exc())
 
     @pyqtSlot()
     def check_usage(self):

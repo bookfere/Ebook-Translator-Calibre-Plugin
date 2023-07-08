@@ -1,3 +1,4 @@
+import time
 import traceback
 from threading import Thread
 
@@ -11,22 +12,25 @@ except ImportError:
 
 
 class ThreadHandler:
-    def __init__(self, concurrency_limit, translate_paragraph,
-                 process_translation, paragraphs):
+    def __init__(self, paragraphs, concurrency_limit, translate_paragraph,
+                 process_translation, request_interval):
         self.queue = queue.Queue()
         for paragraph in paragraphs:
             self.queue.put_nowait(paragraph)
         self.done_queue = queue.Queue()
 
-        self.process_translation = process_translation
-        self.translate_paragraph = translate_paragraph
         self.concurrency_limit = concurrency_limit or 10  # 0 or 10
+        self.translate_paragraph = translate_paragraph
+        self.process_translation = process_translation
+        self.request_interval = request_interval
 
     def translation_thread(self):
         while not self.queue.empty():
             try:
                 paragraph = self.queue.get()
                 self.translate_paragraph(paragraph)
+                if self.queue.qsize() > 0:
+                    time.sleep(self.request_interval)
                 self.done_queue.put(paragraph)
                 self.queue.task_done()
             except TranslationCanceled:

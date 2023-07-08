@@ -105,7 +105,7 @@ class ChatgptTranslate(Base):
                     break
                 delta = json.loads(chunk)['choices'][0]['delta']
                 if 'content' in delta:
-                    yield delta['content']
+                    yield str(delta['content'])
 
     def parse(self, data):
         return json.loads(data)['choices'][0]['message']['content']
