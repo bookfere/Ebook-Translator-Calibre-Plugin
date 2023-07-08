@@ -177,7 +177,9 @@ class Extraction:
         patterns = []
         for rule in rules:
             if self.rule_mode == 'normal':
-                rule = re.compile(rule, re.I)
+                rule = re.compile(re.escape(rule), re.I)
+            elif self.rule_mode == 'case':
+                rule = re.compile(re.escape(rule))
             else:
                 rule = re.compile(rule)
             patterns.append(rule)
