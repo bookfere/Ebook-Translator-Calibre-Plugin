@@ -5,7 +5,8 @@ import json
 import os.path
 from subprocess import Popen, PIPE
 
-from ..exceptions.engine import BadApiKeyFormat
+from ..lib.exception import BadApiKeyFormat
+
 from .base import Base
 from .languages import google
 

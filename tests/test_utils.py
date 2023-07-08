@@ -1,7 +1,7 @@
 import unittest
 from types import GeneratorType
 
-from ..utils import uid, trim, chunk, group
+from ..lib.utils import uid, trim, chunk, group
 
 
 class TestUtils(unittest.TestCase):

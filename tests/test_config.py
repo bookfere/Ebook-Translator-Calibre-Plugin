@@ -1,7 +1,7 @@
 import unittest
-from unittest.mock import Mock
+from unittest.mock import call, Mock
 
-from ..config import (
+from ..lib.config import (
     Configuration, get_config, ver200_upgrade, ver203_upgrade)
 
 
@@ -184,3 +184,10 @@ class TestConfig(unittest.TestCase):
         self.config.preferences = Mock()
         self.config.commit()
         self.config.preferences.commit.assert_called_once()
+
+    def test_save(self):
+        self.config.preferences = Mock()
+        self.config.save(b=2)
+        self.assertEqual(
+            self.config.preferences.mock_calls,
+            [call.update(b=2), call.commit()])

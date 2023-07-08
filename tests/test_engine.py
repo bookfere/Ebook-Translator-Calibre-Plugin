@@ -1,6 +1,6 @@
 import re
 import unittest
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 
 from ..engines.base import Base
 from ..engines.deepl import DeeplTranslate

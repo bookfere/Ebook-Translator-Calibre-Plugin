@@ -1,7 +1,7 @@
 import asyncio
 import concurrent.futures
 
-from ..exceptions import TranslationCanceled
+from .exception import TranslationCanceled
 
 
 class AsyncHandler:
@@ -54,7 +54,7 @@ class AsyncHandler:
         tasks = await self.create_tasks()
         await self.queue.join()
         await self.done_queue.join()
-        # Terminate infinitive loop worker
+        # Terminate infinitive loop worker.
         for task in tasks:
             task.cancel()
         try:

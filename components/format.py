@@ -1,6 +1,6 @@
 from calibre.ebooks.conversion.plumber import supported_input_formats
 
-from ..config import get_config
+from ..lib.config import get_config
 
 
 try:

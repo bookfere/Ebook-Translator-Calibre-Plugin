@@ -1,7 +1,7 @@
 from calibre.utils.config import JSONConfig
 
-from . import EbookTranslator
-from .engines import (
+from .. import EbookTranslator
+from ..engines import (
     GoogleFreeTranslate, ChatgptTranslate, AzureChatgptTranslate)
 
 
@@ -75,6 +75,10 @@ class Configuration:
 
     def commit(self):
         self.preferences.commit()
+
+    def save(self, *args, **kwargs):
+        self.update(*args, **kwargs)
+        self.commit()
 
 
 def get_config():

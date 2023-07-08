@@ -1,19 +1,15 @@
 import re
 import os
-import sys
 import os.path
-from subprocess import Popen
 
+from .lib.config import get_config
+from .lib.utils import css, is_proxy_availiable
+from .lib.translation import get_engine_class
+
+from .engines import builtin_engines
 from .components import (
     layout_info, AlertMessage, TargetLang, SourceLang, EngineList,
-    EngineTester, get_divider, ManageCustomEngine, InputFormat, OutputFormat,
-    CacheManager)
-from .config import get_config
-from .utils import css, is_proxy_availiable
-from .translation import get_engine_class
-from .engines import builtin_engines
-from .cache import TranslationCache
-
+    EngineTester, get_divider, ManageCustomEngine, InputFormat, OutputFormat)
 
 try:
     from qt.core import (
@@ -38,7 +34,6 @@ load_translations()
 
 
 class TranslationSetting(QDialog):
-    cache_count = pyqtSignal()
     save_config = pyqtSignal(int)
 
     def __init__(self, plugin, parent, icon):
@@ -59,21 +54,19 @@ class TranslationSetting(QDialog):
         tab_1 = self.tabs.addTab(self.layout_general(), _('General'))
         tab_2 = self.tabs.addTab(self.layout_engine(), _('Engine'))
         tab_3 = self.tabs.addTab(self.layout_content(), _('Content'))
-        tab_4 = self.tabs.addTab(self.layout_cache(), _('Cache'))
         self.tabs.setStyleSheet('QTabBar::tab {min-width:120px;}')
 
         config_actions = {
             tab_1: self.update_general_config,
             tab_2: self.update_engine_config,
             tab_3: self.update_content_config,
-            tab_4: self.update_cache_config,
         }
         self.save_config.connect(lambda index: config_actions.get(index)())
 
-        def tabs_clicked(index):
-            index == 3 and self.cache_count.emit()
-            self.config.refresh()
-        self.tabs.tabBarClicked.connect(tabs_clicked)
+        # def tabs_clicked(index):
+        #     index == 3 and self.cache_count.emit()
+        #     self.config.refresh()
+        # self.tabs.tabBarClicked.connect(tabs_clicked)
 
         layout.addWidget(self.tabs)
         layout.addWidget(layout_info())
@@ -751,36 +744,7 @@ class TranslationSetting(QDialog):
     def layout_cache(self):
         cache_manager = CacheManager(TranslationCache.get_list())
 
-        cache_manager.cache_enabled.setChecked(
-            self.config.get('cache_enabled'))
-        cache_manager.cache_enabled.toggled.connect(
-            lambda checked: self.config.update(cache_enabled=checked))
 
-        def recount_translation_cache():
-            return cache_manager.cache_size.setText(
-                _('Total: {}').format('%sMB' % TranslationCache.count()))
-        self.cache_count.connect(recount_translation_cache)
-
-        def reveal_cache_files():
-            cache_path = TranslationCache.cache_path
-            if not os.path.exists(cache_path):
-                return self.alert.pop(_('No cache exists.'), 'warning')
-            cmd = 'open'
-            if sys.platform.startswith('win32'):
-                cmd = 'explorer'
-            if sys.platform.startswith('linux'):
-                cmd = 'xdg-open'
-            Popen([cmd, cache_path])
-        cache_manager.cache_reveal.clicked.connect(reveal_cache_files)
-
-        def clear_translation_cache():
-            self.plugin.clear_caches()
-            self.cache_count.emit()
-            cache_manager.clear()
-        self.cache_count.emit()
-        cache_manager.clear_button.clicked.connect(clear_translation_cache)
-
-        cache_manager.delete_button.clicked.connect(cache_manager.delete)
 
         return cache_manager
 

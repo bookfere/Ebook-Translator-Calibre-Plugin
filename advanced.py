@@ -4,13 +4,14 @@ from types import MethodType
 from calibre.constants import __version__
 from calibre.gui2.dialogs.message_box import JobError
 
+from .lib.utils import uid
+from .lib.config import get_config
+from .lib.cache import Paragraph, TranslationCache, get_cache
+from .lib.translation import get_engine_class, get_translator, get_translation
+from .lib.element import get_ebook_elements, get_element_handler, Extraction
+from .lib.convertion import ebook_pages
+
 from . import EbookTranslator
-from .config import get_config
-from .utils import uid
-from .cache import Paragraph, TranslationCache, get_cache
-from .translation import get_engine_class, get_translator, get_translation
-from .element import get_ebook_elements, get_element_handler, Extraction
-from .convertion import ebook_pages
 from .components import (
     EngineList, layout_info, SourceLang, TargetLang, InputFormat, OutputFormat,
     AlertMessage, AdvancedTranslationTable)
@@ -69,10 +70,10 @@ class PreparationWorker(QObject):
     def prepare_ebook_data(self):
         input_path = self.ebook.get_input_path()
         element_handler = get_element_handler()
-        merge_lenth = str(element_handler.get_merge_length())
+        merge_length = str(element_handler.get_merge_length())
         cache_id = uid(
             input_path + self.engine_class.name + self.ebook.target_lang
-            + merge_lenth + TranslationCache.__version__
+            + merge_length + TranslationCache.__version__
             + Extraction.__version__)
         cache = get_cache(cache_id)
 
@@ -80,7 +81,7 @@ class PreparationWorker(QObject):
             cache.set_info('title', self.ebook.title)
             cache.set_info('engine_name', self.engine_class.name)
             cache.set_info('target_lang', self.ebook.target_lang)
-            cache.set_info('merge_length', merge_lenth)
+            cache.set_info('merge_length', merge_length)
             cache.set_info('plugin_version', EbookTranslator.__version__)
             cache.set_info('calibre_version', __version__)
             # --------------------------
@@ -174,7 +175,7 @@ class TranslationWorker(QObject):
 
 
 class CreateTranslationProject(QDialog):
-    start_translation = pyqtSignal()
+    start_translation = pyqtSignal(object)
 
     def __init__(self, parent, ebook):
         QDialog.__init__(self, parent)
@@ -232,7 +233,7 @@ class CreateTranslationProject(QDialog):
     @pyqtSlot()
     def show_advanced(self):
         self.done(0)
-        self.start_translation.emit()
+        self.start_translation.emit(self.ebook)
 
 
 class AdvancedTranslation(QDialog):

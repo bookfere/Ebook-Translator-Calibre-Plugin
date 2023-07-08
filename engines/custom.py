@@ -1,7 +1,8 @@
 import json
 from lxml import etree
 
-from ..utils import is_str
+from ..lib.utils import is_str
+
 from . import builtin_engines
 from .base import Base
 

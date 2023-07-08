@@ -2,14 +2,15 @@ from calibre.constants import DEBUG
 from calibre.gui2.actions import InterfaceAction
 
 from . import EbookTranslator
-from .utils import uid
-from .config import get_config, upgrade_config
-from .ebook import Ebooks
+from .lib.utils import uid
+from .lib.config import get_config, upgrade_config
+from .lib.ebook import Ebooks
+from .lib.cache import TranslationCache
 from .batch import BatchTranslation
-from .cache import TranslationCache
 from .setting import TranslationSetting
+from .cache import CacheManager
 from .about import AboutDialog
-from .worker import ConvertionWorker
+from .lib.worker import ConvertionWorker
 from .components import AlertMessage, ModeSelection
 from .advanced import CreateTranslationProject, AdvancedTranslation
 
@@ -20,7 +21,6 @@ except ImportError:
     from calibre.gui2.convert.single import get_input_format_for_book
 
 try:
-    get_input_format_for_book
     from qt.core import QMenu
 except ImportError:
     from PyQt5.Qt import QMenu
@@ -48,7 +48,9 @@ class EbookTranslatorGui(InterfaceAction):
         menu.addAction(
             _('Advanced Mode'), self.show_advanced_translation)
         menu.addAction(_('Batch Mode'), self.show_batch_translation)
+        menu.addSeparator()
         menu.addAction(_('Setting'), self.show_setting)
+        menu.addAction(_('Cache'), self.show_cache)
         menu.addAction(_('About'), self.show_about)
         if DEBUG:
             menu.addSeparator()
@@ -65,29 +67,27 @@ class EbookTranslatorGui(InterfaceAction):
 
         upgrade_config()
 
+    def advanced_translation_window(self, ebook):
+        name = 'advanced_' + uid(ebook.get_input_path())
+        if self.show_window(name):
+            return
+        worker = ConvertionWorker(self.gui, self.icon)
+        window = AdvancedTranslation(
+            self.gui, self.qaction.icon(), worker, ebook)
+        window.setMinimumWidth(1200)
+        window.setMinimumHeight(700)
+        window.setWindowTitle(
+            '%s - %s' % (_('Advanced Mode'), self.title))
+        window.show()
+        self.add_window(name, window)
+
     def show_advanced_translation(self):
         ebooks = self.get_selected_ebooks()
         if len(ebooks) < 1:
             return self.alert.pop(
                 _('Please choose one single book.'), 'warning')
-        ebook = ebooks.first()
-
-        def advanced_translation_window():
-            name = 'advanced_' + uid(ebook.get_input_path())
-            if self.show_window(name):
-                return
-            worker = ConvertionWorker(self.gui, self.icon)
-            window = AdvancedTranslation(
-                self.gui, self.qaction.icon(), worker, ebook)
-            window.setMinimumWidth(1200)
-            window.setMinimumHeight(700)
-            window.setWindowTitle(
-                '%s - %s' % (_('Advanced Mode'), self.title))
-            window.show()
-            self.add_window(name, window)
-
-        window = CreateTranslationProject(self.gui, ebook)
-        window.start_translation.connect(advanced_translation_window)
+        window = CreateTranslationProject(self.gui, ebooks.first())
+        window.start_translation.connect(self.advanced_translation_window)
         window.setModal(True)
         window.setWindowTitle(self.title)
         window.show()
@@ -120,6 +120,17 @@ class EbookTranslatorGui(InterfaceAction):
         window.setWindowIcon(self.icon)
         window.show()
         self.add_window('setting', window)
+
+    def show_cache(self):
+        if self.show_window('cache'):
+            return
+        window = CacheManager(self, self.gui)
+        window.setMinimumWidth(600)
+        window.setMinimumHeight(520)
+        window.setWindowTitle('%s - %s' % (_('Cache'), self.title))
+        window.setWindowIcon(self.icon)
+        window.show()
+        self.add_window('cache', window)
 
     def show_about(self):
         if self.show_window('about'):
@@ -181,7 +192,10 @@ class EbookTranslatorGui(InterfaceAction):
                 _('Cannot clear cache while there are running jobs.'),
                 'warning')
         action = self.alert.ask(_('Are you sure you want clear all caches?'))
-        action == 'yes' and TranslationCache.clean()
+        if action == 'yes':
+            TranslationCache.clean()
+            return True
+        return False
 
     def get_selected_ebooks(self):
         ebooks = Ebooks()

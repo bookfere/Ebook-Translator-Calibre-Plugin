@@ -2,9 +2,9 @@ import unittest
 from unittest.mock import patch, Mock
 
 from lxml import etree
-from ..utils import ns
-from ..cache import Paragraph
-from ..element import (
+from ..lib.utils import ns
+from ..lib.cache import Paragraph
+from ..lib.element import (
     get_string, get_name, Glossary, Element, Extraction, ElementHandler)
 from ..engines import DeeplFreeTranslate
 from ..engines.base import Base
@@ -36,7 +36,7 @@ class TestGlossary(unittest.TestCase):
         self.assertIsInstance(glossary, dict)
         self.assertEqual(0, len(glossary))
 
-    @patch('calibre_plugins.ebook_translator.element.open')
+    @patch('calibre_plugins.ebook_translator.lib.element.open')
     def test_load_from_file(self, mock_open):
         def mock_open_method(path, mode, newline=None):
             if path == '/path/to/glossary.txt':
@@ -390,7 +390,7 @@ class TestElementHandler(unittest.TestCase):
         self.elements[-3].set_ignored(True)
         self.handler = ElementHandler()
 
-    @patch('calibre_plugins.ebook_translator.element.uid')
+    @patch('calibre_plugins.ebook_translator.lib.element.uid')
     def test_prepare_original(self, mock_uid):
         mock_uid.side_effect = ['m1', 'm2', 'm3', 'm4', 'm5']
         self.assertEqual([
@@ -402,7 +402,7 @@ class TestElementHandler(unittest.TestCase):
             (4, 'm5', '<p></p>', '', True, None, 'p1')],
             self.handler.prepare_original(self.elements))
 
-    @patch('calibre_plugins.ebook_translator.element.uid')
+    @patch('calibre_plugins.ebook_translator.lib.element.uid')
     def test_prepare_original_merged(self, mock_uid):
         mock_uid.return_value = 'm1'
         self.handler.merge_length = 1000

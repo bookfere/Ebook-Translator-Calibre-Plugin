@@ -5,7 +5,8 @@ from tempfile import gettempdir
 from calibre.constants import __version__
 from calibre.ebooks.conversion.plumber import Plumber
 
-from . import EbookTranslator
+from .. import EbookTranslator
+
 from .utils import log, sep, uid
 from .cache import get_cache, TranslationCache
 from .element import get_ebook_elements, get_element_handler, Extraction
@@ -29,8 +30,8 @@ def ebook_pages(input_path):
     return pages
 
 
-def convert_book(input_path, output_path, source_lang, target_lang,
-                 cache_only, notification):
+def convert_book(ebook_title, input_path, output_path, source_lang,
+                 target_lang, cache_only, notification):
     """ The following parameters need attention:
     :cache_only: Only use the translation which exists in the cache.
     :notification: It is automatically added by arbitrary_n.
@@ -43,12 +44,18 @@ def convert_book(input_path, output_path, source_lang, target_lang,
     element_handler.set_translation_lang(
         translator.get_iso639_target_code(target_lang))
 
+    merge_length = str(element_handler.get_merge_length())
     identity = uid(
         input_path + translator.name + target_lang
-        + str(element_handler.get_merge_length())
-        + TranslationCache.__version__ + Extraction.__version__)
+        + merge_length + TranslationCache.__version__ + Extraction.__version__)
     cache = get_cache(identity)
     cache.set_cache_only(cache_only)
+    cache.set_info('title', ebook_title)
+    cache.set_info('engine_name', translator.name)
+    cache.set_info('target_lang', target_lang)
+    cache.set_info('merge_length', merge_length)
+    cache.set_info('plugin_version', EbookTranslator.__version__)
+    cache.set_info('calibre_version', __version__)
 
     translation = get_translation(
         translator, lambda text, error=False: log.info(text))

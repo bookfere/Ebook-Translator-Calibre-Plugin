@@ -1,8 +1,8 @@
 import os
 import os.path
 
-from .config import get_config
-from .translation import get_engine_class
+from .lib.config import get_config
+from .lib.translation import get_engine_class
 from .components import (
     layout_info, AlertMessage, SourceLang, TargetLang, InputFormat,
     OutputFormat)
