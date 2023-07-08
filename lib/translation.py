@@ -4,12 +4,13 @@ import json
 import traceback
 from types import GeneratorType
 
+from ..engines import builtin_engines
+from ..engines import GoogleFreeTranslate
+from ..engines.custom import CustomTranslate
+
 from .utils import sep, dummy
 from .config import get_config
-from .engines import builtin_engines
-from .engines import GoogleFreeTranslate
-from .engines.custom import CustomTranslate
-from .exceptions import (
+from .exception import (
     BadApiKeyFormat, NoAvailableApiKey, TranslationCanceled, TranslationFailed)
 
 
@@ -18,19 +19,20 @@ load_translations()
 
 class ProgressBar:
     total = 0
-    count = 0
     length = 0.0
     step = 0
 
-    def __init__(self, total):
+    _count = 0
+
+    def load(self, total):
         self.total = total
         self.step = 1.0 / total
 
-    def increase_count(self):
-        self.count += 1
-
-    def increase_length(self):
+    @property
+    def count(self):
+        self._count += 1
         self.length += self.step
+        return self._count
 
 
 class Translation:
@@ -44,6 +46,9 @@ class Translation:
         self.streaming = dummy
         self.callback = dummy
         self.cancel_request = dummy
+
+        self.total = 0
+        self.progress_bar = ProgressBar()
 
     def set_fresh(self, fresh):
         self.fresh = fresh
@@ -82,6 +87,7 @@ class Translation:
             raise TranslationCanceled(_('Translation canceled.'))
         except Exception as e:
             self.abort_count += 1
+            # Cancel the request if there are more than 10 continuous failures.
             if self.cancel_request() or self.abort_count >= 10:
                 raise TranslationCanceled(_('Translation canceled.'))
             if self.translator.need_change_api_key(str(e).lower()):
@@ -101,24 +107,29 @@ class Translation:
             return self._translate_text(text, retry, interval)
 
     def translate_paragraph(self, paragraph):
+        if self.cancel_request():
+            raise TranslationCanceled(_('Translation canceled.'))
         if paragraph.translation and not self.fresh:
             paragraph.is_cache = True
             return
-        self.streaming(paragraph)
         self.streaming('')
         self.streaming(_('Translating...'))
         translation = self._translate_text(paragraph.original)
         # Process streaming text
         if isinstance(translation, GeneratorType):
-            temp = ''
-            clear = True
-            for char in translation:
-                if clear:
-                    self.streaming('')
-                    clear = False
-                self.streaming(char)
-                time.sleep(0.05)
-                temp += char
+            if self.total == 1:
+                # Only for a single translation.
+                temp = ''
+                clear = True
+                for char in translation:
+                    if clear:
+                        self.streaming('')
+                        clear = False
+                    self.streaming(char)
+                    time.sleep(0.05)
+                    temp += char
+            else:
+                temp = ''.join([char for char in translation])
             translation = temp.replace('\n', ' ')
         paragraph.translation = translation
         paragraph.engine_name = self.translator.name
@@ -127,28 +138,26 @@ class Translation:
 
     def handle(self, paragraphs=[]):
         start_time = time.time()
-        total = 0
         char_count = 0
         for paragraph in paragraphs:
-            total += 1
+            self.total += 1
             char_count += len(paragraph.original)
 
         self.log(sep())
         self.log(_('Start to translate ebook content'))
         self.log(sep())
-        self.log(_('Total items: {}').format(total))
+        self.log(_('Total items: {}').format(self.total))
         self.log(_('Character count: {}'.format(char_count)))
-        if total < 1:
+        if self.total < 1:
             raise Exception(_('There is no content need to translate.'))
-
-        progress_bar = ProgressBar(total)
+        self.progress_bar.load(self.total)
 
         def process_translation(paragraph):
-            progress_bar.increase_count()
-            self.progress(progress_bar.length, _('Translating: {}/{}')
-                          .format(progress_bar.count, progress_bar.total))
-            progress_bar.increase_length()
+            self.progress(
+                self.progress_bar.length, _('Translating: {}/{}')
+                .format(self.progress_bar.count, self.progress_bar.total))
 
+            self.streaming(paragraph)
             self.callback(paragraph)
 
             if paragraph.error is None:
@@ -165,13 +174,13 @@ class Translation:
                 paragraph.error = None
 
         if sys.version_info >= (3, 7, 0):
-            from .concurrency import AsyncHandler
+            from .async_handler import AsyncHandler
             handler = AsyncHandler(
                 self.translator.concurrency_limit, self.translate_paragraph,
                 process_translation, paragraphs)
             handler.handle()
         else:
-            from .concurrency import ThreadHandler
+            from .thread_handler import ThreadHandler
             handler = ThreadHandler(
                 self.translator.concurrency_limit, self.translate_paragraph,
                 process_translation, paragraphs)

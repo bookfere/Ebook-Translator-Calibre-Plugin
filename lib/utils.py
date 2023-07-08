@@ -5,7 +5,7 @@ import hashlib
 
 from calibre.utils.logging import Log
 
-from .lib.cssselect import GenericTranslator, SelectorError
+from ..lib.cssselect import GenericTranslator, SelectorError
 
 
 ns = {'x': 'http://www.w3.org/1999/xhtml'}

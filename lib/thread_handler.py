@@ -1,7 +1,7 @@
 import traceback
 from threading import Thread
 
-from ..exceptions import TranslationCanceled
+from .exception import TranslationCanceled
 
 
 try:

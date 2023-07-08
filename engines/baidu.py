@@ -4,7 +4,8 @@ import random
 import hashlib
 
 from .. import _z
-from ..exceptions.engine import BadApiKeyFormat
+from ..lib.exception import BadApiKeyFormat
+
 from .base import Base
 from .languages import baidu
 

@@ -1,6 +1,6 @@
 import json
 import unittest
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 
 from ..engines.custom import (
     create_engine_template, load_engine_data, CustomTranslate)

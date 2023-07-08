@@ -2,10 +2,11 @@ import time
 import uuid
 from types import GeneratorType
 
-from ..utils import sorted_mixed_keys
-from ..config import get_config
+from ..lib.utils import sorted_mixed_keys
+from ..lib.config import get_config
 from ..engines.custom import create_engine_template, load_engine_data
 from ..engines import builtin_engines, GoogleFreeTranslate
+
 from .lang import SourceLang, TargetLang
 from .alert import AlertMessage
 

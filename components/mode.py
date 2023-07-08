@@ -1,4 +1,4 @@
-from ..config import get_config
+from ..lib.config import get_config
 
 
 try:

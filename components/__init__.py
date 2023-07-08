@@ -5,7 +5,6 @@ from .format import InputFormat, OutputFormat
 from .alert import AlertMessage
 from .table import AdvancedTranslationTable
 from .mode import ModeSelection
-from .cache import CacheManager
 
 
 try:

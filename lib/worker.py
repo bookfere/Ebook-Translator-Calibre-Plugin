@@ -36,8 +36,8 @@ class ConvertionWorker:
             'arbitrary_n',
             args=(
                 'calibre_plugins.ebook_translator.convertion', 'convert_book',
-                (input_path, output_path, ebook.source_lang, ebook.target_lang,
-                 cache_only)),
+                (ebook.title, input_path, output_path, ebook.source_lang,
+                 ebook.target_lang, cache_only)),
             description=(_('[{} > {}] Translating "{}"').format(
                 ebook.source_lang, ebook.target_lang, ebook.title)))
         self.working_jobs[job] = (ebook, output_path)
