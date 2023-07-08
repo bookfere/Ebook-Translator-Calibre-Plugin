@@ -79,16 +79,16 @@ class Translation:
         if self.cancel_request():
             raise TranslationCanceled(_('Translation canceled.'))
         try:
-            time.sleep(self.translator.request_interval)
-            translation = self.translator.translate(text)
             self.abort_count = 0
-            return translation
+            return self.translator.translate(text)
         except BadApiKeyFormat:
             raise TranslationCanceled(_('Translation canceled.'))
         except Exception as e:
             self.abort_count += 1
-            # Cancel the request if there are more than 10 continuous failures.
-            if self.cancel_request() or self.abort_count >= 10:
+            # Cancel the request if there are more than max continuous errors.
+            need_stop = self.translator.max_error_count != 0 and \
+                self.abort_count > self.translator.max_error_count
+            if self.cancel_request() or need_stop:
                 raise TranslationCanceled(_('Translation canceled.'))
             if self.translator.need_change_api_key(str(e).lower()):
                 if not self.translator.change_api_key():
@@ -130,8 +130,7 @@ class Translation:
                     temp += char
             else:
                 temp = ''.join([char for char in translation])
-            translation = temp.replace('\n', ' ')
-        paragraph.translation = translation
+        paragraph.translation = temp.replace('\n', ' ')
         paragraph.engine_name = self.translator.name
         paragraph.target_lang = self.translator.get_target_lang()
         paragraph.is_cache = False
@@ -176,14 +175,16 @@ class Translation:
         if sys.version_info >= (3, 7, 0):
             from .async_handler import AsyncHandler
             handler = AsyncHandler(
-                self.translator.concurrency_limit, self.translate_paragraph,
-                process_translation, paragraphs)
+                paragraphs, self.translator.concurrency_limit,
+                self.translate_paragraph, process_translation,
+                self.translator.request_interval)
             handler.handle()
         else:
             from .thread_handler import ThreadHandler
             handler = ThreadHandler(
-                self.translator.concurrency_limit, self.translate_paragraph,
-                process_translation, paragraphs)
+                paragraphs, self.translator.concurrency_limit,
+                self.translate_paragraph, process_translation,
+                self.translator.request_interval)
             handler.handle()
 
         message = _('Translation completed.')

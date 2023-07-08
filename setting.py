@@ -18,8 +18,7 @@ try:
         QIntValidator, QScrollArea, QRadioButton, QGridLayout, QCheckBox,
         QButtonGroup, QColorDialog, QSpinBox, QPalette, QApplication,
         QComboBox, QRegularExpression, pyqtSignal, QFormLayout, QDoubleSpinBox,
-        QSpacerItem, QRegularExpressionValidator, QListWidget, QListWidgetItem,
-        QSize, QAbstractItemView)
+        QSpacerItem, QRegularExpressionValidator)
 except ImportError:
     from PyQt5.Qt import (
         Qt, QLabel, QDialog, QWidget, QLineEdit, QPushButton, QPlainTextEdit,
@@ -27,8 +26,7 @@ except ImportError:
         QIntValidator, QScrollArea, QRadioButton, QGridLayout, QCheckBox,
         QButtonGroup, QColorDialog, QSpinBox, QPalette, QApplication,
         QComboBox, QRegularExpression, pyqtSignal, QFormLayout, QDoubleSpinBox,
-        QSpacerItem, QRegularExpressionValidator, QListWidget, QListWidgetItem,
-        QSize, QAbstractItemView)
+        QSpacerItem, QRegularExpressionValidator)
 
 load_translations()
 
@@ -62,11 +60,6 @@ class TranslationSetting(QDialog):
             tab_3: self.update_content_config,
         }
         self.save_config.connect(lambda index: config_actions.get(index)())
-
-        # def tabs_clicked(index):
-        #     index == 3 and self.cache_count.emit()
-        #     self.config.refresh()
-        # self.tabs.tabBarClicked.connect(tabs_clicked)
 
         layout.addWidget(self.tabs)
         layout.addWidget(layout_info())
@@ -325,11 +318,14 @@ class TranslationSetting(QDialog):
         request_timeout = QDoubleSpinBox()
         request_timeout.setRange(0, 9999)
         request_timeout.setDecimals(1)
+        max_error_count = QSpinBox()
+        max_error_count.setRange(0, 9999)
         request_layout = QFormLayout(request_group)
         request_layout.addRow(_('Concurrency limit'), concurrency_limit)
         request_layout.addRow(_('Interval (seconds)'), request_interval)
         request_layout.addRow(_('Attempt times'), request_attempt)
         request_layout.addRow(_('Timeout (seconds)'), request_timeout)
+        request_layout.addRow(_('Max error count'), max_error_count)
         layout.addWidget(request_group, 1)
 
         self.set_form_layout_policy(request_layout)
@@ -469,6 +465,10 @@ class TranslationSetting(QDialog):
             if value is None:
                 value = self.current_engine.request_timeout
             request_timeout.setValue(float(value))
+            value = self.current_engine.config.get('max_error_count')
+            if value is None:
+                value = self.current_engine.max_error_count
+            max_error_count.setValue(value)
             concurrency_limit.valueChanged.connect(
                 lambda value: self.current_engine.config.update(
                     concurrency_limit=value))
@@ -481,6 +481,9 @@ class TranslationSetting(QDialog):
             request_timeout.valueChanged.connect(
                 lambda value: self.current_engine.config.update(
                     request_timeout=round(value, 1)))
+            max_error_count.valueChanged.connect(
+                lambda value: self.current_engine.config.update(
+                    max_error_count=value))
             # show prompt setting
             show_chatgpt_preferences()
         choose_default_engine(engine_list.findData(self.current_engine.name))
@@ -740,14 +743,6 @@ class TranslationSetting(QDialog):
 
         return widget
 
-    @layout_scroll_area
-    def layout_cache(self):
-        cache_manager = CacheManager(TranslationCache.get_list())
-
-
-
-        return cache_manager
-
     def test_proxy_connection(self):
         host = self.proxy_host.text()
         port = self.proxy_port.text()
@@ -909,10 +904,6 @@ class TranslationSetting(QDialog):
         if ebook_metadata:
             self.config.update(ebook_metadata=ebook_metadata)
 
-        self.config.commit()
-        self.alert.pop(_('The setting has been saved.'))
-
-    def update_cache_config(self):
         self.config.commit()
         self.alert.pop(_('The setting has been saved.'))
 

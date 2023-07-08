@@ -23,6 +23,7 @@ class Base:
     request_interval = 0.0
     request_attempt = 3
     request_timeout = 10.0
+    max_error_count = 10
 
     def __init__(self):
         self.source_lang = None
@@ -47,6 +48,9 @@ class Base:
         request_timeout = self.config.get('request_timeout')
         if request_timeout is not None:
             self.request_timeout = request_timeout
+        max_error_count = self.config.get('max_error_count')
+        if max_error_count is not None:
+            self.max_error_count = max_error_count
 
     @classmethod
     def load_lang_codes(cls, codes):

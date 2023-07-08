@@ -5,8 +5,8 @@ from .exception import TranslationCanceled
 
 
 class AsyncHandler:
-    def __init__(self, concurrency_limit, translate_paragraph,
-                 process_translation, paragraphs):
+    def __init__(self, paragraphs, concurrency_limit, translate_paragraph,
+                 process_translation, request_interval):
         self.queue = asyncio.Queue()
         for paragraph in paragraphs:
             self.queue.put_nowait(paragraph)
@@ -15,6 +15,7 @@ class AsyncHandler:
         self.concurrency_limit = concurrency_limit or self.queue.qsize()
         self.translate_paragraph = translate_paragraph
         self.process_translation = process_translation
+        self.request_interval = request_interval
 
     async def translation_worker(self):
         while True:
@@ -22,6 +23,8 @@ class AsyncHandler:
                 paragraph = await self.queue.get()
                 await asyncio.get_running_loop().run_in_executor(
                     None, self.translate_paragraph, paragraph)
+                if self.queue.qsize() > 0:
+                    await asyncio.sleep(self.request_interval)
                 self.done_queue.put_nowait(paragraph)
                 self.queue.task_done()
             except TranslationCanceled:
