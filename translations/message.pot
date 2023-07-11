@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-07-11 18:27+0800\n"
+"POT-Creation-Date: 2023-07-12 01:45+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,128 +31,128 @@ msgstr ""
 msgid "Extracting ebook content..."
 msgstr ""
 
-#: advanced.py:100
+#: advanced.py:99
 msgid "Filtering ebook content..."
 msgstr ""
 
-#: advanced.py:109
+#: advanced.py:108
 msgid "Preparing user interface..."
 msgstr ""
 
-#: advanced.py:187
+#: advanced.py:186
 msgid "Start"
 msgstr ""
 
-#: advanced.py:201 batch.py:54 setting.py:170
+#: advanced.py:200 batch.py:54 setting.py:170
 msgid "Input Format"
 msgstr ""
 
-#: advanced.py:212 advanced.py:513 batch.py:55 setting.py:328
+#: advanced.py:211 advanced.py:512 batch.py:55 setting.py:328
 msgid "Target Language"
 msgstr ""
 
-#: advanced.py:302
+#: advanced.py:301
 msgid ""
 "{} paragraph(s) were translated unsuccessfully. Would you like to retry?"
 msgstr ""
 
-#: advanced.py:308 lib/translation.py:191
+#: advanced.py:307 lib/translation.py:239
 msgid "Translation completed."
 msgstr ""
 
-#: advanced.py:315
+#: advanced.py:314
 msgid "Failed"
 msgstr ""
 
-#: advanced.py:322
+#: advanced.py:321
 msgid "There is no content that needs to be translated."
 msgstr ""
 
-#: advanced.py:359
+#: advanced.py:358
 msgid "Loading ebook data, please wait..."
 msgstr ""
 
-#: advanced.py:382
+#: advanced.py:381
 msgid "Review"
 msgstr ""
 
-#: advanced.py:383
+#: advanced.py:382
 msgid "Log"
 msgstr ""
 
-#: advanced.py:384
+#: advanced.py:383
 msgid "Errors"
 msgstr ""
 
-#: advanced.py:440
+#: advanced.py:439
 msgid "Translate All"
 msgstr ""
 
-#: advanced.py:441
+#: advanced.py:440
 msgid "Translate Selected"
 msgstr ""
 
-#: advanced.py:442 cache.py:82 components/engine.py:200 components/table.py:80
+#: advanced.py:441 cache.py:82 components/engine.py:200 components/table.py:80
 msgid "Delete"
 msgstr ""
 
-#: advanced.py:464 advanced.py:475
+#: advanced.py:463 advanced.py:474
 msgid "Stop"
 msgstr ""
 
-#: advanced.py:470
+#: advanced.py:469
 msgid "Stopping..."
 msgstr ""
 
-#: advanced.py:501 setting.py:297
+#: advanced.py:500 setting.py:297
 msgid "Translation Engine"
 msgstr ""
 
-#: advanced.py:507 batch.py:55 setting.py:327
+#: advanced.py:506 batch.py:55 setting.py:327
 msgid "Source Language"
 msgstr ""
 
-#: advanced.py:519
+#: advanced.py:518
 msgid "Output Ebook"
 msgstr ""
 
-#: advanced.py:521
+#: advanced.py:520
 msgid "Output"
 msgstr ""
 
-#: advanced.py:527 batch.py:54
+#: advanced.py:526 batch.py:54
 msgid "Title"
 msgstr ""
 
-#: advanced.py:570 components/table.py:69
+#: advanced.py:569 components/table.py:69
 msgid "Translated"
 msgstr ""
 
-#: advanced.py:603
+#: advanced.py:602
 msgid "No translation yet"
 msgstr ""
 
-#: advanced.py:650 components/engine.py:206 setting.py:82
+#: advanced.py:649 components/engine.py:206 setting.py:82
 msgid "Save"
 msgstr ""
 
-#: advanced.py:708
+#: advanced.py:707
 msgid "Your changes have been saved."
 msgstr ""
 
-#: advanced.py:721
+#: advanced.py:720
 msgid "Translation log"
 msgstr ""
 
-#: advanced.py:736
+#: advanced.py:735
 msgid "Error log"
 msgstr ""
 
-#: advanced.py:760
+#: advanced.py:759
 msgid "Are you sure you want to translate all {:n} paragraphs?"
 msgstr ""
 
-#: advanced.py:786
+#: advanced.py:785
 msgid "Are you sure you want to stop the translation progress?"
 msgstr ""
 
@@ -164,11 +164,11 @@ msgstr ""
 msgid "Translate"
 msgstr ""
 
-#: batch.py:128 lib/cache.py:108 lib/cache.py:109
+#: batch.py:128 cache.py:193
 msgid "Unknown"
 msgstr ""
 
-#: batch.py:137 cache.py:114 setting.py:792
+#: batch.py:137 cache.py:118 setting.py:792
 msgid "The specified path does not exist."
 msgstr ""
 
@@ -200,23 +200,27 @@ msgstr ""
 msgid "Clear"
 msgstr ""
 
-#: cache.py:110
+#: cache.py:100
+msgid "Are you sure you want to restore the cache path?"
+msgstr ""
+
+#: cache.py:114
 msgid "Are you sure you want to change the cache path?"
 msgstr ""
 
-#: cache.py:117
+#: cache.py:121
 msgid "The specified path is not empty."
 msgstr ""
 
-#: cache.py:140
+#: cache.py:144
 msgid "No cache exists."
 msgstr ""
 
-#: cache.py:150
+#: cache.py:154
 msgid "Total: {}"
 msgstr ""
 
-#: components/engine.py:64 lib/translation.py:116
+#: components/engine.py:64 lib/translation.py:163
 msgid "Translating..."
 msgstr ""
 
@@ -420,85 +424,85 @@ msgstr ""
 msgid "Youdao"
 msgstr ""
 
-#: lib/conversion.py:103
+#: lib/conversion.py:102
 msgid "Start to convert ebook format:"
 msgstr ""
 
-#: lib/conversion.py:139
+#: lib/conversion.py:138
 msgid "[{} > {}] Translating \"{}\""
 msgstr ""
 
-#: lib/conversion.py:148
+#: lib/conversion.py:147
 msgid "Translation job failed"
 msgstr ""
 
-#: lib/conversion.py:176
+#: lib/conversion.py:175
 msgid "completed"
 msgstr ""
 
-#: lib/conversion.py:184
+#: lib/conversion.py:183
 msgid "Ebook Translation Log"
 msgstr ""
 
-#: lib/conversion.py:185
+#: lib/conversion.py:184
 msgid "Translation Completed"
 msgstr ""
 
-#: lib/conversion.py:186
+#: lib/conversion.py:185
 msgid "The translation of \"{}\" was completed. Do you want to open the book?"
 msgstr ""
 
-#: lib/translation.py:80 lib/translation.py:85 lib/translation.py:92
-#: lib/translation.py:111 lib/translation.py:193
+#: lib/translation.py:126 lib/translation.py:132 lib/translation.py:139
+#: lib/translation.py:158 lib/translation.py:241
 msgid "Translation canceled."
 msgstr ""
 
-#: lib/translation.py:95
+#: lib/translation.py:142
 msgid "No available API key."
 msgstr ""
 
-#: lib/translation.py:97
+#: lib/translation.py:144
 msgid "API key was Changed due to previous one unavailable."
 msgstr ""
 
-#: lib/translation.py:99
+#: lib/translation.py:146
 msgid "Failed to retrieve data from translate engine API."
 msgstr ""
 
-#: lib/translation.py:147
-msgid "Start to translate ebook content"
-msgstr ""
-
-#: lib/translation.py:149
-msgid "Total items: {}"
-msgstr ""
-
-#: lib/translation.py:150
-msgid "Character count: {}"
-msgstr ""
-
-#: lib/translation.py:152
-msgid "There is no content need to translate."
-msgstr ""
-
-#: lib/translation.py:157
+#: lib/translation.py:189
 msgid "Translating: {}/{}"
 msgstr ""
 
-#: lib/translation.py:165 lib/translation.py:172
+#: lib/translation.py:197 lib/translation.py:204
 msgid "Original: {}"
 msgstr ""
 
-#: lib/translation.py:166
+#: lib/translation.py:198
 msgid "Translation: {}"
 msgstr ""
 
-#: lib/translation.py:168
+#: lib/translation.py:200
 msgid "Translation (Cached): {}"
 msgstr ""
 
-#: lib/translation.py:173
+#: lib/translation.py:205
 msgid "Error: {}"
+msgstr ""
+
+#: lib/translation.py:216
+msgid "Start to translate ebook content"
+msgstr ""
+
+#: lib/translation.py:218
+msgid "Total items: {}"
+msgstr ""
+
+#: lib/translation.py:219
+msgid "Character count: {}"
+msgstr ""
+
+#: lib/translation.py:221
+msgid "There is no content need to translate."
 msgstr ""
 
 #: setting.py:52

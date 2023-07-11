@@ -96,6 +96,10 @@ class CacheManager(QDialog):
         return self.cache_list
 
     def restore(self):
+        action = self.alert.ask(
+            _('Are you sure you want to restore the cache path?'))
+        if action != 'yes':
+            return
         TranslationCache.move(self.default_path)
         self.cache_list.model().refresh()
         self.cache_path.setText(self.default_path)
@@ -130,9 +134,9 @@ class CacheManager(QDialog):
     def delete(self):
         for row in reversed(self.selection.selectedRows()):
             cache_path = row.data(Qt.UserRole)
-            print(cache_path)
             os.path.exists(cache_path) and os.remove(cache_path)
             self.cache_list.model().delete(row.row())
+            self.cache_count.emit()
 
     def reveal(self):
         cache_path = TranslationCache.cache_path
@@ -161,7 +165,7 @@ class CacheTableView(QTableView):
 
 
 class CacheTableModel(QAbstractTableModel):
-    headers = ['Title', 'Engine', 'Size', 'Filename']
+    headers = ['Title', 'Engine', 'Language', 'Merge', 'Size', 'Filename']
 
     def __init__(self):
         QAbstractTableModel.__init__(self)
@@ -186,7 +190,7 @@ class CacheTableModel(QAbstractTableModel):
         if not index.isValid():
             return None
         if role == Qt.DisplayRole:
-            return self.caches[index.row()][index.column()]
+            return self.caches[index.row()][index.column()] or _('Unknown')
         if role == Qt.UserRole:
             # The path of the file always appends to the last item.
             return self.caches[index.row()][len(self.headers)]

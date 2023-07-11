@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-07-11 18:27+0800\n"
+"POT-Creation-Date: 2023-07-12 01:45+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -157,6 +157,9 @@ msgstr ""
 
 msgid "Clear"
 msgstr "Limpiar"
+
+msgid "Are you sure you want to restore the cache path?"
+msgstr ""
 
 msgid "Are you sure you want to change the cache path?"
 msgstr ""
@@ -357,18 +360,6 @@ msgstr ""
 msgid "Failed to retrieve data from translate engine API."
 msgstr "No se pudieron recuperar los datos de la API del motor de traducción."
 
-msgid "Start to translate ebook content"
-msgstr "Comience a traducir contenido de libros electrónicos"
-
-msgid "Total items: {}"
-msgstr "Articulos totales: {}"
-
-msgid "Character count: {}"
-msgstr ""
-
-msgid "There is no content need to translate."
-msgstr "No hay necesidad de traducir el contenido."
-
 msgid "Translating: {}/{}"
 msgstr "Traduciendo: {}/{}"
 
@@ -383,6 +374,18 @@ msgstr "Traducción (En caché): {}"
 
 msgid "Error: {}"
 msgstr ""
+
+msgid "Start to translate ebook content"
+msgstr "Comience a traducir contenido de libros electrónicos"
+
+msgid "Total items: {}"
+msgstr "Articulos totales: {}"
+
+msgid "Character count: {}"
+msgstr ""
+
+msgid "There is no content need to translate."
+msgstr "No hay necesidad de traducir el contenido."
 
 msgid "General"
 msgstr ""
