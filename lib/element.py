@@ -1,4 +1,3 @@
-import os
 import re
 import json
 import copy
@@ -21,39 +20,11 @@ def get_name(element):
     return etree.QName(element).localname
 
 
-class Glossary(dict):
-    def load_from_file(self, path):
-        """In the universal newlines mode (by adding 'U' to the mode in
-        Python 2.x or keeping newline=None in Python 3.x), there is no need
-        to use `os.linesep`. Instead, using '\n' can properly parse newlines
-        when reading from or writing to files on multiple platforms.
-        """
-        content = None
-        try:
-            with open(path, 'r', newline=None) as f:
-                content = f.read().strip()
-        except TypeError as e:
-            try:
-                with open(path, 'rU') as f:
-                    content = f.read().strip()
-            except Exception:
-                pass
-        if not content:
-            return
-        for group in content.split('\n' * 2):
-            group = group.strip().split(os.linesep)
-            if len(group) > 2:
-                continue
-            self[group[0]] = group[0] if len(group) == 1 else group[1]
-
-
 class Element:
-    def __init__(self, element, page_id, placeholder, glossary):
+    def __init__(self, element, page_id):
         self.element = element
         self.element_copy = copy.deepcopy(element)
         self.page_id = page_id
-        self.placeholder = placeholder
-        self.glossary = glossary
         self.ignored = False
 
         self.reserve_elements = []
@@ -76,7 +47,14 @@ class Element:
     def get_text(self):
         return trim(''.join(self.element.itertext()))
 
-    def get_content(self):
+    def get_attributes(self):
+        attributes = dict(self.element.attrib.items())
+        return json.dumps(attributes) if attributes else None
+
+    def delete(self):
+        self.element.getparent().remove(self.element)
+
+    def get_content(self, placeholder):
         for noise in self.get_descendents(('rt', 'rp', 'sup', 'sub')):
             parent = noise.getparent()
             parent.text = (parent.text or '') + (noise.tail or '')
@@ -85,51 +63,31 @@ class Element:
         self.reserve_elements = self.get_descendents(('img', 'code'))
         count = 0
         for reserve in self.reserve_elements:
-            placeholder = self.placeholder[0].format(format(count, '05'))
+            replacement = placeholder[0].format(format(count, '05'))
             previous, parent = reserve.getprevious(), reserve.getparent()
             if previous is not None:
-                previous.tail = (previous.tail or '') + placeholder
+                previous.tail = (previous.tail or '') + replacement
                 previous.tail += (reserve.tail or '')
             else:
-                parent.text = (parent.text or '') + placeholder
+                parent.text = (parent.text or '') + replacement
                 parent.text += (reserve.tail or '')
             reserve.tail = None
             parent.remove(reserve)
             count += 1
 
-        content = trim(''.join(self.element_copy.itertext()))
+        return trim(''.join(self.element_copy.itertext()))
 
-        for word in self.glossary.keys():
-            placeholder = self.placeholder[0].format(format(count, '05'))
-            content = content.replace(word, placeholder)
-            count += 1
-
-        return content
-
-    def get_attributes(self):
-        attributes = dict(self.element.attrib.items())
-        return json.dumps(attributes) if attributes else None
-
-    def delete(self):
-        self.element.getparent().remove(self.element)
-
-    def add_translation(self, translation, position=None, lang=None,
-                        color=None):
+    def add_translation(self, translation, placeholder, position=None,
+                        lang=None, color=None):
         translation = xml_escape(translation)
         count = 0
         for reserve in self.reserve_elements:
             # Escape the markups (<m id=1 />) to replace escaped markups.
-            pattern = self.placeholder[1].format(format(count, '05'))
+            pattern = placeholder[1].format(format(count, '05'))
             # Prevent potential invalid escapes from affecting the replacement.
             translation = re.sub(
                 xml_escape(pattern), lambda _: get_string(reserve),
                 translation)
-            count += 1
-
-        for word in self.glossary.values():
-            pattern = self.placeholder[1].format(format(count, '05'))
-            translation = re.sub(
-                xml_escape(pattern), lambda _: word, translation)
             count += 1
 
         new_element = etree.XML('<{0} xmlns="{1}">{2}</{0}>'.format(
@@ -154,11 +112,9 @@ class Element:
 class Extraction:
     __version__ = '20230608'
 
-    def __init__(self, pages, placeholder, glossary, rule_mode, filter_scope,
-                 filter_rules, element_rules):
+    def __init__(self, pages, rule_mode, filter_scope, filter_rules,
+                 element_rules):
         self.pages = pages
-        self.placeholder = placeholder
-        self.glossary = glossary
 
         self.rule_mode = rule_mode
         self.filter_scope = filter_scope
@@ -230,12 +186,11 @@ class Extraction:
                             element_has_content = True
                             break
             if element_has_content:
-                elements.append(
-                    Element(element, page_id, self.placeholder, self.glossary))
+                elements.append(Element(element, page_id))
             else:
                 self.extract_elements(page_id, element, elements)
         # Return root if all children have no content
-        root = Element(root, page_id, self.placeholder, self.glossary)
+        root = Element(root, page_id)
         return elements if elements else [root]
 
     def filter_content(self, element):
@@ -258,7 +213,9 @@ class Extraction:
 
 
 class ElementHandler:
-    def __init__(self):
+    def __init__(self, placeholder):
+        self.placeholder = placeholder
+
         self.merge_length = 0
         self.position = None
         self.color = None
@@ -285,12 +242,17 @@ class ElementHandler:
     def get_elements(self):
         return self.elements
 
+    def remove_unused_elements(self):
+        if self.position == 'only':
+            for element in self.elements.values():
+                element.delete()
+
     def prepare_original(self, elements):
         if self.merge_length == 0:
             for eid, element in enumerate(elements):
                 self.elements[eid] = element
                 raw = element.get_raw()
-                content = element.get_content()
+                content = element.get_content(self.placeholder)
                 md5 = uid('%s%s' % (eid, content))
                 attrs = element.get_attributes()
                 self.original.append(
@@ -305,9 +267,9 @@ class ElementHandler:
             if element.ignored:
                 continue
             self.elements[eid] = element
-            placeholder = ' %s ' % element.placeholder[0].format(eid)
+            placeholder = ' %s ' % self.placeholder[0].format(eid)
             code = element.get_raw()
-            text = element.get_content() + placeholder
+            text = element.get_content(self.placeholder) + placeholder
             attrs = element.get_attributes()
             if len(content + text) < self.merge_length:
                 raw += code
@@ -323,11 +285,6 @@ class ElementHandler:
         content and self.original.append((count, md5, raw, content, False))
         return self.original
 
-    def remove_unused_elements(self):
-        if self.position == 'only':
-            for element in self.elements.values():
-                element.delete()
-
     def add_translations(self, paragraphs):
         if self.merge_length == 0:
             for paragraph in paragraphs:
@@ -337,7 +294,8 @@ class ElementHandler:
                 translation = paragraph.translation
                 if translation:
                     element.add_translation(
-                        translation, self.position, self.lang, self.color)
+                        translation, self.placeholder, self.position,
+                        self.lang, self.color)
                     self.elements.pop(paragraph.id)
             for eid, element in self.elements.copy().items():
                 if element.ignored:
@@ -350,37 +308,35 @@ class ElementHandler:
             if paragraph.translation)
 
         for eid, element in self.elements.copy().items():
-            matches = re.search(element.placeholder[1].format(eid), content)
+            matches = re.search(self.placeholder[1].format(eid), content)
             if not matches:
                 continue
-            placeholder = matches.group(0)
-            end = content.find(placeholder)
+            pattern = matches.group(0)
+            end = content.find(pattern)
             part = content[:end]
-            content = content.replace(part + placeholder, '', 1)
+            content = content.replace(part + pattern, '', 1)
             if not element.ignored:
                 element.add_translation(
-                    part.strip(), self.position, self.lang, self.color)
+                    part.strip(), self.placeholder, self.position, self.lang,
+                    self.color)
                 self.elements.pop(eid)
         self.remove_unused_elements()
 
 
-def get_ebook_elements(pages, placeholder):
+def get_ebook_elements(pages):
     config = get_config()
-    glossary = Glossary()
-    if config.get('glossary_enabled'):
-        glossary.load_from_file(config.get('glossary_path'))
     rule_mode = config.get('rule_mode')
     filter_scope = config.get('filter_scope')
-    filter_rules = config.get('filter_rules')[:]
+    filter_rules = config.get('filter_rules')
     element_rules = config.get('element_rules', [])
-    extraction = Extraction(pages, placeholder, glossary, rule_mode,
-                            filter_scope, filter_rules, element_rules)
+    extraction = Extraction(
+        pages, rule_mode, filter_scope, filter_rules, element_rules)
     return extraction.get_elements()
 
 
-def get_element_handler():
+def get_element_handler(placeholder):
     config = get_config()
-    handler = ElementHandler()
+    handler = ElementHandler(placeholder)
     if config.get('merge_enabled'):
         handler.set_merge_length(config.get('merge_length'))
     handler.set_translation_position(

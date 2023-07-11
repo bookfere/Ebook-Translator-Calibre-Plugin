@@ -5,7 +5,7 @@ from lxml import etree
 from ..lib.utils import ns
 from ..lib.cache import Paragraph
 from ..lib.element import (
-    get_string, get_name, Glossary, Element, Extraction, ElementHandler)
+    get_string, get_name, Element, Extraction, ElementHandler)
 from ..engines import DeeplFreeTranslate
 from ..engines.base import Base
 
@@ -30,33 +30,6 @@ class TestFunction(unittest.TestCase):
         self.assertEqual('p', get_name(etree.XML(xhtml)))
 
 
-class TestGlossary(unittest.TestCase):
-    def test_instance_type(self):
-        glossary = Glossary()
-        self.assertIsInstance(glossary, dict)
-        self.assertEqual(0, len(glossary))
-
-    @patch('calibre_plugins.ebook_translator.lib.element.open')
-    def test_load_from_file(self, mock_open):
-        def mock_open_method(path, mode, newline=None):
-            if path == '/path/to/glossary.txt':
-                file = Mock()
-                file.read.return_value.strip.return_value = 'a\n\nb\nZ'
-                mock_open.__enter__.return_value = file
-                return mock_open
-            else:
-                raise TypeError('any glossary error.')
-        mock_open.side_effect = mock_open_method
-
-        glossary = Glossary()
-        glossary.load_from_file('/path/to/glossary.txt')
-        self.assertEqual({'a': 'a', 'b': 'Z'}, glossary)
-
-        glossary = Glossary()
-        glossary.load_from_file('/path/to/fake.txt')
-        self.assertEqual({}, glossary)
-
-
 class TestElement(unittest.TestCase):
     def setUp(self):
         self.xhtml = etree.XML(rb"""<?xml version="1.0" encoding="utf-8"?>
@@ -77,8 +50,7 @@ class TestElement(unittest.TestCase):
     </body>
 </html>""")
         self.paragraph = self.xhtml.find('.//x:p', namespaces=ns)
-        self.element = Element(
-            self.paragraph, 'test', Base.placeholder, {'a': 'a', 'b': r'\Z'})
+        self.element = Element(self.paragraph, 'p1')
 
     def test_get_name(self):
         self.assertEqual('p', self.element.get_name())
@@ -103,10 +75,10 @@ class TestElement(unittest.TestCase):
             r'a bB c d e f g h i App\Http k', self.element.get_text())
 
     def test_get_content(self):
-        content = ('{{id_00000}} {{id_00008}} {{id_00001}} {{id_00009}} c '
-                   '{{id_00002}} d e {{id_00003}} f g {{id_00004}} h '
-                   '{{id_00005}} i {{id_00006}} {{id_00007}} k')
-        self.assertEqual(content, self.element.get_content())
+        content = ('{{id_00000}} a {{id_00001}} b c {{id_00002}} d e '
+                   '{{id_00003}} f g {{id_00004}} h {{id_00005}} i '
+                   '{{id_00006}} {{id_00007}} k')
+        self.assertEqual(content, self.element.get_content(Base.placeholder))
         self.assertEqual(8, len(self.element.reserve_elements))
 
         for element in self.element.reserve_elements:
@@ -117,14 +89,14 @@ class TestElement(unittest.TestCase):
         self.assertEqual('{"class": "abc"}', self.element.get_attributes())
 
     def test_add_translation(self):
-        self.element.get_content()  # remove rt and reserve images
-        translation = ('{{id_00000}} {{id_00008}} {{id_00001}} {{id_00009}} C '
-                       '{{id_00002}} D E {{id_00003}} F G {{id_00004}} H '
-                       '{{id_00005}} I {{id_00006}} {{id_00007}} K')
-        new = self.element.add_translation(translation)
+        self.element.get_content(Base.placeholder)
+        translation = ('{{id_00000}} A {{id_00001}} B C {{id_00002}} D E '
+                       '{{id_00003}} F G {{id_00004}} H {{id_00005}} I '
+                       '{{id_00006}} {{id_00007}} K')
+        new = self.element.add_translation(translation, Base.placeholder)
         translation = ('<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
-                       '<img src="icon.jpg"/> a <img src="w1.jpg"/> '
-                       r'\Z C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
+                       '<img src="icon.jpg"/> A <img src="w1.jpg"/> '
+                       r'B C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
                        'F G <img src="w2.jpg"/> H '
                        r'<img alt="{\D}" src="w3.jpg"/> I '
                        r'<img src="w3.jpg"/> <code>App\Http</code> K</p>')
@@ -134,39 +106,42 @@ class TestElement(unittest.TestCase):
         self.assertEqual('abc', new.get('class'))
 
     def test_add_translation_with_markup(self):
-        self.element.placeholder = DeeplFreeTranslate.placeholder
-        self.element.get_content()
-        translation = ('<m id=00000 /> <m id=00008 /> <m id=00001 /> '
-                       '<m id=00009 /> C <m id=00002 /> D E <m id=00003 /> '
-                       'F G <m id=00004 /> H <m id=00005 /> I <m id=00006 /> '
-                       '<m id=00007 /> K')
-        new = self.element.add_translation(translation)
+        self.element.get_content(DeeplFreeTranslate.placeholder)
+        translation = ('<m id=00000 /> A <m id=00001 /> B C <m id=00002 /> D '
+                       'E <m id=00003 /> F G <m id=00004 /> H <m id=00005 /> '
+                       'I <m id=00006 /> <m id=00007 /> K')
+        new = self.element.add_translation(
+            translation, DeeplFreeTranslate.placeholder)
         translation = ('<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
-                       '<img src="icon.jpg"/> a <img src="w1.jpg"/> '
-                       r'\Z C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
+                       '<img src="icon.jpg"/> A <img src="w1.jpg"/> '
+                       'B C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
                        'F G <img src="w2.jpg"/> H '
                        r'<img alt="{\D}" src="w3.jpg"/> I '
                        r'<img src="w3.jpg"/> <code>App\Http</code> K</p>')
         self.assertEqual(translation, get_string(new))
 
     def test_add_translation_next(self):
-        new = self.element.add_translation('test', position='next')
+        new = self.element.add_translation(
+            'test', Base.placeholder, position='next')
         self.assertEqual(self.paragraph, new.getprevious())
         self.assertIn('>test<', get_string(new))
 
     def test_add_translation_before(self):
-        new = self.element.add_translation('test', position='before')
+        new = self.element.add_translation(
+            'test', Base.placeholder, position='before')
         self.assertEqual(self.paragraph, new.getnext())
         self.assertIn('>test<', get_string(new))
 
     def test_add_translation_only(self):
-        new = self.element.add_translation('test', position='only')
+        new = self.element.add_translation(
+            'test', Base.placeholder, position='only')
         self.assertIsNone(new.getprevious())
         self.assertIsNone(new.getnext())
         self.assertIn('>test<', get_string(new))
 
     def test_add_translation_attr(self):
-        new = self.element.add_translation('a', lang='zh', color='red')
+        new = self.element.add_translation(
+            'a', Base.placeholder, lang='zh', color='red')
         self.assertEqual('zh', new.get('lang'))
         self.assertEqual('color:red', new.get('style'))
 
@@ -198,8 +173,7 @@ class TestExtraction(unittest.TestCase):
         self.page_3 = Mock(media_type='text/css')
 
         self.extraction = Extraction(
-            [self.page_3, self.page_2, self.page_1], Base.placeholder, {},
-            'normal', 'text', [], [])
+            [self.page_3, self.page_2, self.page_1], 'normal', 'text', [], [])
 
     def test_get_sorted_pages(self):
         self.assertEqual(
@@ -216,10 +190,10 @@ class TestExtraction(unittest.TestCase):
         self.assertEqual(2, len(elements))
         self.assertIsInstance(elements[0], Element)
         self.assertEqual('p', get_name(elements[0].get_name()))
-        self.assertEqual('abc', elements[0].get_content())
+        self.assertEqual('abc', elements[0].get_content(Base.placeholder))
         self.assertIsInstance(elements[1], Element)
         self.assertEqual('div', get_name(elements[1].get_name()))
-        self.assertEqual('def', elements[1].get_content())
+        self.assertEqual('def', elements[1].get_content(Base.placeholder))
 
     def test_load_filter_patterns(self):
         self.extraction.load_filter_patterns()
@@ -293,8 +267,7 @@ class TestExtraction(unittest.TestCase):
 
     def test_filter_content(self):
         def elements(markups):
-            return [Element(etree.XML(markup), 'test', Base.placeholder, {})
-                    for markup in markups]
+            return [Element(etree.XML(markup), 'test') for markup in markups]
 
         # normal - text
         markups = ['<p>\xa0</p>', '<p>\u3000</p>', '<p>\u200b</p>',
@@ -385,11 +358,11 @@ class TestElementHandler(unittest.TestCase):
 </html>""")
 
         self.elements = [
-            Element(element, 'p1', Base.placeholder, {})
-            for element in self.xhtml.findall('.//x:p', namespaces=ns)]
+            Element(element, 'p1') for element
+            in self.xhtml.findall('.//x:p', namespaces=ns)]
         self.elements[-2].set_ignored(True)
         self.elements[-4].set_ignored(True)
-        self.handler = ElementHandler()
+        self.handler = ElementHandler(Base.placeholder)
 
     @patch('calibre_plugins.ebook_translator.lib.element.uid')
     def test_prepare_original(self, mock_uid):
