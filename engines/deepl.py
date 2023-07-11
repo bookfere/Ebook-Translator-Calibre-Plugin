@@ -74,14 +74,14 @@ class DeeplFreeTranslate(Base):
 
     headers = {
         'Accept': '*/*',
-        'Accept-Encoding': '*',
+        'Accept-Encoding': 'gzip, deflate',
         'Accept-Language': 'en-US,en;q=0.9',
         'Authorization': 'None',
         'Authority': 'www2.deepl.com',
         'Content-Type': 'application/json; charset=utf-8',
-        'User-Agent': 'DeepLBrowserExtension/1.3.0 Mozilla/5.0 (Macintosh;'
-        ' Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)'
-        ' Chrome/111.0.0.0 Safari/537.36',
+        'User-Agent': 'DeepLBrowserExtension/1.5.1 Mozilla/5.0 (Macintosh; '
+                      'Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, '
+                      'like Gecko) Chrome/114.0.0.0 Safari/537.36',
         'Origin': 'chrome-extension://cofdbpoegempjloogbagkncekinflcnj',
         'Referer': 'https://www.deepl.com/',
     }

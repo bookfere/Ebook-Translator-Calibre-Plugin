@@ -130,7 +130,8 @@ class Translation:
                     temp += char
             else:
                 temp = ''.join([char for char in translation])
-        paragraph.translation = temp.replace('\n', ' ')
+            translation = temp.replace('\n', ' ')
+        paragraph.translation = translation
         paragraph.engine_name = self.translator.name
         paragraph.target_lang = self.translator.get_target_lang()
         paragraph.is_cache = False

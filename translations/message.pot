@@ -302,7 +302,7 @@ msgstr ""
 msgid "Retain at least one row."
 msgstr ""
 
-#: convertion.py:88
+#: conversion.py:88
 msgid "Start to convert ebook format:"
 msgstr ""
 

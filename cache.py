@@ -3,20 +3,20 @@ import sys
 import os.path
 from subprocess import Popen
 
-from .lib.cache import TranslationCache
+from .lib.cache import default_cache_path, TranslationCache
 from .lib.config import get_config
 from .components import layout_info, AlertMessage
 
 try:
     from qt.core import (
-        Qt, QDialog, QWidget, QVBoxLayout, QHBoxLayout, QCheckBox, QPushButton,
-        QLabel, QTableView, QAbstractTableModel, QAbstractItemView, pyqtSignal,
-        QLineEdit)
+        Qt, QDialog, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
+        QTableView, QAbstractTableModel, QAbstractItemView, pyqtSignal,
+        QLineEdit, QFileDialog)
 except ImportError:
     from PyQt5.Qt import (
-        Qt, QDialog, QWidget, QVBoxLayout, QHBoxLayout, QCheckBox, QPushButton,
-        QLabel, QTableView, QAbstractTableModel, QAbstractItemView, pyqtSignal,
-        QLineEdit)
+        Qt, QDialog, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
+        QTableView, QAbstractTableModel, QAbstractItemView, pyqtSignal,
+        QLineEdit, QFileDialog)
 
 load_translations()
 
@@ -29,6 +29,8 @@ class CacheManager(QDialog):
         self.plugin = plugin
         self.gui = parent
         self.config = get_config()
+        self.alert = AlertMessage(self)
+        self.default_path = default_cache_path()
 
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.control_widget())
@@ -36,13 +38,14 @@ class CacheManager(QDialog):
         self.layout.addWidget(self.enable_widget())
         self.layout.addWidget(layout_info())
 
-        self.alert = AlertMessage(self)
-
-        self.cache_enabled.setChecked(self.config.get('cache_enabled'))
-        self.cache_enabled.toggled.connect(
-            lambda checked: self.config.save(cache_enabled=checked))
+        self.cache_path.setText(TranslationCache.dir_path)
+        self.cache_restore.setDisabled(
+            TranslationCache.dir_path == self.default_path)
 
         self.cache_count.connect(self.recount)
+        self.cache_path.mouseDoubleClickEvent = lambda event: self.move()
+        self.cache_move.clicked.connect(self.move)
+        self.cache_restore.clicked.connect(self.restore)
         self.cache_reveal.clicked.connect(self.reveal)
         self.clear_button.clicked.connect(self.clear)
         self.delete_button.clicked.connect(self.delete)
@@ -53,14 +56,19 @@ class CacheManager(QDialog):
         widget = QWidget()
         layout = QHBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
-        self.cache_enabled = QCheckBox(_('Enable'))
+
         self.cache_path = QLineEdit()
-        self.cache_choose = QPushButton(_('Choose'))
+        self.cache_path.setReadOnly(True)
+        self.cache_path.setPlaceholderText(
+            _('Choose a path to store cache files.'))
+        self.cache_move = QPushButton(_('Move'))
+        self.cache_restore = QPushButton(_('Restore'))
         self.cache_reveal = QPushButton(_('Reveal'))
 
-        layout.addWidget(self.cache_enabled)
-        layout.addWidget(self.cache_path)
-        layout.addWidget(self.cache_choose)
+        layout.addWidget(QLabel(_('Cache path')))
+        layout.addWidget(self.cache_path, 1)
+        layout.addWidget(self.cache_move)
+        layout.addWidget(self.cache_restore)
         layout.addWidget(self.cache_reveal)
 
         return widget
@@ -82,11 +90,37 @@ class CacheManager(QDialog):
 
     def table_widget(self):
         self.cache_list = CacheTableView()
-        self.cache_list.setModel(
-            CacheTableModel(TranslationCache.get_list()))
+        self.cache_list.setModel(CacheTableModel())
         self.selection = self.cache_list.selectionModel()
 
         return self.cache_list
+
+    def restore(self):
+        TranslationCache.move(self.default_path)
+        self.cache_list.model().refresh()
+        self.cache_path.setText(self.default_path)
+        self.cache_restore.setDisabled(True)
+        self.config.save(cache_path=None)
+
+    def move(self):
+        path = QFileDialog.getExistingDirectory()
+        if not path or path == self.default_path:
+            return
+        action = self.alert.ask(
+            _('Are you sure you want to change the cache path?'))
+        if action != 'yes':
+            return
+        if not os.path.exists(path):
+            self.alert.pop(_('The specified path does not exist.'))
+            return
+        if len([i for i in os.listdir(path) if not i.startswith('.')]) > 0:
+            self.alert.pop(_('The specified path is not empty.'))
+            return
+        TranslationCache.move(path)
+        self.cache_list.model().refresh()
+        self.cache_path.setText(path)
+        self.cache_restore.setDisabled(False)
+        self.config.save(cache_path=path)
 
     def clear(self):
         if self.plugin.clear_caches():
@@ -96,6 +130,7 @@ class CacheManager(QDialog):
     def delete(self):
         for row in reversed(self.selection.selectedRows()):
             cache_path = row.data(Qt.UserRole)
+            print(cache_path)
             os.path.exists(cache_path) and os.remove(cache_path)
             self.cache_list.model().delete(row.row())
 
@@ -126,11 +161,11 @@ class CacheTableView(QTableView):
 
 
 class CacheTableModel(QAbstractTableModel):
-    headers = ['Title', 'Size', 'Filename']
+    headers = ['Title', 'Engine', 'Size', 'Filename']
 
-    def __init__(self, caches=[]):
+    def __init__(self):
         QAbstractTableModel.__init__(self)
-        self.caches = caches
+        self.refresh()
 
     def update(func):
         def wrapper(self, *args):
@@ -153,7 +188,12 @@ class CacheTableModel(QAbstractTableModel):
         if role == Qt.DisplayRole:
             return self.caches[index.row()][index.column()]
         if role == Qt.UserRole:
-            return self.caches[index.row()][3]
+            # The path of the file always appends to the last item.
+            return self.caches[index.row()][len(self.headers)]
+
+    @update
+    def refresh(self):
+        self.caches = TranslationCache.get_list()
 
     @update
     def delete(self, row):

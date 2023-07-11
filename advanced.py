@@ -9,7 +9,7 @@ from .lib.config import get_config
 from .lib.cache import Paragraph, TranslationCache, get_cache
 from .lib.translation import get_engine_class, get_translator, get_translation
 from .lib.element import get_ebook_elements, get_element_handler, Extraction
-from .lib.convertion import ebook_pages
+from .lib.conversion import ebook_pages
 
 from . import EbookTranslator
 from .components import (
