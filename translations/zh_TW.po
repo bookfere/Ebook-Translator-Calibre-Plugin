@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-07-11 18:27+0800\n"
+"POT-Creation-Date: 2023-07-12 01:45+0800\n"
 "PO-Revision-Date: 2023-04-25 15:36+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -155,6 +155,9 @@ msgstr ""
 
 msgid "Clear"
 msgstr "清除"
+
+msgid "Are you sure you want to restore the cache path?"
+msgstr ""
 
 msgid "Are you sure you want to change the cache path?"
 msgstr ""
@@ -355,18 +358,6 @@ msgstr ""
 msgid "Failed to retrieve data from translate engine API."
 msgstr "無法從翻譯引擎 API 擷取資料。"
 
-msgid "Start to translate ebook content"
-msgstr "開始翻譯電子書內容"
-
-msgid "Total items: {}"
-msgstr "項目總計：{}"
-
-msgid "Character count: {}"
-msgstr ""
-
-msgid "There is no content need to translate."
-msgstr "沒有需要翻譯的內容。"
-
 msgid "Translating: {}/{}"
 msgstr "翻譯：{}/{}"
 
@@ -381,6 +372,18 @@ msgstr "譯文 (快取)：{}"
 
 msgid "Error: {}"
 msgstr ""
+
+msgid "Start to translate ebook content"
+msgstr "開始翻譯電子書內容"
+
+msgid "Total items: {}"
+msgstr "項目總計：{}"
+
+msgid "Character count: {}"
+msgstr ""
+
+msgid "There is no content need to translate."
+msgstr "沒有需要翻譯的內容。"
 
 msgid "General"
 msgstr ""

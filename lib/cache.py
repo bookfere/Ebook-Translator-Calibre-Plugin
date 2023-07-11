@@ -105,10 +105,13 @@ class TranslationCache:
         for file_path in glob(os.path.join(cls.cache_path, '*.db')):
             name = os.path.basename(file_path)
             cache = cls(os.path.splitext(name)[0])
-            title = cache.get_info('title') or _('Unknown')
-            engine = cache.get_info('engine_name') or _('Unknown')
+            title = cache.get_info('title')
+            engine = cache.get_info('engine_name')
+            lang = cache.get_info('target_lang')
+            merge = cache.get_info('merge_length')
             size = size_by_unit(os.path.getsize(file_path), 'MB')
-            names.append((title, engine, '%sMB' % size, name, file_path))
+            names.append(
+                (title, engine, lang, merge, '%sMB' % size, name, file_path))
         return names
 
     def _path(self, name):
