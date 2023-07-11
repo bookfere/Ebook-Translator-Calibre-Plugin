@@ -40,7 +40,7 @@ class ThreadHandler:
                     self.queue.task_done()
                 break
             except Exception:
-                paragraph.error = traceback.format_exc()
+                paragraph.error = traceback.format_exc().strip()
                 self.done_queue.put(paragraph)
                 self.queue.task_done()
 

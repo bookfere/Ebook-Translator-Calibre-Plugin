@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-06-30 07:10+0800\n"
+"POT-Creation-Date: 2023-07-11 18:27+0800\n"
 "PO-Revision-Date: 2023-04-25 15:36+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -138,6 +138,36 @@ msgstr "指定路徑不存在。"
 msgid "The specified glossary file does not exist."
 msgstr "指定的詞彙表檔案不存在。"
 
+msgid "Choose a path to store cache files."
+msgstr ""
+
+msgid "Move"
+msgstr ""
+
+msgid "Restore"
+msgstr "重設"
+
+msgid "Reveal"
+msgstr ""
+
+msgid "Cache path"
+msgstr ""
+
+msgid "Clear"
+msgstr "清除"
+
+msgid "Are you sure you want to change the cache path?"
+msgstr ""
+
+msgid "The specified path is not empty."
+msgstr ""
+
+msgid "No cache exists."
+msgstr ""
+
+msgid "Total: {}"
+msgstr "總計：{}"
+
 msgid "Translating..."
 msgstr "翻譯中..."
 
@@ -155,12 +185,6 @@ msgstr "自訂翻譯引擎"
 
 msgid "Add"
 msgstr "新增"
-
-msgid "Clear"
-msgstr "清除"
-
-msgid "Restore"
-msgstr "重設"
 
 msgid "Verify"
 msgstr "驗證"
@@ -232,9 +256,6 @@ msgstr ""
 msgid "Retain at least one row."
 msgstr ""
 
-msgid "Start to convert ebook format:"
-msgstr "開始轉換電子書格式："
-
 msgid "Baidu"
 msgstr "百度"
 
@@ -301,14 +322,71 @@ msgstr ""
 msgid "Youdao"
 msgstr "有道"
 
+msgid "Start to convert ebook format:"
+msgstr "開始轉換電子書格式："
+
+msgid "[{} > {}] Translating \"{}\""
+msgstr "[{} > {}] 翻譯「{}」"
+
+msgid "Translation job failed"
+msgstr "翻譯工作失敗"
+
+msgid "completed"
+msgstr "已完成"
+
+msgid "Ebook Translation Log"
+msgstr "電子書翻譯記錄"
+
+msgid "Translation Completed"
+msgstr "翻譯已完成"
+
+msgid "The translation of \"{}\" was completed. Do you want to open the book?"
+msgstr "「{}」的翻譯已完成。是否想要立即閱讀這本電子書？"
+
+msgid "Translation canceled."
+msgstr ""
+
+msgid "No available API key."
+msgstr ""
+
+msgid "API key was Changed due to previous one unavailable."
+msgstr ""
+
+msgid "Failed to retrieve data from translate engine API."
+msgstr "無法從翻譯引擎 API 擷取資料。"
+
+msgid "Start to translate ebook content"
+msgstr "開始翻譯電子書內容"
+
+msgid "Total items: {}"
+msgstr "項目總計：{}"
+
+msgid "Character count: {}"
+msgstr ""
+
+msgid "There is no content need to translate."
+msgstr "沒有需要翻譯的內容。"
+
+msgid "Translating: {}/{}"
+msgstr "翻譯：{}/{}"
+
+msgid "Original: {}"
+msgstr "原文：{}"
+
+msgid "Translation: {}"
+msgstr "譯文：{}"
+
+msgid "Translation (Cached): {}"
+msgstr "譯文 (快取)：{}"
+
+msgid "Error: {}"
+msgstr ""
+
 msgid "General"
 msgstr ""
 
 msgid "Content"
 msgstr "內容"
-
-msgid "Cache"
-msgstr "快取"
 
 msgid "Preferred Mode"
 msgstr ""
@@ -355,6 +433,12 @@ msgstr "連接埠"
 msgid "Test"
 msgstr "測試"
 
+msgid "Cache"
+msgstr "快取"
+
+msgid "Manage"
+msgstr ""
+
 msgid "Job Log"
 msgstr "工作記錄"
 
@@ -386,6 +470,9 @@ msgid "Attempt times"
 msgstr "嘗試次數"
 
 msgid "Timeout (seconds)"
+msgstr ""
+
+msgid "Max error count"
 msgstr ""
 
 msgid "Tune ChatGPT"
@@ -487,18 +574,6 @@ msgstr ""
 msgid "Subject"
 msgstr ""
 
-msgid "Reveal"
-msgstr ""
-
-msgid "Total: {}"
-msgstr "總計：{}"
-
-msgid "No cache exists."
-msgstr ""
-
-msgid "Refresh"
-msgstr ""
-
 msgid "Proxy host or port is incorrect."
 msgstr "代理的主機或連接埠不正確。"
 
@@ -518,45 +593,6 @@ msgid "{} is not a valid regular expression."
 msgstr "{} 不是有效的規則運算式。"
 
 msgid "{} is not a valid CSS seletor."
-msgstr ""
-
-msgid "Translation canceled."
-msgstr ""
-
-msgid "No available API key."
-msgstr ""
-
-msgid "API key was Changed due to previous one unavailable."
-msgstr ""
-
-msgid "Failed to retrieve data from translate engine API."
-msgstr "無法從翻譯引擎 API 擷取資料。"
-
-msgid "Start to translate ebook content"
-msgstr "開始翻譯電子書內容"
-
-msgid "Total items: {}"
-msgstr "項目總計：{}"
-
-msgid "Character count: {}"
-msgstr ""
-
-msgid "There is no content need to translate."
-msgstr "沒有需要翻譯的內容。"
-
-msgid "Translating: {}/{}"
-msgstr "翻譯：{}/{}"
-
-msgid "Original: {}"
-msgstr "原文：{}"
-
-msgid "Translation: {}"
-msgstr "譯文：{}"
-
-msgid "Translation (Cached): {}"
-msgstr "譯文 (快取)：{}"
-
-msgid "Error: {}"
 msgstr ""
 
 msgid "Translate Book"
@@ -580,6 +616,9 @@ msgstr ""
 msgid "Please choose at least one book."
 msgstr "必須選擇至少一本電子書。"
 
+msgid "Cache Manager"
+msgstr ""
+
 msgid "Choose Translation Mode"
 msgstr ""
 
@@ -588,24 +627,6 @@ msgstr "有正在執行的工作，無法清除快取。"
 
 msgid "Are you sure you want clear all caches?"
 msgstr ""
-
-msgid "[{} > {}] Translating \"{}\""
-msgstr "[{} > {}] 翻譯「{}」"
-
-msgid "Translation job failed"
-msgstr "翻譯工作失敗"
-
-msgid "completed"
-msgstr "已完成"
-
-msgid "Ebook Translation Log"
-msgstr "電子書翻譯記錄"
-
-msgid "Translation Completed"
-msgstr "翻譯已完成"
-
-msgid "The translation of \"{}\" was completed. Do you want to open the book?"
-msgstr "「{}」的翻譯已完成。是否想要立即閱讀這本電子書？"
 
 #~ msgid "Will retry in {} seconds."
 #~ msgstr "將在 {} 秒後重試。"
