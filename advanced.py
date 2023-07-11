@@ -69,7 +69,7 @@ class PreparationWorker(QObject):
     @pyqtSlot()
     def prepare_ebook_data(self):
         input_path = self.ebook.get_input_path()
-        element_handler = get_element_handler()
+        element_handler = get_element_handler(self.engine_class.placeholder)
         merge_length = str(element_handler.get_merge_length())
         cache_id = uid(
             input_path + self.engine_class.name + self.ebook.target_lang
@@ -88,8 +88,7 @@ class PreparationWorker(QObject):
             a = time.time()
             # --------------------------
             self.progress_message.emit(_('Extracting ebook content...'))
-            elements = get_ebook_elements(
-                ebook_pages(input_path), self.engine_class.placeholder)
+            elements = get_ebook_elements(ebook_pages(input_path))
             self.progress.emit(30)
             b = time.time()
             print('extract: ', b - a)

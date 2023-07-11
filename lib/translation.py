@@ -1,20 +1,65 @@
+import re
 import sys
 import time
 import json
 import traceback
 from types import GeneratorType
 
+from calibre import prepare_string_for_xml as xml_escape
+
 from ..engines import builtin_engines
 from ..engines import GoogleFreeTranslate
 from ..engines.custom import CustomTranslate
 
-from .utils import sep, dummy
+from .utils import sep, trim, dummy
 from .config import get_config
 from .exception import (
     BadApiKeyFormat, NoAvailableApiKey, TranslationCanceled, TranslationFailed)
 
 
 load_translations()
+
+
+class Glossary:
+    def __init__(self, placeholder):
+        self.placeholder = placeholder
+        self.glossary = []
+
+    def load_from_file(self, path):
+        """In the universal newlines mode (by adding 'U' to the mode in
+        Python 2.x or keeping newline=None in Python 3.x), there is no need
+        to use `os.linesep`. Instead, using '\n' can properly parse newlines
+        when reading from or writing to files on multiple platforms.
+        """
+        content = None
+        try:
+            with open(path, 'r', newline=None) as f:
+                content = f.read().strip()
+        except TypeError as e:
+            try:
+                with open(path, 'rU') as f:
+                    content = f.read().strip()
+            except Exception:
+                pass
+        if not content:
+            return
+        for group in filter(trim, re.split(r'\n{2,}', content)):
+            group = group.split('\n')
+            self.glossary.append(
+                (group[0], group[0] if len(group) < 2 else group[1]))
+
+    def replace(self, content):
+        for wid, words in enumerate(self.glossary):
+            replacement = self.placeholder[0].format(format(wid, '06'))
+            content = content.replace(words[0], replacement)
+        return content
+
+    def restore(self, content):
+        for wid, words in enumerate(self.glossary):
+            pattern = self.placeholder[1].format(format(wid, '06'))
+            # Eliminate the impact of backslashes on substitution.
+            content = re.sub(xml_escape(pattern), lambda _: words[1], content)
+        return content
 
 
 class ProgressBar:
@@ -36,8 +81,9 @@ class ProgressBar:
 
 
 class Translation:
-    def __init__(self, translator):
+    def __init__(self, translator, glossary):
         self.translator = translator
+        self.glossary = glossary
         self.abort_count = 0
 
         self.fresh = False
@@ -80,6 +126,7 @@ class Translation:
             raise TranslationCanceled(_('Translation canceled.'))
         try:
             self.abort_count = 0
+            text = self.glossary.replace(text)
             return self.translator.translate(text)
         except BadApiKeyFormat:
             raise TranslationCanceled(_('Translation canceled.'))
@@ -115,6 +162,7 @@ class Translation:
         self.streaming('')
         self.streaming(_('Translating...'))
         translation = self._translate_text(paragraph.original)
+        translation = self.glossary.restore(translation)
         # Process streaming text
         if isinstance(translation, GeneratorType):
             if self.total == 1:
@@ -136,6 +184,27 @@ class Translation:
         paragraph.target_lang = self.translator.get_target_lang()
         paragraph.is_cache = False
 
+    def process_translation(self, paragraph):
+        self.progress(
+            self.progress_bar.length, _('Translating: {}/{}')
+            .format(self.progress_bar.count, self.progress_bar.total))
+
+        self.streaming(paragraph)
+        self.callback(paragraph)
+
+        if paragraph.error is None:
+            self.log(sep('-'))
+            self.log(_('Original: {}').format(paragraph.original))
+            message = _('Translation: {}')
+            if paragraph.is_cache:
+                message = _('Translation (Cached): {}')
+            self.log(message.format(paragraph.translation))
+        else:
+            self.log(sep('-'), True)
+            self.log(_('Original: {}').format(paragraph.original), True)
+            self.log(_('Error: {}').format(paragraph.error), True)
+            paragraph.error = None
+
     def handle(self, paragraphs=[]):
         start_time = time.time()
         char_count = 0
@@ -152,39 +221,18 @@ class Translation:
             raise Exception(_('There is no content need to translate.'))
         self.progress_bar.load(self.total)
 
-        def process_translation(paragraph):
-            self.progress(
-                self.progress_bar.length, _('Translating: {}/{}')
-                .format(self.progress_bar.count, self.progress_bar.total))
-
-            self.streaming(paragraph)
-            self.callback(paragraph)
-
-            if paragraph.error is None:
-                self.log(sep('-'))
-                self.log(_('Original: {}').format(paragraph.original))
-                message = _('Translation: {}')
-                if paragraph.is_cache:
-                    message = _('Translation (Cached): {}')
-                self.log(message.format(paragraph.translation))
-            else:
-                self.log(sep('-'), True)
-                self.log(_('Original: {}').format(paragraph.original), True)
-                self.log(_('Error: {}').format(paragraph.error), True)
-                paragraph.error = None
-
         if sys.version_info >= (3, 7, 0):
             from .async_handler import AsyncHandler
             handler = AsyncHandler(
                 paragraphs, self.translator.concurrency_limit,
-                self.translate_paragraph, process_translation,
+                self.translate_paragraph, self.process_translation,
                 self.translator.request_interval)
             handler.handle()
         else:
             from .thread_handler import ThreadHandler
             handler = ThreadHandler(
                 paragraphs, self.translator.concurrency_limit,
-                self.translate_paragraph, process_translation,
+                self.translate_paragraph, self.process_translation,
                 self.translator.request_interval)
             handler.handle()
 
@@ -227,7 +275,11 @@ def get_translator(engine_class=None):
 
 
 def get_translation(translator, log=None):
-    translation = Translation(translator)
+    config = get_config()
+    glossary = Glossary(translator.placeholder)
+    if config.get('glossary_enabled'):
+        glossary.load_from_file(config.get('glossary_path'))
+    translation = Translation(translator, glossary)
     if get_config().get('log_translation'):
         translation.set_logging(log)
     return translation
