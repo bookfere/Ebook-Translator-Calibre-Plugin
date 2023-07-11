@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-06-30 07:10+0800\n"
+"POT-Creation-Date: 2023-07-11 18:27+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -140,6 +140,36 @@ msgstr "La ruta especificada no existe."
 msgid "The specified glossary file does not exist."
 msgstr "El archivo de glosario especificado no existe."
 
+msgid "Choose a path to store cache files."
+msgstr ""
+
+msgid "Move"
+msgstr ""
+
+msgid "Restore"
+msgstr "Restablecer"
+
+msgid "Reveal"
+msgstr ""
+
+msgid "Cache path"
+msgstr ""
+
+msgid "Clear"
+msgstr "Limpiar"
+
+msgid "Are you sure you want to change the cache path?"
+msgstr ""
+
+msgid "The specified path is not empty."
+msgstr ""
+
+msgid "No cache exists."
+msgstr ""
+
+msgid "Total: {}"
+msgstr "Total: {}"
+
 msgid "Translating..."
 msgstr "Traduciendo..."
 
@@ -157,12 +187,6 @@ msgstr "Motor de Traducción Personalizado"
 
 msgid "Add"
 msgstr "Agregar"
-
-msgid "Clear"
-msgstr "Limpiar"
-
-msgid "Restore"
-msgstr "Restablecer"
 
 msgid "Verify"
 msgstr "Verificar"
@@ -234,9 +258,6 @@ msgstr ""
 msgid "Retain at least one row."
 msgstr ""
 
-msgid "Start to convert ebook format:"
-msgstr "Comienza a convertir el formato de libro electrónico:"
-
 msgid "Baidu"
 msgstr "Baidu"
 
@@ -303,14 +324,71 @@ msgstr ""
 msgid "Youdao"
 msgstr "Youdao"
 
+msgid "Start to convert ebook format:"
+msgstr "Comienza a convertir el formato de libro electrónico:"
+
+msgid "[{} > {}] Translating \"{}\""
+msgstr "[{} > {}] Traduciendo \"{}\""
+
+msgid "Translation job failed"
+msgstr "Error al traducir"
+
+msgid "completed"
+msgstr "completado"
+
+msgid "Ebook Translation Log"
+msgstr "Registro de traducción de libros electrónicos"
+
+msgid "Translation Completed"
+msgstr "Traducción completada"
+
+msgid "The translation of \"{}\" was completed. Do you want to open the book?"
+msgstr "La traducción de \"{}\" se completó. ¿Quieres abrir el libro?"
+
+msgid "Translation canceled."
+msgstr ""
+
+msgid "No available API key."
+msgstr ""
+
+msgid "API key was Changed due to previous one unavailable."
+msgstr ""
+
+msgid "Failed to retrieve data from translate engine API."
+msgstr "No se pudieron recuperar los datos de la API del motor de traducción."
+
+msgid "Start to translate ebook content"
+msgstr "Comience a traducir contenido de libros electrónicos"
+
+msgid "Total items: {}"
+msgstr "Articulos totales: {}"
+
+msgid "Character count: {}"
+msgstr ""
+
+msgid "There is no content need to translate."
+msgstr "No hay necesidad de traducir el contenido."
+
+msgid "Translating: {}/{}"
+msgstr "Traduciendo: {}/{}"
+
+msgid "Original: {}"
+msgstr "Original: {}"
+
+msgid "Translation: {}"
+msgstr "Traducción: {}"
+
+msgid "Translation (Cached): {}"
+msgstr "Traducción (En caché): {}"
+
+msgid "Error: {}"
+msgstr ""
+
 msgid "General"
 msgstr ""
 
 msgid "Content"
 msgstr "Contenido"
-
-msgid "Cache"
-msgstr "Cache"
 
 msgid "Preferred Mode"
 msgstr ""
@@ -357,6 +435,12 @@ msgstr "Puerto"
 msgid "Test"
 msgstr "Probar"
 
+msgid "Cache"
+msgstr "Cache"
+
+msgid "Manage"
+msgstr ""
+
 msgid "Job Log"
 msgstr ""
 
@@ -388,6 +472,9 @@ msgid "Attempt times"
 msgstr ""
 
 msgid "Timeout (seconds)"
+msgstr ""
+
+msgid "Max error count"
 msgstr ""
 
 msgid "Tune ChatGPT"
@@ -491,18 +578,6 @@ msgstr ""
 msgid "Subject"
 msgstr ""
 
-msgid "Reveal"
-msgstr ""
-
-msgid "Total: {}"
-msgstr "Total: {}"
-
-msgid "No cache exists."
-msgstr ""
-
-msgid "Refresh"
-msgstr ""
-
 msgid "Proxy host or port is incorrect."
 msgstr "El host o puerto proxy es incorrecto."
 
@@ -522,45 +597,6 @@ msgid "{} is not a valid regular expression."
 msgstr "{} no es una expresión regular válida."
 
 msgid "{} is not a valid CSS seletor."
-msgstr ""
-
-msgid "Translation canceled."
-msgstr ""
-
-msgid "No available API key."
-msgstr ""
-
-msgid "API key was Changed due to previous one unavailable."
-msgstr ""
-
-msgid "Failed to retrieve data from translate engine API."
-msgstr "No se pudieron recuperar los datos de la API del motor de traducción."
-
-msgid "Start to translate ebook content"
-msgstr "Comience a traducir contenido de libros electrónicos"
-
-msgid "Total items: {}"
-msgstr "Articulos totales: {}"
-
-msgid "Character count: {}"
-msgstr ""
-
-msgid "There is no content need to translate."
-msgstr "No hay necesidad de traducir el contenido."
-
-msgid "Translating: {}/{}"
-msgstr "Traduciendo: {}/{}"
-
-msgid "Original: {}"
-msgstr "Original: {}"
-
-msgid "Translation: {}"
-msgstr "Traducción: {}"
-
-msgid "Translation (Cached): {}"
-msgstr "Traducción (En caché): {}"
-
-msgid "Error: {}"
 msgstr ""
 
 msgid "Translate Book"
@@ -584,6 +620,9 @@ msgstr ""
 msgid "Please choose at least one book."
 msgstr "Por favor, elija al menos un libro."
 
+msgid "Cache Manager"
+msgstr ""
+
 msgid "Choose Translation Mode"
 msgstr ""
 
@@ -592,24 +631,6 @@ msgstr "No se puede borrar el caché mientras se ejecuta el trabajo(s)."
 
 msgid "Are you sure you want clear all caches?"
 msgstr ""
-
-msgid "[{} > {}] Translating \"{}\""
-msgstr "[{} > {}] Traduciendo \"{}\""
-
-msgid "Translation job failed"
-msgstr "Error al traducir"
-
-msgid "completed"
-msgstr "completado"
-
-msgid "Ebook Translation Log"
-msgstr "Registro de traducción de libros electrónicos"
-
-msgid "Translation Completed"
-msgstr "Traducción completada"
-
-msgid "The translation of \"{}\" was completed. Do you want to open the book?"
-msgstr "La traducción de \"{}\" se completó. ¿Quieres abrir el libro?"
 
 #~ msgid "Will retry in {} seconds."
 #~ msgstr "Se volverá a intentar en {} segundos."

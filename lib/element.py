@@ -289,11 +289,12 @@ class ElementHandler:
         if self.merge_length == 0:
             for eid, element in enumerate(elements):
                 self.elements[eid] = element
-                content = element.get_content()
                 raw = element.get_raw()
+                content = element.get_content()
+                md5 = uid('%s%s' % (eid, content))
                 attrs = element.get_attributes()
                 self.original.append(
-                    (eid, uid(content), raw, content, element.ignored, attrs,
+                    (eid, md5, raw, content, element.ignored, attrs,
                      element.page_id))
             return self.original
 
@@ -313,13 +314,13 @@ class ElementHandler:
                 content += text
                 continue
             elif content:
-                self.original.append(
-                    (count, uid(content), raw, content, False))
+                md5 = uid('%s%s' % (count, content))
+                self.original.append((count, md5, raw, content, False))
                 count += 1
             raw = code
             content = text
-        content and self.original.append(
-                (count, uid(content), raw, content, False))
+        md5 = uid('%s%s' % (count, content))
+        content and self.original.append((count, md5, raw, content, False))
         return self.original
 
     def remove_unused_elements(self):
@@ -338,6 +339,9 @@ class ElementHandler:
                     element.add_translation(
                         translation, self.position, self.lang, self.color)
                     self.elements.pop(paragraph.id)
+            for eid, element in self.elements.copy().items():
+                if element.ignored:
+                    self.elements.pop(eid)
             self.remove_unused_elements()
             return
 

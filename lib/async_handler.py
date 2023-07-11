@@ -35,7 +35,7 @@ class AsyncHandler:
                     self.queue.task_done()
                 break
             except Exception:
-                paragraph.error = traceback.format_exc()
+                paragraph.error = traceback.format_exc().strip()
                 self.done_queue.put_nowait(paragraph)
                 self.queue.task_done()
 

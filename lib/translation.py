@@ -99,7 +99,7 @@ class Translation:
             message = _('Failed to retrieve data from translate engine API.')
             if retry >= self.translator.request_attempt:
                 raise TranslationFailed('{}\n{}'.format(
-                    message, traceback.format_exc()))
+                    message, traceback.format_exc().strip()))
             # TODO: Display how many jobs are retrying.
             retry += 1
             interval *= retry

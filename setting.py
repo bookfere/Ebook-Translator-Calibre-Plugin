@@ -610,8 +610,8 @@ class TranslationSetting(QDialog):
             valid = QColor(color).isValid()
             color_show.setStyleSheet(
                 'background-color:{};border-color:{};'
-                .format(valid and color or 'transparent',
-                        valid and color or '#eee'))
+                .format(valid and color or 'black',
+                        valid and color or 'black'))
         show_color()
 
         def set_color(color):

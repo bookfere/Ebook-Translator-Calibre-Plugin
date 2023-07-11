@@ -78,7 +78,7 @@ class EngineWorker(QObject):
             self.complete.emit()
         except Exception:
             self.clear.emit()
-            self.result.emit(traceback.format_exc())
+            self.result.emit(traceback.format_exc().strip())
 
     @pyqtSlot()
     def check_usage(self):
