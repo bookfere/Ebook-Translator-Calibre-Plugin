@@ -34,25 +34,37 @@ class Paragraph:
         return {}
 
 
-class TranslationCache:
-    """We use two types of cache: one is used temporarily for communication,
-    and another one is used to cache translations, which avoids the need for
-    retranslation. This is controlled by the parameter `enabled`.
-    """
-    __version__ = '20230608'
-
-    fresh = True
-    dir_path = os.path.join(
+def default_cache_path():
+    path = os.path.join(
         tempfile.gettempdir(), 'com.bookfere.Calibre.EbookTranslator')
+    not os.path.exists(path) and os.mkdir(path)
+    return path
+
+
+def cache_path():
+    config = get_config()
+    path = config.get('cache_path')
+    if path and os.path.exists(path):
+        return path
+    return default_cache_path()
+
+
+class TranslationCache:
+    __version__ = '20230608'
+    fresh = True
+    dir_path = cache_path()
     cache_path = os.path.join(dir_path, 'cache')
     temp_path = os.path.join(dir_path, 'temp')
 
     def __init__(self, identity, persistence=True):
-        """An interruption may occur, resulting in the cache size being less
-        than 50,000 bytes. Therefore, we need to resave it again.
+        """:persistence: We use two types of cache, one is used temporarily for
+        communication, and another one is used to cache translations, which
+        avoids the need for retranslation.
         """
         self.persistence = persistence
         self.file_path = self._path(identity)
+        # An interruption may occur, resulting in the cache size being less
+        # than 50,000 bytes. Therefore, we need to resave it again.
         if os.path.exists(self.file_path) and self.size() > 50000:
             self.fresh = False
         self.cache_only = False
@@ -69,10 +81,18 @@ class TranslationCache:
             'CREATE TABLE IF NOT EXISTS info(key UNIQUE, value)')
 
     @classmethod
+    def move(cls, dest):
+        for dir_path in glob(os.path.join(cls.dir_path, '*')):
+            os.path.isdir(dir_path) and shutil.move(dir_path, dest)
+        cls.dir_path = dest
+        cls.cache_path = os.path.join(dest, 'cache')
+        cls.temp_path = os.path.join(dest, 'temp')
+
+    @classmethod
     def count(cls):
         total = 0
-        for cache in glob(os.path.join(cls.cache_path, '*.db')):
-            total += os.path.getsize(cache)
+        for file_path in glob(os.path.join(cls.cache_path, '*.db')):
+            total += os.path.getsize(file_path)
         return size_by_unit(total, 'MB')
 
     @classmethod
@@ -86,9 +106,20 @@ class TranslationCache:
             name = os.path.basename(file_path)
             cache = cls(os.path.splitext(name)[0])
             title = cache.get_info('title') or _('Unknown')
+            engine = cache.get_info('engine_name') or _('Unknown')
             size = size_by_unit(os.path.getsize(file_path), 'MB')
-            names.append((title, '%sMB' % size, name, file_path))
+            names.append((title, engine, '%sMB' % size, name, file_path))
         return names
+
+    def _path(self, name):
+        if not os.path.exists(self.dir_path):
+            os.mkdir(self.dir_path)
+        cache_dir = self.cache_path
+        if not self.is_persistence():
+            cache_dir = self.temp_path
+        if not os.path.exists(cache_dir):
+            os.mkdir(cache_dir)
+        return os.path.join(cache_dir, '%s.db' % name)
 
     def size(self):
         return os.path.getsize(self.file_path)
@@ -101,16 +132,6 @@ class TranslationCache:
 
     def set_cache_only(self, cache_only):
         self.cache_only = cache_only
-
-    def _path(self, name):
-        if not os.path.exists(self.dir_path):
-            os.mkdir(self.dir_path)
-        cache_dir = self.cache_path
-        if not self.is_persistence():
-            cache_dir = self.temp_path
-        if not os.path.exists(cache_dir):
-            os.mkdir(cache_dir)
-        return os.path.join(cache_dir, '%s.db' % name)
 
     def set_info(self, key, value):
         self.cursor.execute(

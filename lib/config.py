@@ -14,6 +14,7 @@ defaults = {
     'proxy_enabled': False,
     'proxy_setting': [],
     'cache_enabled': True,
+    'cache_path': None,
     'log_translation': True,
     'translation_position': 'after',
     'translation_color': None,

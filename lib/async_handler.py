@@ -1,4 +1,5 @@
 import asyncio
+import traceback
 import concurrent.futures
 
 from .exception import TranslationCanceled
@@ -33,8 +34,8 @@ class AsyncHandler:
                     await self.queue.get()
                     self.queue.task_done()
                 break
-            except Exception as e:
-                paragraph.error = str(e)
+            except Exception:
+                paragraph.error = traceback.format_exc()
                 self.done_queue.put_nowait(paragraph)
                 self.queue.task_done()
 

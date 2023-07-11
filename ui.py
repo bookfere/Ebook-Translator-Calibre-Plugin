@@ -3,14 +3,14 @@ from calibre.gui2.actions import InterfaceAction
 
 from . import EbookTranslator
 from .lib.utils import uid
-from .lib.config import get_config, upgrade_config
 from .lib.ebook import Ebooks
 from .lib.cache import TranslationCache
+from .lib.config import get_config, upgrade_config
+from .lib.conversion import ConversionWorker
 from .batch import BatchTranslation
 from .setting import TranslationSetting
 from .cache import CacheManager
 from .about import AboutDialog
-from .lib.worker import ConvertionWorker
 from .components import AlertMessage, ModeSelection
 from .advanced import CreateTranslationProject, AdvancedTranslation
 
@@ -71,7 +71,7 @@ class EbookTranslatorGui(InterfaceAction):
         name = 'advanced_' + uid(ebook.get_input_path())
         if self.show_window(name):
             return
-        worker = ConvertionWorker(self.gui, self.icon)
+        worker = ConversionWorker(self.gui, self.icon)
         window = AdvancedTranslation(
             self.gui, self.qaction.icon(), worker, ebook)
         window.setMinimumWidth(1200)
@@ -99,7 +99,7 @@ class EbookTranslatorGui(InterfaceAction):
         if len(ebooks) < 1:
             return self.alert.pop(
                 _('Please choose at least one book.'), 'warning')
-        worker = ConvertionWorker(self.gui, self.icon)
+        worker = ConversionWorker(self.gui, self.icon)
         window = BatchTranslation(self.gui, worker, ebooks)
         # window.setModal(True)
         window.setMinimumWidth(600)
@@ -125,9 +125,9 @@ class EbookTranslatorGui(InterfaceAction):
         if self.show_window('cache'):
             return
         window = CacheManager(self, self.gui)
-        window.setMinimumWidth(600)
-        window.setMinimumHeight(520)
-        window.setWindowTitle('%s - %s' % (_('Cache'), self.title))
+        window.setMinimumWidth(800)
+        window.setMinimumHeight(620)
+        window.setWindowTitle('%s - %s' % (_('Cache Manager'), self.title))
         window.setWindowIcon(self.icon)
         window.show()
         self.add_window('cache', window)

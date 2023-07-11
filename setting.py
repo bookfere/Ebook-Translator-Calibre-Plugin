@@ -246,19 +246,43 @@ class TranslationSetting(QDialog):
         proxy_group.setLayout(proxy_layout)
         layout.addWidget(proxy_group)
 
+        misc_widget = QWidget()
+        misc_layout = QHBoxLayout(misc_widget)
+        misc_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Cache
+        cache_group = QGroupBox(_('Cache'))
+        cache_layout = QHBoxLayout(cache_group)
+        cache_enabled = QCheckBox(_('Enable'))
+        cache_manage = QLabel(_('Manage'))
+        cache_layout.addWidget(cache_enabled)
+        cache_layout.addStretch(1)
+        cache_layout.addWidget(cache_manage)
+        misc_layout.addWidget(cache_group, 1)
+
+        cache_manage.setStyleSheet('color:blue;text-decoration:underline;')
+        cursor = cache_manage.cursor()
+        cursor.setShape(Qt.PointingHandCursor)
+        cache_manage.setCursor(cursor)
+        cache_manage.mouseReleaseEvent = lambda event: self.plugin.show_cache()
+
+        cache_enabled.setChecked(self.config.get('cache_enabled'))
+        cache_enabled.toggled.connect(
+            lambda checked: self.config.update(cache_enabled=checked))
+
         # Job Log
         log_group = QGroupBox(_('Job Log'))
         log_translation = QCheckBox(_('Show translation'))
         log_layout = QVBoxLayout(log_group)
         log_layout.addWidget(log_translation)
         log_layout.addStretch(1)
-        layout.addWidget(log_group, 1)
+        misc_layout.addWidget(log_group, 1)
+
+        layout.addWidget(misc_widget)
 
         log_translation.setChecked(self.config.get('log_translation'))
         log_translation.toggled.connect(
             lambda checked: self.config.update(log_translation=checked))
-
-        layout.addWidget(log_group)
 
         layout.addStretch(1)
 

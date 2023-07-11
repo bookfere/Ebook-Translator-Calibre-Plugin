@@ -172,10 +172,10 @@ class Extraction:
         self.load_element_patterns()
 
     def load_filter_patterns(self):
-        rules = [r'^[-\d\s\.\'\\"‘’“”,=~!@#$%^&º*|<>?/`—…+:_(){}[\]]+$']
-        rules.extend(self.filter_rules)
-        patterns = []
-        for rule in rules:
+        default_rules = [
+            r'^[-\d\s\.\'\\"‘’“”,=~!@#$%^&º*|<>?/`—…+:_(){}[\]]+$']
+        patterns = [re.compile(rule) for rule in default_rules]
+        for rule in self.filter_rules:
             if self.rule_mode == 'normal':
                 rule = re.compile(re.escape(rule), re.I)
             elif self.rule_mode == 'case':
