@@ -52,9 +52,6 @@ class EbookTranslatorGui(InterfaceAction):
         menu.addAction(_('Cache'), self.show_cache)
         menu.addAction(_('Setting'), self.show_setting)
         menu.addAction(_('About'), self.show_about)
-        if DEBUG:
-            menu.addSeparator()
-            menu.addAction(_('Clear all caches'), self.clear_caches)
 
         self.qaction.setMenu(menu)
         self.qaction.setIcon(self.icon)
@@ -101,7 +98,6 @@ class EbookTranslatorGui(InterfaceAction):
                 _('Please choose at least one book.'), 'warning')
         worker = ConversionWorker(self.gui, self.icon)
         window = BatchTranslation(self.gui, worker, ebooks)
-        # window.setModal(True)
         window.setMinimumWidth(600)
         window.setMinimumHeight(520)
         window.setWindowTitle(
@@ -122,9 +118,14 @@ class EbookTranslatorGui(InterfaceAction):
         self.add_window('setting', window)
 
     def show_cache(self):
+        if self.has_running_jobs():
+            return self.alert.pop(
+                _('Cannot manage cache while translation in process.'),
+                'warning')
         if self.show_window('cache'):
             return
         window = CacheManager(self, self.gui)
+        window.setModal(True)
         window.setMinimumWidth(800)
         window.setMinimumHeight(620)
         window.setWindowTitle('%s - %s' % (_('Cache Manager'), self.title))
@@ -184,17 +185,6 @@ class EbookTranslatorGui(InterfaceAction):
         for name in windows:
             if name.startswith('advanced_'):
                 return True
-        return False
-
-    def clear_caches(self):
-        if self.has_running_jobs():
-            return self.alert.pop(
-                _('Cannot clear cache while there are running jobs.'),
-                'warning')
-        action = self.alert.ask(_('Are you sure you want clear all caches?'))
-        if action == 'yes':
-            TranslationCache.clean()
-            return True
         return False
 
     def get_selected_ebooks(self):

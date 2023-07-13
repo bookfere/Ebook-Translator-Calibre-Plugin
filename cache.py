@@ -11,12 +11,12 @@ try:
     from qt.core import (
         Qt, QDialog, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
         QTableView, QAbstractTableModel, QAbstractItemView, pyqtSignal,
-        QLineEdit, QFileDialog)
+        QLineEdit, QFileDialog, QModelIndex)
 except ImportError:
     from PyQt5.Qt import (
         Qt, QDialog, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
         QTableView, QAbstractTableModel, QAbstractItemView, pyqtSignal,
-        QLineEdit, QFileDialog)
+        QLineEdit, QFileDialog, QModelIndex)
 
 load_translations()
 
@@ -37,6 +37,15 @@ class CacheManager(QDialog):
         self.layout.addWidget(self.table_widget())
         self.layout.addWidget(self.enable_widget())
         self.layout.addWidget(layout_info())
+
+        self.cache_list.selected_rows.connect(
+            lambda rows: self.delete_button.setDisabled(len(rows) < 1))
+
+        def clear_button_status():
+            self.clear_button.setDisabled(
+                self.cache_list.model().rowCount() < 1)
+        clear_button_status()
+        self.cache_list.model().layoutChanged.connect(clear_button_status)
 
         self.cache_path.setText(TranslationCache.dir_path)
         self.cache_restore.setDisabled(
@@ -61,7 +70,7 @@ class CacheManager(QDialog):
         self.cache_path.setReadOnly(True)
         self.cache_path.setPlaceholderText(
             _('Choose a path to store cache files.'))
-        self.cache_move = QPushButton(_('Move'))
+        self.cache_move = QPushButton(_('Choose...'))
         self.cache_restore = QPushButton(_('Restore'))
         self.cache_reveal = QPushButton(_('Reveal'))
 
@@ -79,7 +88,9 @@ class CacheManager(QDialog):
         layout.setContentsMargins(0, 0, 0, 0)
         self.cache_size = QLabel()
         self.clear_button = QPushButton(_('Clear'))
+        self.clear_button.setDisabled(True)
         self.delete_button = QPushButton(_('Delete'))
+        self.delete_button.setDisabled(True)
 
         layout.addWidget(self.cache_size)
         layout.addStretch(1)
@@ -91,7 +102,6 @@ class CacheManager(QDialog):
     def table_widget(self):
         self.cache_list = CacheTableView()
         self.cache_list.setModel(CacheTableModel())
-        self.selection = self.cache_list.selectionModel()
 
         return self.cache_list
 
@@ -127,14 +137,21 @@ class CacheManager(QDialog):
         self.config.save(cache_path=path)
 
     def clear(self):
-        if self.plugin.clear_caches():
-            self.cache_list.model().clear()
-            self.cache_count.emit()
+        action = self.alert.ask(_('Are you sure you want clear all caches?'))
+        if action != 'yes':
+            return
+        TranslationCache.clean()
+        self.cache_list.model().clear()
+        self.cache_count.emit()
 
     def delete(self):
-        for row in reversed(self.selection.selectedRows()):
-            cache_path = row.data(Qt.UserRole)
-            os.path.exists(cache_path) and os.remove(cache_path)
+        action = self.alert.ask(
+            _('Are you sure you want to delete selected cache(s)?'))
+        if action != 'yes':
+            return
+        for row in reversed(self.cache_list.selectionModel().selectedRows()):
+            filename = row.data(Qt.UserRole)
+            TranslationCache.remove(filename)
             self.cache_list.model().delete(row.row())
             self.cache_count.emit()
 
@@ -155,6 +172,8 @@ class CacheManager(QDialog):
 
 
 class CacheTableView(QTableView):
+    selected_rows = pyqtSignal(list)
+
     def __init__(self, parent=None):
         QTableView.__init__(self, parent)
         self.setSortingEnabled(True)
@@ -163,9 +182,16 @@ class CacheTableView(QTableView):
         self.horizontalHeader().setStretchLastSection(True)
         self.horizontalHeader().sortIndicatorChanged.connect(self.sortByColumn)
 
+    def selectionChanged(self, selected, deselected):
+        QTableView.selectionChanged(self, selected, deselected)
+        self.selected_rows.emit(self.selectionModel().selectedRows())
+
 
 class CacheTableModel(QAbstractTableModel):
-    headers = ['Title', 'Engine', 'Language', 'Merge', 'Size', 'Filename']
+    headers = [
+        _('Title'), _('Engine'), _('Language'), _('Merge Length'), _('Size'),
+        _('Filename'),
+    ]
 
     def __init__(self):
         QAbstractTableModel.__init__(self)
@@ -190,10 +216,9 @@ class CacheTableModel(QAbstractTableModel):
         if not index.isValid():
             return None
         if role == Qt.DisplayRole:
-            return self.caches[index.row()][index.column()] or _('Unknown')
+            return self.caches[index.row()][index.column()]
         if role == Qt.UserRole:
-            # The path of the file always appends to the last item.
-            return self.caches[index.row()][len(self.headers)]
+            return self.caches[index.row()][-1]
 
     @update
     def refresh(self):
@@ -213,8 +238,8 @@ class CacheTableModel(QAbstractTableModel):
         if order == Qt.DescendingOrder:
             self.caches.reverse()
 
-    def rowCount(self, parent):
+    def rowCount(self, parent=QModelIndex()):
         return len(self.caches)
 
-    def columnCount(self, parent):
+    def columnCount(self, parent=QModelIndex()):
         return len(self.headers)

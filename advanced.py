@@ -122,10 +122,10 @@ class PreparationWorker(QObject):
 
 class TranslationWorker(QObject):
     start = pyqtSignal()
-    finished = pyqtSignal(bool)
+    finished = pyqtSignal()
     translate = pyqtSignal(list, bool)
     logging = pyqtSignal(str, bool)
-    error = pyqtSignal(str, str, str)
+    # error = pyqtSignal(str, str, str)
     streaming = pyqtSignal(object)
     callback = pyqtSignal(object)
 
@@ -169,8 +169,7 @@ class TranslationWorker(QObject):
         translation.set_callback(self.callback.emit)
         translation.set_cancel_request(self.cancel_request)
         translation.handle(paragraphs)
-        self.finished.emit(not self.cancel_request())
-        self.cancelled = False
+        self.finished.emit()
 
 
 class CreateTranslationProject(QDialog):
@@ -255,7 +254,7 @@ class AdvancedTranslation(QDialog):
         self.ebook = ebook
         self.config = get_config()
         self.alert = AlertMessage(self)
-        self.error = JobError(self)
+        # self.error = JobError(self)
         self.current_engine = get_engine_class()
         self.cache = None
 
@@ -291,14 +290,20 @@ class AdvancedTranslation(QDialog):
 
         def working_status():
             self.on_working = True
+            self.logging_text.clear()
+            self.errors_text.clear()
         self.trans_worker.start.connect(working_status)
 
-        def working_finished(success):
-            if self.translate_all and success:
+        self.trans_worker.logging.connect(
+            lambda text, error: self.errors_text.appendPlainText(text)
+                if error else self.logging_text.appendPlainText(text))
+
+        def working_finished():
+            if self.translate_all:
                 failures = len(self.table.get_seleted_items(True, True))
                 if failures > 0:
                     message = _(
-                        '{} paragraph(s) were translated unsuccessfully. '
+                        'Failed to translate {} paragraph(s), '
                         'Would you like to retry?')
                     if self.alert.ask(message.format(failures)) == 'yes':
                         self.translate_all_paragraphs()
@@ -309,9 +314,9 @@ class AdvancedTranslation(QDialog):
             self.on_working = False
         self.trans_worker.finished.connect(working_finished)
 
-        self.trans_worker.error.connect(
-            lambda title, reason, detail: self.error.show_error(
-                title, _('Failed') + ': ' + reason, det_msg=detail))
+        # self.trans_worker.error.connect(
+        #     lambda title, reason, detail: self.error.show_error(
+        #         title, _('Failed') + ': ' + reason, det_msg=detail))
 
         def prepare_table_layout(cache_id):
             self.cache = get_cache(cache_id)
@@ -378,17 +383,18 @@ class AdvancedTranslation(QDialog):
         layout.setContentsMargins(0, 0, 0, 0)
 
         tabs = QTabWidget()
-        tabs.addTab(self.layout_review(), _('Review'))
-        tabs.addTab(self.layout_log(), _('Log'))
-        tabs.addTab(self.layout_errors(), _('Errors'))
+        review_index = tabs.addTab(self.layout_review(), _('Review'))
+        log_index = tabs.addTab(self.layout_log(), _('Log'))
+        errors_index = tabs.addTab(self.layout_errors(), _('Errors'))
         tabs.setStyleSheet('QTabBar::tab {min-width:120px;}')
 
         self.trans_worker.start.connect(
             lambda: (self.translate_all or self.table.selected_count() > 1)
-            and tabs.setCurrentIndex(1))
+                and tabs.setCurrentIndex(log_index))
         self.trans_worker.finished.connect(
-            lambda success: success and self.translate_all
-            and tabs.setCurrentIndex(0))
+            lambda: tabs.setCurrentIndex(
+                errors_index if self.errors_text.toPlainText()
+                    else review_index))
 
         splitter = QSplitter()
         splitter.addWidget(self.layout_table())
@@ -425,9 +431,8 @@ class AdvancedTranslation(QDialog):
                 progress_bar.setVisible(True)
         self.trans_worker.start.connect(working_start)
 
-        def working_finished(success):
-            progress_bar.setVisible(False)
-        self.trans_worker.finished.connect(working_finished)
+        self.trans_worker.finished.connect(
+            lambda: progress_bar.setVisible(False))
 
         return widget
 
@@ -485,7 +490,7 @@ class AdvancedTranslation(QDialog):
             action_widget.setDisabled(True)
         self.trans_worker.start.connect(working_start)
 
-        def working_finished(success):
+        def working_finished():
             stack.setCurrentWidget(action_widget)
             action_widget.setDisabled(False)
         self.trans_worker.finished.connect(working_finished)
@@ -581,7 +586,7 @@ class AdvancedTranslation(QDialog):
             widget.setDisabled(True)
         self.trans_worker.start.connect(working_start)
 
-        def working_finished(success):
+        def working_finished():
             widget.setVisible(True)
             widget.setDisabled(False)
         self.trans_worker.finished.connect(working_finished)
@@ -615,7 +620,7 @@ class AdvancedTranslation(QDialog):
         self.trans_worker.start.connect(
             lambda: translation_text.setReadOnly(False))
         self.trans_worker.finished.connect(
-            lambda success: translation_text.setReadOnly(False))
+            lambda: translation_text.setReadOnly(False))
 
         default_flag = translation_text.textInteractionFlags()
 
@@ -716,14 +721,10 @@ class AdvancedTranslation(QDialog):
         widget = QWidget()
         layout = QVBoxLayout(widget)
 
-        logging_text = QPlainTextEdit()
-        logging_text.setPlaceholderText(_('Translation log'))
-        logging_text.setReadOnly(True)
-        layout.addWidget(logging_text)
-
-        self.trans_worker.start.connect(logging_text.clear)
-        self.trans_worker.logging.connect(
-            lambda text, error: error or logging_text.appendPlainText(text))
+        self.logging_text = QPlainTextEdit()
+        self.logging_text.setPlaceholderText(_('Translation log'))
+        self.logging_text.setReadOnly(True)
+        layout.addWidget(self.logging_text)
 
         return widget
 
@@ -731,14 +732,10 @@ class AdvancedTranslation(QDialog):
         widget = QWidget()
         layout = QVBoxLayout(widget)
 
-        errors_text = QPlainTextEdit()
-        errors_text.setPlaceholderText(_('Error log'))
-        errors_text.setReadOnly(True)
-        layout.addWidget(errors_text)
-
-        self.trans_worker.start.connect(errors_text.clear)
-        self.trans_worker.logging.connect(
-            lambda text, error: error and errors_text.appendPlainText(text))
+        self.errors_text = QPlainTextEdit()
+        self.errors_text.setPlaceholderText(_('Error log'))
+        self.errors_text.setReadOnly(True)
+        layout.addWidget(self.errors_text)
 
         return widget
 

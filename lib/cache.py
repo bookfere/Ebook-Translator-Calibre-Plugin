@@ -10,6 +10,9 @@ from .utils import size_by_unit
 from .config import get_config
 
 
+load_translations()
+
+
 class Paragraph:
     def __init__(self, id, md5, raw, original, ignored=False, attributes=None,
                  page=None, translation=None, engine_name=None,
@@ -83,7 +86,7 @@ class TranslationCache:
     @classmethod
     def move(cls, dest):
         for dir_path in glob(os.path.join(cls.dir_path, '*')):
-            os.path.isdir(dir_path) and shutil.move(dir_path, dest)
+            os.path.exists(dir_path) and shutil.move(dir_path, dest)
         cls.dir_path = dest
         cls.cache_path = os.path.join(dest, 'cache')
         cls.temp_path = os.path.join(dest, 'temp')
@@ -96,8 +99,14 @@ class TranslationCache:
         return size_by_unit(total, 'MB')
 
     @classmethod
+    def remove(cls, filename):
+        file_path = os.path.join(cls.cache_path, filename)
+        os.path.exists(file_path) and os.remove(file_path)
+
+    @classmethod
     def clean(cls):
-        shutil.rmtree(cls.dir_path, ignore_errors=True)
+        for filename in os.listdir(cls.cache_path):
+            cls.remove(filename)
 
     @classmethod
     def get_list(cls):
@@ -105,13 +114,13 @@ class TranslationCache:
         for file_path in glob(os.path.join(cls.cache_path, '*.db')):
             name = os.path.basename(file_path)
             cache = cls(os.path.splitext(name)[0])
-            title = cache.get_info('title')
+            title = cache.get_info('title') or '[%s]' % _('Unknown')
             engine = cache.get_info('engine_name')
             lang = cache.get_info('target_lang')
-            merge = cache.get_info('merge_length')
+            merge = int(cache.get_info('merge_length')) or 'N/A'
             size = size_by_unit(os.path.getsize(file_path), 'MB')
             names.append(
-                (title, engine, lang, merge, '%sMB' % size, name, file_path))
+                (title, engine, lang, merge, '%sMB' % size, name))
         return names
 
     def _path(self, name):

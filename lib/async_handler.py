@@ -1,5 +1,4 @@
 import asyncio
-import traceback
 import concurrent.futures
 
 from .exception import TranslationCanceled
@@ -24,7 +23,7 @@ class AsyncHandler:
                 paragraph = await self.queue.get()
                 await asyncio.get_running_loop().run_in_executor(
                     None, self.translate_paragraph, paragraph)
-                if self.queue.qsize() > 0:
+                if self.queue.qsize() > 0 and not paragraph.is_cache:
                     await asyncio.sleep(self.request_interval)
                 self.done_queue.put_nowait(paragraph)
                 self.queue.task_done()
@@ -34,8 +33,8 @@ class AsyncHandler:
                     await self.queue.get()
                     self.queue.task_done()
                 break
-            except Exception:
-                paragraph.error = traceback.format_exc().strip()
+            except Exception as e:
+                paragraph.error = str(e)
                 self.done_queue.put_nowait(paragraph)
                 self.queue.task_done()
 
