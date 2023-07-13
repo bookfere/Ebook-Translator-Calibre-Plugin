@@ -29,7 +29,7 @@ class ThreadHandler:
             try:
                 paragraph = self.queue.get()
                 self.translate_paragraph(paragraph)
-                if self.queue.qsize() > 0:
+                if self.queue.qsize() > 0 and not paragraph.is_cache:
                     time.sleep(self.request_interval)
                 self.done_queue.put(paragraph)
                 self.queue.task_done()

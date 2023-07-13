@@ -14,7 +14,7 @@ from ..engines.custom import CustomTranslate
 from .utils import sep, trim, dummy
 from .config import get_config
 from .exception import (
-    BadApiKeyFormat, NoAvailableApiKey, TranslationCanceled, TranslationFailed)
+    NoAvailableApiKey, TranslationCanceled, TranslationFailed)
 
 
 load_translations()
@@ -114,6 +114,11 @@ class Translation:
     def set_cancel_request(self, cancel_request):
         self.cancel_request = cancel_request
 
+    def need_stop(self):
+        # Cancel the request if there are more than max continuous errors.
+        return self.translator.max_error_count != 0 and \
+            self.abort_count >= self.translator.max_error_count
+
     def _translate_text(self, text, retry=0, interval=5):
         """Translation engine service error code documentation:
         * https://cloud.google.com/apis/design/errors
@@ -125,32 +130,30 @@ class Translation:
         if self.cancel_request():
             raise TranslationCanceled(_('Translation canceled.'))
         try:
-            self.abort_count = 0
             text = self.glossary.replace(text)
-            return self.translator.translate(text)
-        except BadApiKeyFormat:
-            raise TranslationCanceled(_('Translation canceled.'))
+            translation = self.translator.translate(text)
+            self.abort_count = 0
+            return translation
         except Exception as e:
-            self.abort_count += 1
-            # Cancel the request if there are more than max continuous errors.
-            need_stop = self.translator.max_error_count != 0 and \
-                self.abort_count > self.translator.max_error_count
-            if self.cancel_request() or need_stop:
+            if self.cancel_request() or self.need_stop():
                 raise TranslationCanceled(_('Translation canceled.'))
+            self.abort_count += 1
+            # Try to retreive a available API key.
             if self.translator.need_change_api_key(str(e).lower()):
                 if not self.translator.change_api_key():
                     raise NoAvailableApiKey(_('No available API key.'))
                 self.log(
                     _('API key was Changed due to previous one unavailable.'))
-                return self._translate_text(text, retry, interval)
-            message = _('Failed to retrieve data from translate engine API.')
-            if retry >= self.translator.request_attempt:
-                raise TranslationFailed('{}\n{}'.format(
-                    message, traceback.format_exc().strip()))
-            # TODO: Display how many jobs are retrying.
-            retry += 1
-            interval *= retry
-            time.sleep(interval)
+            else:
+                message = _(
+                    'Failed to retrieve data from translate engine API.')
+                is_exceeded = retry >= self.translator.request_attempt
+                if is_exceeded or self.need_stop():
+                    raise TranslationFailed('{}\n{}'.format(
+                        message, traceback.format_exc().strip()))
+                retry += 1
+                interval *= retry
+                time.sleep(interval)
             return self._translate_text(text, retry, interval)
 
     def translate_paragraph(self, paragraph):
@@ -193,15 +196,17 @@ class Translation:
         self.callback(paragraph)
 
         if paragraph.error is None:
-            self.log(sep('-'))
+            self.log(sep())
             self.log(_('Original: {}').format(paragraph.original))
+            self.log(sep('-', 35))
             message = _('Translation: {}')
             if paragraph.is_cache:
                 message = _('Translation (Cached): {}')
             self.log(message.format(paragraph.translation))
         else:
-            self.log(sep('-'), True)
+            self.log(sep(), True)
             self.log(_('Original: {}').format(paragraph.original), True)
+            self.log(sep('-', 35), True)
             self.log(_('Error: {}').format(paragraph.error), True)
             paragraph.error = None
 
@@ -237,8 +242,6 @@ class Translation:
             handler.handle()
 
         message = _('Translation completed.')
-        if self.cancel_request():
-            message = _('Translation canceled.')
         self.log(sep())
         consuming = round((time.time() - start_time) / 60, 2)
         self.log('Time consuming: %s minutes' % consuming)

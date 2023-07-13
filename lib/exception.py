@@ -1,14 +1,14 @@
-class BadApiKeyFormat(Exception):
-    pass
-
-
-class NoAvailableApiKey(Exception):
-    pass
-
-
-class TranslationCanceled(Exception):
-    pass
-
-
 class TranslationFailed(Exception):
+    pass
+
+
+class TranslationCanceled(TranslationFailed):
+    pass
+
+
+class BadApiKeyFormat(TranslationCanceled):
+    pass
+
+
+class NoAvailableApiKey(TranslationCanceled):
     pass
