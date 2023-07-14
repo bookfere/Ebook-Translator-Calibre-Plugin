@@ -135,9 +135,9 @@ class TranslationWorker(QObject):
         self.target_lang = ebook.target_lang
         self.engine_class = engine_class
 
-        self.cancelled = False
+        self.canceled = False
         self.translate.connect(self.translate_paragraphs)
-        self.finished.connect(lambda: self.set_cancelled(False))
+        # self.finished.connect(lambda: self.set_canceled(False))
 
     def set_source_lang(self, lang):
         self.source_lang = lang
@@ -148,11 +148,11 @@ class TranslationWorker(QObject):
     def set_engine_class(self, engine_class):
         self.engine_class = engine_class
 
-    def set_cancelled(self, cancelled):
-        self.cancelled = cancelled
+    def set_canceled(self, canceled):
+        self.canceled = canceled
 
     def cancel_request(self):
-        return self.cancelled
+        return self.canceled
 
     @pyqtSlot(list, bool)
     def translate_paragraphs(self, paragraphs=[], fresh=False):
@@ -299,7 +299,7 @@ class AdvancedTranslation(QDialog):
                 if error else self.logging_text.appendPlainText(text))
 
         def working_finished():
-            if self.translate_all:
+            if self.translate_all and not self.trans_worker.cancel_request():
                 failures = len(self.table.get_seleted_items(True, True))
                 if failures > 0:
                     message = _(
@@ -310,6 +310,7 @@ class AdvancedTranslation(QDialog):
                         return
                 else:
                     self.alert.pop(_('Translation completed.'))
+            self.trans_worker.set_canceled(False)
             self.translate_all = False
             self.on_working = False
         self.trans_worker.finished.connect(working_finished)
@@ -477,8 +478,8 @@ class AdvancedTranslation(QDialog):
         def terminate_finished():
             stop_button.setDisabled(False)
             stop_button.setText(_('Stop'))
-            paragraph = self.table.current_paragraph()
-            self.translation_text[str].emit(paragraph.translation)
+            self.translation_text[str].emit(
+                self.table.current_paragraph().translation)
         self.trans_worker.finished.connect(terminate_finished)
 
         stack = QStackedWidget()
@@ -782,7 +783,7 @@ class AdvancedTranslation(QDialog):
                 _('Are you sure you want to stop the translation progress?'))
             if action != 'yes':
                 return False
-        self.trans_worker.set_cancelled(True)
+        self.trans_worker.set_canceled(True)
         return True
 
     def done(self, result):

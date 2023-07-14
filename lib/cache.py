@@ -119,8 +119,7 @@ class TranslationCache:
             lang = cache.get_info('target_lang')
             merge = int(cache.get_info('merge_length')) or 'N/A'
             size = size_by_unit(os.path.getsize(file_path), 'MB')
-            names.append(
-                (title, engine, lang, merge, '%sMB' % size, name))
+            names.append((title, engine, lang, merge, size, name))
         return names
 
     def _path(self, name):

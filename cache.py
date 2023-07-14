@@ -48,13 +48,13 @@ class CacheManager(QDialog):
         self.cache_list.model().layoutChanged.connect(clear_button_status)
 
         self.cache_path.setText(TranslationCache.dir_path)
-        self.cache_restore.setDisabled(
+        self.cache_reset.setDisabled(
             TranslationCache.dir_path == self.default_path)
 
         self.cache_count.connect(self.recount)
         self.cache_path.mouseDoubleClickEvent = lambda event: self.move()
         self.cache_move.clicked.connect(self.move)
-        self.cache_restore.clicked.connect(self.restore)
+        self.cache_reset.clicked.connect(self.reset)
         self.cache_reveal.clicked.connect(self.reveal)
         self.clear_button.clicked.connect(self.clear)
         self.delete_button.clicked.connect(self.delete)
@@ -71,13 +71,13 @@ class CacheManager(QDialog):
         self.cache_path.setPlaceholderText(
             _('Choose a path to store cache files.'))
         self.cache_move = QPushButton(_('Choose...'))
-        self.cache_restore = QPushButton(_('Restore'))
+        self.cache_reset = QPushButton(_('Reset'))
         self.cache_reveal = QPushButton(_('Reveal'))
 
         layout.addWidget(QLabel(_('Cache path')))
         layout.addWidget(self.cache_path, 1)
         layout.addWidget(self.cache_move)
-        layout.addWidget(self.cache_restore)
+        layout.addWidget(self.cache_reset)
         layout.addWidget(self.cache_reveal)
 
         return widget
@@ -105,23 +105,25 @@ class CacheManager(QDialog):
 
         return self.cache_list
 
-    def restore(self):
-        action = self.alert.ask(
-            _('Are you sure you want to restore the cache path?'))
+    def reset(self):
+        action = self.alert.ask(_(
+            'All cache(s) will be moved to the default path. '
+            'Are you sure to proceed?'))
         if action != 'yes':
             return
         TranslationCache.move(self.default_path)
         self.cache_list.model().refresh()
         self.cache_path.setText(self.default_path)
-        self.cache_restore.setDisabled(True)
+        self.cache_reset.setDisabled(True)
         self.config.save(cache_path=None)
 
     def move(self):
         path = QFileDialog.getExistingDirectory()
         if not path or path == self.default_path:
             return
-        action = self.alert.ask(
-            _('Are you sure you want to change the cache path?'))
+        action = self.alert.ask(_(
+            'All cache(s) will be moved to the new path. '
+            'Are you sure to proceed?'))
         if action != 'yes':
             return
         if not os.path.exists(path):
@@ -133,7 +135,7 @@ class CacheManager(QDialog):
         TranslationCache.move(path)
         self.cache_list.model().refresh()
         self.cache_path.setText(path)
-        self.cache_restore.setDisabled(False)
+        self.cache_reset.setDisabled(False)
         self.config.save(cache_path=path)
 
     def clear(self):
@@ -189,8 +191,8 @@ class CacheTableView(QTableView):
 
 class CacheTableModel(QAbstractTableModel):
     headers = [
-        _('Title'), _('Engine'), _('Language'), _('Merge Length'), _('Size'),
-        _('Filename'),
+        _('Title'), _('Engine'), _('Language'), _('Merge Length'),
+        _('Size (MB)'), _('Filename'),
     ]
 
     def __init__(self):

@@ -2,7 +2,6 @@ import re
 import sys
 import time
 import json
-import traceback
 from types import GeneratorType
 
 from calibre import prepare_string_for_xml as xml_escape
@@ -117,7 +116,7 @@ class Translation:
     def need_stop(self):
         # Cancel the request if there are more than max continuous errors.
         return self.translator.max_error_count != 0 and \
-            self.abort_count >= self.translator.max_error_count
+            self.abort_count > self.translator.max_error_count
 
     def _translate_text(self, text, retry=0, interval=5):
         """Translation engine service error code documentation:
@@ -149,8 +148,7 @@ class Translation:
                     'Failed to retrieve data from translate engine API.')
                 is_exceeded = retry >= self.translator.request_attempt
                 if is_exceeded or self.need_stop():
-                    raise TranslationFailed('{}\n{}'.format(
-                        message, traceback.format_exc().strip()))
+                    raise TranslationFailed('{}\n{}'.format(message, str(e)))
                 retry += 1
                 interval *= retry
                 time.sleep(interval)
