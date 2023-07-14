@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-07-12 01:45+0800\n"
+"POT-Creation-Date: 2023-07-14 16:24+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -46,15 +46,11 @@ msgstr "Formato de entrada"
 msgid "Target Language"
 msgstr "Lenguaje a traducir"
 
-msgid ""
-"{} paragraph(s) were translated unsuccessfully. Would you like to retry?"
+msgid "Failed to translate {} paragraph(s), Would you like to retry?"
 msgstr ""
 
 msgid "Translation completed."
 msgstr "Traducción completada."
-
-msgid "Failed"
-msgstr ""
 
 msgid "There is no content that needs to be translated."
 msgstr ""
@@ -143,11 +139,11 @@ msgstr "El archivo de glosario especificado no existe."
 msgid "Choose a path to store cache files."
 msgstr ""
 
-msgid "Move"
-msgstr ""
+msgid "Choose..."
+msgstr "Elegir..."
 
-msgid "Restore"
-msgstr "Restablecer"
+msgid "Reset"
+msgstr ""
 
 msgid "Reveal"
 msgstr ""
@@ -158,13 +154,20 @@ msgstr ""
 msgid "Clear"
 msgstr "Limpiar"
 
-msgid "Are you sure you want to restore the cache path?"
+msgid ""
+"All cache(s) will be moved to the default path. Are you sure to proceed?"
 msgstr ""
 
-msgid "Are you sure you want to change the cache path?"
+msgid "All cache(s) will be moved to the new path. Are you sure to proceed?"
 msgstr ""
 
 msgid "The specified path is not empty."
+msgstr ""
+
+msgid "Are you sure you want clear all caches?"
+msgstr ""
+
+msgid "Are you sure you want to delete selected cache(s)?"
 msgstr ""
 
 msgid "No cache exists."
@@ -172,6 +175,21 @@ msgstr ""
 
 msgid "Total: {}"
 msgstr "Total: {}"
+
+msgid "Engine"
+msgstr ""
+
+msgid "Language"
+msgstr ""
+
+msgid "Merge Length"
+msgstr ""
+
+msgid "Filename"
+msgstr ""
+
+msgid "Size (MB)"
+msgstr ""
 
 msgid "Translating..."
 msgstr "Traduciendo..."
@@ -190,6 +208,9 @@ msgstr "Motor de Traducción Personalizado"
 
 msgid "Add"
 msgstr "Agregar"
+
+msgid "Restore"
+msgstr "Restablecer"
 
 msgid "Verify"
 msgstr "Verificar"
@@ -235,12 +256,6 @@ msgstr ""
 msgid ""
 "This mode allows users to translate multiple ebooks at once, streamlining "
 "the translation process and saving time."
-msgstr ""
-
-msgid "Engine"
-msgstr ""
-
-msgid "Language"
 msgstr ""
 
 msgid "Original"
@@ -407,9 +422,6 @@ msgstr "Ruta"
 
 msgid "Choose a path to store translated book(s)"
 msgstr "Elija una ruta para guardar el/los libro(s) traducido(s)"
-
-msgid "Choose..."
-msgstr "Elegir..."
 
 msgid "Preferred Format"
 msgstr ""
@@ -614,29 +626,17 @@ msgstr "Configuración"
 msgid "About"
 msgstr "Acerca"
 
-msgid "Clear all caches"
-msgstr ""
-
 msgid "Please choose one single book."
 msgstr ""
 
 msgid "Please choose at least one book."
 msgstr "Por favor, elija al menos un libro."
 
+msgid "Cannot manage cache while translation in process."
+msgstr ""
+
 msgid "Cache Manager"
 msgstr ""
 
 msgid "Choose Translation Mode"
 msgstr ""
-
-msgid "Cannot clear cache while there are running jobs."
-msgstr "No se puede borrar el caché mientras se ejecuta el trabajo(s)."
-
-msgid "Are you sure you want clear all caches?"
-msgstr ""
-
-#~ msgid "Will retry in {} seconds."
-#~ msgstr "Se volverá a intentar en {} segundos."
-
-#~ msgid "[{}] Retrying {} ... (timeout is {} seconds)."
-#~ msgstr "[{}] Reintentando {} ... (el tiempo de espera es de {} segundos)."

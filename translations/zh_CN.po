@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-07-12 01:45+0800\n"
+"POT-Creation-Date: 2023-07-14 16:24+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -43,15 +43,11 @@ msgstr "输入格式"
 msgid "Target Language"
 msgstr "目标语言"
 
-msgid ""
-"{} paragraph(s) were translated unsuccessfully. Would you like to retry?"
-msgstr "{} 个段落未能翻译成功。是否需要重试？"
+msgid "Failed to translate {} paragraph(s), Would you like to retry?"
+msgstr "{} 个段落翻译失败，是否重试？"
 
 msgid "Translation completed."
 msgstr "翻译已完成。"
-
-msgid "Failed"
-msgstr "失败"
 
 msgid "There is no content that needs to be translated."
 msgstr "没有需要翻译的内容"
@@ -140,10 +136,10 @@ msgstr "指定的词汇表文件不存在。"
 msgid "Choose a path to store cache files."
 msgstr "选择一个用来存放缓存文件的路径。"
 
-msgid "Move"
-msgstr "移动"
+msgid "Choose..."
+msgstr "选择..."
 
-msgid "Restore"
+msgid "Reset"
 msgstr "重置"
 
 msgid "Reveal"
@@ -155,20 +151,42 @@ msgstr "缓存路径"
 msgid "Clear"
 msgstr "清除"
 
-msgid "Are you sure you want to restore the cache path?"
-msgstr "你确定要复原缓存路径吗？"
+msgid ""
+"All cache(s) will be moved to the default path. Are you sure to proceed?"
+msgstr "所有缓存将会被移至默认路径。是否继续？"
 
-msgid "Are you sure you want to change the cache path?"
-msgstr "你确定要更改缓存路径吗？"
+msgid "All cache(s) will be moved to the new path. Are you sure to proceed?"
+msgstr "所有缓存将会被移至新设路径。是否继续？"
 
 msgid "The specified path is not empty."
 msgstr "指定的路径需要为空。"
+
+msgid "Are you sure you want clear all caches?"
+msgstr "你确定要清除所有缓存吗？"
+
+msgid "Are you sure you want to delete selected cache(s)?"
+msgstr "你确定想要删除所选缓存吗？"
 
 msgid "No cache exists."
 msgstr "缓存不存在。"
 
 msgid "Total: {}"
 msgstr "总计：{}"
+
+msgid "Engine"
+msgstr "引擎"
+
+msgid "Language"
+msgstr "语言"
+
+msgid "Merge Length"
+msgstr "合并长度"
+
+msgid "Filename"
+msgstr "文件名"
+
+msgid "Size (MB)"
+msgstr "大小（MB）"
 
 msgid "Translating..."
 msgstr "翻译中……"
@@ -187,6 +205,9 @@ msgstr "自定义翻译引擎"
 
 msgid "Add"
 msgstr "添加"
+
+msgid "Restore"
+msgstr "重置"
 
 msgid "Verify"
 msgstr "验证"
@@ -233,12 +254,6 @@ msgid ""
 "This mode allows users to translate multiple ebooks at once, streamlining "
 "the translation process and saving time."
 msgstr "此模式允许用户一次性翻译多本电子书，提升翻译效率节省时间。"
-
-msgid "Engine"
-msgstr "引擎"
-
-msgid "Language"
-msgstr "语言"
 
 msgid "Original"
 msgstr "原文"
@@ -404,9 +419,6 @@ msgstr "路径"
 
 msgid "Choose a path to store translated book(s)"
 msgstr "选择一个路径用来存放翻译后的电子书"
-
-msgid "Choose..."
-msgstr "选择..."
 
 msgid "Preferred Format"
 msgstr "偏好格式"
@@ -609,35 +621,17 @@ msgstr "设置"
 msgid "About"
 msgstr "关于"
 
-msgid "Clear all caches"
-msgstr "清除所有缓存"
-
 msgid "Please choose one single book."
 msgstr "请选择一本书籍。"
 
 msgid "Please choose at least one book."
 msgstr "必须选择至少一本电子书。"
 
+msgid "Cannot manage cache while translation in process."
+msgstr "无法在进行翻译时管理缓存。"
+
 msgid "Cache Manager"
 msgstr "缓存管理器"
 
 msgid "Choose Translation Mode"
 msgstr "选择翻译模式"
-
-msgid "Cannot clear cache while there are running jobs."
-msgstr "有运行中的任务，无法清理缓存。"
-
-msgid "Are you sure you want clear all caches?"
-msgstr "你确定要清除所有缓存吗？"
-
-#~ msgid "Refresh"
-#~ msgstr "刷新"
-
-#~ msgid "Translation Failed"
-#~ msgstr "翻译失败"
-
-#~ msgid "Will retry in {} seconds."
-#~ msgstr "{} 秒后重试。"
-
-#~ msgid "[{}] Retrying {} ... (timeout is {} seconds)."
-#~ msgstr "[{}] 正在重试 {} ...（{}秒后超时）"
