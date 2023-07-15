@@ -106,8 +106,8 @@ class EbookTranslatorGui(InterfaceAction):
 
     def show_setting(self):
         if self.has_running_jobs():
-            self.alert.pop(
-                _('Cannot change setting while translation in process.'),
+            self.alert.pop(_(
+                'Cannot change setting while book(s) are under translation.'),
                 'warning')
             return
         if self.show_window('setting'):
@@ -122,8 +122,8 @@ class EbookTranslatorGui(InterfaceAction):
 
     def show_cache(self):
         if self.has_running_jobs():
-            self.alert.pop(
-                _('Cannot manage cache while translation in process.'),
+            self.alert.pop(_(
+                'Cannot manage cache while book(s) are under translation.'),
                 'warning')
             return
         if self.show_window('cache'):
