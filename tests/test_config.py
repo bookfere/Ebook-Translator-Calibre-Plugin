@@ -169,11 +169,11 @@ class TestConfig(unittest.TestCase):
         })
 
     def test_update(self):
-        self.config.preferences = {'a': 1}
+        self.config.preferences = Mock()
         self.config.update(a=6, b=4)
-        self.assertEqual({'a': 6, 'b': 4}, self.config.preferences)
-        self.config.update({'c': 0})
-        self.assertEqual({'a': 6, 'b': 4, 'c': 0}, self.config.preferences)
+        self.assertEqual(
+            self.config.preferences.mock_calls,
+            [call.refresh(), call.update(a=6, b=4)])
 
     def test_delete(self):
         self.config.preferences = {'a': 1, 'b': 2}
@@ -191,4 +191,4 @@ class TestConfig(unittest.TestCase):
         self.config.save(b=2)
         self.assertEqual(
             self.config.preferences.mock_calls,
-            [call.update(b=2), call.commit()])
+            [call.refresh(), call.update(b=2), call.commit()])

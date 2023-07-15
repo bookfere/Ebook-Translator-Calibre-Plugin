@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-07-14 16:24+0800\n"
+"POT-Creation-Date: 2023-07-15 17:59+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -139,8 +139,8 @@ msgstr "El archivo de glosario especificado no existe."
 msgid "Choose a path to store cache files."
 msgstr ""
 
-msgid "Choose..."
-msgstr "Elegir..."
+msgid "Choose"
+msgstr "Elegir"
 
 msgid "Reset"
 msgstr ""
@@ -161,13 +161,13 @@ msgstr ""
 msgid "All cache(s) will be moved to the new path. Are you sure to proceed?"
 msgstr ""
 
-msgid "The specified path is not empty."
+msgid "Please choose an empty folder."
 msgstr ""
 
-msgid "Are you sure you want clear all caches?"
+msgid "Are you sure you want to clear all caches?"
 msgstr ""
 
-msgid "Are you sure you want to delete selected cache(s)?"
+msgid "Are you sure you want to delete the selected cache(s)?"
 msgstr ""
 
 msgid "No cache exists."
@@ -246,9 +246,6 @@ msgid ""
 "This mode provides additional options for the translation process, allowing "
 "for more control and customization."
 msgstr ""
-
-msgid "Choose"
-msgstr "Elegir"
 
 msgid "Batch Mode"
 msgstr ""
@@ -632,6 +629,9 @@ msgstr ""
 msgid "Please choose at least one book."
 msgstr "Por favor, elija al menos un libro."
 
+msgid "Cannot change setting while translation in process."
+msgstr ""
+
 msgid "Cannot manage cache while translation in process."
 msgstr ""
 
@@ -640,3 +640,6 @@ msgstr ""
 
 msgid "Choose Translation Mode"
 msgstr ""
+
+#~ msgid "Choose..."
+#~ msgstr "Elegir..."

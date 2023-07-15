@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-07-14 16:24+0800\n"
+"POT-Creation-Date: 2023-07-15 17:59+0800\n"
 "PO-Revision-Date: 2023-04-25 15:36+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -137,8 +137,8 @@ msgstr "指定的詞彙表檔案不存在。"
 msgid "Choose a path to store cache files."
 msgstr ""
 
-msgid "Choose..."
-msgstr "選擇..."
+msgid "Choose"
+msgstr "選擇"
 
 msgid "Reset"
 msgstr ""
@@ -159,13 +159,13 @@ msgstr ""
 msgid "All cache(s) will be moved to the new path. Are you sure to proceed?"
 msgstr ""
 
-msgid "The specified path is not empty."
+msgid "Please choose an empty folder."
 msgstr ""
 
-msgid "Are you sure you want clear all caches?"
+msgid "Are you sure you want to clear all caches?"
 msgstr ""
 
-msgid "Are you sure you want to delete selected cache(s)?"
+msgid "Are you sure you want to delete the selected cache(s)?"
 msgstr ""
 
 msgid "No cache exists."
@@ -244,9 +244,6 @@ msgid ""
 "This mode provides additional options for the translation process, allowing "
 "for more control and customization."
 msgstr ""
-
-msgid "Choose"
-msgstr "選擇"
 
 msgid "Batch Mode"
 msgstr ""
@@ -627,6 +624,9 @@ msgstr ""
 
 msgid "Please choose at least one book."
 msgstr "必須選擇至少一本電子書。"
+
+msgid "Cannot change setting while translation in process."
+msgstr ""
 
 msgid "Cannot manage cache while translation in process."
 msgstr ""
