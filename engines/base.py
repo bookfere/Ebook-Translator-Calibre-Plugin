@@ -19,7 +19,7 @@ class Base:
     api_key_errors = ['401']
     placeholder = ('{{{{id_{}}}}}', r'({{\s*)+id\s*_\s*{}\s*(\s*}})+')
 
-    concurrency_limit = 10
+    concurrency_limit = 0
     request_interval = 0.0
     request_attempt = 3
     request_timeout = 10.0
