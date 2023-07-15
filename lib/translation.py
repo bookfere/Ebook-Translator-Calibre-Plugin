@@ -116,7 +116,7 @@ class Translation:
     def need_stop(self):
         # Cancel the request if there are more than max continuous errors.
         return self.translator.max_error_count != 0 and \
-            self.abort_count > self.translator.max_error_count
+            self.abort_count >= self.translator.max_error_count
 
     def _translate_text(self, text, retry=0, interval=5):
         """Translation engine service error code documentation:
@@ -136,7 +136,6 @@ class Translation:
         except Exception as e:
             if self.cancel_request() or self.need_stop():
                 raise TranslationCanceled(_('Translation canceled.'))
-            self.abort_count += 1
             # Try to retreive a available API key.
             if self.translator.need_change_api_key(str(e).lower()):
                 if not self.translator.change_api_key():
@@ -146,8 +145,9 @@ class Translation:
             else:
                 message = _(
                     'Failed to retrieve data from translate engine API.')
-                is_exceeded = retry >= self.translator.request_attempt
-                if is_exceeded or self.need_stop():
+                need_retry = retry >= self.translator.request_attempt
+                if need_retry or self.need_stop():
+                    self.abort_count += 1
                     raise TranslationFailed('{}\n{}'.format(message, str(e)))
                 retry += 1
                 interval *= retry

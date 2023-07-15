@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-07-14 16:24+0800\n"
+"POT-Creation-Date: 2023-07-15 17:59+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -115,7 +115,7 @@ msgstr ""
 msgid "Output"
 msgstr ""
 
-#: advanced.py:532 batch.py:54 cache.py:194
+#: advanced.py:532 batch.py:54 cache.py:195
 msgid "Title"
 msgstr ""
 
@@ -175,8 +175,9 @@ msgstr ""
 msgid "Choose a path to store cache files."
 msgstr ""
 
-#: cache.py:73 setting.py:142
-msgid "Choose..."
+#: cache.py:73 components/mode.py:41 components/mode.py:51 setting.py:142
+#: setting.py:602 setting.py:636
+msgid "Choose"
 msgstr ""
 
 #: cache.py:74
@@ -205,42 +206,42 @@ msgid "All cache(s) will be moved to the new path. Are you sure to proceed?"
 msgstr ""
 
 #: cache.py:133
-msgid "The specified path is not empty."
+msgid "Please choose an empty folder."
 msgstr ""
 
-#: cache.py:142
-msgid "Are you sure you want clear all caches?"
+#: cache.py:143
+msgid "Are you sure you want to clear all caches?"
 msgstr ""
 
-#: cache.py:151
-msgid "Are you sure you want to delete selected cache(s)?"
+#: cache.py:152
+msgid "Are you sure you want to delete the selected cache(s)?"
 msgstr ""
 
-#: cache.py:163
+#: cache.py:164
 msgid "No cache exists."
 msgstr ""
 
-#: cache.py:173
+#: cache.py:174
 msgid "Total: {}"
 msgstr ""
 
-#: cache.py:194 components/table.py:35 setting.py:53
+#: cache.py:195 components/table.py:35 setting.py:53
 msgid "Engine"
 msgstr ""
 
-#: cache.py:194 components/table.py:35 setting.py:757
+#: cache.py:195 components/table.py:35 setting.py:757
 msgid "Language"
 msgstr ""
 
-#: cache.py:194
+#: cache.py:195
 msgid "Merge Length"
 msgstr ""
 
-#: cache.py:195
+#: cache.py:196
 msgid "Filename"
 msgstr ""
 
-#: cache.py:195
+#: cache.py:196
 msgid "Size (MB)"
 msgstr ""
 
@@ -308,7 +309,7 @@ msgstr ""
 msgid "Choose a translation mode for clicking the icon button."
 msgstr ""
 
-#: components/mode.py:33 setting.py:99 ui.py:49 ui.py:77
+#: components/mode.py:33 setting.py:99 ui.py:47 ui.py:75
 msgid "Advanced Mode"
 msgstr ""
 
@@ -318,11 +319,7 @@ msgid ""
 "for more control and customization."
 msgstr ""
 
-#: components/mode.py:41 components/mode.py:51 setting.py:602 setting.py:636
-msgid "Choose"
-msgstr ""
-
-#: components/mode.py:43 setting.py:100 ui.py:50 ui.py:104
+#: components/mode.py:43 setting.py:100 ui.py:48 ui.py:102
 msgid "Batch Mode"
 msgstr ""
 
@@ -476,15 +473,15 @@ msgstr ""
 msgid "Translation canceled."
 msgstr ""
 
-#: lib/translation.py:143
+#: lib/translation.py:142
 msgid "No available API key."
 msgstr ""
 
-#: lib/translation.py:145
+#: lib/translation.py:144
 msgid "API key was Changed due to previous one unavailable."
 msgstr ""
 
-#: lib/translation.py:148
+#: lib/translation.py:147
 msgid "Failed to retrieve data from translate engine API."
 msgstr ""
 
@@ -588,7 +585,7 @@ msgstr ""
 msgid "Test"
 msgstr ""
 
-#: setting.py:254 ui.py:52
+#: setting.py:254 ui.py:50
 msgid "Cache"
 msgstr ""
 
@@ -804,38 +801,42 @@ msgstr ""
 msgid "{} is not a valid CSS seletor."
 msgstr ""
 
-#: ui.py:34
+#: ui.py:32
 msgid "Translate Book"
 msgstr ""
 
-#: ui.py:34
+#: ui.py:32
 msgid "Translate Ebook Content"
 msgstr ""
 
-#: ui.py:53 ui.py:115
+#: ui.py:51 ui.py:118
 msgid "Setting"
 msgstr ""
 
-#: ui.py:54 ui.py:142
+#: ui.py:52 ui.py:146
 msgid "About"
 msgstr ""
 
-#: ui.py:85
+#: ui.py:83
 msgid "Please choose one single book."
 msgstr ""
 
-#: ui.py:98
+#: ui.py:96
 msgid "Please choose at least one book."
 msgstr ""
 
-#: ui.py:123
+#: ui.py:110
+msgid "Cannot change setting while translation in process."
+msgstr ""
+
+#: ui.py:126
 msgid "Cannot manage cache while translation in process."
 msgstr ""
 
-#: ui.py:131
+#: ui.py:135
 msgid "Cache Manager"
 msgstr ""
 
-#: ui.py:160
+#: ui.py:164
 msgid "Choose Translation Mode"
 msgstr ""

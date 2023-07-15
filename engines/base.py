@@ -176,7 +176,7 @@ class Base:
         except Exception as e:
             if silence:
                 return None
-            error = '\n%s' % traceback.format_exc().strip()
+            error = '\n%s' % traceback.format_exc(chain=False).strip()
             data = error if result is None else '\n%s%s' % (result, error)
             raise Exception(_('Can not parse returned response. Raw data: {}')
                             .format(data))

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-07-14 16:24+0800\n"
+"POT-Creation-Date: 2023-07-15 17:59+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -136,8 +136,8 @@ msgstr "指定的词汇表文件不存在。"
 msgid "Choose a path to store cache files."
 msgstr "选择一个用来存放缓存文件的路径。"
 
-msgid "Choose..."
-msgstr "选择..."
+msgid "Choose"
+msgstr "选择"
 
 msgid "Reset"
 msgstr "重置"
@@ -158,13 +158,13 @@ msgstr "所有缓存将会被移至默认路径。是否继续？"
 msgid "All cache(s) will be moved to the new path. Are you sure to proceed?"
 msgstr "所有缓存将会被移至新设路径。是否继续？"
 
-msgid "The specified path is not empty."
-msgstr "指定的路径需要为空。"
+msgid "Please choose an empty folder."
+msgstr "请选择一个空文件夹。"
 
-msgid "Are you sure you want clear all caches?"
+msgid "Are you sure you want to clear all caches?"
 msgstr "你确定要清除所有缓存吗？"
 
-msgid "Are you sure you want to delete selected cache(s)?"
+msgid "Are you sure you want to delete the selected cache(s)?"
 msgstr "你确定想要删除所选缓存吗？"
 
 msgid "No cache exists."
@@ -243,9 +243,6 @@ msgid ""
 "This mode provides additional options for the translation process, allowing "
 "for more control and customization."
 msgstr "此模式为翻译过程提供了额外选项，允许更多的控制和自定义。"
-
-msgid "Choose"
-msgstr "选择"
 
 msgid "Batch Mode"
 msgstr "批量模式"
@@ -626,6 +623,9 @@ msgstr "请选择一本书籍。"
 
 msgid "Please choose at least one book."
 msgstr "必须选择至少一本电子书。"
+
+msgid "Cannot change setting while translation in process."
+msgstr "无法在进行翻译时更改设置。"
 
 msgid "Cannot manage cache while translation in process."
 msgstr "无法在进行翻译时管理缓存。"

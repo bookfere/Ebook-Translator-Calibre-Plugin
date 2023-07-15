@@ -50,10 +50,10 @@ def convert_book(ebook_title, input_path, output_path, source_lang,
         translator.get_iso639_target_code(target_lang))
 
     merge_length = str(element_handler.get_merge_length())
-    identity = uid(
-        input_path + translator.name + target_lang
-        + merge_length + TranslationCache.__version__ + Extraction.__version__)
-    cache = get_cache(identity)
+    cache_id = uid(
+        input_path + translator.name + target_lang + merge_length
+        + TranslationCache.__version__ + Extraction.__version__)
+    cache = get_cache(cache_id)
     cache.set_cache_only(cache_only)
     cache.set_info('title', ebook_title)
     cache.set_info('engine_name', translator.name)

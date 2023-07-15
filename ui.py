@@ -1,10 +1,8 @@
-from calibre.constants import DEBUG
 from calibre.gui2.actions import InterfaceAction
 
 from . import EbookTranslator
 from .lib.utils import uid
 from .lib.ebook import Ebooks
-from .lib.cache import TranslationCache
 from .lib.config import get_config, upgrade_config
 from .lib.conversion import ConversionWorker
 from .batch import BatchTranslation
@@ -107,6 +105,11 @@ class EbookTranslatorGui(InterfaceAction):
         self.add_window('batch', window)
 
     def show_setting(self):
+        if self.has_running_jobs():
+            self.alert.pop(
+                _('Cannot change setting while translation in process.'),
+                'warning')
+            return
         if self.show_window('setting'):
             return
         window = TranslationSetting(self, self.gui, self.icon)
@@ -119,9 +122,10 @@ class EbookTranslatorGui(InterfaceAction):
 
     def show_cache(self):
         if self.has_running_jobs():
-            return self.alert.pop(
+            self.alert.pop(
                 _('Cannot manage cache while translation in process.'),
                 'warning')
+            return
         if self.show_window('cache'):
             return
         window = CacheManager(self, self.gui)

@@ -70,7 +70,7 @@ class CacheManager(QDialog):
         self.cache_path.setReadOnly(True)
         self.cache_path.setPlaceholderText(
             _('Choose a path to store cache files.'))
-        self.cache_move = QPushButton(_('Choose...'))
+        self.cache_move = QPushButton(_('Choose'))
         self.cache_reset = QPushButton(_('Reset'))
         self.cache_reveal = QPushButton(_('Reveal'))
 
@@ -130,7 +130,7 @@ class CacheManager(QDialog):
             self.alert.pop(_('The specified path does not exist.'))
             return
         if len([i for i in os.listdir(path) if not i.startswith('.')]) > 0:
-            self.alert.pop(_('The specified path is not empty.'))
+            self.alert.pop(_('Please choose an empty folder.'))
             return
         TranslationCache.move(path)
         self.cache_list.model().refresh()
@@ -139,7 +139,8 @@ class CacheManager(QDialog):
         self.config.save(cache_path=path)
 
     def clear(self):
-        action = self.alert.ask(_('Are you sure you want clear all caches?'))
+        action = self.alert.ask(
+            _('Are you sure you want to clear all caches?'))
         if action != 'yes':
             return
         TranslationCache.clean()
@@ -148,7 +149,7 @@ class CacheManager(QDialog):
 
     def delete(self):
         action = self.alert.ask(
-            _('Are you sure you want to delete selected cache(s)?'))
+            _('Are you sure you want to delete the selected cache(s)?'))
         if action != 'yes':
             return
         for row in reversed(self.cache_list.selectionModel().selectedRows()):

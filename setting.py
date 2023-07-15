@@ -139,7 +139,7 @@ class TranslationSetting(QDialog):
             _('Choose a path to store translated book(s)'))
         self.output_path_entry.setText(self.config.get('output_path'))
         radio_layout.addWidget(self.output_path_entry)
-        output_path_button = QPushButton(_('Choose...'))
+        output_path_button = QPushButton(_('Choose'))
 
         radio_layout.addWidget(output_path_button)
         radio_group.setLayout(radio_layout)

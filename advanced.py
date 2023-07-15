@@ -296,7 +296,7 @@ class AdvancedTranslation(QDialog):
 
         self.trans_worker.logging.connect(
             lambda text, error: self.errors_text.appendPlainText(text)
-                if error else self.logging_text.appendPlainText(text))
+            if error else self.logging_text.appendPlainText(text))
 
         def working_finished():
             if self.translate_all and not self.trans_worker.cancel_request():
@@ -391,11 +391,11 @@ class AdvancedTranslation(QDialog):
 
         self.trans_worker.start.connect(
             lambda: (self.translate_all or self.table.selected_count() > 1)
-                and tabs.setCurrentIndex(log_index))
+            and tabs.setCurrentIndex(log_index))
         self.trans_worker.finished.connect(
             lambda: tabs.setCurrentIndex(
                 errors_index if self.errors_text.toPlainText()
-                    else review_index))
+                else review_index))
 
         splitter = QSplitter()
         splitter.addWidget(self.layout_table())
