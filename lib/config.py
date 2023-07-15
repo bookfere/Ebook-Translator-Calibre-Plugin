@@ -63,7 +63,6 @@ class Configuration:
         temp[key] = value
 
     def update(self, *args, **kwargs):
-        self.refresh()
         self.preferences.update(*args, **kwargs)
 
     def delete(self, key):

@@ -49,17 +49,23 @@ class TranslationSetting(QDialog):
         layout = QVBoxLayout(self)
 
         self.tabs = QTabWidget()
-        tab_1 = self.tabs.addTab(self.layout_general(), _('General'))
-        tab_2 = self.tabs.addTab(self.layout_engine(), _('Engine'))
-        tab_3 = self.tabs.addTab(self.layout_content(), _('Content'))
+        general_index = self.tabs.addTab(self.layout_general(), _('General'))
+        engine_index = self.tabs.addTab(self.layout_engine(), _('Engine'))
+        content_index = self.tabs.addTab(self.layout_content(), _('Content'))
         self.tabs.setStyleSheet('QTabBar::tab {min-width:120px;}')
 
-        config_actions = {
-            tab_1: self.update_general_config,
-            tab_2: self.update_engine_config,
-            tab_3: self.update_content_config,
-        }
-        self.save_config.connect(lambda index: config_actions.get(index)())
+        def save_setting(index):
+            actions = {
+                general_index: self.update_general_config,
+                engine_index: self.update_engine_config,
+                content_index: self.update_content_config,
+            }
+            actions.get(index)()
+            # TODO: Resolve the conflict setting.
+            self.config.update(cache_path=get_config().get('cache_path'))
+            self.config.commit()
+            self.alert.pop(_('The setting has been saved.'))
+        self.save_config.connect(save_setting)
 
         layout.addWidget(self.tabs)
         layout.addWidget(layout_info())
@@ -808,9 +814,6 @@ class TranslationSetting(QDialog):
             self.config.update(proxy_setting=proxy_setting)
         len(proxy_setting) < 1 and self.config.delete('proxy_setting')
 
-        self.config.commit()
-        self.alert.pop(_('The setting has been saved.'))
-
     def get_engine_config(self):
         config = self.current_engine.config
 
@@ -870,8 +873,6 @@ class TranslationSetting(QDialog):
                 engine_config.pop(name)
         # Update modified engine preferences
         self.config.update(engine_preferences=engine_config)
-        self.config.commit()
-        self.alert.pop(_('The setting has been saved.'))
 
     def update_content_config(self):
         # Translation color
@@ -927,9 +928,6 @@ class TranslationSetting(QDialog):
             del ebook_metadata['subjects']
         if ebook_metadata:
             self.config.update(ebook_metadata=ebook_metadata)
-
-        self.config.commit()
-        self.alert.pop(_('The setting has been saved.'))
 
     def is_valid_regex(self, rule):
         try:
