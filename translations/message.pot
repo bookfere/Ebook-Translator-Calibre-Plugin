@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-07-15 17:59+0800\n"
+"POT-Creation-Date: 2023-07-15 19:57+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -826,11 +826,11 @@ msgid "Please choose at least one book."
 msgstr ""
 
 #: ui.py:110
-msgid "Cannot change setting while translation in process."
+msgid "Cannot change setting while book(s) are under translation."
 msgstr ""
 
 #: ui.py:126
-msgid "Cannot manage cache while translation in process."
+msgid "Cannot manage cache while book(s) are under translation."
 msgstr ""
 
 #: ui.py:135
