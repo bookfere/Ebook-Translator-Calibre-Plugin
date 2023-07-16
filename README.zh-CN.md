@@ -1,4 +1,4 @@
-[English](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.md) · __简体中文__ · [正體中文](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.zh-TW.md)
+[English](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.md) · __简体中文__
 
 ---
 
