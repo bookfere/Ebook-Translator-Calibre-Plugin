@@ -57,7 +57,7 @@ class Glossary:
         for wid, words in enumerate(self.glossary):
             pattern = self.placeholder[1].format(format(wid, '06'))
             # Eliminate the impact of backslashes on substitution.
-            content = re.sub(xml_escape(pattern), lambda _: words[1], content)
+            content = re.sub(pattern, lambda _: words[1], content)
         return content
 
 
