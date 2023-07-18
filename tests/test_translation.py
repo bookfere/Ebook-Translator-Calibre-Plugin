@@ -3,6 +3,7 @@ from unittest.mock import patch, Mock
 
 from ..lib.translation import Glossary
 from ..engines.base import Base
+from ..engines.deepl import DeeplTranslate
 
 
 class TestGlossary(unittest.TestCase):
@@ -34,8 +35,18 @@ class TestGlossary(unittest.TestCase):
         self.assertEqual(
             '{{id_000000}} {{id_000001}} c', glossary.replace('a b c'))
 
+        glossary = Glossary(DeeplTranslate.placeholder)
+        glossary.glossary = [('a', 'a'), ('b', 'Z')]
+        self.assertEqual(
+            '<m id=000000 /> <m id=000001 /> c', glossary.replace('a b c'))
+
     def test_restore(self):
         glossary = Glossary(Base.placeholder)
         glossary.glossary = [('a', 'a'), ('b', 'Z')]
         self.assertEqual(
             'a Z c', glossary.restore('{{id_000000}} {{id_000001}} c'))
+
+        glossary = Glossary(DeeplTranslate.placeholder)
+        glossary.glossary = [('a', 'a'), ('b', 'Z')]
+        self.assertEqual(
+            'a Z c', glossary.restore('<m id=000000 /> <m id=000001 /> c'))
