@@ -355,7 +355,8 @@ class TranslationSetting(QDialog):
         request_layout.addRow(_('Interval (seconds)'), request_interval)
         request_layout.addRow(_('Attempt times'), request_attempt)
         request_layout.addRow(_('Timeout (seconds)'), request_timeout)
-        request_layout.addRow(_('Max error count'), max_error_count)
+        request_layout.addRow(
+            _('Error count to stop translation'), max_error_count)
         layout.addWidget(request_group, 1)
 
         self.set_form_layout_policy(request_layout)
