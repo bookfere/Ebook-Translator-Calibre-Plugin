@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-07-15 19:57+0800\n"
+"POT-Creation-Date: 2023-07-19 17:03+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,11 +43,11 @@ msgstr ""
 msgid "Start"
 msgstr ""
 
-#: advanced.py:199 batch.py:54 setting.py:170
+#: advanced.py:199 batch.py:54 setting.py:176
 msgid "Input Format"
 msgstr ""
 
-#: advanced.py:210 advanced.py:518 batch.py:55 setting.py:328
+#: advanced.py:210 advanced.py:518 batch.py:55 setting.py:334
 msgid "Target Language"
 msgstr ""
 
@@ -99,11 +99,11 @@ msgstr ""
 msgid "Stopping..."
 msgstr ""
 
-#: advanced.py:506 setting.py:297
+#: advanced.py:506 setting.py:303
 msgid "Translation Engine"
 msgstr ""
 
-#: advanced.py:512 batch.py:55 setting.py:327
+#: advanced.py:512 batch.py:55 setting.py:333
 msgid "Source Language"
 msgstr ""
 
@@ -127,7 +127,7 @@ msgstr ""
 msgid "No translation yet"
 msgstr ""
 
-#: advanced.py:655 components/engine.py:206 setting.py:82
+#: advanced.py:655 components/engine.py:206 setting.py:88
 msgid "Save"
 msgstr ""
 
@@ -151,7 +151,7 @@ msgstr ""
 msgid "Are you sure you want to stop the translation progress?"
 msgstr ""
 
-#: batch.py:54 setting.py:171
+#: batch.py:54 setting.py:177
 msgid "Output Format"
 msgstr ""
 
@@ -163,11 +163,11 @@ msgstr ""
 msgid "Unknown"
 msgstr ""
 
-#: batch.py:137 cache.py:130 setting.py:792
+#: batch.py:137 cache.py:130 setting.py:799
 msgid "The specified path does not exist."
 msgstr ""
 
-#: batch.py:143 setting.py:888
+#: batch.py:143 setting.py:890
 msgid "The specified glossary file does not exist."
 msgstr ""
 
@@ -175,8 +175,8 @@ msgstr ""
 msgid "Choose a path to store cache files."
 msgstr ""
 
-#: cache.py:73 components/mode.py:41 components/mode.py:51 setting.py:142
-#: setting.py:602 setting.py:636
+#: cache.py:73 components/mode.py:41 components/mode.py:51 setting.py:148
+#: setting.py:609 setting.py:643
 msgid "Choose"
 msgstr ""
 
@@ -229,7 +229,7 @@ msgstr ""
 msgid "Engine"
 msgstr ""
 
-#: cache.py:195 components/table.py:35 setting.py:757
+#: cache.py:195 components/table.py:35 setting.py:764
 msgid "Language"
 msgstr ""
 
@@ -285,11 +285,11 @@ msgstr ""
 msgid "The engine name is already in use."
 msgstr ""
 
-#: components/engine.py:280 setting.py:812 setting.py:874 setting.py:932
+#: components/engine.py:280 setting.py:67
 msgid "The setting has been saved."
 msgstr ""
 
-#: components/format.py:27 setting.py:180
+#: components/format.py:27 setting.py:186
 msgid "Ebook Specific"
 msgstr ""
 
@@ -301,15 +301,15 @@ msgstr ""
 msgid "Feedback"
 msgstr ""
 
-#: components/lang.py:34 engines/base.py:64 setting.py:852
+#: components/lang.py:34 engines/base.py:64 setting.py:856
 msgid "Auto detect"
 msgstr ""
 
-#: components/mode.py:28 setting.py:109
+#: components/mode.py:28 setting.py:115
 msgid "Choose a translation mode for clicking the icon button."
 msgstr ""
 
-#: components/mode.py:33 setting.py:99 ui.py:47 ui.py:75
+#: components/mode.py:33 setting.py:105 ui.py:47 ui.py:75
 msgid "Advanced Mode"
 msgstr ""
 
@@ -319,7 +319,7 @@ msgid ""
 "for more control and customization."
 msgstr ""
 
-#: components/mode.py:43 setting.py:100 ui.py:48 ui.py:102
+#: components/mode.py:43 setting.py:106 ui.py:48 ui.py:102
 msgid "Batch Mode"
 msgstr ""
 
@@ -357,7 +357,7 @@ msgstr ""
 msgid "Baidu"
 msgstr ""
 
-#: engines/base.py:17 setting.py:308
+#: engines/base.py:17 setting.py:314
 msgid "API Keys"
 msgstr ""
 
@@ -529,275 +529,275 @@ msgstr ""
 msgid "Content"
 msgstr ""
 
-#: setting.py:97
+#: setting.py:103
 msgid "Preferred Mode"
 msgstr ""
 
-#: setting.py:131
+#: setting.py:137
 msgid "Output Path"
 msgstr ""
 
-#: setting.py:133
+#: setting.py:139
 msgid "Library"
 msgstr ""
 
-#: setting.py:134
+#: setting.py:140
 msgid "Path"
 msgstr ""
 
-#: setting.py:139
+#: setting.py:145
 msgid "Choose a path to store translated book(s)"
 msgstr ""
 
-#: setting.py:166
+#: setting.py:172
 msgid "Preferred Format"
 msgstr ""
 
-#: setting.py:190
+#: setting.py:196
 msgid "(Beta)"
 msgstr ""
 
-#: setting.py:190
+#: setting.py:196
 msgid "Merge to Translate"
 msgstr ""
 
-#: setting.py:192 setting.py:213 setting.py:256 setting.py:633
+#: setting.py:198 setting.py:219 setting.py:262 setting.py:640
 msgid "Enable"
 msgstr ""
 
-#: setting.py:198
+#: setting.py:204
 msgid "The number of characters to translate at once."
 msgstr ""
 
-#: setting.py:210
+#: setting.py:216
 msgid "HTTP Proxy"
 msgstr ""
 
-#: setting.py:224
+#: setting.py:230
 msgid "Host"
 msgstr ""
 
-#: setting.py:227
+#: setting.py:233
 msgid "Port"
 msgstr ""
 
-#: setting.py:238 setting.py:300
+#: setting.py:244 setting.py:306
 msgid "Test"
 msgstr ""
 
-#: setting.py:254 ui.py:50
+#: setting.py:260 ui.py:50
 msgid "Cache"
 msgstr ""
 
-#: setting.py:257
+#: setting.py:263
 msgid "Manage"
 msgstr ""
 
-#: setting.py:274
+#: setting.py:280
 msgid "Job Log"
 msgstr ""
 
-#: setting.py:275
+#: setting.py:281
 msgid "Show translation"
 msgstr ""
 
-#: setting.py:301
+#: setting.py:307
 msgid "Custom"
 msgstr ""
 
-#: setting.py:312
+#: setting.py:318
 msgid "Tip:"
 msgstr ""
 
-#: setting.py:313
+#: setting.py:319
 msgid "API keys will auto-switch if the previous one is unavailable."
 msgstr ""
 
-#: setting.py:323
+#: setting.py:329
 msgid "Preferred Language"
 msgstr ""
 
-#: setting.py:334
+#: setting.py:340
 msgid "HTTP Request"
 msgstr ""
 
-#: setting.py:348
+#: setting.py:354
 msgid "Concurrency limit"
 msgstr ""
 
-#: setting.py:349
+#: setting.py:355
 msgid "Interval (seconds)"
 msgstr ""
 
-#: setting.py:350
+#: setting.py:356
 msgid "Attempt times"
 msgstr ""
 
-#: setting.py:351
+#: setting.py:357
 msgid "Timeout (seconds)"
 msgstr ""
 
-#: setting.py:352
-msgid "Max error count"
+#: setting.py:359
+msgid "Error count to stop translation"
 msgstr ""
 
-#: setting.py:362
+#: setting.py:369
 msgid "Tune ChatGPT"
 msgstr ""
 
-#: setting.py:370
+#: setting.py:377
 msgid "Prompt"
 msgstr ""
 
-#: setting.py:372
+#: setting.py:379
 msgid "Endpoint"
 msgstr ""
 
-#: setting.py:375
+#: setting.py:382
 msgid "Model"
 msgstr ""
 
-#: setting.py:401
+#: setting.py:408
 msgid "Sampling"
 msgstr ""
 
-#: setting.py:406
+#: setting.py:413
 msgid "Enable streaming text like in ChatGPT"
 msgstr ""
 
-#: setting.py:407
+#: setting.py:414
 msgid "Stream"
 msgstr ""
 
-#: setting.py:563
+#: setting.py:570
 msgid "Translation Position"
 msgstr ""
 
-#: setting.py:565
+#: setting.py:572
 msgid "Add after original"
 msgstr ""
 
-#: setting.py:567
+#: setting.py:574
 msgid "Add before original"
 msgstr ""
 
-#: setting.py:568
+#: setting.py:575
 msgid "Add without original"
 msgstr ""
 
-#: setting.py:591
+#: setting.py:598
 msgid "Translation Color"
 msgstr ""
 
-#: setting.py:595
+#: setting.py:602
 msgid "CSS color value, e.g., #666666, grey, rgb(80, 80, 80)"
 msgstr ""
 
-#: setting.py:631
+#: setting.py:638
 msgid "Translation Glossary"
 msgstr ""
 
-#: setting.py:635
+#: setting.py:642
 msgid "Choose a glossary file"
 msgstr ""
 
-#: setting.py:654
+#: setting.py:661
 msgid "Ignore Paragraph"
 msgstr ""
 
-#: setting.py:660
+#: setting.py:667
 msgid "Scope"
 msgstr ""
 
-#: setting.py:661
+#: setting.py:668
 msgid "Text only"
 msgstr ""
 
-#: setting.py:663
+#: setting.py:670
 msgid "HTML element"
 msgstr ""
 
-#: setting.py:670
+#: setting.py:677
 msgid "Mode"
 msgstr ""
 
-#: setting.py:671
+#: setting.py:678
 msgid "Normal"
 msgstr ""
 
-#: setting.py:673
+#: setting.py:680
 msgid "Normal (case-sensitive)"
 msgstr ""
 
-#: setting.py:674
+#: setting.py:681
 msgid "Regular Expression"
 msgstr ""
 
-#: setting.py:716
+#: setting.py:723
 msgid "Exclude paragraph by keyword. One keyword per line:"
 msgstr ""
 
-#: setting.py:717
+#: setting.py:724
 msgid "Exclude paragraph by case-sensitive keyword. One keyword per line:"
 msgstr ""
 
-#: setting.py:719
+#: setting.py:726
 msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
 msgstr ""
 
-#: setting.py:735
+#: setting.py:742
 msgid "Ignore Element"
 msgstr ""
 
-#: setting.py:743
+#: setting.py:750
 msgid "CSS selectors to exclude elements. One rule per line:"
 msgstr ""
 
-#: setting.py:746
+#: setting.py:753
 msgid "e.g."
 msgstr ""
 
-#: setting.py:750
+#: setting.py:757
 msgid "Ebook Metadata"
 msgstr ""
 
-#: setting.py:753
+#: setting.py:760
 msgid "Set \"Target Language\" to metadata"
 msgstr ""
 
-#: setting.py:756
+#: setting.py:763
 msgid "Subjects of ebook (one subject per line)"
 msgstr ""
 
-#: setting.py:758
+#: setting.py:765
 msgid "Subject"
 msgstr ""
 
-#: setting.py:775 setting.py:805
+#: setting.py:782 setting.py:812
 msgid "Proxy host or port is incorrect."
 msgstr ""
 
-#: setting.py:777
+#: setting.py:784
 msgid "The proxy is available."
 msgstr ""
 
-#: setting.py:778
+#: setting.py:785
 msgid "The proxy is not available."
 msgstr ""
 
-#: setting.py:837
+#: setting.py:841
 msgid "the prompt must include {}."
 msgstr ""
 
-#: setting.py:880
+#: setting.py:882
 msgid "Invalid color value."
 msgstr ""
 
-#: setting.py:899
+#: setting.py:901
 msgid "{} is not a valid regular expression."
 msgstr ""
 
-#: setting.py:910
+#: setting.py:912
 msgid "{} is not a valid CSS seletor."
 msgstr ""
 

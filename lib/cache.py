@@ -117,7 +117,7 @@ class TranslationCache:
             title = cache.get_info('title') or '[%s]' % _('Unknown')
             engine = cache.get_info('engine_name')
             lang = cache.get_info('target_lang')
-            merge = int(cache.get_info('merge_length')) or 'N/A'
+            merge = int(cache.get_info('merge_length') or 0) or 'N/A'
             size = size_by_unit(os.path.getsize(file_path), 'MB')
             names.append((title, engine, lang, merge, size, name))
         return names
