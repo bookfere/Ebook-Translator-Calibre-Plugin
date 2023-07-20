@@ -346,3 +346,100 @@ def get_element_handler(placeholder):
     handler.set_translation_color(config.get('translation_color'))
 
     return handler
+
+class TOCHandler(ElementHandler):
+    placeholder = []
+    offset = 50000
+    def prepare_original(self, elements):
+        if self.merge_length == 0:
+            for eid, element in enumerate(elements):
+                self.elements[eid] = element
+                content = element.title
+                raw = element.href
+                attrs = element.klass
+                self.original.append(
+                    (eid + self.offset, uid(content), raw, content, False, attrs,
+                     element.id))
+            return self.original
+
+        raw = ''
+        content = ''
+        count = 0 + self.offset
+        for eid, element in enumerate(elements):
+            self.elements[eid] = element
+            # placeholder = ' %s ' % '{{id_{}}}'.format(eid)
+            placeholder = ' %s ' % self.placeholder[0].format(eid)
+            code = str(element.href) + ' '
+            text = element.title + placeholder
+            attrs = element.klass
+            if len(content + text) < self.merge_length:
+                raw += code
+                content += text
+                continue
+            elif content:
+                self.original.append(
+                    (count, uid(content), raw, content, False))
+                count += 1
+            raw = code
+            content = text
+        content and self.original.append(
+                (count, uid(content), raw, content, False))
+        return self.original
+
+    def add_translation(self,Toc,translation):
+        position = self.position
+        if position == 'before':
+            Toc.title = translation + Toc.title
+        else:
+            Toc.title = Toc.title + translation
+        if position == 'only':
+            Toc.title = translation
+
+    def add_translations(self, paragraphs):
+        if self.merge_length == 0:
+            for paragraph in paragraphs:
+                element = self.elements.get(paragraph.id - self.offset)
+                if not element:
+                    continue
+                translation = paragraph.translation
+                if translation:
+                    self.add_translation(element,translation)
+                    self.elements.pop(paragraph.id - self.offset)
+            return
+
+        content = ''.join(
+            paragraph.translation for paragraph in paragraphs
+            if paragraph.translation)
+
+        for eid, element in self.elements.copy().items():
+            matches = re.search(self.placeholder[1].format(eid), content)
+            if not matches:
+                continue
+            placeholder = matches.group(0)
+            end = content.find(placeholder)
+            part = content[:end]
+            content = content.replace(part + placeholder, '', 1)
+            if not False: #element.ignored:
+                self.add_translation(element,part.strip())
+                self.elements.pop(eid)
+
+    def all_paragraphs(self):
+        from .cache import Paragraph
+        paragraphs = []
+        for item in self.original:
+            paragraph = Paragraph(*item)
+            paragraphs.append(paragraph)
+        return paragraphs
+    
+
+def get_TOCHandler(lang_code,placeholder):
+    config = get_config()
+    handler = TOCHandler(placeholder)
+    if config.get('merge_enabled'):
+        handler.set_merge_length(config.get('merge_length'))
+    handler.set_translation_position(
+        config.get('translation_position'))
+    handler.set_translation_color(config.get('translation_color'))
+    handler.set_translation_lang(lang_code)
+
+    return handler

@@ -14,7 +14,7 @@ from .. import EbookTranslator
 from .config import get_config
 from .utils import log, sep, uid
 from .cache import get_cache, TranslationCache
-from .element import get_ebook_elements, get_element_handler, Extraction
+from .element import get_ebook_elements, get_element_handler, get_TOCHandler, Extraction
 from .translation import get_translator, get_translation
 
 
@@ -48,6 +48,7 @@ def convert_book(ebook_title, input_path, output_path, source_lang,
     element_handler = get_element_handler(translator.placeholder)
     element_handler.set_translation_lang(
         translator.get_iso639_target_code(target_lang))
+    toc_handler = get_TOCHandler(translator.get_iso639_target_code(target_lang),translator.placeholder)
 
     merge_length = str(element_handler.get_merge_length())
     cache_id = uid(
@@ -97,6 +98,12 @@ def convert_book(ebook_title, input_path, output_path, source_lang,
         paragraphs = cache.all_paragraphs()
         translation.handle(paragraphs)
         element_handler.add_translations(paragraphs)
+
+        toc_handler.offset = len(paragraphs) + 1
+        toc_original_group = toc_handler.prepare_original(oeb.toc.iter())
+        paragraphs = toc_handler.all_paragraphs()
+        translation.handle(paragraphs)
+        toc_handler.add_translations(paragraphs)
 
         log(sep())
         log(_('Start to convert ebook format:'))
