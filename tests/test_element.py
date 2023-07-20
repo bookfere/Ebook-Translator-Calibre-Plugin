@@ -353,13 +353,13 @@ class TestElementHandler(unittest.TestCase):
         <p><img src="abc.jpg" /></p>
         <p id="c">c</p>
         <p></p>
-        <p>a</p>
+        <a href="/a">a</a>
     </body>
 </html>""")
 
         self.elements = [
             Element(element, 'p1') for element
-            in self.xhtml.findall('.//x:p', namespaces=ns)]
+            in self.xhtml.findall('./x:body/*', namespaces=ns)]
         self.elements[-2].set_ignored(True)
         self.elements[-4].set_ignored(True)
         self.handler = ElementHandler(Base.placeholder)
@@ -374,7 +374,8 @@ class TestElementHandler(unittest.TestCase):
              None, 'p1'),
             (3, 'm4', '<p id="c">c</p>', 'c', False, '{"id": "c"}', 'p1'),
             (4, 'm5', '<p></p>', '', True, None, 'p1'),
-            (5, 'm6', '<p>a</p>', 'a', False, None, 'p1')],
+            (5, 'm6', '<a href="/a">a</a>', 'a', False, '{"href": "/a"}',
+             'p1')],
             self.handler.prepare_original(self.elements))
 
     @patch('calibre_plugins.ebook_translator.lib.element.uid')
@@ -382,25 +383,26 @@ class TestElementHandler(unittest.TestCase):
         mock_uid.return_value = 'm1'
         self.handler.merge_length = 1000
         self.assertEqual([(
-            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p><p>a</p>',
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>'
+            '<a href="/a">a</a>',
             'a {{id_0}} b {{id_1}} c {{id_3}} a {{id_5}} ', False)],
             self.handler.prepare_original(self.elements))
 
     def test_add_translations(self):
         self.handler.prepare_original(self.elements)
         translations = [
-            Paragraph(0, 'm1', '<p>a</p>', 'a', False, '{"id": "a"}', 'p1',
-                      'A', 'ENGINE', 'LANG'),
-            Paragraph(1, 'm2', '<p>b</p>', 'b', False, '{"id": "b"}', 'p1',
-                      'B', 'ENGINE', 'LANG'),
-            Paragraph(3, 'm3', '<p>c</p>', 'c', False, '{"id": "c"}', 'p1',
-                      'C', 'ENGINE', 'LANG'),
-            Paragraph(5, 'm5', '<p>a</p>', 'a', False, None, 'p1',
+            Paragraph(0, 'm1', '<p id="a">a</p>', 'a', False, '{"id": "a"}',
+                      'p1', 'A', 'ENGINE', 'LANG'),
+            Paragraph(1, 'm2', '<p id="b">b</p>', 'b', False, '{"id": "b"}',
+                      'p1', 'B', 'ENGINE', 'LANG'),
+            Paragraph(3, 'm3', '<p id="c">c</p>', 'c', False, '{"id": "c"}',
+                      'p1', 'C', 'ENGINE', 'LANG'),
+            Paragraph(5, 'm5', '<a href="/a">a</a>', 'a', False, None, 'p1',
                       'A', 'ENGINE', 'LANG')]
 
         self.handler.add_translations(translations)
 
-        elements = self.xhtml.findall('.//x:p', namespaces=ns)
+        elements = self.xhtml.findall('./x:body/*', namespaces=ns)
         self.assertEqual(10, len(elements))
         self.assertEqual('a', elements[0].text)
         self.assertEqual('A', elements[1].text)
@@ -412,37 +414,40 @@ class TestElementHandler(unittest.TestCase):
 
         self.assertEqual('a', elements[8].text)
         self.assertEqual('A', elements[9].text)
+        self.assertIsNone(elements[9].get('href'))
 
     def test_add_translations_translation_only(self):
         self.handler.position = 'only'
 
         self.handler.prepare_original(self.elements)
         self.handler.add_translations([
-            Paragraph(0, 'm1', '<p>a</p>', 'a', False, '{"id": "a"}', 'p1',
-                      'A', 'ENGINE', 'LANG'),
-            Paragraph(1, 'm2', '<p>b</p>', 'b', False, '{"id": "b"}', 'p1',
-                      'B', 'ENGINE', 'LANG'),
-            Paragraph(3, 'm3', '<p>c</p>', 'c', False, '{"id": "c"}', 'p1',
-                      'C', 'ENGINE', 'LANG'),
-            Paragraph(5, 'm5', '<p>a</p>', 'a', False, None, 'p1',
-                      'A', 'ENGINE', 'LANG')])
+            Paragraph(0, 'm1', '<p id="a">a</p>', 'a', False, '{"id": "a"}',
+                      'p1', 'A', 'ENGINE', 'LANG'),
+            Paragraph(1, 'm2', '<p id="b">b</p>', 'b', False, '{"id": "b"}',
+                      'p1', 'B', 'ENGINE', 'LANG'),
+            Paragraph(3, 'm3', '<p id="c">c</p>', 'c', False, '{"id": "c"}',
+                      'p1', 'C', 'ENGINE', 'LANG'),
+            Paragraph(5, 'm5', '<p href="/a">a</p>', 'a', False,
+                      '{"href": "a"}', 'p1', 'A', 'ENGINE', 'LANG')])
 
-        elements = self.xhtml.findall('.//x:p', namespaces=ns)
+        elements = self.xhtml.findall('./x:body/*', namespaces=ns)
         self.assertEqual(6, len(elements))
         self.assertEqual('A', elements[0].text)
         self.assertEqual('B', elements[1].text)
         self.assertEqual('C', elements[3].text)
         self.assertEqual('A', elements[5].text)
+        self.assertEqual('/a', elements[5].get('href'))
 
     def test_add_translations_merged(self):
         self.handler.merge_length = 1000
         self.handler.prepare_original(self.elements)
         self.handler.add_translations([Paragraph(
-            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p><p>a</p>',
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>'
+            '<a href="/a">a</a>',
             'a {{id_0}} b {{id_1}} c {{id_3}} a {{id_5}}', False, None, None,
             'A {{id_0}} B {{id_1}} C {{id_3}} A {{id_5}}', 'ENGINE', 'LANG')])
 
-        elements = self.xhtml.findall('.//x:p', namespaces=ns)
+        elements = self.xhtml.findall('./x:body/*', namespaces=ns)
         self.assertEqual(10, len(elements))
         self.assertEqual('a', elements[0].text)
         self.assertEqual('A', elements[1].text)
@@ -454,16 +459,18 @@ class TestElementHandler(unittest.TestCase):
 
         self.assertEqual('a', elements[8].text)
         self.assertEqual('A', elements[9].text)
+        self.assertIsNone(elements[9].get('href'))
 
     def test_add_translations_merged_missing_id(self):
         self.handler.merge_length = 1000
         self.handler.prepare_original(self.elements)
         self.handler.add_translations([Paragraph(
-            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p><p>a</p>',
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>'
+            '<a href="/a">a</a>',
             'a {{id_0}} b {{id_1}} c {{id_3}} a {{id_5}}', False, None, None,
             'A B {{id_1}} C {{id_3}} A {{id_5}}', 'ENGINE', 'LANG')])
 
-        elements = self.xhtml.findall('.//x:p', namespaces=ns)
+        elements = self.xhtml.findall('./x:body/*', namespaces=ns)
         self.assertEqual(9, len(elements))
         self.assertEqual('a', elements[0].text)
         self.assertEqual('b', elements[1].text)
@@ -472,17 +479,22 @@ class TestElementHandler(unittest.TestCase):
         self.assertEqual('c', elements[4].text)
         self.assertEqual('C', elements[5].text)
 
+        self.assertEqual('a', elements[7].text)
+        self.assertEqual('A', elements[8].text)
+        self.assertIsNone(elements[8].get('href'))
+
     def test_add_translations_merged_translation_only(self):
         self.handler.position = 'only'
 
         self.handler.merge_length = 1000
         self.handler.prepare_original(self.elements)
         self.handler.add_translations([Paragraph(
-            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p><p>a</p>',
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>'
+            '<a href="/a">a</a>',
             'a {{id_0}} b {{id_1}} c {{id_3}} a {{id_5}}', False, None, None,
             'A {{id_0} B {{id_1}} C {{id_3}} A {{id_5}}', 'ENGINE', 'LANG')])
 
-        elements = self.xhtml.findall('.//x:p', namespaces=ns)
+        elements = self.xhtml.findall('./x:body/*', namespaces=ns)
         self.assertEqual(6, len(elements))
         self.assertEqual('A', elements[0].text)
         self.assertEqual('B', elements[1].text)
@@ -490,6 +502,7 @@ class TestElementHandler(unittest.TestCase):
         self.assertEqual('C', elements[3].text)
 
         self.assertEqual('A', elements[5].text)
+        self.assertEqual('/a', elements[5].get('href'))
 
     def test_add_translations_merged_translation_only_missing_id(self):
         self.handler.position = 'only'
@@ -497,14 +510,16 @@ class TestElementHandler(unittest.TestCase):
         self.handler.merge_length = 1000
         self.handler.prepare_original(self.elements)
         self.handler.add_translations([Paragraph(
-            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p><p>a</p>',
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>'
+            '<a href="/a">a</a>',
             'a {{id_0}} b {{id_1}} c {{id_3}} a {{id_5}}', False, None, None,
             'A B {{id_1}} C {{id_3}} A {{id_5}}', 'ENGINE', 'LANG')])
 
-        elements = self.xhtml.findall('.//x:p', namespaces=ns)
+        elements = self.xhtml.findall('./x:body/*', namespaces=ns)
         self.assertEqual(5, len(elements))
         self.assertEqual('A B', elements[0].text)
 
         self.assertEqual('C', elements[2].text)
 
         self.assertEqual('A', elements[4].text)
+        self.assertEqual('/a', elements[4].get('href'))
