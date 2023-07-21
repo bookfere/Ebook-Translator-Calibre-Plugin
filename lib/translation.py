@@ -4,8 +4,6 @@ import time
 import json
 from types import GeneratorType
 
-from calibre import prepare_string_for_xml as xml_escape
-
 from ..engines import builtin_engines
 from ..engines import GoogleFreeTranslate
 from ..engines.custom import CustomTranslate
@@ -83,9 +81,9 @@ class Translation:
     def __init__(self, translator, glossary):
         self.translator = translator
         self.glossary = glossary
-        self.abort_count = 0
 
         self.fresh = False
+        self.batch = False
         self.progress = dummy
         self.log = dummy
         self.streaming = dummy
@@ -94,9 +92,13 @@ class Translation:
 
         self.total = 0
         self.progress_bar = ProgressBar()
+        self.abort_count = 0
 
     def set_fresh(self, fresh):
         self.fresh = fresh
+
+    def set_batch(self, batch):
+        self.batch = batch
 
     def set_progress(self, progress):
         self.progress = progress
@@ -136,7 +138,7 @@ class Translation:
         except Exception as e:
             if self.cancel_request() or self.need_stop():
                 raise TranslationCanceled(_('Translation canceled.'))
-            # Try to retreive a available API key.
+            # Try to retrieve a available API key.
             if self.translator.need_change_api_key(str(e).lower()):
                 if not self.translator.change_api_key():
                     raise NoAvailableApiKey(_('No available API key.'))
@@ -239,10 +241,12 @@ class Translation:
                 self.translator.request_interval)
             handler.handle()
 
-        message = _('Translation completed.')
         self.log(sep())
+        if self.batch and self.abort_count > 0:
+            raise Exception(_('Translation failed.'))
         consuming = round((time.time() - start_time) / 60, 2)
         self.log('Time consuming: %s minutes' % consuming)
+        message = _('Translation completed.')
         self.log(message)
         self.progress(1, message)
 

@@ -4,7 +4,7 @@ from types import MethodType
 from tempfile import gettempdir
 
 from calibre.gui2 import Dispatcher
-from calibre.constants import __version__, DEBUG
+from calibre.constants import DEBUG, __version__
 from calibre.ebooks.conversion.plumber import Plumber
 from calibre.ptempfile import PersistentTemporaryFile
 from calibre.ebooks.metadata.meta import get_metadata, set_metadata
@@ -36,8 +36,8 @@ def ebook_pages(input_path):
 
 
 def convert_book(ebook_title, input_path, output_path, source_lang,
-                 target_lang, cache_only, notification):
-    """ The following parameters need attention:
+                 target_lang, cache_only, is_batch, notification):
+    """The following parameters need attention:
     :cache_only: Only use the translation which exists in the cache.
     :notification: It is automatically added by arbitrary_n.
     """
@@ -64,6 +64,7 @@ def convert_book(ebook_title, input_path, output_path, source_lang,
 
     translation = get_translation(
         translator, lambda text, error=False: log.info(text))
+    translation.set_batch(is_batch)
     translation.set_callback(cache.update_paragraph)
 
     info = '{0}\n| Diagnosis Information\n{0}'.format(sep())
@@ -117,7 +118,7 @@ class ConversionWorker:
         self.api = self.db.new_api
         self.working_jobs = self.gui.bookfere_ebook_translator.jobs
 
-    def translate_ebook(self, ebook, cache_only=False):
+    def translate_ebook(self, ebook, cache_only=False, is_batch=False):
         input_path = ebook.get_input_path()
         if not self.config.get('to_library'):
             output_path = os.path.join(
@@ -134,7 +135,7 @@ class ConversionWorker:
                 'calibre_plugins.ebook_translator.lib.conversion',
                 'convert_book',
                 (ebook.title, input_path, output_path, ebook.source_lang,
-                 ebook.target_lang, cache_only)),
+                 ebook.target_lang, cache_only, is_batch)),
             description=(_('[{} > {}] Translating "{}"').format(
                 ebook.source_lang, ebook.target_lang, ebook.title)))
         self.working_jobs[job] = (ebook, output_path)
