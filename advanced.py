@@ -2,7 +2,6 @@ import time
 from types import MethodType
 
 from calibre.constants import __version__
-from calibre.gui2.dialogs.message_box import JobError
 
 from .lib.utils import uid
 from .lib.config import get_config

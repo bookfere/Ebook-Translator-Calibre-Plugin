@@ -144,6 +144,6 @@ class BatchTranslation(QDialog):
 
         ebooks = ebooks if isinstance(ebooks, list) else [ebooks]
         for ebook in self.ebooks:
-            self.worker.translate_ebook(ebook)
+            self.worker.translate_ebook(ebook, is_batch=True)
         self.ebooks.clear()
         self.done(0)

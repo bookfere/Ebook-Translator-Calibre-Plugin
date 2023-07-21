@@ -105,8 +105,8 @@ class Element:
         else:
             self.element.addnext(new_element)
         if position == 'only':
-            if get_name(new_element) =='a':
-                new_element.set('href', self.element.get('href'))           
+            if get_name(new_element) == 'a':
+                new_element.set('href', self.element.get('href'))
             self.delete()
         return new_element
 
