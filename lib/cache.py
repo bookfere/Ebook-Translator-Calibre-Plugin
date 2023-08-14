@@ -209,6 +209,7 @@ class TranslationCache:
         self.connection.commit()
 
     def close(self):
+        self.cursor.close
         self.connection.commit()
         self.connection.close()
 
