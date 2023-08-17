@@ -796,7 +796,8 @@ class AdvancedTranslation(QDialog):
         self.status_thread.quit()
         self.status_thread.wait()
         if self.cache is not None:
-            self.cache.close()
-            if not self.cache.is_persistence() and result == 0:
+            if self.cache.is_persistence():
+                self.cache.close()
+            elif result == 0:
                 self.cache.destroy()
         QDialog.done(self, result)

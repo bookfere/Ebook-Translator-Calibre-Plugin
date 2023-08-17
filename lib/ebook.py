@@ -1,11 +1,12 @@
 import re
 
+from calibre import sanitize_file_name
+
 
 class Ebooks:
     class Ebook:
         def __init__(self, id, title, files, input_format, source_lang):
             self.id = id
-            self.title = title
             self.files = files
             self.input_format = input_format
             self.source_lang = source_lang
@@ -14,8 +15,11 @@ class Ebooks:
             self.target_lang = None
             self.lang_code = None
 
+            self.set_title(title)
+
         def set_title(self, title):
-            self.title = re.sub(r'^\.+|[\/\\\\<>:"|?*\n\t]', '', title)
+            self.title = sanitize_file_name(title)
+            # self.title = re.sub(r'^\.+|[\/\\\\<>:"|?*\n\t]', '', title)
 
         def set_input_format(self, format):
             self.input_format = format
