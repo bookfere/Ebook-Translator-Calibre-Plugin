@@ -122,7 +122,7 @@ class ConversionWorker:
         input_path = ebook.get_input_path()
         if not self.config.get('to_library'):
             output_path = os.path.join(
-                self.config.get('output_path'), '%s (%s).%s' % (
+                self.config.get('output_path'), '%s [%s].%s' % (
                     ebook.title[:200], ebook.target_lang, ebook.output_format))
         else:
             output_path = PersistentTemporaryFile(
