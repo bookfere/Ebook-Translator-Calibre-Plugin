@@ -34,7 +34,7 @@ def uid(*args):
 def trim(text):
     # Remove \xa0 to be compitable with Python2.x
     text = re.sub(u'\u00a0|\u3000', ' ', text)
-    text = re.sub(u'\u200b', '', text)
+    text = re.sub(u'\u200b|\ufeff', '', text)
     text = re.sub(r'\s+', ' ', text)
     return text.strip()
 
