@@ -40,7 +40,8 @@ class Glossary:
                 pass
         if not content:
             return
-        for group in filter(trim, re.split(r'\n{2,}', content)):
+        groups = re.split(r'\n{2,}', content.strip(u'\ufeff'))
+        for group in filter(trim, groups):
             group = group.split('\n')
             self.glossary.append(
                 (group[0], group[0] if len(group) < 2 else group[1]))
