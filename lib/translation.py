@@ -32,7 +32,7 @@ class Glossary:
         try:
             with open(path, 'r', newline=None) as f:
                 content = f.read().strip()
-        except TypeError as e:
+        except Exception:
             try:
                 with open(path, 'rU') as f:
                     content = f.read().strip()
@@ -139,7 +139,7 @@ class Translation:
         except Exception as e:
             if self.cancel_request() or self.need_stop():
                 raise TranslationCanceled(_('Translation canceled.'))
-            # Try to retrieve a available API key.
+            # Try to retrieve an available API key.
             if self.translator.need_change_api_key(str(e).lower()):
                 if not self.translator.change_api_key():
                     raise NoAvailableApiKey(_('No available API key.'))
