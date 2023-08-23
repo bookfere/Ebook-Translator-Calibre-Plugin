@@ -1,3 +1,4 @@
+import sys
 import asyncio
 import concurrent.futures
 
@@ -66,4 +67,7 @@ class AsyncHandler:
             pass
 
     def handle(self):
+        if sys.platform == 'win32':
+            asyncio.set_event_loop_policy(
+                asyncio.WindowsSelectorEventLoopPolicy())
         asyncio.run(self.process_tasks())
