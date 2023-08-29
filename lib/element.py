@@ -91,7 +91,7 @@ class Element:
             count += 1
 
         new_element = etree.XML('<{0} xmlns="{1}">{2}</{0}>'.format(
-            get_name(self.element), ns['x'], translation))
+            get_name(self.element), ns['x'], trim(translation)))
         if color is not None:
             new_element.set('style', 'color:%s' % color)
         if lang is not None:

@@ -136,11 +136,11 @@ class BatchTranslation(QDialog):
             return self.alert.pop(
                 _('The specified path does not exist.'), 'warning')
 
-        glossary_enabled = self.config.get('glossary_enabled')
-        glossary_path = self.config.get('glossary_path')
-        if glossary_enabled and not os.path.exists(glossary_path):
-            return self.alert.pop(
-                _('The specified glossary file does not exist.'), 'warning')
+        # glossary_enabled = self.config.get('glossary_enabled')
+        # glossary_path = self.config.get('glossary_path')
+        # if glossary_enabled and not os.path.exists(glossary_path):
+        #     return self.alert.pop(
+        #         _('The specified glossary file does not exist.'), 'warning')
 
         ebooks = ebooks if isinstance(ebooks, list) else [ebooks]
         for ebook in self.ebooks:
