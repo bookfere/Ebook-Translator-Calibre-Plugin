@@ -161,6 +161,7 @@ class TranslationCache:
         if self.is_fresh():
             for original_unit in original_group:
                 self.add(*original_unit)
+            self.connection.commit()
 
     def all(self):
         resource = self.cursor.execute('SELECT * FROM cache WHERE NOT ignored')
@@ -188,7 +189,7 @@ class TranslationCache:
             '?1, ?2, ?3, ?4, ?5, ?6, ?7, NULL, NULL, NULL'
             ') ON CONFLICT DO NOTHING',
             (id, md5, raw, original, ignored, attributes, page))
-        self.connection.commit()
+        # self.connection.commit()
 
     def update(self, ids, **kwargs):
         ids = ids if isinstance(ids, list) else [ids]

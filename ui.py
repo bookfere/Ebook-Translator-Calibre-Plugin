@@ -70,7 +70,7 @@ class EbookTranslatorGui(InterfaceAction):
         window = AdvancedTranslation(
             self.gui, self.qaction.icon(), worker, ebook)
         window.setMinimumWidth(1200)
-        window.setMinimumHeight(700)
+        window.setMinimumHeight(680)
         window.setWindowTitle(
             '%s - %s' % (_('Advanced Mode'), self.title))
         window.show()
