@@ -8,10 +8,20 @@ from .exception import TranslationCanceled
 class AsyncHandler:
     def __init__(self, paragraphs, concurrency_limit, translate_paragraph,
                  process_translation, request_interval):
+        if sys.platform == 'win32':
+            asyncio.set_event_loop_policy(
+                asyncio.WindowsSelectorEventLoopPolicy())
+        try:
+            self.loop = asyncio.get_event_loop()
+        except Exception:
+            self.loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(self.loop)
+
         self.queue = asyncio.Queue()
+        self.done_queue = asyncio.Queue()
+
         for paragraph in paragraphs:
             self.queue.put_nowait(paragraph)
-        self.done_queue = asyncio.Queue()
 
         self.concurrency_limit = concurrency_limit or self.queue.qsize()
         self.translate_paragraph = translate_paragraph
@@ -67,7 +77,4 @@ class AsyncHandler:
             pass
 
     def handle(self):
-        if sys.platform == 'win32':
-            asyncio.set_event_loop_policy(
-                asyncio.WindowsSelectorEventLoopPolicy())
-        asyncio.run(self.process_tasks())
+        self.loop.run_until_complete(self.process_tasks())
