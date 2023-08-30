@@ -1,4 +1,4 @@
-name: Ebook Translator Unit Test
+name: Ebook Translator Unit Testing
 
 on:
   push:
