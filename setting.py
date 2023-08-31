@@ -60,11 +60,10 @@ class TranslationSetting(QDialog):
                 engine_index: self.update_engine_config,
                 content_index: self.update_content_config,
             }
-            actions.get(index)()
-            # TODO: Resolve the conflict setting.
-            self.config.update(cache_path=get_config().get('cache_path'))
-            self.config.commit()
-            self.alert.pop(_('The setting has been saved.'))
+            if actions.get(index)():
+                self.config.update(cache_path=get_config().get('cache_path'))
+                self.config.commit()
+                self.alert.pop(_('The setting has been saved.'))
         self.save_config.connect(save_setting)
 
         layout.addWidget(self.tabs)
@@ -381,9 +380,6 @@ class TranslationSetting(QDialog):
         chatgpt_model = QComboBox()
         endpoint_layout.addRow(_('Model'), chatgpt_model)
 
-        chatgpt_model.currentTextChanged.connect(
-            lambda model: self.current_engine.config.update(model=model))
-
         self.disable_wheel_event(chatgpt_model)
 
         sampling_widget = QWidget()
@@ -413,10 +409,6 @@ class TranslationSetting(QDialog):
         stream_enabled = QCheckBox(_('Enable streaming text like in ChatGPT'))
         endpoint_layout.addRow(_('Stream'), stream_enabled)
 
-        temperature_value.valueChanged.connect(
-            lambda value: self.current_engine.config.update(
-                temperature=round(value, 1)))
-
         sampling_btn_group = QButtonGroup(sampling_widget)
         sampling_btn_group.addButton(temperature, 0)
         sampling_btn_group.addButton(top_p, 1)
@@ -424,9 +416,6 @@ class TranslationSetting(QDialog):
         def change_sampling_method(button):
             self.current_engine.config.update(sampling=button.text())
         sampling_btn_group.buttonClicked.connect(change_sampling_method)
-
-        top_p_value.valueChanged.connect(
-            lambda value: self.current_engine.config.update(top_p=value))
 
         layout.addWidget(chatgpt_group)
 
@@ -449,6 +438,8 @@ class TranslationSetting(QDialog):
             chatgpt_model.addItems(self.current_engine.models)
             chatgpt_model.setCurrentText(
                 config.get('model', self.current_engine.model))
+            chatgpt_model.currentTextChanged.connect(
+                lambda model: self.current_engine.config.update(model=model))
             # Sampling
             sampling = config.get('sampling', self.current_engine.sampling)
             btn_id = self.current_engine.samplings.index(sampling)
@@ -456,8 +447,13 @@ class TranslationSetting(QDialog):
 
             temperature_value.setValue(
                 config.get('temperature', self.current_engine.temperature))
+            temperature_value.valueChanged.connect(
+                lambda value: self.current_engine.config.update(
+                    temperature=round(value, 1)))
             top_p_value.setValue(
                 config.get('top_p', self.current_engine.top_p))
+            top_p_value.valueChanged.connect(
+                lambda value: self.current_engine.config.update(top_p=value))
             # Stream
             stream_enabled.setChecked(
                 config.get('stream', self.current_engine.stream))
@@ -795,8 +791,9 @@ class TranslationSetting(QDialog):
         if not self.config.get('to_library'):
             output_path = self.output_path_entry.text()
             if not os.path.exists(output_path):
-                return self.alert.pop(
+                self.alert.pop(
                     _('The specified path does not exist.'), 'warning')
+                return False
             self.config.update(output_path=output_path.strip())
 
         # Merge length
@@ -808,16 +805,17 @@ class TranslationSetting(QDialog):
         port = self.proxy_port.text()
         if self.config.get('proxy_enabled') or (host or port):
             if not (self.is_valid_data(self.host_validator, host) and port):
-                return self.alert.pop(
+                self.alert.pop(
                     _('Proxy host or port is incorrect.'), level='warning')
+                return False
             proxy_setting.append(host)
             proxy_setting.append(int(port))
             self.config.update(proxy_setting=proxy_setting)
         len(proxy_setting) < 1 and self.config.delete('proxy_setting')
+        return True
 
     def get_engine_config(self):
         config = self.current_engine.config
-
         # API key
         if self.current_engine.need_api_key:
             api_keys = []
@@ -862,7 +860,7 @@ class TranslationSetting(QDialog):
     def update_engine_config(self):
         config = self.get_engine_config()
         if not config:
-            return
+            return False
         # Do not update directly as you may get default preferences!
         engine_config = self.config.get('engine_preferences').copy()
         engine_config.update({self.current_engine.name: config})
@@ -874,21 +872,24 @@ class TranslationSetting(QDialog):
                 engine_config.pop(name)
         # Update modified engine preferences
         self.config.update(engine_preferences=engine_config)
+        return True
 
     def update_content_config(self):
         # Translation color
         translation_color = self.translation_color.text()
         if translation_color and not QColor(translation_color).isValid():
-            return self.alert.pop(_('Invalid color value.'), 'warning')
+            self.alert.pop(_('Invalid color value.'), 'warning')
+            return False
         self.config.update(translation_color=translation_color or None)
 
         # Glossary file
         if self.config.get('glossary_enabled'):
             glossary_path = self.glossary_path.text()
             if not os.path.exists(glossary_path):
-                return self.alert.pop(
+                self.alert.pop(
                     _('The specified glossary file does not exist.'),
                     'warning')
+                return False
             self.config.update(glossary_path=glossary_path)
 
         # Filter rules
@@ -897,9 +898,10 @@ class TranslationSetting(QDialog):
         if self.config.get('rule_mode') == 'regex':
             for rule in filter_rules:
                 if not self.is_valid_regex(rule):
-                    return self.alert.pop(
+                    self.alert.pop(
                         _('{} is not a valid regular expression.')
                         .format(rule), 'warning')
+                    return False
         self.config.delete('filter_rules')
         filter_rules and self.config.update(filter_rules=filter_rules)
 
@@ -908,9 +910,10 @@ class TranslationSetting(QDialog):
         element_rules = [r for r in rule_content.split('\n') if r]
         for rule in element_rules:
             if css(rule) is None:
-                return self.alert.pop(
+                self.alert.pop(
                     _('{} is not a valid CSS seletor.')
                     .format(rule), 'warning')
+                return False
         self.config.delete('element_rules')
         element_rules and self.config.update(element_rules=element_rules)
 
@@ -929,6 +932,7 @@ class TranslationSetting(QDialog):
             del ebook_metadata['subjects']
         if ebook_metadata:
             self.config.update(ebook_metadata=ebook_metadata)
+        return True
 
     def is_valid_regex(self, rule):
         try:
