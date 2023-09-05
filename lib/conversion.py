@@ -70,7 +70,7 @@ def convert_book(ebook_title, input_path, output_path, source_lang,
     info = '{0}\n| Diagnosis Information\n{0}'.format(sep())
     info += '\n| Calibre Version: %s\n' % __version__
     info += '| Plugin Version: %s\n' % EbookTranslator.__version__
-    info += '| Translate Engine: %s\n' % translator.name
+    info += '| Translation Engine: %s\n' % translator.name
     info += '| Source Language: %s\n' % source_lang
     info += '| Target Language: %s\n' % target_lang
     info += '| Cache Enabled: %s\n' % cache.is_persistence()

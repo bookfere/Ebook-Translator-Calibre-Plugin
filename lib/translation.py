@@ -148,8 +148,8 @@ class Translation:
             else:
                 message = _(
                     'Failed to retrieve data from translate engine API.')
-                need_retry = retry >= self.translator.request_attempt
-                if need_retry or self.need_stop():
+                retry_exceeded = retry >= self.translator.request_attempt
+                if retry_exceeded or self.need_stop():
                     self.abort_count += 1
                     raise TranslationFailed('{}\n{}'.format(message, str(e)))
                 retry += 1
@@ -243,7 +243,7 @@ class Translation:
             handler.handle()
 
         self.log(sep())
-        if self.batch and self.abort_count > 0:
+        if self.batch and self.need_stop():
             raise Exception(_('Translation failed.'))
         consuming = round((time.time() - start_time) / 60, 2)
         self.log('Time consuming: %s minutes' % consuming)
