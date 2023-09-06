@@ -192,7 +192,7 @@ deepl = {
         'Polish': 'PL',
         'Portuguese': 'PT',
         'Portuguese (Brazilian)': 'PT-BR',
-        'Portuguese': 'PT-PT',
+        'Portuguese (international)': 'PT-PT',
         'Romanian': 'RO',
         'Russian': 'RU',
         'Slovak': 'SK',

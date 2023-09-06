@@ -98,20 +98,29 @@ class DeeplFreeTranslate(Base):
         return uid, ts
 
     def _data(self, text):
+        regional_variant = {}
+        target_lang = self._get_target_code()
+        if '-' in target_lang:
+            portions = target_lang.split('-')
+            variant = '-'.join([portions[0].lower(), portions[1]])
+            regional_variant['regionalVariant'] = variant
+            target_lang = portions[0]
         uid, ts = self._vars(text)
+
         data = json.dumps({
-            "jsonrpc": "2.0",
-            "method": "LMT_handle_texts",
-            "params": {
-                "texts": [{"text": text}],
-                "splitting": "newlines",
-                "lang": {
-                    "source_lang_user_selected": self._get_source_code(),
-                    "target_lang": self._get_target_code(),
+            'jsonrpc': '2.0',
+            'method': 'LMT_handle_texts',
+            'params': {
+                'commonJobParams': regional_variant,
+                'texts': [{'text': text}],
+                'splitting': 'newlines',
+                'lang': {
+                    'source_lang_user_selected': self._get_source_code(),
+                    'target_lang': target_lang,
                 },
-                "timestamp": ts
+                'timestamp': ts
             },
-            "id": uid
+            'id': uid
         }, separators=',:')
 
         # ((e, t) => e = (t.id + 3) % 13 == 0 || (t.id + 5) % 29 == 0
