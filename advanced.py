@@ -674,7 +674,7 @@ class AdvancedTranslation(QDialog):
         def change_selected_item():
             rows = self.table.get_selected_rows()
             if not self.on_working and len(rows) == 1:
-                paragraph = self.table.paragraph(rows.pop(-1))
+                paragraph = self.table.paragraph(rows[0])
                 self.raw_text.emit(paragraph.raw)
                 self.original_text.emit(paragraph.original)
                 self.translation_text[str].emit(paragraph.translation)
