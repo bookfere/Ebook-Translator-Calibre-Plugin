@@ -520,6 +520,16 @@ class AdvancedTranslation(QDialog):
         target_lang.setFixedWidth(150)
         target_layout.addWidget(target_lang)
 
+        cache_group = QGroupBox(_('Cache Status'))
+        cache_layout = QVBoxLayout(cache_group)
+        cache_status = QLabel(
+            _('Enabled') if self.cache.is_persistence() else _('Disabled'))
+        cache_status.setAlignment(Qt.AlignCenter)
+        cache_status.setStyleSheet(
+            'border-radius:2px;color:white;background-color:%s;'
+            % ('green' if self.cache.is_persistence() else 'grey'))
+        cache_layout.addWidget(cache_status)
+
         save_group = QGroupBox(_('Output Ebook'))
         save_layout = QHBoxLayout(save_group)
         save_ebook = QPushButton(_('Output'))
@@ -535,6 +545,7 @@ class AdvancedTranslation(QDialog):
 
         ebook_title.textChanged.connect(self.ebook.set_title)
 
+        layout.addWidget(cache_group)
         layout.addWidget(engine_group)
         layout.addWidget(source_group)
         layout.addWidget(target_group)
@@ -662,8 +673,8 @@ class AdvancedTranslation(QDialog):
 
         def change_selected_item():
             rows = self.table.get_selected_rows()
-            if not self.on_working and len(rows) > 0:
-                paragraph = self.table.paragraph(rows.pop(0))
+            if not self.on_working and len(rows) == 1:
+                paragraph = self.table.paragraph(rows.pop(-1))
                 self.raw_text.emit(paragraph.raw)
                 self.original_text.emit(paragraph.original)
                 self.translation_text[str].emit(paragraph.translation)
