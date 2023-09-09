@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-07-19 17:03+0800\n"
+"POT-Creation-Date: 2023-09-10 01:05+0800\n"
 "PO-Revision-Date: 2023-04-25 15:36+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -86,6 +86,15 @@ msgstr "翻譯引擎"
 msgid "Source Language"
 msgstr "來源語言"
 
+msgid "Cache Status"
+msgstr ""
+
+msgid "Disabled"
+msgstr ""
+
+msgid "Enabled"
+msgstr ""
+
 msgid "Output Ebook"
 msgstr ""
 
@@ -130,9 +139,6 @@ msgstr "未知"
 
 msgid "The specified path does not exist."
 msgstr "指定路徑不存在。"
-
-msgid "The specified glossary file does not exist."
-msgstr "指定的詞彙表檔案不存在。"
 
 msgid "Choose a path to store cache files."
 msgstr ""
@@ -397,6 +403,9 @@ msgstr ""
 msgid "There is no content need to translate."
 msgstr "沒有需要翻譯的內容。"
 
+msgid "Translation failed."
+msgstr ""
+
 msgid "General"
 msgstr ""
 
@@ -600,6 +609,9 @@ msgstr "提示必須包含 {}。"
 
 msgid "Invalid color value."
 msgstr "無效的色彩值。"
+
+msgid "The specified glossary file does not exist."
+msgstr "指定的詞彙表檔案不存在。"
 
 msgid "{} is not a valid regular expression."
 msgstr "{} 不是有效的規則運算式。"
