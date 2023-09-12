@@ -672,13 +672,11 @@ class AdvancedTranslation(QDialog):
         layout.addWidget(control)
 
         def change_selected_item():
-            rows = self.table.get_selected_rows()
-            if not self.on_working and len(rows) == 1:
-                paragraph = self.table.paragraph(rows[0])
-                self.raw_text.emit(paragraph.raw)
-                self.original_text.emit(paragraph.original)
-                self.translation_text[str].emit(paragraph.translation)
-        self.table.itemSelectionChanged.connect(change_selected_item)
+            paragraph = self.table.current_paragraph()
+            self.raw_text.emit(paragraph.raw)
+            self.original_text.emit(paragraph.original)
+            self.translation_text[str].emit(paragraph.translation)
+        self.table.itemPressed.connect(change_selected_item)
         self.table.setCurrentItem(self.table.item(0, 0))
 
         def translation_callback(paragraph):
