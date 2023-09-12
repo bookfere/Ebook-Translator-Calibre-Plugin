@@ -370,7 +370,7 @@ class TestElementHandler(unittest.TestCase):
         <p id="a">a</p>
         <p id="b">b</p>
         <p><img src="abc.jpg" /></p>
-        <p id="c">c</p>
+        <p id="c" class="c">c</p>
         <p></p>
     </body>
 </html>""")
@@ -390,7 +390,8 @@ class TestElementHandler(unittest.TestCase):
             (1, 'm2', '<p id="b">b</p>', 'b', False, '{"id": "b"}', 'p1'),
             (2, 'm3', '<p><img src="abc.jpg"/></p>', '{{id_00000}}', True,
              None, 'p1'),
-            (3, 'm4', '<p id="c">c</p>', 'c', False, '{"id": "c"}', 'p1'),
+            (3, 'm4', '<p id="c" class="c">c</p>', 'c', False,
+             '{"id": "c", "class": "c"}', 'p1'),
             (4, 'm5', '<p></p>', '', True, None, 'p1')],
             self.handler.prepare_original(self.elements))
 
@@ -399,7 +400,7 @@ class TestElementHandler(unittest.TestCase):
         mock_uid.return_value = 'm1'
         self.handler.merge_length = 1000
         self.assertEqual([(
-            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c" class="c">c</p>',
             'a {{id_0}} b {{id_1}} c {{id_3}} ', False)],
             self.handler.prepare_original(self.elements))
 
@@ -410,8 +411,9 @@ class TestElementHandler(unittest.TestCase):
                       'p1', 'A', 'ENGINE', 'LANG'),
             Paragraph(1, 'm2', '<p id="b">b</p>', 'b', False, '{"id": "b"}',
                       'p1', 'B', 'ENGINE', 'LANG'),
-            Paragraph(3, 'm3', '<p id="c">c</p>', 'c', False, '{"id": "c"}',
-                      'p1', 'C', 'ENGINE', 'LANG')]
+            Paragraph(3, 'm3', '<p id="c">c</p>', 'c', False,
+                      '{"id": "c", "class": "c"}', 'p1', 'C', 'ENGINE',
+                      'LANG')]
 
         self.handler.add_translations(translations)
 
@@ -434,14 +436,17 @@ class TestElementHandler(unittest.TestCase):
                       'p1', 'A', 'ENGINE', 'LANG'),
             Paragraph(1, 'm2', '<p id="b">b</p>', 'b', False, '{"id": "b"}',
                       'p1', 'B', 'ENGINE', 'LANG'),
-            Paragraph(3, 'm3', '<p id="c">c</p>', 'c', False, '{"id": "c"}',
-                      'p1', 'C', 'ENGINE', 'LANG')])
+            Paragraph(3, 'm3', '<p id="c">c</p>', 'c', False,
+                      '{"id": "c", "class": "c"}', 'p1', 'C', 'ENGINE',
+                      'LANG')])
 
         elements = self.xhtml.findall('./x:body/*', namespaces=ns)
         self.assertEqual(5, len(elements))
         self.assertEqual('A', elements[0].text)
         self.assertEqual('B', elements[1].text)
         self.assertEqual('C', elements[3].text)
+        self.assertEqual('c', elements[3].get('id'))
+        self.assertEqual('c', elements[3].get('class'))
 
     def test_add_translations_merged(self):
         self.handler.merge_length = 1000

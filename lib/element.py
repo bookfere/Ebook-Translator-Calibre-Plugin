@@ -96,18 +96,17 @@ class Element:
             new_element.set('style', 'color:%s' % color)
         if lang is not None:
             new_element.set('lang', lang)
-        klass = self.element.get('class')
-        if klass is not None:
-            new_element.set('class', self.element.get('class'))
+        # Preserve all attributes from the original element.
+        for k, v in self.element.items():
+            if k == 'id' and position != 'only':
+                continue
+            new_element.set(k, v)
         self.element.tail = None  # Make sure it has no tail
         if position == 'before':
             self.element.addprevious(new_element)
         else:
             self.element.addnext(new_element)
         if position == 'only':
-            href = self.element.get('href')
-            if get_name(new_element) == 'a' and href is not None:
-                new_element.set('href', href)
             self.delete()
         return new_element
 
