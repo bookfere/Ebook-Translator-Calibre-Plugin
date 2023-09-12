@@ -53,6 +53,7 @@ class TranslationSetting(QDialog):
         engine_index = self.tabs.addTab(self.layout_engine(), _('Engine'))
         content_index = self.tabs.addTab(self.layout_content(), _('Content'))
         self.tabs.setStyleSheet('QTabBar::tab {min-width:120px;}')
+        self.tabs.currentChanged.connect(lambda _: self.config.refresh())
 
         def save_setting(index):
             actions = {
