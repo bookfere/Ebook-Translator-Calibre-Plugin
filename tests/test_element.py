@@ -426,6 +426,8 @@ class TestElementHandler(unittest.TestCase):
 
         self.assertEqual('c', elements[5].text)
         self.assertEqual('C', elements[6].text)
+        self.assertIsNone(elements[6].get('id'))
+        self.assertEqual('c', elements[6].get('class'))
 
     def test_add_translations_translation_only(self):
         self.handler.position = 'only'
@@ -443,7 +445,9 @@ class TestElementHandler(unittest.TestCase):
         elements = self.xhtml.findall('./x:body/*', namespaces=ns)
         self.assertEqual(5, len(elements))
         self.assertEqual('A', elements[0].text)
+        self.assertEqual('a', elements[0].get('id'))
         self.assertEqual('B', elements[1].text)
+        self.assertEqual('b', elements[1].get('id'))
         self.assertEqual('C', elements[3].text)
         self.assertEqual('c', elements[3].get('id'))
         self.assertEqual('c', elements[3].get('class'))
