@@ -262,11 +262,15 @@ class ManageCustomEngine(QDialog):
                         return self.alert.pop(
                             _('The engine name is already in use.'), 'warning')
                 # Refresh custom engine data
+                default_name = get_config().get('translate_engine')
                 if self.default_name == current_name:
                     self.default_name = new_name
                     if current_name in self.engine_config:
                         data = self.engine_config.pop(current_name)
                         self.engine_config[new_name] = data
+                if default_name == current_name:
+                    default_name = new_name
+                self.config.update(translate_engine=default_name)
                 del self.custom_engines[current_name]
                 self.custom_engines[new_name] = raw_data
                 # Refresh the custom engine list
@@ -275,8 +279,9 @@ class ManageCustomEngine(QDialog):
             # Update the custom engine
             self.config.update(custom_engines=self.custom_engines.copy())
             self.config.update(engine_preferences=self.engine_config.copy())
-            self.config.update(translate_engine=self.default_name)
             self.config.commit()
+            # Restore the selected engine
+            self.config.update(translate_engine=self.default_name)
             self.alert.pop(_('The setting has been saved.'))
 
         def delete_data():
