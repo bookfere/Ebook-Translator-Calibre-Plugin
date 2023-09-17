@@ -212,7 +212,7 @@ class Extraction:
         return False
 
     def extract_elements(self, page_id, root, elements=[]):
-        priority_elements = ['p', 'pre']
+        priority_elements = ['p', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']
         for element in root.findall('./*'):
             if self.need_ignore(element):
                 continue
@@ -367,6 +367,7 @@ class ElementHandler:
 
 
 def get_toc_elements(nodes, elements=[]):
+    """Be aware that elements should not overlap with existing data."""
     for node in nodes:
         elements.append(TocElement(node, 'toc.ncx'))
         if len(node.nodes) > 0:

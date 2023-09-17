@@ -39,7 +39,10 @@ class TestFunction(unittest.TestCase):
         toc.nodes[0].add('b', 'b.html')
         toc.nodes[0][0].add('c', 'c.html')
 
-        elements = get_toc_elements(toc)
+        elements = get_toc_elements(toc, [])
+        self.assertEqual(3, len(elements))
+
+        elements = get_toc_elements(toc, [])
         self.assertEqual(3, len(elements))
 
 
@@ -289,6 +292,7 @@ class TestExtraction(unittest.TestCase):
 <body>
     <div>
         <div>
+            <h2><a>title</a></h2>
             <div>123456789</div>
             <div><div>123</div>456789</div>
             <div>123456<div>789</div></div>
@@ -302,8 +306,10 @@ class TestExtraction(unittest.TestCase):
 </body>
 </html>""")
         root = xhtml.find('x:body', namespaces=ns)
-        self.assertEqual(
-            7, len(self.extraction.extract_elements('p1', root, [])))
+        elements = self.extraction.extract_elements('p1', root, [])
+        self.assertEqual(8, len(elements))
+        self.assertEqual('h2', elements[0].get_name())
+        self.assertEqual('p', elements[-1].get_name())
 
         xhtml = etree.XML(b"""<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html>
