@@ -2,6 +2,7 @@ from ..lib.utils import group
 
 from .alert import AlertMessage
 
+
 try:
     from qt.core import (
         Qt, QTableWidget, QHeaderView, QMenu, QAbstractItemView, QCursor,

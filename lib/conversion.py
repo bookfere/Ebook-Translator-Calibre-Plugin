@@ -14,25 +14,27 @@ from .. import EbookTranslator
 from .config import get_config
 from .utils import log, sep, uid
 from .cache import get_cache, TranslationCache
-from .element import get_ebook_elements, get_element_handler, Extraction
+from .element import (
+    get_toc_elements, get_page_elements, get_element_handler, Extraction)
 from .translation import get_translator, get_translation
 
 
 load_translations()
 
 
-def ebook_pages(input_path):
-    pages = []
+def extract_ebook_elements(input_path):
+    elements = []
 
     output_path = os.path.join(gettempdir(), 'temp.epub')
     plumber = Plumber(input_path, output_path, log=log)
 
     def convert(self, oeb, output_path, input_plugin, opts, log):
-        pages.extend(oeb.manifest.items)
+        elements.extend(get_toc_elements(oeb.toc.nodes))
+        elements.extend(get_page_elements(oeb.manifest.items))
     plumber.output_plugin.convert = MethodType(convert, plumber.output_plugin)
     plumber.run()
 
-    return pages
+    return elements
 
 
 def convert_book(ebook_title, input_path, output_path, source_lang,
@@ -85,13 +87,15 @@ def convert_book(ebook_title, input_path, output_path, source_lang,
     plumber = Plumber(
         input_path, output_path, log=log, report_progress=notification)
     _convert = plumber.output_plugin.convert
+    elements = []
 
     def convert(self, oeb, output_path, input_plugin, opts, log):
         log.info('Translating ebook content ... (this will take a while)')
         log.info(info)
         translation.set_progress(self.report_progress)
 
-        elements = get_ebook_elements(oeb.manifest.items)
+        elements.extend(get_toc_elements(oeb.toc.nodes))
+        elements.extend(get_page_elements(oeb.manifest.items))
         original_group = element_handler.prepare_original(elements)
         cache.save(original_group)
 

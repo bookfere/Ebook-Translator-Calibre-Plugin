@@ -28,18 +28,59 @@ class Element:
         self.ignored = False
 
         self.reserve_elements = []
-        self.reserve_words = []
         self.original = []
 
     def set_ignored(self, ignored):
         self.ignored = ignored
 
     def get_name(self):
-        return get_name(self.element)
+        return None
 
-    def get_descendents(self, tags):
+    def get_raw(self):
+        raise NotImplementedError()
+
+    def get_text(self):
+        raise NotImplementedError()
+
+    def get_attributes(self):
+        return None
+
+    def delete(self):
+        pass
+
+    def get_content(self, placeholder):
+        raise NotImplementedError()
+
+    def add_translation(self, translation, placeholder, position=None,
+                        lang=None, color=None):
+        raise NotImplementedError()
+
+
+class TocElement(Element):
+    def get_raw(self):
+        return self.element.title
+
+    def get_text(self):
+        return self.element.title
+
+    def get_content(self, placeholder):
+        return self.element.title
+
+    def add_translation(self, translation, placeholder, position=None,
+                        lang=None, color=None):
+        items = [self.element.title, translation]
+        self.element.title = items[-1] if position == 'only' else \
+            ' '.join(reversed(items) if position == 'before' else items)
+        return self.element
+
+
+class PageElement(Element):
+    def _get_descendents(self, tags):
         xpath = './/*[%s]' % ' or '.join(['self::x:%s' % tag for tag in tags])
         return self.element_copy.xpath(xpath, namespaces=ns)
+
+    def get_name(self):
+        return get_name(self.element)
 
     def get_raw(self):
         return get_string(self.element, True)
@@ -55,12 +96,12 @@ class Element:
         self.element.getparent().remove(self.element)
 
     def get_content(self, placeholder):
-        for noise in self.get_descendents(('rt', 'rp', 'sup', 'sub')):
+        for noise in self._get_descendents(('rt', 'rp', 'sup', 'sub')):
             parent = noise.getparent()
             parent.text = (parent.text or '') + (noise.tail or '')
             parent.remove(noise)
 
-        self.reserve_elements = self.get_descendents(('img', 'code'))
+        self.reserve_elements = self._get_descendents(('img', 'code'))
         count = 0
         for reserve in self.reserve_elements:
             replacement = placeholder[0].format(format(count, '05'))
@@ -188,11 +229,11 @@ class Extraction:
                             element_has_content = True
                             break
             if element_has_content:
-                elements.append(Element(element, page_id))
+                elements.append(PageElement(element, page_id))
             else:
                 self.extract_elements(page_id, element, elements)
         # Return root if all children have no content
-        root = Element(root, page_id)
+        root = PageElement(root, page_id)
         return elements if elements else [root]
 
     def filter_content(self, element):
@@ -325,7 +366,15 @@ class ElementHandler:
         self.remove_unused_elements()
 
 
-def get_ebook_elements(pages):
+def get_toc_elements(nodes, elements=[]):
+    for node in nodes:
+        elements.append(TocElement(node, 'toc.ncx'))
+        if len(node.nodes) > 0:
+            get_toc_elements(node.nodes, elements)
+    return elements
+
+
+def get_page_elements(pages):
     config = get_config()
     rule_mode = config.get('rule_mode')
     filter_scope = config.get('filter_scope')

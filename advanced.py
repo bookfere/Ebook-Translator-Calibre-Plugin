@@ -7,8 +7,8 @@ from .lib.utils import uid
 from .lib.config import get_config
 from .lib.cache import Paragraph, TranslationCache, get_cache
 from .lib.translation import get_engine_class, get_translator, get_translation
-from .lib.element import get_ebook_elements, get_element_handler, Extraction
-from .lib.conversion import ebook_pages
+from .lib.element import get_element_handler, Extraction
+from .lib.conversion import extract_ebook_elements
 
 from . import EbookTranslator
 from .components import (
@@ -87,7 +87,7 @@ class PreparationWorker(QObject):
             a = time.time()
             # --------------------------
             self.progress_message.emit(_('Extracting ebook content...'))
-            elements = get_ebook_elements(ebook_pages(input_path))
+            elements = extract_ebook_elements(input_path)
             self.progress.emit(30)
             b = time.time()
             print('extract: ', b - a)
@@ -638,8 +638,8 @@ class AdvancedTranslation(QDialog):
         def disable_translation_text():
             if self.on_working:
                 translation_text.setTextInteractionFlags(Qt.TextEditable)
-                end = getattr(QTextCursor.MoveOperation, 'End', None) or \
-                    QTextCursor.End
+                end = getattr(QTextCursor.MoveOperation, 'End', None) \
+                    or QTextCursor.End
                 translation_text.moveCursor(end)
             else:
                 translation_text.setTextInteractionFlags(default_flag)
@@ -678,6 +678,7 @@ class AdvancedTranslation(QDialog):
             self.translation_text[str].emit(paragraph.translation)
         self.table.itemPressed.connect(change_selected_item)
         self.table.setCurrentItem(self.table.item(0, 0))
+        change_selected_item()
 
         def translation_callback(paragraph):
             row = paragraph.row
