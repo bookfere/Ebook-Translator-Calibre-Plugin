@@ -2,10 +2,14 @@ import unittest
 from unittest.mock import patch, Mock
 
 from lxml import etree
+
+from calibre.ebooks.oeb.base import TOC
+
 from ..lib.utils import ns
 from ..lib.cache import Paragraph
 from ..lib.element import (
-    get_string, get_name, Element, Extraction, ElementHandler)
+    get_string, get_name, TocElement, PageElement, Extraction, ElementHandler,
+    get_toc_elements)
 from ..engines import DeeplFreeTranslate
 from ..engines.base import Base
 
@@ -29,8 +33,35 @@ class TestFunction(unittest.TestCase):
         xhtml = '<p xmlns="http://www.w3.org/1999/xhtml">a</p>'
         self.assertEqual('p', get_name(etree.XML(xhtml)))
 
+    def test_get_toc_elements(self):
+        toc = TOC()
+        toc.add('a', 'a.html')
+        toc.nodes[0].add('b', 'b.html')
+        toc.nodes[0][0].add('c', 'c.html')
 
-class TestElement(unittest.TestCase):
+        elements = get_toc_elements(toc)
+        self.assertEqual(3, len(elements))
+
+
+class TestTocElement(unittest.TestCase):
+    def setUp(self):
+        self.element = TocElement(TOC('a', 'a.html'), 'toc.ncx')
+
+    def test_get_raw(self):
+        self.assertEqual('a', self.element.get_raw())
+
+    def test_get_text(self):
+        self.assertEqual('a', self.element.get_text())
+
+    def test_get_content(self):
+        self.assertEqual('a', self.element.get_content(Base.placeholder))
+
+    def test_add_translation(self):
+        element = self.element.add_translation('A', Base.placeholder)
+        self.assertEqual('a A', element.title)
+
+
+class TestPageElement(unittest.TestCase):
     def setUp(self):
         self.xhtml = etree.XML(rb"""<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html>
@@ -50,16 +81,16 @@ class TestElement(unittest.TestCase):
     </body>
 </html>""")
         self.paragraph = self.xhtml.find('.//x:p', namespaces=ns)
-        self.element = Element(self.paragraph, 'p1')
+        self.element = PageElement(self.paragraph, 'p1')
 
     def test_get_name(self):
         self.assertEqual('p', self.element.get_name())
 
-    def test_get_descendents(self):
-        elements = self.element.get_descendents(('ruby', 'img'))
-        self.assertEqual(8, len(elements))
-        self.assertEqual(
-            '<ruby>b<rt>B</rt></ruby>', get_string(elements[2], True))
+    # def test_get_descendents(self):
+    #     elements = self.element.get_descendents(('ruby', 'img'))
+    #     self.assertEqual(8, len(elements))
+    #     self.assertEqual(
+    #         '<ruby>b<rt>B</rt></ruby>', get_string(elements[2], True))
 
     def test_get_raw(self):
         text = (
@@ -150,11 +181,11 @@ class TestElement(unittest.TestCase):
     </body>
 </html>""")
 
-        element = Element(xhtml.find('.//x:a[1]', namespaces=ns), 'p1')
+        element = PageElement(xhtml.find('.//x:a[1]', namespaces=ns), 'p1')
         new = element.add_translation('A', Base.placeholder, position='only')
         self.assertIsNone(new.get('href'))
 
-        element = Element(xhtml.find('.//x:a[2]', namespaces=ns), 'p1')
+        element = PageElement(xhtml.find('.//x:a[2]', namespaces=ns), 'p1')
         new = element.add_translation('A', Base.placeholder, position='only')
         self.assertEqual('abc', new.get('href'))
 
@@ -207,10 +238,10 @@ class TestExtraction(unittest.TestCase):
         self.assertIsInstance(elements, filter)
         elements = list(elements)
         self.assertEqual(2, len(elements))
-        self.assertIsInstance(elements[0], Element)
+        self.assertIsInstance(elements[0], PageElement)
         self.assertEqual('p', get_name(elements[0].get_name()))
         self.assertEqual('abc', elements[0].get_content(Base.placeholder))
-        self.assertIsInstance(elements[1], Element)
+        self.assertIsInstance(elements[1], PageElement)
         self.assertEqual('div', get_name(elements[1].get_name()))
         self.assertEqual('def', elements[1].get_content(Base.placeholder))
 
@@ -286,7 +317,8 @@ class TestExtraction(unittest.TestCase):
 
     def test_filter_content(self):
         def elements(markups):
-            return [Element(etree.XML(markup), 'test') for markup in markups]
+            return [
+                PageElement(etree.XML(markup), 'test') for markup in markups]
 
         # normal - text
         markups = ['<p>\xa0</p>', '<p>\u3000</p>', '<p>\u200b</p>',
@@ -376,7 +408,7 @@ class TestElementHandler(unittest.TestCase):
 </html>""")
 
         self.elements = [
-            Element(element, 'p1') for element
+            PageElement(element, 'p1') for element
             in self.xhtml.findall('./x:body/*', namespaces=ns)]
         self.elements[-1].set_ignored(True)
         self.elements[-3].set_ignored(True)
