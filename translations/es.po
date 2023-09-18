@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-07-19 17:03+0800\n"
+"POT-Creation-Date: 2023-09-10 01:05+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -88,6 +88,15 @@ msgstr "Motor de traducción"
 msgid "Source Language"
 msgstr "Lenguaje original"
 
+msgid "Cache Status"
+msgstr ""
+
+msgid "Disabled"
+msgstr ""
+
+msgid "Enabled"
+msgstr ""
+
 msgid "Output Ebook"
 msgstr ""
 
@@ -132,9 +141,6 @@ msgstr "Desconocido"
 
 msgid "The specified path does not exist."
 msgstr "La ruta especificada no existe."
-
-msgid "The specified glossary file does not exist."
-msgstr "El archivo de glosario especificado no existe."
 
 msgid "Choose a path to store cache files."
 msgstr ""
@@ -399,6 +405,9 @@ msgstr ""
 msgid "There is no content need to translate."
 msgstr "No hay necesidad de traducir el contenido."
 
+msgid "Translation failed."
+msgstr ""
+
 msgid "General"
 msgstr ""
 
@@ -604,6 +613,9 @@ msgstr "El prompt debe incluir {}."
 
 msgid "Invalid color value."
 msgstr "Valor de color no válido."
+
+msgid "The specified glossary file does not exist."
+msgstr "El archivo de glosario especificado no existe."
 
 msgid "{} is not a valid regular expression."
 msgstr "{} no es una expresión regular válida."

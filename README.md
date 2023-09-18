@@ -31,9 +31,15 @@ __English__ · [简体中文](https://github.com/bookfere/Ebook-Translator-Calib
 
 ---
 
+## Contributing
+
+* [Contributing](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/CONTRIBUTING.md)
+
+---
+
 ## License
 
-[GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html)
+[GNU General Public License v3.0](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/LICENSE)
 
 ---
 
