@@ -53,6 +53,7 @@ class TranslationSetting(QDialog):
         engine_index = self.tabs.addTab(self.layout_engine(), _('Engine'))
         content_index = self.tabs.addTab(self.layout_content(), _('Content'))
         self.tabs.setStyleSheet('QTabBar::tab {min-width:120px;}')
+        self.tabs.currentChanged.connect(lambda _: self.config.refresh())
 
         def save_setting(index):
             actions = {
@@ -463,9 +464,8 @@ class TranslationSetting(QDialog):
 
         def choose_default_engine(index):
             engine_name = engine_list.itemData(index)
-            if self.current_engine.name != engine_name:
-                self.config.update(translate_engine=engine_name)
-                self.current_engine = get_engine_class(engine_name)
+            self.config.update(translate_engine=engine_name)
+            self.current_engine = get_engine_class(engine_name)
             # refresh preferred language
             source_lang = self.current_engine.config.get('source_lang')
             self.source_lang.refresh.emit(

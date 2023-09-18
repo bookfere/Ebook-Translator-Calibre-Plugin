@@ -7,8 +7,8 @@ from .lib.utils import uid
 from .lib.config import get_config
 from .lib.cache import Paragraph, TranslationCache, get_cache
 from .lib.translation import get_engine_class, get_translator, get_translation
-from .lib.element import get_ebook_elements, get_element_handler, Extraction
-from .lib.conversion import ebook_pages
+from .lib.element import get_element_handler, Extraction
+from .lib.conversion import extract_ebook_elements
 
 from . import EbookTranslator
 from .components import (
@@ -87,7 +87,7 @@ class PreparationWorker(QObject):
             a = time.time()
             # --------------------------
             self.progress_message.emit(_('Extracting ebook content...'))
-            elements = get_ebook_elements(ebook_pages(input_path))
+            elements = extract_ebook_elements(input_path)
             self.progress.emit(30)
             b = time.time()
             print('extract: ', b - a)
@@ -520,6 +520,16 @@ class AdvancedTranslation(QDialog):
         target_lang.setFixedWidth(150)
         target_layout.addWidget(target_lang)
 
+        cache_group = QGroupBox(_('Cache Status'))
+        cache_layout = QVBoxLayout(cache_group)
+        cache_status = QLabel(
+            _('Enabled') if self.cache.is_persistence() else _('Disabled'))
+        cache_status.setAlignment(Qt.AlignCenter)
+        cache_status.setStyleSheet(
+            'border-radius:2px;color:white;background-color:%s;'
+            % ('green' if self.cache.is_persistence() else 'grey'))
+        cache_layout.addWidget(cache_status)
+
         save_group = QGroupBox(_('Output Ebook'))
         save_layout = QHBoxLayout(save_group)
         save_ebook = QPushButton(_('Output'))
@@ -535,6 +545,7 @@ class AdvancedTranslation(QDialog):
 
         ebook_title.textChanged.connect(self.ebook.set_title)
 
+        layout.addWidget(cache_group)
         layout.addWidget(engine_group)
         layout.addWidget(source_group)
         layout.addWidget(target_group)
@@ -627,8 +638,8 @@ class AdvancedTranslation(QDialog):
         def disable_translation_text():
             if self.on_working:
                 translation_text.setTextInteractionFlags(Qt.TextEditable)
-                end = getattr(QTextCursor.MoveOperation, 'End', None) or \
-                    QTextCursor.End
+                end = getattr(QTextCursor.MoveOperation, 'End', None) \
+                    or QTextCursor.End
                 translation_text.moveCursor(end)
             else:
                 translation_text.setTextInteractionFlags(default_flag)
@@ -661,14 +672,13 @@ class AdvancedTranslation(QDialog):
         layout.addWidget(control)
 
         def change_selected_item():
-            rows = self.table.get_selected_rows()
-            if not self.on_working and len(rows) > 0:
-                paragraph = self.table.paragraph(rows.pop(0))
-                self.raw_text.emit(paragraph.raw)
-                self.original_text.emit(paragraph.original)
-                self.translation_text[str].emit(paragraph.translation)
-        self.table.itemSelectionChanged.connect(change_selected_item)
+            paragraph = self.table.current_paragraph()
+            self.raw_text.emit(paragraph.raw)
+            self.original_text.emit(paragraph.original)
+            self.translation_text[str].emit(paragraph.translation)
+        self.table.itemPressed.connect(change_selected_item)
         self.table.setCurrentItem(self.table.item(0, 0))
+        change_selected_item()
 
         def translation_callback(paragraph):
             row = paragraph.row
