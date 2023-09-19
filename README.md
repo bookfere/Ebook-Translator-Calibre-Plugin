@@ -37,6 +37,28 @@ __English__ · [简体中文](https://github.com/bookfere/Ebook-Translator-Calib
 
 ---
 
+## Sponsor
+
+|Date| Name|Amount|
+|---|---|---|
+|2023-09-19|Y**** Wang|$5|
+|2023-08-10|E*s|¥10|
+|2023-08-06|Rong**** Chen|$10|
+|2023-08-05|5*K|¥5.2|
+|2023-07-31|*之|¥10|
+|2023-07-17|Phi**** Müller|$5.12|
+|2023-07-01|(*)|¥50|
+|2023-06-20|Ken**** Golden|$10|
+|2023-06-15|*名|¥50|
+|2023-06-07|*机|¥20|
+|2023-06-01|*胡|¥10|
+|2023-05-12|*上|¥5|
+|2023-05-12|T*r|¥20|
+
+As an open source project, this plug-in relies on the goodwill of individuals like you who understand its value. Your donations enable us to dedicate more time and resources to improving the project, fixing bugs, and adding new features.
+
+---
+
 ## License
 
 [GNU General Public License v3.0](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/LICENSE)
