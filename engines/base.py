@@ -1,6 +1,7 @@
 import traceback
 
 from mechanize import Browser, Request
+from calibre import get_proxies
 from calibre.utils.localization import lang_as_iso639_1
 
 
@@ -152,12 +153,24 @@ class Base:
             return self.api_keys.pop(0)
         return None
 
-    def get_result(self, url, data=None, headers={}, method='GET',
-                   stream=False, silence=False, callback=None):
+    def get_browser(self):
         br = Browser()
         br.set_handle_robots(False)
-        self.proxy_uri and br.set_proxies(
-            {'http': self.proxy_uri, 'https': self.proxy_uri})
+
+        proxies = {}
+        if self.proxy_uri is not None:
+            proxies.update(http=self.proxy_uri, https=self.proxy_uri)
+        else:
+            http = get_proxies(False).get('http')
+            http and proxies.update(http=http, https=http)
+            https = get_proxies(False).get('https')
+            https and proxies.update(https=https)
+        proxies and br.set_proxies(proxies)
+
+        return br
+
+    def get_result(self, url, data=None, headers={}, method='GET',
+                   stream=False, silence=False, callback=None):
         # Compatible with mechanize 0.3.0 on Calibre 3.21.
         try:
             request = Request(
@@ -168,6 +181,7 @@ class Base:
                 url, data, headers=headers, timeout=self.request_timeout)
         try:
             result = None
+            br = self.get_browser()
             br.open(request)
             response = br.response()
             result = response if stream else \
