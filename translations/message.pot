@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-09-10 01:05+0800\n"
+"POT-Creation-Date: 2023-09-20 12:24+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,11 +43,11 @@ msgstr ""
 msgid "Start"
 msgstr ""
 
-#: advanced.py:198 batch.py:54 setting.py:175
+#: advanced.py:198 batch.py:54 setting.py:176
 msgid "Input Format"
 msgstr ""
 
-#: advanced.py:209 advanced.py:517 batch.py:55 setting.py:333
+#: advanced.py:209 advanced.py:517 batch.py:55 setting.py:334
 msgid "Target Language"
 msgstr ""
 
@@ -87,7 +87,7 @@ msgstr ""
 msgid "Translate Selected"
 msgstr ""
 
-#: advanced.py:446 cache.py:92 components/engine.py:200 components/table.py:80
+#: advanced.py:446 cache.py:92 components/engine.py:200 components/table.py:81
 msgid "Delete"
 msgstr ""
 
@@ -99,11 +99,11 @@ msgstr ""
 msgid "Stopping..."
 msgstr ""
 
-#: advanced.py:505 setting.py:302
+#: advanced.py:505 setting.py:303
 msgid "Translation Engine"
 msgstr ""
 
-#: advanced.py:511 batch.py:55 setting.py:332
+#: advanced.py:511 batch.py:55 setting.py:333
 msgid "Source Language"
 msgstr ""
 
@@ -131,7 +131,7 @@ msgstr ""
 msgid "Title"
 msgstr ""
 
-#: advanced.py:585 components/table.py:69
+#: advanced.py:585 components/table.py:70
 msgid "Translated"
 msgstr ""
 
@@ -139,35 +139,35 @@ msgstr ""
 msgid "No translation yet"
 msgstr ""
 
-#: advanced.py:665 components/engine.py:206 setting.py:87
+#: advanced.py:665 components/engine.py:206 setting.py:88
 msgid "Save"
 msgstr ""
 
-#: advanced.py:728
+#: advanced.py:722
 msgid "Your changes have been saved."
 msgstr ""
 
-#: advanced.py:741
+#: advanced.py:735
 msgid "Translation log"
 msgstr ""
 
-#: advanced.py:752
+#: advanced.py:746
 msgid "Error log"
 msgstr ""
 
-#: advanced.py:772
+#: advanced.py:766
 msgid "Are you sure you want to translate all {:n} paragraphs?"
 msgstr ""
 
-#: advanced.py:798
+#: advanced.py:792
 msgid "Are you sure you want to stop the translation progress?"
 msgstr ""
 
-#: batch.py:54 setting.py:176
+#: batch.py:54 setting.py:177
 msgid "Output Format"
 msgstr ""
 
-#: batch.py:117 components/engine.py:137 components/table.py:78
+#: batch.py:117 components/engine.py:137 components/table.py:79
 msgid "Translate"
 msgstr ""
 
@@ -183,7 +183,7 @@ msgstr ""
 msgid "Choose a path to store cache files."
 msgstr ""
 
-#: cache.py:73 components/mode.py:41 components/mode.py:51 setting.py:147
+#: cache.py:73 components/mode.py:41 components/mode.py:51 setting.py:148
 #: setting.py:605 setting.py:639
 msgid "Choose"
 msgstr ""
@@ -233,11 +233,11 @@ msgstr ""
 msgid "Total: {}"
 msgstr ""
 
-#: cache.py:195 components/table.py:35 setting.py:53
+#: cache.py:195 components/table.py:36 setting.py:53
 msgid "Engine"
 msgstr ""
 
-#: cache.py:195 components/table.py:35 setting.py:760
+#: cache.py:195 components/table.py:36 setting.py:760
 msgid "Language"
 msgstr ""
 
@@ -293,11 +293,11 @@ msgstr ""
 msgid "The engine name is already in use."
 msgstr ""
 
-#: components/engine.py:280 setting.py:66
+#: components/engine.py:285 setting.py:67
 msgid "The setting has been saved."
 msgstr ""
 
-#: components/format.py:27 setting.py:185
+#: components/format.py:27 setting.py:186
 msgid "Ebook Specific"
 msgstr ""
 
@@ -309,15 +309,15 @@ msgstr ""
 msgid "Feedback"
 msgstr ""
 
-#: components/lang.py:34 engines/base.py:64 setting.py:854
+#: components/lang.py:34 engines/base.py:65 setting.py:854
 msgid "Auto detect"
 msgstr ""
 
-#: components/mode.py:28 setting.py:114
+#: components/mode.py:28 setting.py:115
 msgid "Choose a translation mode for clicking the icon button."
 msgstr ""
 
-#: components/mode.py:33 setting.py:104 ui.py:47 ui.py:75
+#: components/mode.py:33 setting.py:105 ui.py:47 ui.py:75
 msgid "Advanced Mode"
 msgstr ""
 
@@ -327,7 +327,7 @@ msgid ""
 "for more control and customization."
 msgstr ""
 
-#: components/mode.py:43 setting.py:105 ui.py:48 ui.py:102
+#: components/mode.py:43 setting.py:106 ui.py:48 ui.py:102
 msgid "Batch Mode"
 msgstr ""
 
@@ -337,27 +337,27 @@ msgid ""
 "the translation process and saving time."
 msgstr ""
 
-#: components/table.py:35
+#: components/table.py:36
 msgid "Original"
 msgstr ""
 
-#: components/table.py:35
+#: components/table.py:36
 msgid "Status"
 msgstr ""
 
-#: components/table.py:65
+#: components/table.py:66
 msgid "Untranslated"
 msgstr ""
 
-#: components/table.py:84
+#: components/table.py:85
 msgid "Select the whole chapter"
 msgstr ""
 
-#: components/table.py:90
+#: components/table.py:91
 msgid "Select similar paragraphs: {}=\"{}\""
 msgstr ""
 
-#: components/table.py:135
+#: components/table.py:136
 msgid "Retain at least one row."
 msgstr ""
 
@@ -365,15 +365,15 @@ msgstr ""
 msgid "Baidu"
 msgstr ""
 
-#: engines/base.py:17 setting.py:313
+#: engines/base.py:18 setting.py:314
 msgid "API Keys"
 msgstr ""
 
-#: engines/base.py:81
+#: engines/base.py:82
 msgid "A correct key format \"{}\" is required."
 msgstr ""
 
-#: engines/base.py:181 engines/chatgpt.py:101 tests/test_engine.py:63
+#: engines/base.py:195 engines/chatgpt.py:101 tests/test_engine.py:63
 msgid "Can not parse returned response. Raw data: {}"
 msgstr ""
 
@@ -449,31 +449,31 @@ msgstr ""
 msgid "Youdao"
 msgstr ""
 
-#: lib/conversion.py:103
+#: lib/conversion.py:107
 msgid "Start to convert ebook format:"
 msgstr ""
 
-#: lib/conversion.py:139
+#: lib/conversion.py:143
 msgid "[{} > {}] Translating \"{}\""
 msgstr ""
 
-#: lib/conversion.py:148
+#: lib/conversion.py:152
 msgid "Translation job failed"
 msgstr ""
 
-#: lib/conversion.py:176
+#: lib/conversion.py:180
 msgid "completed"
 msgstr ""
 
-#: lib/conversion.py:184
+#: lib/conversion.py:188
 msgid "Ebook Translation Log"
 msgstr ""
 
-#: lib/conversion.py:185
+#: lib/conversion.py:189
 msgid "Translation Completed"
 msgstr ""
 
-#: lib/conversion.py:186
+#: lib/conversion.py:190
 msgid "The translation of \"{}\" was completed. Do you want to open the book?"
 msgstr ""
 
@@ -541,143 +541,143 @@ msgstr ""
 msgid "Content"
 msgstr ""
 
-#: setting.py:102
+#: setting.py:103
 msgid "Preferred Mode"
 msgstr ""
 
-#: setting.py:136
+#: setting.py:137
 msgid "Output Path"
 msgstr ""
 
-#: setting.py:138
+#: setting.py:139
 msgid "Library"
 msgstr ""
 
-#: setting.py:139
+#: setting.py:140
 msgid "Path"
 msgstr ""
 
-#: setting.py:144
+#: setting.py:145
 msgid "Choose a path to store translated book(s)"
 msgstr ""
 
-#: setting.py:171
+#: setting.py:172
 msgid "Preferred Format"
 msgstr ""
 
-#: setting.py:195
+#: setting.py:196
 msgid "(Beta)"
 msgstr ""
 
-#: setting.py:195
+#: setting.py:196
 msgid "Merge to Translate"
 msgstr ""
 
-#: setting.py:197 setting.py:218 setting.py:261 setting.py:636
+#: setting.py:198 setting.py:219 setting.py:262 setting.py:636
 msgid "Enable"
 msgstr ""
 
-#: setting.py:203
+#: setting.py:204
 msgid "The number of characters to translate at once."
 msgstr ""
 
-#: setting.py:215
+#: setting.py:216
 msgid "HTTP Proxy"
 msgstr ""
 
-#: setting.py:229
+#: setting.py:230
 msgid "Host"
 msgstr ""
 
-#: setting.py:232
+#: setting.py:233
 msgid "Port"
 msgstr ""
 
-#: setting.py:243 setting.py:305
+#: setting.py:244 setting.py:306
 msgid "Test"
 msgstr ""
 
-#: setting.py:259 ui.py:50
+#: setting.py:260 ui.py:50
 msgid "Cache"
 msgstr ""
 
-#: setting.py:262
+#: setting.py:263
 msgid "Manage"
 msgstr ""
 
-#: setting.py:279
+#: setting.py:280
 msgid "Job Log"
 msgstr ""
 
-#: setting.py:280
+#: setting.py:281
 msgid "Show translation"
 msgstr ""
 
-#: setting.py:306
+#: setting.py:307
 msgid "Custom"
 msgstr ""
 
-#: setting.py:317
+#: setting.py:318
 msgid "Tip:"
 msgstr ""
 
-#: setting.py:318
+#: setting.py:319
 msgid "API keys will auto-switch if the previous one is unavailable."
 msgstr ""
 
-#: setting.py:328
+#: setting.py:329
 msgid "Preferred Language"
 msgstr ""
 
-#: setting.py:339
+#: setting.py:340
 msgid "HTTP Request"
 msgstr ""
 
-#: setting.py:353
+#: setting.py:354
 msgid "Concurrency limit"
 msgstr ""
 
-#: setting.py:354
+#: setting.py:355
 msgid "Interval (seconds)"
 msgstr ""
 
-#: setting.py:355
+#: setting.py:356
 msgid "Attempt times"
 msgstr ""
 
-#: setting.py:356
+#: setting.py:357
 msgid "Timeout (seconds)"
 msgstr ""
 
-#: setting.py:358
+#: setting.py:359
 msgid "Error count to stop translation"
 msgstr ""
 
-#: setting.py:368
+#: setting.py:369
 msgid "Tune ChatGPT"
 msgstr ""
 
-#: setting.py:376
+#: setting.py:377
 msgid "Prompt"
 msgstr ""
 
-#: setting.py:378
+#: setting.py:379
 msgid "Endpoint"
 msgstr ""
 
-#: setting.py:381
+#: setting.py:382
 msgid "Model"
 msgstr ""
 
-#: setting.py:404
+#: setting.py:405
 msgid "Sampling"
 msgstr ""
 
-#: setting.py:409
+#: setting.py:410
 msgid "Enable streaming text like in ChatGPT"
 msgstr ""
 
-#: setting.py:410
+#: setting.py:411
 msgid "Stream"
 msgstr ""
 
