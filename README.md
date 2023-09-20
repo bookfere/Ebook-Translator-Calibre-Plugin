@@ -12,7 +12,7 @@ __English__ · [简体中文](https://github.com/bookfere/Ebook-Translator-Calib
 
 * Support both "Advanced Mode" and "Batch Mode" for different usage situations.
 * Support languages supported by the selected translation engine (e.g. Google Translate supports 134 languages)
-* Support multiple translation engines, including Google Translate, ChatGPT, and DeepL
+* Support multiple translation engines, including Google Translate, ChatGPT, DeepL, etc.
 * Support custom translation engines (you can configure to parse response in JSON or XML format)
 * Support all ebook formats supported by Calibre (48 input formats, 20 output formats)
 * Support to translate more than one ebooks. The translation process of each book is carried out simultaneously without affecting one another
@@ -39,6 +39,8 @@ __English__ · [简体中文](https://github.com/bookfere/Ebook-Translator-Calib
 
 ## Sponsor
 
+As an open source project, this plug-in relies on the goodwill of individuals like you who understand its value. Your donations enable us to dedicate more time and resources to improving the project, fixing bugs, and adding new features.
+
 |Date| Name|Amount|
 |---|---|---|
 |2023-09-19|Y**** Wang|$5|
@@ -53,9 +55,9 @@ __English__ · [简体中文](https://github.com/bookfere/Ebook-Translator-Calib
 |2023-06-07|*机|¥20|
 |2023-06-01|*胡|¥10|
 |2023-05-12|*上|¥5|
-|2023-05-12|T*r|¥20|
+|2023-04-09|T*r|¥20|
 
-As an open source project, this plug-in relies on the goodwill of individuals like you who understand its value. Your donations enable us to dedicate more time and resources to improving the project, fixing bugs, and adding new features.
+\* We mask some characters in sponsor name due to privacy concern.
 
 ---
 

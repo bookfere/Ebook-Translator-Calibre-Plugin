@@ -222,7 +222,7 @@ class Translation:
         self.log(_('Start to translate ebook content'))
         self.log(sep())
         self.log(_('Total items: {}').format(self.total))
-        self.log(_('Character count: {}'.format(char_count)))
+        self.log(_('Character count: {}').format(char_count))
         if self.total < 1:
             raise Exception(_('There is no content need to translate.'))
         self.progress_bar.load(self.total)
