@@ -1,5 +1,7 @@
 import json
 
+from .. import EbookTranslator
+
 from .base import Base
 from .languages import google
 
@@ -66,7 +68,8 @@ class ChatgptTranslate(Base):
     def get_headers(self):
         return {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer %s' % self.api_key
+            'Authorization': 'Bearer %s' % self.api_key,
+            'User-Agent': 'Ebook-Translator/%s' % EbookTranslator.__version__
         }
 
     def translate(self, text):
