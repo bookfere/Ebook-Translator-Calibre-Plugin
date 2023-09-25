@@ -227,7 +227,8 @@ class TranslationSetting(QDialog):
                r'(([a-zA-Z\d]|-)*[a-zA-Z\d]\.){1,}[a-zA-Z\d]+$'
         self.host_validator = QRegularExpressionValidator(
             QRegularExpression(rule))
-        self.proxy_host.setPlaceholderText(_('Host'))
+        self.proxy_host.setPlaceholderText(
+            _('Host') + ' (127.0.0.1, user:pass@127.0.0.1)')
         proxy_layout.addWidget(self.proxy_host, 4)
         self.proxy_port = QLineEdit()
         self.proxy_port.setPlaceholderText(_('Port'))

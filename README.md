@@ -43,6 +43,7 @@ As an open source project, this plug-in relies on the goodwill of individuals li
 
 |Date| Name|Amount|
 |---|---|---|
+|2023-09-24|We**** Wei|$10|
 |2023-09-19|Y**** Wang|$5|
 |2023-08-10|E*s|¥10|
 |2023-08-06|Rong**** Chen|$10|
