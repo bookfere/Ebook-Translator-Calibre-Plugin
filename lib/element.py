@@ -256,19 +256,16 @@ class Extraction:
 
 
 class ElementHandler:
-    def __init__(self, placeholder):
+    def __init__(self, placeholder, merge_length=0):
         self.placeholder = placeholder
+        self.merge_length = merge_length
 
-        self.merge_length = 0
         self.position = None
         self.color = None
         self.lang = None
 
         self.elements = {}
         self.original = []
-
-    def set_merge_length(self, length):
-        self.merge_length = length
 
     def get_merge_length(self):
         return self.merge_length
@@ -291,18 +288,36 @@ class ElementHandler:
                 element.delete()
 
     def prepare_original(self, elements):
-        if self.merge_length == 0:
-            for eid, element in enumerate(elements):
-                self.elements[eid] = element
-                raw = element.get_raw()
-                content = element.get_content(self.placeholder)
-                md5 = uid('%s%s' % (eid, content))
-                attrs = element.get_attributes()
-                self.original.append(
-                    (eid, md5, raw, content, element.ignored, attrs,
-                     element.page_id))
-            return self.original
+        for eid, element in enumerate(elements):
+            self.elements[eid] = element
+            raw = element.get_raw()
+            content = element.get_content(self.placeholder)
+            md5 = uid('%s%s' % (eid, content))
+            attrs = element.get_attributes()
+            self.original.append(
+                (eid, md5, raw, content, element.ignored, attrs,
+                    element.page_id))
+        return self.original
 
+    def add_translations(self, paragraphs):
+        for paragraph in paragraphs:
+            element = self.elements.get(paragraph.id)
+            if not element:
+                continue
+            translation = paragraph.translation
+            if translation:
+                element.add_translation(
+                    translation, self.placeholder, self.position,
+                    self.lang, self.color)
+                self.elements.pop(paragraph.id)
+        for eid, element in self.elements.copy().items():
+            if element.ignored:
+                self.elements.pop(eid)
+        self.remove_unused_elements()
+
+
+class ElementHandlerMerge(ElementHandler):
+    def prepare_original(self, elements):
         raw = ''
         content = ''
         count = 0
@@ -313,7 +328,6 @@ class ElementHandler:
             placeholder = ' %s ' % self.placeholder[0].format(eid)
             code = element.get_raw()
             text = element.get_content(self.placeholder) + placeholder
-            attrs = element.get_attributes()
             if len(content + text) < self.merge_length:
                 raw += code
                 content += text
@@ -329,23 +343,6 @@ class ElementHandler:
         return self.original
 
     def add_translations(self, paragraphs):
-        if self.merge_length == 0:
-            for paragraph in paragraphs:
-                element = self.elements.get(paragraph.id)
-                if not element:
-                    continue
-                translation = paragraph.translation
-                if translation:
-                    element.add_translation(
-                        translation, self.placeholder, self.position,
-                        self.lang, self.color)
-                    self.elements.pop(paragraph.id)
-            for eid, element in self.elements.copy().items():
-                if element.ignored:
-                    self.elements.pop(eid)
-            self.remove_unused_elements()
-            return
-
         content = ''.join(
             paragraph.translation for paragraph in paragraphs
             if paragraph.translation)
@@ -390,7 +387,9 @@ def get_element_handler(placeholder):
     config = get_config()
     handler = ElementHandler(placeholder)
     if config.get('merge_enabled'):
-        handler.set_merge_length(config.get('merge_length'))
+        merge_length = config.get('merge_length')
+        if merge_length > 0:
+            handler = ElementHandlerMerge(placeholder, merge_length)
     handler.set_translation_position(
         config.get('translation_position'))
     handler.set_translation_color(config.get('translation_color'))

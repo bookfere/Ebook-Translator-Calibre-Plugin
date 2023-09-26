@@ -9,7 +9,7 @@ from ..lib.utils import ns
 from ..lib.cache import Paragraph
 from ..lib.element import (
     get_string, get_name, TocElement, PageElement, Extraction, ElementHandler,
-    get_toc_elements)
+    ElementHandlerMerge, get_toc_elements)
 from ..engines import DeeplFreeTranslate
 from ..engines.base import Base
 
@@ -433,15 +433,6 @@ class TestElementHandler(unittest.TestCase):
             (4, 'm5', '<p></p>', '', True, None, 'p1')],
             self.handler.prepare_original(self.elements))
 
-    @patch('calibre_plugins.ebook_translator.lib.element.uid')
-    def test_prepare_original_merged(self, mock_uid):
-        mock_uid.return_value = 'm1'
-        self.handler.merge_length = 1000
-        self.assertEqual([(
-            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c" class="c">c</p>',
-            'a {{id_0}} b {{id_1}} c {{id_3}} ', False)],
-            self.handler.prepare_original(self.elements))
-
     def test_add_translations(self):
         self.handler.prepare_original(self.elements)
         translations = [
@@ -490,8 +481,38 @@ class TestElementHandler(unittest.TestCase):
         self.assertEqual('c', elements[3].get('id'))
         self.assertEqual('c', elements[3].get('class'))
 
+
+class TestElementHandlerMerge(unittest.TestCase):
+    def setUp(self):
+        self.xhtml = etree.XML(b"""<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head><title>Test Document</title></head>
+    <body>
+        <p id="a">a</p>
+        <p id="b">b</p>
+        <p><img src="abc.jpg" /></p>
+        <p id="c" class="c">c</p>
+        <p></p>
+    </body>
+</html>""")
+
+        self.elements = [
+            PageElement(element, 'p1') for element
+            in self.xhtml.findall('./x:body/*', namespaces=ns)]
+        self.elements[-1].set_ignored(True)
+        self.elements[-3].set_ignored(True)
+        self.handler = ElementHandlerMerge(Base.placeholder, 1000)
+
+    @patch('calibre_plugins.ebook_translator.lib.element.uid')
+    def test_prepare_original_merged(self, mock_uid):
+        mock_uid.return_value = 'm1'
+        self.assertEqual([(
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c" class="c">c</p>',
+            'a {{id_0}} b {{id_1}} c {{id_3}} ', False)],
+            self.handler.prepare_original(self.elements))
+
     def test_add_translations_merged(self):
-        self.handler.merge_length = 1000
         self.handler.prepare_original(self.elements)
         self.handler.add_translations([Paragraph(
             0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
@@ -510,7 +531,6 @@ class TestElementHandler(unittest.TestCase):
         self.assertEqual('C', elements[6].text)
 
     def test_add_translations_merged_missing_id(self):
-        self.handler.merge_length = 1000
         self.handler.prepare_original(self.elements)
         self.handler.add_translations([Paragraph(
             0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
@@ -529,7 +549,6 @@ class TestElementHandler(unittest.TestCase):
     def test_add_translations_merged_translation_only(self):
         self.handler.position = 'only'
 
-        self.handler.merge_length = 1000
         self.handler.prepare_original(self.elements)
         self.handler.add_translations([Paragraph(
             0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>'
@@ -547,7 +566,6 @@ class TestElementHandler(unittest.TestCase):
     def test_add_translations_merged_translation_only_missing_id(self):
         self.handler.position = 'only'
 
-        self.handler.merge_length = 1000
         self.handler.prepare_original(self.elements)
         self.handler.add_translations([Paragraph(
             0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>'
