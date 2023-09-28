@@ -71,5 +71,6 @@
 
 * GitHub：[https://github.com/bookfere/Ebook-Translator-Calibre-Plugin](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin)
 * MobileRead: [https://www.mobileread.com/forums/showthread.php?t=353052](https://www.mobileread.com/forums/showthread.php?t=353052)
-* 发布页面：[https://bookfere.com/post/1057.html](https://bookfere.com/post/1057.html)
+* 发布页面: [https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/releases](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/releases)
+* 相关文章：[https://bookfere.com/post/1057.html](https://bookfere.com/post/1057.html)
 * 赞赏页面：[https://bookfere.com/donate](https://bookfere.com/donate)

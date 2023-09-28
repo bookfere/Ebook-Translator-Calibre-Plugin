@@ -1,4 +1,5 @@
-name: Ebook Translator Unit Testing
+name: Test Ebook Translator
+run-name: 'Test Ebook Translator: ${{ github.ref_name }}'
 
 on:
   push:

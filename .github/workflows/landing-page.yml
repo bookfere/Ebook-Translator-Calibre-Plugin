@@ -1,0 +1,60 @@
+name: Publish Rolling Release
+run-name: 'Publish Rolling Release: ${{ github.ref_name }}'
+
+on:
+  push:
+    branches: ['master']
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
+
+env:
+  branch: master
+  directory: page
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.branch }}
+      - name: Generate rolling release
+        run: |
+          git fetch --prune --unshallow --tags
+          stable_version=$(git describe --tags $(git rev-list --tags --max-count=1))
+          file_name=ebook-translator_$(git log -n1 --pretty='format:%cd' --date=format:'%Y%m%d%H%M%S').zip
+          file_path=./${{ env.directory }}/download
+          mkdir -p $file_path
+          git archive --format=zip --output=$file_path/$file_name ${{ env.branch }}
+          pattern="\1\nrolling_url: $file_name\nstable_version: $stable_version"
+          sed -i "s/\(layout:.*\)/$pattern/" ./${{ env.directory }}/index.md
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./${{ env.directory }}/
+          destination: ./${{ env.directory }}/_site
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: ./${{ env.directory }}/_site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
