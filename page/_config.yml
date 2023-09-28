@@ -1,0 +1,12 @@
+title: Ebook Translator
+email: bookfere@gmail.com
+description: >-
+  A Calibre plugin to translate ebook into a specified language.
+twitter_username: bookfere
+github_username: bookfere
+
+theme: jekyll-theme-cayman
+
+show_downloads: true
+github:
+  is_project_page: true
