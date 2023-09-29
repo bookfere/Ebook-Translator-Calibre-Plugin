@@ -54,8 +54,9 @@ class AboutDialog(QDialog):
             'ul ul {list-style:circle;}ul ul ul{list-style:square;}'
             'ul,ol{-qt-list-indent:0;margin-left:10px;}li{margin:6px 0;}'
             'ol{margin-left:15px;}pre{background-color:#eee;font-size:10px}')
-        html = re.sub(r'<img.*?>', '', markdown(self.get_readme()))
-        document.setHtml(html)
+        markup = re.sub(r'^!\[.*', '', self.get_readme(), flags=re.M)
+        markup = re.sub(r'\|.*\\\*.*?\n\n', '', markup, flags=re.S)
+        document.setHtml(markdown(markup))
         description.setDocument(document)
         description.setOpenExternalLinks(True)
 

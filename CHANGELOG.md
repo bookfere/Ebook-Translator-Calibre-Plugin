@@ -1,3 +1,17 @@
+## v2.2.0
+
+Fixed bugs and added features:
+
+1. feat: Added the ability to translate the TOC in the NCX file. #96, #105
+2. feat: Added feature to preserve all attributes from the original element. #104
+3. fix: Resolved the conflict on saving the engine settings.
+4. fix: Enhanced the feature of processing headings as other priority elements. #128
+5. fix: Fixed the bug preventing proxy access from the OS. #129
+6. fix: Added a user agent to the request header of ChatGPT. #133
+7. Other bug fixing and feature enhancement. cb764a4...8b39d86
+
+---
+
 ## v2.1.4
 
 Fixed bugs and added feature:
