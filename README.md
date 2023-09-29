@@ -1,10 +1,14 @@
-__English__ · [简体中文](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.zh-CN.md)
+__English__ · [简体中文](README.zh-CN.md)
 
 ---
 
-# Ebook Translator (A Calibre plugin)
+# Ebook Translator (a Calibre plugin)
 
-![Ebook Translator Calibre Plugin](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/raw/master/images/logo.png)
+![Ebook Translator Calibre Plugin](images/logo.png)
+
+A Calibre plugin to translate ebook into a specified language.
+
+__Plugin Homepage__: [https://translator.bookfere.com](https://translator.bookfere.com)
 
 ---
 
@@ -19,7 +23,7 @@ __English__ · [简体中文](https://github.com/bookfere/Ebook-Translator-Calib
 * Support caching translated content, with no need to re-translate after request failure or network interruption
 * Provide a large number of customization settings, such as saving translated ebooks to Calibre library or designated location
 
-![Translation illustration](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/raw/master/images/sample-en.png)
+![Translation illustration](images/sample-en.png)
 
 ---
 
@@ -33,7 +37,7 @@ __English__ · [简体中文](https://github.com/bookfere/Ebook-Translator-Calib
 
 ## Contributing
 
-* [Contributing](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/CONTRIBUTING.md)
+* [Contributing](CONTRIBUTING.md)
 
 ---
 
@@ -64,7 +68,7 @@ As an open source project, this plug-in relies on the goodwill of individuals li
 
 ## License
 
-[GNU General Public License v3.0](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/LICENSE)
+[GNU General Public License v3.0](LICENSE)
 
 ---
 

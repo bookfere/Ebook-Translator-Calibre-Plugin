@@ -1,4 +1,4 @@
-[English](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/README.md) · __简体中文__
+[English](README.md) · __简体中文__
 
 ---
 
@@ -8,7 +8,7 @@
 
 一个可以将电子书翻译成指定语言（原文译文对照）的 Calibre 插件。
 
-![Translation illustration](images/sample-sc.png)
+__插件主页__：[https://translator.bookfere.com](https://translator.bookfere.com)
 
 ---
 
@@ -22,6 +22,8 @@
 * 支持缓存翻译内容，在请求失败或网络中断后无需重新翻译
 * 提供大量自定义设置，如将翻译的电子书存到 Calibre 书库或指定位置
 
+![Translation illustration](images/sample-sc.png)
+
 ---
 
 ## 用户手册
@@ -34,7 +36,7 @@
 
 ## 贡献指南
 
-* [贡献指南](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/CONTRIBUTING.md)
+* [贡献指南](CONTRIBUTING.md)
 
 ---
 
@@ -65,7 +67,7 @@
 
 ## 许可证
 
-[GNU General Public License v3.0](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/blob/master/LICENSE)
+[GNU General Public License v3.0](LICENSE)
 
 ---
 
