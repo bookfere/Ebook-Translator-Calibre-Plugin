@@ -47,7 +47,8 @@ def convert_book(ebook_title, input_path, output_path, source_lang,
     translator.set_source_lang(source_lang)
     translator.set_target_lang(target_lang)
 
-    element_handler = get_element_handler(translator.placeholder)
+    element_handler = get_element_handler(
+        translator.placeholder, translator.separator)
     element_handler.set_translation_lang(
         translator.get_iso639_target_code(target_lang))
 

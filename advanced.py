@@ -68,7 +68,8 @@ class PreparationWorker(QObject):
     @pyqtSlot()
     def prepare_ebook_data(self):
         input_path = self.ebook.get_input_path()
-        element_handler = get_element_handler(self.engine_class.placeholder)
+        element_handler = get_element_handler(
+            self.engine_class.placeholder, self.engine_class.separator)
         merge_length = str(element_handler.get_merge_length())
         cache_id = uid(
             input_path + self.engine_class.name + self.ebook.target_lang

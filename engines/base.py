@@ -18,6 +18,7 @@ class Base:
     api_key_hint = _('API Keys')
     api_key_pattern = r'^[^\s]+$'
     api_key_errors = ['401']
+    separator = '\n\n'
     placeholder = ('{{{{id_{}}}}}', r'({{\s*)+id\s*_\s*{}\s*(\s*}})+')
 
     concurrency_limit = 0
