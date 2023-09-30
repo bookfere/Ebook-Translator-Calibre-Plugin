@@ -37,6 +37,7 @@ class GoogleFreeTranslate(Base):
             'sl': self._get_source_code(),
             'tl': self._get_target_code(),
             'dt': 't',
+            'dj': 1,
             'q': text,
         }
 
@@ -44,7 +45,8 @@ class GoogleFreeTranslate(Base):
         return self.get_result(self.endpoint, data, headers)
 
     def parse(self, data):
-        return ''.join(i[0] for i in json.loads(data)[0])
+        # return ''.join(i[0] for i in json.loads(data)[0])
+        return ''.join(i['trans'] for i in json.loads(data)['sentences'])
 
 
 class GoogleTranslate:

@@ -256,8 +256,9 @@ class Extraction:
 
 
 class ElementHandler:
-    def __init__(self, placeholder, merge_length=0):
+    def __init__(self, placeholder, separator, merge_length=0):
         self.placeholder = placeholder
+        self.separator = separator
         self.merge_length = merge_length
 
         self.position = None
@@ -325,9 +326,10 @@ class ElementHandlerMerge(ElementHandler):
             if element.ignored:
                 continue
             self.elements[eid] = element
-            placeholder = ' %s ' % self.placeholder[0].format(eid)
+            separator = self.separator \
+                or ' %s ' % self.placeholder[0].format(eid)
             code = element.get_raw()
-            text = element.get_content(self.placeholder) + placeholder
+            text = element.get_content(self.placeholder) + separator
             if len(content + text) < self.merge_length:
                 raw += code
                 content += text
@@ -343,12 +345,23 @@ class ElementHandlerMerge(ElementHandler):
         return self.original
 
     def add_translations(self, paragraphs):
-        content = ''.join(
-            paragraph.translation for paragraph in paragraphs
-            if paragraph.translation)
+        content = ''
+        for paragraph in paragraphs:
+            tail = paragraph.original[-2:]
+            tail = tail if tail == self.separator else ''
+            if paragraph.translation:
+                content += paragraph.translation + tail
+        # Check if the translated content contains at least one separator;
+        # if none is found, use the placeholder to separate paragraphs.
+        if self.separator and self.separator in content:
+            pattern = '%s+' % self.separator[0]
+            content = re.sub(pattern, self.separator, content)
+        else:
+            self.separator = None
 
         for eid, element in self.elements.copy().items():
-            matches = re.search(self.placeholder[1].format(eid), content)
+            separator = self.separator or self.placeholder[1].format(eid)
+            matches = re.search(separator, content)
             if not matches:
                 continue
             pattern = matches.group(0)
@@ -383,13 +396,12 @@ def get_page_elements(pages):
     return extraction.get_elements()
 
 
-def get_element_handler(placeholder):
+def get_element_handler(placeholder, separator):
     config = get_config()
-    handler = ElementHandler(placeholder)
+    handler = ElementHandler(placeholder, separator)
     if config.get('merge_enabled'):
-        merge_length = config.get('merge_length')
-        if merge_length > 0:
-            handler = ElementHandlerMerge(placeholder, merge_length)
+        handler = ElementHandlerMerge(
+            placeholder, separator, config.get('merge_length'))
     handler.set_translation_position(
         config.get('translation_position'))
     handler.set_translation_color(config.get('translation_color'))

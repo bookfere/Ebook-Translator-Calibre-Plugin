@@ -274,14 +274,16 @@ class TestExtraction(unittest.TestCase):
                  '<code xmlns="http://www.w3.org/1999/xhtml">abc</code>',
                  '<table xmlns="http://www.w3.org/1999/xhtml">abc</table>',
                  '<p xmlns="http://www.w3.org/1999/xhtml" class="a">abc</p>']
-        with self.subTest():
-            for item in items:
+
+        for item in items:
+            with self.subTest(item=item):
                 self.assertTrue(self.extraction.need_ignore(etree.XML(item)))
 
         items = ['<p xmlns="http://www.w3.org/1999/xhtml">abc</p>',
                  '<p xmlns="http://www.w3.org/1999/xhtml" id="a">abc</p>']
-        with self.subTest():
-            for item in items:
+
+        for item in items:
+            with self.subTest(item=item):
                 self.assertFalse(self.extraction.need_ignore(etree.XML(item)))
 
     def test_extract_elements(self):
@@ -418,7 +420,7 @@ class TestElementHandler(unittest.TestCase):
             in self.xhtml.findall('./x:body/*', namespaces=ns)]
         self.elements[-1].set_ignored(True)
         self.elements[-3].set_ignored(True)
-        self.handler = ElementHandler(Base.placeholder)
+        self.handler = ElementHandler(Base.placeholder, Base.separator)
 
     @patch('calibre_plugins.ebook_translator.lib.element.uid')
     def test_prepare_original(self, mock_uid):
@@ -502,17 +504,37 @@ class TestElementHandlerMerge(unittest.TestCase):
             in self.xhtml.findall('./x:body/*', namespaces=ns)]
         self.elements[-1].set_ignored(True)
         self.elements[-3].set_ignored(True)
-        self.handler = ElementHandlerMerge(Base.placeholder, 1000)
+        self.handler = ElementHandlerMerge(Base.placeholder, None, 1000)
 
     @patch('calibre_plugins.ebook_translator.lib.element.uid')
-    def test_prepare_original_merged(self, mock_uid):
+    def test_prepare_original_merge_placeholder(self, mock_uid):
         mock_uid.return_value = 'm1'
         self.assertEqual([(
             0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c" class="c">c</p>',
             'a {{id_0}} b {{id_1}} c {{id_3}} ', False)],
             self.handler.prepare_original(self.elements))
 
-    def test_add_translations_merged(self):
+    @patch('calibre_plugins.ebook_translator.lib.element.uid')
+    def test_prepare_original_merge_separator(self, mock_uid):
+        mock_uid.return_value = 'm1'
+        self.handler.separator = Base.separator
+        self.assertEqual([(
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c" class="c">c</p>',
+            'a\n\nb\n\nc\n\n', False)],
+            self.handler.prepare_original(self.elements))
+
+    @patch('calibre_plugins.ebook_translator.lib.element.uid')
+    def test_prepare_original_merge_separator_multiple(self, mock_uid):
+        mock_uid.side_effect = ['m1', 'm2', 'm3']
+        self.handler.merge_length = 2
+        self.handler.separator = Base.separator
+        items = [
+            (0, 'm1', '<p id="a">a</p>', 'a\n\n', False),
+            (1, 'm2', '<p id="b">b</p>', 'b\n\n', False),
+            (2, 'm3', '<p id="c" class="c">c</p>', 'c\n\n', False)]
+        self.assertEqual(items, self.handler.prepare_original(self.elements))
+
+    def test_add_translations_merge_placeholder(self):
         self.handler.prepare_original(self.elements)
         self.handler.add_translations([Paragraph(
             0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
@@ -530,7 +552,69 @@ class TestElementHandlerMerge(unittest.TestCase):
         self.assertEqual('c', elements[5].text)
         self.assertEqual('C', elements[6].text)
 
-    def test_add_translations_merged_missing_id(self):
+    def test_add_translations_merge_cached_placeholder(self):
+        self.handler.separator = Base.separator
+        self.handler.prepare_original(self.elements)
+        self.handler.add_translations([Paragraph(
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
+            'a {{id_0}} b {{id_1}} c {{id_3}}', False, None, None,
+            'A {{id_0}} B {{id_1}} C {{id_3}}', 'ENGINE', 'LANG')])
+
+        elements = self.xhtml.findall('./x:body/*', namespaces=ns)
+
+        self.assertEqual(8, len(elements))
+        self.assertEqual('a', elements[0].text)
+        self.assertEqual('A', elements[1].text)
+        self.assertEqual('b', elements[2].text)
+        self.assertEqual('B', elements[3].text)
+
+        self.assertEqual('c', elements[5].text)
+        self.assertEqual('C', elements[6].text)
+
+    def test_add_translations_merge_separator(self):
+        self.handler.separator = Base.separator
+        self.handler.prepare_original(self.elements)
+        self.handler.add_translations([Paragraph(
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
+            'a\n\nb\n\nc\n\n', False, None, None,
+            'A\nB\n\n\nC', 'ENGINE', 'LANG')])  # missing or repeated \n
+
+        elements = self.xhtml.findall('./x:body/*', namespaces=ns)
+
+        self.assertEqual(8, len(elements))
+        self.assertEqual('a', elements[0].text)
+        self.assertEqual('A', elements[1].text)
+        self.assertEqual('b', elements[2].text)
+        self.assertEqual('B', elements[3].text)
+
+        self.assertEqual('c', elements[5].text)
+        self.assertEqual('C', elements[6].text)
+
+    def test_add_translations_merge_separator_multiple(self):
+        self.handler.merge_length = 2
+        self.handler.separator = Base.separator
+        self.handler.prepare_original(self.elements)
+        paragraphs = [
+            Paragraph(0, 'm1', '<p id="a">a</p>', 'a\n\n', False, None, None,
+                      'A\n\n', 'ENGINE', 'LANG'),
+            Paragraph(1, 'm2', '<p id="b">b</p>', 'b\n\n', False, None, None,
+                      'B', 'ENGINE', 'LANG'),
+            Paragraph(2, 'm3', '<p id="c" class="c">c</p>', 'c\n\n', False,
+                      None, None, 'C\n\n', 'ENGINE', 'LANG')]
+        self.handler.add_translations(paragraphs)
+
+        elements = self.xhtml.findall('./x:body/*', namespaces=ns)
+
+        self.assertEqual(8, len(elements))
+        self.assertEqual('a', elements[0].text)
+        self.assertEqual('A', elements[1].text)
+        self.assertEqual('b', elements[2].text)
+        self.assertEqual('B', elements[3].text)
+
+        self.assertEqual('c', elements[5].text)
+        self.assertEqual('C', elements[6].text)
+
+    def test_add_translations_merge_placeholder_missing_id(self):
         self.handler.prepare_original(self.elements)
         self.handler.add_translations([Paragraph(
             0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
@@ -546,9 +630,25 @@ class TestElementHandlerMerge(unittest.TestCase):
         self.assertEqual('c', elements[4].text)
         self.assertEqual('C', elements[5].text)
 
-    def test_add_translations_merged_translation_only(self):
-        self.handler.position = 'only'
+    def test_add_translations_merge_placeholder_missing_newline(self):
+        self.handler.separator = Base.separator
+        self.handler.prepare_original(self.elements)
+        self.handler.add_translations([Paragraph(
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
+            'a\n\nb\n\nc\n\n', False, None, None,
+            'A B\n\nC\n\n', 'ENGINE', 'LANG')])
 
+        elements = self.xhtml.findall('./x:body/*', namespaces=ns)
+        self.assertEqual(7, len(elements))
+        self.assertEqual('a', elements[0].text)
+        self.assertEqual('A B', elements[1].text)
+        self.assertEqual('b', elements[2].text)
+        self.assertEqual('C', elements[3].text)
+
+        self.assertEqual('c', elements[5].text)
+
+    def test_add_translations_merge_palceholder_only(self):
+        self.handler.position = 'only'
         self.handler.prepare_original(self.elements)
         self.handler.add_translations([Paragraph(
             0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>'
@@ -563,7 +663,24 @@ class TestElementHandlerMerge(unittest.TestCase):
 
         self.assertEqual('C', elements[3].text)
 
-    def test_add_translations_merged_translation_only_missing_id(self):
+    def test_add_translations_merge_separator_only(self):
+        self.handler.position = 'only'
+        self.handler.separator = Base.separator
+        self.handler.prepare_original(self.elements)
+        self.handler.add_translations([Paragraph(
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>'
+            '<a href="/a">a</a>',
+            'a\n\nb\n\nc\n\n', False, None, None,
+            'A\n\n B\n\nC\n\n', 'ENGINE', 'LANG')])
+
+        elements = self.xhtml.findall('./x:body/*', namespaces=ns)
+        self.assertEqual(5, len(elements))
+        self.assertEqual('A', elements[0].text)
+        self.assertEqual('B', elements[1].text)
+
+        self.assertEqual('C', elements[3].text)
+
+    def test_add_translations_merge_placeholder_only_missing_id(self):
         self.handler.position = 'only'
 
         self.handler.prepare_original(self.elements)
@@ -578,3 +695,18 @@ class TestElementHandlerMerge(unittest.TestCase):
         self.assertEqual('A B', elements[0].text)
 
         self.assertEqual('C', elements[2].text)
+
+    def test_add_translations_merge_separator_only_missing_id(self):
+        self.handler.position = 'only'
+        self.handler.separator = Base.separator
+        self.handler.prepare_original(self.elements)
+        self.handler.add_translations([Paragraph(
+            0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>'
+            '<a href="/a">a</a>',
+            'a\n\nb\n\nc\n\n', False, None, None,
+            'A B\n\nC\n\n', 'ENGINE', 'LANG')])
+
+        elements = self.xhtml.findall('./x:body/*', namespaces=ns)
+        self.assertEqual(4, len(elements))
+        self.assertEqual('A B', elements[0].text)
+        self.assertEqual('C', elements[1].text)
