@@ -42,7 +42,9 @@ class GoogleFreeTranslate(Base):
         }
 
         # The POST method is unstable, despite its ability to send more text.
-        return self.get_result(self.endpoint, data, headers)
+        # However, it can be used occasionally with an unacceptable length.
+        method = 'GET' if len(text) <= 1800 else 'POST'
+        return self.get_result(self.endpoint, data, headers, method=method)
 
     def parse(self, data):
         # return ''.join(i[0] for i in json.loads(data)[0])
