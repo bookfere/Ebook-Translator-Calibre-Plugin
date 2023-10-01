@@ -677,7 +677,7 @@ class AdvancedTranslation(QDialog):
             self.raw_text.emit(paragraph.raw)
             self.original_text.emit(paragraph.original)
             self.translation_text[str].emit(paragraph.translation)
-        self.table.itemPressed.connect(change_selected_item)
+        self.table.itemSelectionChanged.connect(change_selected_item)
         self.table.setCurrentItem(self.table.item(0, 0))
         change_selected_item()
 

@@ -188,7 +188,7 @@ class Base:
             result = response if stream else \
                 response.read().decode('utf-8').strip()
             return callback(result) if callback else self.parse(result)
-        except Exception as e:
+        except Exception:
             if silence:
                 return None
             error = '\n%s' % traceback.format_exc(chain=False).strip()
