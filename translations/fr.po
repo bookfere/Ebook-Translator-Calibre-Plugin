@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
 "POT-Creation-Date: 2023-09-29 21:24+0800\n"
-"PO-Revision-Date: 2023-09-29 21:36-0400\n"
+"PO-Revision-Date: 2023-10-01 15:35-0400\n"
 "Last-Translator: <a href=\"https://www.mobileread.com/forums/member.php?"
 "u=90932\">PoP</a>\n"
 "Language-Team: none\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.3.2\n"
+"X-Generator: Poedit 3.4\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SearchPath-0: .\n"
 
@@ -29,7 +29,7 @@ msgstr ""
 "(préservant optionnellement le contenu original)."
 
 msgid "Extracting ebook content..."
-msgstr "Extractant le contenu de ebook..."
+msgstr "Extrayant le contenu du ebook..."
 
 msgid "Filtering ebook content..."
 msgstr "Filtrant le contenu du ebook..."
@@ -44,7 +44,7 @@ msgid "Input Format"
 msgstr "Format d'entrée"
 
 msgid "Target Language"
-msgstr "Format de sortie"
+msgstr "Langue cible"
 
 msgid "Failed to translate {} paragraph(s), Would you like to retry?"
 msgstr "Échoua à traduire {} paragraphe(s), Voudriez-vous recommencer?"
@@ -86,7 +86,7 @@ msgid "Translation Engine"
 msgstr "Moteur de traduction"
 
 msgid "Source Language"
-msgstr "Langage dórigine"
+msgstr "Langage d'origine"
 
 msgid "Cache Status"
 msgstr "Statut du cache"
@@ -175,10 +175,10 @@ msgid "Please choose an empty folder."
 msgstr "Veuillez choisir un dossier vide."
 
 msgid "Are you sure you want to clear all caches?"
-msgstr "Êtes-vous certain d'effacer tous les caches?"
+msgstr "Voulez-vous vraiment effacer tous les caches?"
 
 msgid "Are you sure you want to delete the selected cache(s)?"
-msgstr "Êtes-vous certain d'effacer les caches sélectionnés?"
+msgstr "Voulez-vous vraiment effacer le cache(s) sélectionné?"
 
 msgid "No cache exists."
 msgstr "Il n'existe aucun cache."
@@ -205,7 +205,7 @@ msgid "Translating..."
 msgstr "Traduisant..."
 
 msgid "Test Translation Engine"
-msgstr "Testant le moteur de traduction"
+msgstr "Tester le moteur de traduction"
 
 msgid "Usage: checking..."
 msgstr "Usage: vérifiant..."
@@ -214,7 +214,7 @@ msgid "Usage: {}"
 msgstr "Usage: {}"
 
 msgid "Custom Translation Engine"
-msgstr "Moteur de traduction personalisé"
+msgstr "Moteur de traduction personnalisé"
 
 msgid "Add"
 msgstr "Ajouter"
@@ -238,7 +238,7 @@ msgid "Ebook Specific"
 msgstr "Spécifique à un ebook"
 
 msgid "Donate"
-msgstr "Doner"
+msgstr "Donner"
 
 msgid "Feedback"
 msgstr "Commentaires"
@@ -247,7 +247,7 @@ msgid "Auto detect"
 msgstr "Détection automatique"
 
 msgid "Choose a translation mode for clicking the icon button."
-msgstr "Choisissez un mode de traduction pour cliquer le bouton d'icon."
+msgstr "Choisissez un mode de traduction pour cliquer l'icon du bouton."
 
 msgid "Advanced Mode"
 msgstr "Mode avancé"
@@ -257,7 +257,7 @@ msgid ""
 "for more control and customization."
 msgstr ""
 "Ce mode présente des options additionnelles lors de la traduction, "
-"permettant plus de contrôle et de personalisation."
+"permettant plus de contrôle et de personnalisation."
 
 msgid "Batch Mode"
 msgstr "Mode de traitement en lot"
@@ -273,13 +273,13 @@ msgid "Original"
 msgstr "Original"
 
 msgid "Status"
-msgstr "Status"
+msgstr "Statut"
 
 msgid "Untranslated"
 msgstr "Non-traduit"
 
 msgid "Select the whole chapter"
-msgstr "Choisissez un chapitre entier"
+msgstr "Choisissez le chapitre en entier"
 
 msgid "Select similar paragraphs: {}=\"{}\""
 msgstr "Choisissez des paragraphes similaires: {}=\"{}\""
@@ -297,7 +297,7 @@ msgid "A correct key format \"{}\" is required."
 msgstr "Un format de clée \"{}\" valide est requis."
 
 msgid "Can not parse returned response. Raw data: {}"
-msgstr "Ne peux parcourir la réponse retournée. Data non-traité: {}"
+msgstr "Ne peux analyser la réponse retournée. Data non-traité: {}"
 
 msgid "Engine data must be in valid JSON format."
 msgstr "Le data du moteur doit avoir un format JSON valide."
@@ -318,28 +318,28 @@ msgid "Source and target must be added in pair."
 msgstr "L'origine et la cible doivent être ajoutés en paire."
 
 msgid "Request information is required."
-msgstr "Information de requête est requise."
+msgstr "L'information de requête est requise."
 
 msgid "API URL is required."
-msgstr "URL d'API est requise."
+msgstr "l'URL d'API est requise."
 
 msgid "Placeholder <text> is required."
 msgstr "Position <text> est requise."
 
 msgid "Request headers must be an JSON object."
-msgstr "L'en-tête de requête doit être un objet JSON."
+msgstr "Les en-têtes de requête doit être un objet JSON."
 
 msgid "A appropriate Content-Type in headers is required."
-msgstr "Un type de contenu approprié est requis dans l'en-tête."
+msgstr "Un type de contenu approprié est requis dans les en-têtes."
 
 msgid "Expression to parse response is required."
-msgstr "Une expression est requise pour parcourir la réponse."
+msgstr "Une expression est requise pour analyser la réponse."
 
 msgid "Response was parsed incorrectly."
-msgstr "La réponse a été parcourue incorrectement."
+msgstr "La réponse a été analysée incorrectement."
 
 msgid "{} total, {} used, {} left"
-msgstr "{} total, {} utilisé, {} restant(s)"
+msgstr "{} total, {} utilisé, {} restant"
 
 msgid "Can not obtain Google API key. Reason: {}"
 msgstr "Ne peut obtenir la clée d'API de Google. Raison: {}"
@@ -348,13 +348,13 @@ msgid "Failed get APP key due to an invalid Token."
 msgstr "Échoua l'obtention d'une clé APP à cause d'un Token non-valide."
 
 msgid "Failed get APP key due to and invalid Base64 URL."
-msgstr "Échoua l'obtention d'une clé APP à cause d'un URl Base64 non-valide."
+msgstr "Échoua l'obtention d'une clé APP à cause d'un URL Base64 non-valide."
 
 msgid "Youdao"
 msgstr "Youdao"
 
 msgid "Start to convert ebook format:"
-msgstr "Commençant à convertir le format de ebook:"
+msgstr "Commençant la conversion du format de ebook:"
 
 msgid "[{} > {}] Translating \"{}\""
 msgstr "[{} > {}] Traduisant \"{}\""
@@ -369,10 +369,10 @@ msgid "Ebook Translation Log"
 msgstr "Registre de traduction du ebook"
 
 msgid "Translation Completed"
-msgstr "TTraduction complétée"
+msgstr "Traduction complétée"
 
 msgid "The translation of \"{}\" was completed. Do you want to open the book?"
-msgstr "La traduction de \"{}\" est complétés. Voulez-vous ouvrir ce livre?"
+msgstr "La traduction de \"{}\" est complétée. Voulez-vous ouvrir ce livre?"
 
 msgid "Translation canceled."
 msgstr "Traduction annulée."
@@ -403,7 +403,7 @@ msgid "Error: {}"
 msgstr "Erreur: {}"
 
 msgid "Start to translate ebook content"
-msgstr "Commençant à traduire le contenu de l'ebook"
+msgstr "Commencer à traduire le contenu de l'ebook"
 
 msgid "Total items: {}"
 msgstr "Items totaux: {}"
@@ -451,13 +451,13 @@ msgid "Enable"
 msgstr "Activer"
 
 msgid "The number of characters to translate at once."
-msgstr "ELe nombre de caractères à traduire à la fois."
+msgstr "Le nombre de caractères à traduire à la fois."
 
 msgid "HTTP Proxy"
-msgstr "Proxy HTTP"
+msgstr "Procurateur HTTP"
 
 msgid "Host"
-msgstr "H*ote"
+msgstr "Hôte"
 
 msgid "Port"
 msgstr "Port"
@@ -478,7 +478,7 @@ msgid "Show translation"
 msgstr "Montrer la traduction"
 
 msgid "Custom"
-msgstr "Personalisé"
+msgstr "Personnalisé"
 
 msgid "Tip:"
 msgstr "Indice:"
@@ -488,7 +488,7 @@ msgstr ""
 "Les clées API wont s'interchanger si la clée précédente n'est pas disponible."
 
 msgid "Preferred Language"
-msgstr "Langue de préférence"
+msgstr "Langue préférée"
 
 msgid "HTTP Request"
 msgstr "Requête HTTP"
@@ -509,7 +509,7 @@ msgid "Error count to stop translation"
 msgstr "Nombre d'erreurs avant d'arrêter la traduction"
 
 msgid "Tune ChatGPT"
-msgstr "Paramétriser ChatGPT"
+msgstr "Régler ChatGPT"
 
 msgid "Prompt"
 msgstr "Demander"
@@ -611,13 +611,13 @@ msgid "Subject"
 msgstr "Sujet"
 
 msgid "Proxy host or port is incorrect."
-msgstr "L'hôte Proxy ou le port n'est pas valide."
+msgstr "L'hôte procurateur ou le port n'est pas valide."
 
 msgid "The proxy is available."
-msgstr "Le Proxy est disponible."
+msgstr "Le procurateur est disponible."
 
 msgid "The proxy is not available."
-msgstr "Le Proxy n'est pas disponible."
+msgstr "Le procurateur n'est pas disponible."
 
 msgid "the prompt must include {}."
 msgstr "l'entrée doit inclure {}."
@@ -626,13 +626,13 @@ msgid "Invalid color value."
 msgstr "Valeur de couleur n'est pas valide."
 
 msgid "The specified glossary file does not exist."
-msgstr "Le fichier de glossaire n'existe pas."
+msgstr "Le fichier de glossaire spécifié n'existe pas."
 
 msgid "{} is not a valid regular expression."
 msgstr "{} n'est pas une expression régulière valide."
 
 msgid "{} is not a valid CSS seletor."
-msgstr "{}  nés pas un selecteur CSS valide."
+msgstr "{} n'es pas un selecteur CSS valide."
 
 msgid "Translate Book"
 msgstr "Traduire un livre"
