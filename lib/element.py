@@ -125,7 +125,7 @@ class PageElement(Element):
         count = 0
         for reserve in self.reserve_elements:
             # Escape the markups (<m id=1 />) to replace escaped markups.
-            pattern = placeholder[1].format(format(count, '05'))
+            pattern = placeholder[1].format(r'\s*'.join(format(count, '05')))
             # Prevent potential invalid escapes from affecting the replacement.
             translation = re.sub(
                 xml_escape(pattern), lambda _: get_string(reserve),
