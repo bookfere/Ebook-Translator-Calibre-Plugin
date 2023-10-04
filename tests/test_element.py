@@ -79,7 +79,7 @@ class TestPageElement(unittest.TestCase):
             <span>g <img src="w2.jpg"/> h</span>
             <img alt="{\D}" src="w3.jpg"/> i
             <img src="w3.jpg"/>
-            <code>App\Http</code> k
+            <code>App\Http</code> k<br/>l
         </p>
     </body>
 </html>""")
@@ -101,19 +101,19 @@ class TestPageElement(unittest.TestCase):
             '<ruby>b<rt>B</rt></ruby> c <span><img src="w2.jpg"/> d</span> '
             '<span>e <img src="w2.jpg"/></span> f <span>g <img src="w2.jpg"/> '
             r'h</span> <img alt="{\D}" src="w3.jpg"/> i <img src="w3.jpg"/> '
-            r'<code>App\Http</code> k </p>')
+            r'<code>App\Http</code> k<br/>l </p>')
         self.assertEqual(text, self.element.get_raw())
 
     def test_get_text(self):
         self.assertEqual(
-            r'a bB c d e f g h i App\Http k', self.element.get_text())
+            r'a bB c d e f g h i App\Http kl', self.element.get_text())
 
     def test_get_content(self):
         content = ('{{id_00000}} a {{id_00001}} b c {{id_00002}} d e '
                    '{{id_00003}} f g {{id_00004}} h {{id_00005}} i '
-                   '{{id_00006}} {{id_00007}} k')
+                   '{{id_00006}} {{id_00007}} k{{id_00008}}l')
         self.assertEqual(content, self.element.get_content(Base.placeholder))
-        self.assertEqual(8, len(self.element.reserve_elements))
+        self.assertEqual(9, len(self.element.reserve_elements))
 
         for element in self.element.reserve_elements:
             with self.subTest(element=element):
@@ -126,14 +126,15 @@ class TestPageElement(unittest.TestCase):
         self.element.get_content(Base.placeholder)
         translation = ('{{id_00000}} A {{id_00001}} B C {{id_00002}} D E '
                        '{{id_00003}} F G {{id_00004}} H {{id_00005}} I '
-                       '{{id_00006}} {{id_00007}} K')
+                       '{{id_00006}} {{id_00007}} K{{id_00008}}L')
         new = self.element.add_translation(translation, Base.placeholder)
         translation = ('<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
                        '<img src="icon.jpg"/> A <img src="w1.jpg"/> '
-                       r'B C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
+                       'B C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
                        'F G <img src="w2.jpg"/> H '
                        r'<img alt="{\D}" src="w3.jpg"/> I '
-                       r'<img src="w3.jpg"/> <code>App\Http</code> K</p>')
+                       r'<img src="w3.jpg"/> <code>App\Http</code> '
+                       'K<br/>L</p>')
         self.assertEqual(translation, get_string(new))
         self.assertIsNone(new.get('lang'))
         self.assertIsNone(new.get('style'))
@@ -143,7 +144,7 @@ class TestPageElement(unittest.TestCase):
         self.element.get_content(DeeplFreeTranslate.placeholder)
         translation = ('<m id=00000 /> A <m id=00001 /> B C <m id=00002 /> D '
                        'E <m id=00003 /> F G <m id=00004 /> H <m id=00005 /> '
-                       'I <m id=00006 /> <m id=00007 /> K')
+                       'I <m id=00006 /> <m id=00007 /> K<m id=00008 />L')
         new = self.element.add_translation(
             translation, DeeplFreeTranslate.placeholder)
         translation = ('<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
@@ -151,7 +152,8 @@ class TestPageElement(unittest.TestCase):
                        'B C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
                        'F G <img src="w2.jpg"/> H '
                        r'<img alt="{\D}" src="w3.jpg"/> I '
-                       r'<img src="w3.jpg"/> <code>App\Http</code> K</p>')
+                       r'<img src="w3.jpg"/> <code>App\Http</code> '
+                       'K<br/>L</p>')
         self.assertEqual(translation, get_string(new))
 
     def test_add_translation_next(self):
