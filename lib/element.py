@@ -101,7 +101,8 @@ class PageElement(Element):
             parent.text = (parent.text or '') + (noise.tail or '')
             parent.remove(noise)
 
-        self.reserve_elements = self._get_descendents(('img', 'code'))
+        self.reserve_elements = self._get_descendents(
+            ('img', 'code', 'br', 'hr', 'sub', 'sup', 'kbd'))
         count = 0
         for reserve in self.reserve_elements:
             replacement = placeholder[0].format(format(count, '05'))
@@ -133,15 +134,17 @@ class PageElement(Element):
 
         new_element = etree.XML('<{0} xmlns="{1}">{2}</{0}>'.format(
             get_name(self.element), ns['x'], trim(translation)))
-        if color is not None:
-            new_element.set('style', 'color:%s' % color)
-        if lang is not None:
-            new_element.set('lang', lang)
         # Preserve all attributes from the original element.
         for k, v in self.element.items():
             if k == 'id' and position != 'only':
                 continue
+            if k == 'dir':
+                v = 'auto'
             new_element.set(k, v)
+        if color is not None:
+            new_element.set('style', 'color:%s' % color)
+        if lang is not None:
+            new_element.set('lang', lang)
         self.element.tail = None  # Make sure it has no tail
         if position == 'before':
             self.element.addprevious(new_element)
