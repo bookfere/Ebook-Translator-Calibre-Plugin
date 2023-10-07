@@ -1,3 +1,5 @@
+from types import MethodType
+
 from calibre.gui2.actions import InterfaceAction
 
 from . import EbookTranslator
@@ -19,11 +21,15 @@ except ImportError:
     from calibre.gui2.convert.single import get_input_format_for_book
 
 try:
-    from qt.core import QMenu
+    from qt.core import QMenu, QCoreApplication, QSettings
 except ImportError:
-    from PyQt5.Qt import QMenu
+    from PyQt5.Qt import QMenu, QCoreApplication, QSettings
 
 load_translations()
+
+QCoreApplication.setOrganizationName(EbookTranslator.author)
+QCoreApplication.setOrganizationDomain(EbookTranslator.author)
+QCoreApplication.setApplicationName(EbookTranslator.identifier)
 
 
 class EbookTranslatorGui(InterfaceAction):
@@ -31,6 +37,7 @@ class EbookTranslatorGui(InterfaceAction):
     action_spec = (
         _('Translate Book'), None, _('Translate Ebook Content'), None)
     title = '%s - %s' % (EbookTranslator.title, EbookTranslator.__version__)
+    settings = QSettings()
 
     class Status:
         jobs = {}
@@ -167,9 +174,24 @@ class EbookTranslatorGui(InterfaceAction):
             modes.get(preferred_mode)()
 
     def add_window(self, name, window):
+        identifier = name.split('_')[0]
+
+        window_size = 'window_size/%s' % identifier
+        size = self.settings.value(window_size)
+        size and window.resize(size)
+
+        window_position = 'window_position/%s' % identifier
+        position = self.settings.value(window_position)
+        position and window.restoreGeometry(position)
+
         windows = self.gui.bookfere_ebook_translator.windows
         windows[name] = window
-        window.finished.connect(lambda: windows.pop(name))
+
+        def setup_window():
+            self.settings.setValue(window_size, window.size())
+            self.settings.setValue(window_position, window.saveGeometry())
+            windows.pop(name)
+        window.finished.connect(setup_window)
 
     def get_window(self, name):
         return self.gui.bookfere_ebook_translator.windows.get(name)

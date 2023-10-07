@@ -145,7 +145,8 @@ class PageElement(Element):
             new_element.set('style', 'color:%s' % color)
         if lang is not None:
             new_element.set('lang', lang)
-        self.element.tail = None  # Make sure it has no tail
+
+        self.element.tail = None  # Make sure the element has no tail
         if position == 'before':
             self.element.addprevious(new_element)
         else:

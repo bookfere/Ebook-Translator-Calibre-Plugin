@@ -21,13 +21,13 @@ try:
         Qt, QObject, QDialog, QGroupBox, QWidget, QVBoxLayout, QHBoxLayout,
         QPlainTextEdit, QPushButton, QSplitter, QLabel, QThread, QLineEdit,
         QGridLayout, QProgressBar, pyqtSignal, pyqtSlot, QPixmap, QEvent,
-        QStackedWidget, QSpacerItem, QTextCursor, QSettings, QTabWidget)
+        QStackedWidget, QSpacerItem, QTextCursor, QTabWidget)
 except ImportError:
     from PyQt5.Qt import (
         Qt, QObject, QDialog, QGroupBox, QWidget, QVBoxLayout, QHBoxLayout,
         QPlainTextEdit, QPushButton, QSplitter, QLabel, QThread, QLineEdit,
         QGridLayout, QProgressBar, pyqtSignal, pyqtSlot, QPixmap, QEvent,
-        QStackedWidget, QSpacerItem, QTextCursor, QSettings, QTabWidget)
+        QStackedWidget, QSpacerItem, QTextCursor, QTabWidget)
 
 load_translations()
 
@@ -235,8 +235,6 @@ class CreateTranslationProject(QDialog):
 
 
 class AdvancedTranslation(QDialog):
-    ui_setting = QSettings()
-
     raw_text = pyqtSignal(str)
     original_text = pyqtSignal(str)
     translation_text = pyqtSignal((), (str,))

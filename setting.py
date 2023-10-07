@@ -18,7 +18,7 @@ try:
         QIntValidator, QScrollArea, QRadioButton, QGridLayout, QCheckBox,
         QButtonGroup, QColorDialog, QSpinBox, QPalette, QApplication,
         QComboBox, QRegularExpression, pyqtSignal, QFormLayout, QDoubleSpinBox,
-        QSpacerItem, QRegularExpressionValidator)
+        QSettings, QSpacerItem, QRegularExpressionValidator)
 except ImportError:
     from PyQt5.Qt import (
         Qt, QLabel, QDialog, QWidget, QLineEdit, QPushButton, QPlainTextEdit,
@@ -26,7 +26,7 @@ except ImportError:
         QIntValidator, QScrollArea, QRadioButton, QGridLayout, QCheckBox,
         QButtonGroup, QColorDialog, QSpinBox, QPalette, QApplication,
         QComboBox, QRegularExpression, pyqtSignal, QFormLayout, QDoubleSpinBox,
-        QSpacerItem, QRegularExpressionValidator)
+        QSettings, QSpacerItem, QRegularExpressionValidator)
 
 load_translations()
 
