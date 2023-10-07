@@ -19,6 +19,7 @@ class EbookTranslator(InterfaceActionBase):
     name = _z('Ebook Translator')
     title = _(name)
     supported_platforms = ['windows', 'osx', 'linux']
+    identifier = 'ebook-translator'
     author = 'bookfere.com'
     version = (2, 2, 0)
     __version__ = 'v' + '.'.join(map(str, version))
