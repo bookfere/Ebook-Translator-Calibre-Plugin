@@ -109,13 +109,19 @@ class TestCustom(unittest.TestCase):
         engine_data = """{
     "name": "New Engine",
     "languages": {
-        "source": {"English": "en"},
-        "target": {"Chinese": "zh"}
+        "source": {
+            "English": "en"
+        },
+        "target": {
+            "Chinese": "zh"
+        }
     },
     "request": {
         "url": "https://example.api",
         "method": "POST",
-        "headers": {"Content-Type": "application/json"},
+        "headers": {
+            "Content-Type": "application/json"
+        },
         "data": {
             "source": "<source>",
             "target": "<target>",
@@ -129,13 +135,24 @@ class TestCustom(unittest.TestCase):
         CustomTranslate.set_engine_data(engine_data)
 
     @patch('calibre_plugins.ebook_translator.engines.base.Browser')
-    def test_translate(self, mock_browser):
+    def test_translate_json(self, mock_browser):
         translator = CustomTranslate()
         translator.set_source_lang('English')
         translator.set_target_lang('Chinese')
         mock_browser.return_value.response.return_value.read.return_value \
             .decode.return_value = '{"text": "你好世界！"}'
-        self.assertEqual('你好世界！', translator.translate('Hello World!'))
+        self.assertEqual('你好世界！', translator.translate('HelloWorld!'))
+
+    @patch('calibre_plugins.ebook_translator.engines.base.Browser')
+    def test_translate_urlencoded(self, mock_browser):
+        translator = CustomTranslate()
+        # Mock content type: application/x-www-form-urlencoded
+        del translator.engine_data['request']['headers']
+        translator.set_source_lang('English')
+        translator.set_target_lang('Chinese')
+        mock_browser.return_value.response.return_value.read.return_value \
+            .decode.return_value = '{"text": "你好\\"\\n世界！"}'
+        self.assertEqual('你好\"\n世界！', translator.translate('Hello\"\nWorld!'))
 
     def test_parse(self):
         translator = CustomTranslate()
