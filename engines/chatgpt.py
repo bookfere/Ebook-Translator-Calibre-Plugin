@@ -25,6 +25,7 @@ class ChatgptTranslate(Base):
 
     concurrency_limit = 1
     request_interval = 20
+    request_timeout = 30.0
 
     prompt = (
         'You are a meticulous translator who translates any given content. '
