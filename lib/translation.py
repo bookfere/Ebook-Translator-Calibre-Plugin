@@ -196,17 +196,19 @@ class Translation:
         self.streaming(paragraph)
         self.callback(paragraph)
 
+        original = paragraph.original.strip()
+        translation = paragraph.translation.strip()
         if paragraph.error is None:
             self.log(sep())
-            self.log(_('Original: {}').format(paragraph.original))
+            self.log(_('Original: {}').format(original))
             self.log(sep('-', 35))
             message = _('Translation: {}')
             if paragraph.is_cache:
                 message = _('Translation (Cached): {}')
-            self.log(message.format(paragraph.translation))
+            self.log(message.format(translation))
         else:
             self.log(sep(), True)
-            self.log(_('Original: {}').format(paragraph.original), True)
+            self.log(_('Original: {}').format(original), True)
             self.log(sep('-', 35), True)
             self.log(_('Error: {}').format(paragraph.error), True)
             paragraph.error = None
