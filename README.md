@@ -43,10 +43,11 @@ __Plugin Homepage__: [https://translator.bookfere.com](https://translator.bookfe
 
 ## Sponsor
 
-As an open source project, this plug-in relies on the goodwill of individuals like you who understand its value. Your donations enable us to dedicate more time and resources to improving the project, fixing bugs, and adding new features.
+As an open source project, Ebook Translator relies on the goodwill of individuals like you who understand its value. Your donations enable us to dedicate more time and resources to improving the project, fixing bugs, and adding new features.
 
 |Date| Name|Amount|
 |---|---|---|
+|2023-10-08|N**YC|$17.85|
 |2023-09-24|We**** Wei|$10|
 |2023-09-19|Y**** Wang|$5|
 |2023-08-10|E*s|¥10|
