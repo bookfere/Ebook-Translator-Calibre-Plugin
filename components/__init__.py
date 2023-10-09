@@ -17,6 +17,7 @@ def get_divider():
     divider = QFrame()
     divider.setFrameShape(QFrame.HLine)
     divider.setFrameShadow(QFrame.Sunken)
+    # divider.setFrameStyle(QFrame.HLine | QFrame.Sunken)
     return divider
 
 

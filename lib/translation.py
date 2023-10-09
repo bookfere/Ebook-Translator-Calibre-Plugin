@@ -166,7 +166,6 @@ class Translation:
         self.streaming('')
         self.streaming(_('Translating...'))
         translation = self._translate_text(paragraph.original)
-        translation = self.glossary.restore(translation)
         # Process streaming text
         if isinstance(translation, GeneratorType):
             if self.total == 1:
@@ -182,8 +181,9 @@ class Translation:
                     temp += char
             else:
                 temp = ''.join([char for char in translation])
-            translation = temp.replace('\n', ' ')
-        paragraph.translation = translation
+            translation = temp
+        translation = self.glossary.restore(translation)
+        paragraph.translation = translation.strip()
         paragraph.engine_name = self.translator.name
         paragraph.target_lang = self.translator.get_target_lang()
         paragraph.is_cache = False
