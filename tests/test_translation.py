@@ -8,6 +8,9 @@ from ..engines.base import Base
 from ..engines.deepl import DeeplTranslate
 
 
+load_translations()
+
+
 class TestGlossary(unittest.TestCase):
     @patch('calibre_plugins.ebook_translator.lib.translation.open')
     def test_load_from_file(self, mock_open):
