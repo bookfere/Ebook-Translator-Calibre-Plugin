@@ -181,26 +181,23 @@ class Base:
             request = Request(
                 url, data, headers=headers, timeout=self.request_timeout)
         try:
-            result = None
+            result = ''
             br = self.get_browser()
             br.open(request)
             response = br.response()
-            result = response if stream else \
-                response.read().decode('utf-8').strip()
-            return callback(result) if callback else self.parse(result)
+            if not stream:
+                response = result = response.read().decode('utf-8').strip()
+            return response if callback is None else callback(response)
         except Exception:
             if silence:
                 return None
             error = '\n%s' % traceback.format_exc(chain=False).strip()
-            data = error if result is None else '\n%s%s' % (result, error)
+            data = '\n%s%s' % (result, error) if result else error
             raise Exception(_('Can not parse returned response. Raw data: {}')
-                            .format(data))
+                            .format('\n%s' % data))
 
     def get_usage(self):
         return None
 
     def translate(self, text):
-        raise NotImplementedError()
-
-    def parse(self, data):
         raise NotImplementedError()

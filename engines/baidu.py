@@ -33,7 +33,6 @@ class BaiduTranslate(Base):
         sign = hashlib.md5(sign_str.encode('utf-8')).hexdigest()
 
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-
         data = {
             'appid': app_id,
             'q': text,
@@ -43,7 +42,6 @@ class BaiduTranslate(Base):
             'sign': sign
         }
 
-        return self.get_result(self.endpoint, data, headers, method='POST')
-
-    def parse(self, response):
-        return json.loads(response)['trans_result'][0]['dst']
+        return self.get_result(
+            self.endpoint, data, headers, method='POST',
+            callback=lambda r: json.loads(r)['trans_result'][0]['dst'])

@@ -54,7 +54,7 @@ class ChatgptTranslate(Base):
     def set_prompt(self, prompt):
         self.prompt = prompt
 
-    def get_prompt(self):
+    def _get_prompt(self):
         prompt = self.prompt.replace('<tlang>', self.target_lang)
         if self._is_auto_lang():
             prompt = prompt.replace('<slang>', 'detect language')
@@ -66,35 +66,38 @@ class ChatgptTranslate(Base):
                        '{{id_\\d+}} in the content are retained.')
         return prompt
 
-    def get_headers(self):
+    def _get_headers(self):
         return {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer %s' % self.api_key,
             'User-Agent': 'Ebook-Translator/%s' % EbookTranslator.__version__
         }
 
-    def translate(self, text):
-        prompt = self.get_prompt()
-        headers = self.get_headers()
-
-        data = {
+    def _get_body(self, text):
+        return {
             'stream': self.stream,
             'model': self.model,
             'messages': [
-                {'role': 'system', 'content': prompt},
+                {'role': 'system', 'content': self._get_prompt()},
                 {'role': 'user', 'content': text}
             ]
         }
 
+    def translate(self, text):
+        data = self._get_body(text)
         sampling_value = getattr(self, self.sampling)
         data.update({self.sampling: sampling_value})
 
-        callback = self.parse_stream if self.stream else self.parse
         return self.get_result(
-            self.endpoint, json.dumps(data), headers, method='POST',
-            stream=self.stream, callback=callback)
+            self.endpoint, json.dumps(data), self._get_headers(),
+            method='POST', stream=self.stream, callback=self._parse)
 
-    def parse_stream(self, data):
+    def _parse(self, data):
+        if self.stream:
+            return self._parse_stream(data)
+        return json.loads(data)['choices'][0]['message']['content']
+
+    def _parse_stream(self, data):
         while True:
             try:
                 line = data.readline().decode('utf-8').strip()
@@ -112,9 +115,6 @@ class ChatgptTranslate(Base):
                 if 'content' in delta:
                     yield str(delta['content'])
 
-    def parse(self, data):
-        return json.loads(data)['choices'][0]['message']['content']
-
 
 class AzureChatgptTranslate(ChatgptTranslate):
     name = 'ChatGPT(Azure)'
@@ -125,8 +125,17 @@ class AzureChatgptTranslate(ChatgptTranslate):
     models = ['gpt-35-turbo', 'gpt-4', 'gpt-4-32k']
     model = 'gpt-35-turbo'
 
-    def get_headers(self):
+    def _get_headers(self):
         return {
             'Content-Type': 'application/json',
             'api-key': self.api_key
         }
+
+    def _get_body(self, text):
+        data = ChatgptTranslate._get_body(self, text)
+        # Some versions do not support the `model` parameter.
+        for version in ('2023-03-15-preview', '2023-05-15'):
+            if self.endpoint.endswith(version):
+                del data['model']
+                break
+        return data

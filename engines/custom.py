@@ -117,9 +117,10 @@ class CustomTranslate(Base):
         if need_restore and not is_json:
             data = json.loads(data)
 
-        return self.get_result(endpoint, data, headers, method=method)
+        return self.get_result(
+            endpoint, data, headers, method=method, callback=self._parse)
 
-    def parse(self, response):
+    def _parse(self, response):
         try:
             response = json.loads(response)
         except Exception:

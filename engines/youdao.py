@@ -23,12 +23,12 @@ class YoudaoTranslate(Base):
     api_key_pattern = r'^[^\s:\|]+?[:\|][^\s:\|]+$'
     api_key_errors = ['401']
 
-    def encrypt(self, signStr):
+    def _encrypt(self, signStr):
         hash_algorithm = hashlib.sha256()
         hash_algorithm.update(signStr.encode('utf-8'))
         return hash_algorithm.hexdigest()
 
-    def truncate(self, text):
+    def _truncate(self, text):
         if text is None:
             return None
         size = len(text)
@@ -43,8 +43,8 @@ class YoudaoTranslate(Base):
 
         curtime = str(int(time.time()))
         salt = str(uuid.uuid1())
-        sign_str = app_key + self.truncate(text) + salt + curtime + app_secret
-        sign = self.encrypt(sign_str)
+        sign_str = app_key + self._truncate(text) + salt + curtime + app_secret
+        sign = self._encrypt(sign_str)
 
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
@@ -60,7 +60,6 @@ class YoudaoTranslate(Base):
             'vocabId': False,
         }
 
-        return self.get_result(self.endpoint, data, headers, method='POST')
-
-    def parse(self, data):
-        return json.loads(data)['translation'][0]
+        return self.get_result(
+            self.endpoint, data, headers, method='POST',
+            callback=lambda r: json.loads(r)['translation'][0])
