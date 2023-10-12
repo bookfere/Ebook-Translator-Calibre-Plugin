@@ -44,9 +44,10 @@ class GoogleFreeTranslate(Base):
         # The POST method is unstable, despite its ability to send more text.
         # However, it can be used occasionally with an unacceptable length.
         method = 'GET' if len(text) <= 1800 else 'POST'
-        return self.get_result(self.endpoint, data, headers, method=method)
+        return self.get_result(
+            self.endpoint, data, headers, method=method, callback=self._parse)
 
-    def parse(self, data):
+    def _parse(self, data):
         # return ''.join(i[0] for i in json.loads(data)[0])
         return ''.join(i['trans'] for i in json.loads(data)['sentences'])
 
@@ -106,9 +107,10 @@ class GoogleBasicTranslate(Base, GoogleTranslate):
         if not self._is_auto_lang():
             data.update(source=self._get_source_code())
 
-        return self.get_result(self.endpoint, data, headers, method='POST')
+        return self.get_result(
+            self.endpoint, data, headers, method='POST', callback=self._parse)
 
-    def parse(self, data):
+    def _parse(self, data):
         translations = json.loads(data)['data']['translations']
         return ''.join(i['translatedText'] for i in translations)
 
@@ -147,8 +149,9 @@ class GoogleAdvancedTranslate(Base, GoogleTranslate):
             data.update(sourceLanguageCode=self._get_source_code())
 
         return self.get_result(
-            endpoint, json.dumps(data), headers, method='POST')
+            endpoint, json.dumps(data), headers, method='POST',
+            callback=self._parse)
 
-    def parse(self, data):
+    def _parse(self, data):
         translations = json.loads(data)['translations']
         return ''.join(i['translatedText'] for i in translations)

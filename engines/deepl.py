@@ -23,16 +23,17 @@ class DeeplTranslate(Base):
 
     def get_usage(self):
         # See: https://www.deepl.com/docs-api/general/get-usage/
-        def usage_info(data):
-            usage = json.loads(data)
-            total = usage.get('character_limit')
-            used = usage.get('character_count')
-            left = total - used
-            return _('{} total, {} used, {} left').format(total, used, left)
+        headers = {'Authorization': 'DeepL-Auth-Key %s' % self.api_key}
+        usage = self.get_result(
+            self.endpoint.get('usage'), headers=headers, silence=True,
+            callback=lambda r: json.loads(r))
+        if usage is None:
+            return None
+        total = usage.get('character_limit')
+        used = usage.get('character_count')
+        left = total - used
 
-        return self.get_result(
-            self.endpoint.get('usage'), silence=True, callback=usage_info,
-            headers={'Authorization': 'DeepL-Auth-Key %s' % self.api_key})
+        return _('{} total, {} used, {} left').format(total, used, left)
 
     def translate(self, text):
         headers = {'Authorization': 'DeepL-Auth-Key %s' % self.api_key}
@@ -46,10 +47,8 @@ class DeeplTranslate(Base):
             data.update(source_lang=self._get_source_code())
 
         return self.get_result(
-            self.endpoint.get('translate'), data, headers, method='POST')
-
-    def parse(self, data):
-        return json.loads(data)['translations'][0]['text']
+            self.endpoint.get('translate'), data, headers, method='POST',
+            callback=lambda r: json.loads(r)['translations'][0]['text'])
 
 
 class DeeplProTranslate(DeeplTranslate):
@@ -132,7 +131,5 @@ class DeeplFreeTranslate(Base):
 
     def translate(self, text):
         return self.get_result(
-            self.endpoint, self._data(text), self.headers, method='POST')
-
-    def parse(self, data):
-        return json.loads(data)['result']['texts'][0]['text']
+            self.endpoint, self._data(text), self.headers, method='POST',
+            callback=lambda r: json.loads(r)['result']['texts'][0]['text'])

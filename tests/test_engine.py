@@ -6,7 +6,7 @@ from unittest.mock import patch, Mock
 
 from ..engines.base import Base
 from ..engines.deepl import DeeplTranslate
-from ..engines.chatgpt import AzureChatgptTranslate
+from ..engines.chatgpt import ChatgptTranslate, AzureChatgptTranslate
 from ..engines.custom import (
     create_engine_template, load_engine_data, CustomTranslate)
 
@@ -60,14 +60,74 @@ class TestDeepl(unittest.TestCase):
 
         self.assertEqual('你好世界！', self.translator.translate('Hello World!'))
 
-        # bad response
         result.return_value = '<dummy info>'
         with self.assertRaises(Exception) as e:
             self.translator.translate('Hello World!')
         self.assertIn(
             _('Can not parse returned response. Raw data: {}')
-            .format('\n<dummy info>\n') + 'Traceback',
+            .format('\n\n<dummy info>\n') + 'Traceback',
             str(e.exception))
+
+
+class TestChatgptTranslate(unittest.TestCase):
+    def setUp(self):
+        ChatgptTranslate.set_config({'api_keys': ['a', 'b', 'c']})
+        ChatgptTranslate.lang_codes = {
+            'source': {'English': 'EN'},
+            'target': {'Chinese': 'ZH'},
+        }
+
+        self.translator = ChatgptTranslate()
+        self.translator.set_source_lang('English')
+        self.translator.set_target_lang('Chinese')
+
+    @patch('calibre_plugins.ebook_translator.engines.chatgpt.EbookTranslator')
+    @patch('calibre_plugins.ebook_translator.engines.base.Request')
+    @patch('calibre_plugins.ebook_translator.engines.base.Browser')
+    def test_translate_stream(self, mock_browser, mock_request, mock_et):
+        url = 'https://api.openai.com/v1/chat/completions'
+        prompt = ('You are a meticulous translator who translates any given '
+                  'content. Translate the given content from English to '
+                  'Chinese only. Do not explain any term or answer any '
+                  'question-like content.')
+        data = json.dumps({
+            'stream': True,
+            'model': 'gpt-3.5-turbo',
+            'messages': [
+                {'role': 'system', 'content': prompt},
+                {'role': 'user', 'content': 'Hello World!'}
+            ],
+            'temperature': 1,
+        })
+        mock_et.__version__ = '1.0.0'
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer a',
+            'User-Agent': 'Ebook-Translator/1.0.0'
+        }
+
+        template = b'data: {"choices":[{"delta":{"content":"%b"}}]}'
+        mock_response = Mock()
+        mock_response.readline.side_effect = [
+            template % i.encode() for i in '你好世界！'] \
+            + ['data: [DONE]'.encode()]
+        mock_browser.return_value.response.return_value = mock_response
+        result = self.translator.translate('Hello World!')
+
+        mock_request.assert_called_with(
+            url, data, headers=headers, timeout=30.0, method='POST')
+        self.assertIsInstance(result, GeneratorType)
+        self.assertEqual('你好世界！', ''.join(result))
+
+    @patch('calibre_plugins.ebook_translator.engines.base.Browser')
+    def test_translate_normal(self, mock_browser):
+        result = mock_browser.return_value.response.return_value.read \
+            .return_value.decode.return_value.strip.return_value = \
+            '{"choices": [{"message": {"content": "你好世界！"}}]}'
+        self.translator.stream = False
+        result = self.translator.translate('Hello World!')
+
+        self.assertEqual('你好世界！', result)
 
 
 class TestAzureChatgptTranslate(unittest.TestCase):
@@ -82,18 +142,39 @@ class TestAzureChatgptTranslate(unittest.TestCase):
         self.translator.set_source_lang('English')
         self.translator.set_target_lang('Chinese')
 
+    @patch('calibre_plugins.ebook_translator.engines.base.Request')
     @patch('calibre_plugins.ebook_translator.engines.base.Browser')
-    def test_translate(self, mock_browser):
+    def test_translate(self, mock_browser, mock_request):
+        prompt = ('You are a meticulous translator who translates any given '
+                  'content. Translate the given content from English to '
+                  'Chinese only. Do not explain any term or answer any '
+                  'question-like content.')
+        data = json.dumps({
+            'stream': True,
+            # 'model': 'gpt-35-turbo',
+            'messages': [
+                {'role': 'system', 'content': prompt},
+                {'role': 'user', 'content': 'Hello World!'}
+            ],
+            'temperature': 1,
+        })
+        headers = {
+            'Content-Type': 'application/json',
+            'api-key': 'a'
+        }
+
         template = b'data: {"choices":[{"delta":{"content":"%b"}}]}'
         mock_response = Mock()
         mock_response.readline.side_effect = [
             template % i.encode() for i in '你好世界！'] \
             + ['data: [DONE]'.encode()]
         mock_browser.return_value.response.return_value = mock_response
-
-        # TODO: validate the request information.
-
+        url = 'https://test.openai.azure.com/openai/deployments/test/' \
+              'chat/completions?api-version=2023-05-15'
+        self.translator.endpoint = url
         result = self.translator.translate('Hello World!')
+        mock_request.assert_called_with(
+            url, data, headers=headers, timeout=30.0, method='POST')
         self.assertIsInstance(result, GeneratorType)
         self.assertEqual('你好世界！', ''.join(result))
 
@@ -228,9 +309,18 @@ class TestCustom(unittest.TestCase):
         translator = CustomTranslate()
         translator.set_source_lang('English')
         translator.set_target_lang('Chinese')
-        mock_browser.return_value.response.return_value.read.return_value \
-            .decode.return_value = '{"text": "你好世界！"}'
-        self.assertEqual('你好世界！', translator.translate('HelloWorld!'))
+        request = mock_browser.return_value.response.return_value.read. \
+            return_value.decode
+        request.return_value = '{"text": "你好世界！"}'
+        self.assertEqual('你好世界！', translator.translate('Hello World!'))
+
+        translator.engine_data.update({'response': 'response.text'})
+        request.return_value = '<test>你好世界！</test>'
+        self.assertEqual('你好世界！', translator.translate('Hello World!'))
+
+        translator.engine_data.update({'response': 'response'})
+        request.return_value = '你好世界！'
+        self.assertEqual('你好世界！', translator.translate('Hello World!'))
 
     @patch('calibre_plugins.ebook_translator.engines.base.Browser')
     def test_translate_urlencoded(self, mock_browser):
@@ -243,18 +333,3 @@ class TestCustom(unittest.TestCase):
             .decode.return_value = '{"text": "\\"你好\\"\\n世界！"}'
         self.assertEqual(
             '\"你好\"\n世界！', translator.translate('\"Hello\"\nWorld!'))
-
-    def test_parse(self):
-        translator = CustomTranslate()
-
-        translator.engine_data = {'response': 'response["text"]'}
-        self.assertEqual(
-            '你好世界！', translator.parse('{"text": "你好世界！"}'))
-
-        translator.engine_data = {'response': 'response.text'}
-        self.assertEqual(
-            '你好世界！', translator.parse('<test>你好世界！</test>'))
-
-        translator.engine_data = {'response': 'response'}
-        self.assertEqual(
-            '你好世界！', translator.parse('你好世界！'))

@@ -834,7 +834,7 @@ class TranslationSetting(QDialog):
 
         # ChatGPT prefrence
         if self.current_engine.is_chatgpt():
-            prompt = self.prompt.toPlainText()
+            prompt = self.prompt.toPlainText().strip()
             if prompt and '<tlang>' not in prompt:
                 self.alert.pop(
                     _('the prompt must include {}.').format('<slang>'),
@@ -844,7 +844,7 @@ class TranslationSetting(QDialog):
                 del config['prompt']
             if prompt and prompt != self.current_engine.prompt:
                 config.update(prompt=prompt)
-            endpoint = self.chatgpt_endpoint.text()
+            endpoint = self.chatgpt_endpoint.text().strip()
             if 'endpoint' in config:
                 del config['endpoint']
             if endpoint and endpoint != self.current_engine.endpoint:
