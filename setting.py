@@ -840,7 +840,9 @@ class TranslationSetting(QDialog):
                     _('the prompt must include {}.').format('<slang>'),
                     'warning')
                 return None
-            if prompt != self.current_engine.prompt:
+            if 'prompt' in config:
+                del config['prompt']
+            if prompt and prompt != self.current_engine.prompt:
                 config.update(prompt=prompt)
             endpoint = self.chatgpt_endpoint.text()
             if 'endpoint' in config:
