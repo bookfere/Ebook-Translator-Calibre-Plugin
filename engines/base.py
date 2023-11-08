@@ -1,3 +1,4 @@
+import ssl
 import traceback
 
 from mechanize import Browser, Request
@@ -157,6 +158,9 @@ class Base:
     def get_browser(self):
         br = Browser()
         br.set_handle_robots(False)
+        # Do not verify SSL certificates
+        br.set_ca_data(
+            context=ssl._create_unverified_context(cert_reqs=ssl.CERT_NONE))
 
         proxies = {}
         if self.proxy_uri is not None:
