@@ -121,10 +121,10 @@ class PageElement(Element):
 
     def add_translation(self, translation, placeholder, position=None,
                         lang=None, color=None):
+        # Escape the markups (<m id=1 />) to replace escaped markups.
         translation = xml_escape(translation)
         count = 0
         for reserve in self.reserve_elements:
-            # Escape the markups (<m id=1 />) to replace escaped markups.
             pattern = placeholder[1].format(r'\s*'.join(format(count, '05')))
             # Prevent potential invalid escapes from affecting the replacement.
             translation = re.sub(
