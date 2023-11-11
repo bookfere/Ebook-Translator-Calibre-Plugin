@@ -199,7 +199,7 @@ class Extraction:
 
     def get_sorted_pages(self):
         return sorted(
-            [page for page in self.pages if 'html' in page.media_type],
+            [p for p in self.pages if isinstance(p.data, etree._Element)],
             key=lambda page: sorted_mixed_keys(page.href))
 
     def get_elements(self):
