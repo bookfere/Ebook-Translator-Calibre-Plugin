@@ -16,7 +16,7 @@ load_translations()
 
 class TestBase(unittest.TestCase):
     def setUp(self):
-        self.mark, self.pattern = Base.placeholder
+        self.translator = Base()
 
     def test_placeholder(self):
         marks = [
@@ -24,7 +24,30 @@ class TestBase(unittest.TestCase):
         for mark in marks:
             with self.subTest(mark=mark):
                 self.assertIsNotNone(
-                    re.search(self.pattern.format(1), 'xxx %s xxx' % mark))
+                    re.search(
+                        Base.placeholder[1].format(1),
+                        'xxx %s xxx' % mark))
+
+    @patch('calibre_plugins.ebook_translator.engines.base.os.path.isfile')
+    def test_get_external_program(self, mock_os_path_isfile):
+        mock_os_path_isfile.side_effect = lambda p: p in [
+            '/path/to/real', '/path/to/folder/real', '/path/to/specify/real']
+
+        self.translator.search_paths = ['/path/to/real']
+        self.assertEqual(
+            '/path/to/real',
+            self.translator.get_external_program('real'))
+
+        self.translator.search_paths = ['/path/to/folder']
+        self.assertEqual(
+            '/path/to/folder/real',
+            self.translator.get_external_program('real'))
+        self.assertEqual(
+            '/path/to/specify/real',
+            self.translator.get_external_program('real', ['/path/to/specify']))
+
+        self.assertIsNone(
+            self.translator.get_external_program('/path/to/fake'))
 
 
 @patch('calibre_plugins.ebook_translator.engines.base.Browser')
