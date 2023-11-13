@@ -28,6 +28,7 @@ defaults = {
     'merge_enabled': False,
     'merge_length': 1800,
     'ebook_metadata': {},
+    'search_paths': [],
 }
 
 

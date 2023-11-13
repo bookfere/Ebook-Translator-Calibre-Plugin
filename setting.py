@@ -291,6 +291,20 @@ class TranslationSetting(QDialog):
         log_translation.toggled.connect(
             lambda checked: self.config.update(log_translation=checked))
 
+        # Search path
+        path_group = QGroupBox(_('Search Paths'))
+        path_layout = QVBoxLayout(path_group)
+        path_desc = QLabel(
+            _('The plugin will search for external programs via these paths.'))
+        self.path_list = QPlainTextEdit()
+        self.path_list.setMinimumHeight(100)
+        path_layout.addWidget(path_desc)
+        path_layout.addWidget(self.path_list)
+
+        self.path_list.setPlainText('\n'.join(self.config.get('search_paths')))
+
+        layout.addWidget(path_group)
+
         layout.addStretch(1)
 
         return widget
@@ -310,6 +324,16 @@ class TranslationSetting(QDialog):
         engine_layout.addWidget(engine_test)
         engine_layout.addWidget(manage_engine)
         layout.addWidget(engine_group)
+
+        # Using Tip
+        self.tip_group = QGroupBox(_('Using Tip'))
+        tip_layout = QVBoxLayout(self.tip_group)
+        self.using_tip = QLabel()
+        self.using_tip.setTextFormat(Qt.RichText)
+        self.using_tip.setWordWrap(True)
+        self.using_tip.setOpenExternalLinks(True)
+        tip_layout.addWidget(self.using_tip)
+        layout.addWidget(self.tip_group)
 
         # API Keys
         self.keys_group = QGroupBox(_('API Keys'))
@@ -467,7 +491,7 @@ class TranslationSetting(QDialog):
             engine_name = engine_list.itemData(index)
             self.config.update(translate_engine=engine_name)
             self.current_engine = get_engine_class(engine_name)
-            # refresh preferred language
+            # Refresh preferred language
             source_lang = self.current_engine.config.get('source_lang')
             self.source_lang.refresh.emit(
                 self.current_engine.lang_codes.get('source'), source_lang,
@@ -475,7 +499,12 @@ class TranslationSetting(QDialog):
             target_lang = self.current_engine.config.get('target_lang')
             self.target_lang.refresh.emit(
                 self.current_engine.lang_codes.get('target'), target_lang)
-            self.set_api_keys()  # show api key setting
+            # show use notice
+            show_tip = self.current_engine.using_tip is not None
+            self.tip_group.setVisible(show_tip)
+            show_tip and self.using_tip.setText(self.current_engine.using_tip)
+            # show api key setting
+            self.set_api_keys()
             # Request setting
             value = self.current_engine.config.get('concurrency_limit')
             if value is None:
@@ -538,6 +567,7 @@ class TranslationSetting(QDialog):
             if config is not None:
                 self.current_engine.set_config(config)
                 translator = self.current_engine()
+                translator.set_search_paths(self.get_search_paths())
                 self.proxy_enabled.isChecked() and translator.set_proxy(
                     [self.proxy_host.text(), self.proxy_port.text()])
                 EngineTester(self, translator)
@@ -551,10 +581,9 @@ class TranslationSetting(QDialog):
         need_api_key = self.current_engine.need_api_key
         self.keys_group.setVisible(need_api_key)
         if need_api_key:
-            self.api_keys.clear()
-            self.api_keys.setPlaceholderText(
-                self.current_engine.api_key_hint)
+            self.api_keys.setPlaceholderText(self.current_engine.api_key_hint)
             api_keys = self.current_engine.config.get('api_keys', [])
+            self.api_keys.clear()
             for api_key in api_keys:
                 self.api_keys.appendPlainText(api_key)
 
@@ -787,6 +816,10 @@ class TranslationSetting(QDialog):
             return state == 2  # Compatible with PyQt5
         return state.value == 2
 
+    def get_search_paths(self):
+        path_list = self.path_list.toPlainText()
+        return [p for p in path_list.split('\n') if os.path.exists(p)]
+
     def update_general_config(self):
         # Output path
         if not self.config.get('to_library'):
@@ -813,6 +846,12 @@ class TranslationSetting(QDialog):
             proxy_setting.append(int(port))
             self.config.update(proxy_setting=proxy_setting)
         len(proxy_setting) < 1 and self.config.delete('proxy_setting')
+
+        # Search paths
+        search_paths = self.get_search_paths()
+        self.config.update(search_paths=search_paths)
+        self.path_list.setPlainText('\n'.join(search_paths))
+
         return True
 
     def get_engine_config(self):
@@ -823,7 +862,7 @@ class TranslationSetting(QDialog):
             api_key_validator = QRegularExpressionValidator(
                 QRegularExpression(self.current_engine.api_key_pattern))
             key_str = re.sub('\n+', '\n', self.api_keys.toPlainText()).strip()
-            for key in [key.strip() for key in key_str.split('\n')]:
+            for key in [k.strip() for k in key_str.split('\n')]:
                 if not self.is_valid_data(api_key_validator, key):
                     self.alert.pop(
                         self.current_engine.api_key_error_message(), 'warning')
@@ -897,7 +936,7 @@ class TranslationSetting(QDialog):
 
         # Filter rules
         rule_content = self.filter_rules.toPlainText()
-        filter_rules = [r for r in rule_content.split('\n') if r]
+        filter_rules = [r for r in rule_content.split('\n') if r.strip()]
         if self.config.get('rule_mode') == 'regex':
             for rule in filter_rules:
                 if not self.is_valid_regex(rule):
@@ -910,7 +949,7 @@ class TranslationSetting(QDialog):
 
         # Element rules
         rule_content = self.element_rules.toPlainText()
-        element_rules = [r for r in rule_content.split('\n') if r]
+        element_rules = [r for r in rule_content.split('\n') if r.strip()]
         for rule in element_rules:
             if css(rule) is None:
                 self.alert.pop(

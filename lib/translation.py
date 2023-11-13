@@ -276,6 +276,7 @@ def get_translator(engine_class=None):
     config = get_config()
     engine_class = engine_class or get_engine_class()
     translator = engine_class()
+    translator.set_search_paths(config.get('search_paths'))
     if config.get('proxy_enabled'):
         translator.set_proxy(config.get('proxy_setting'))
     translator.set_merge_enabled(config.get('merge_enabled'))

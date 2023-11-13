@@ -1,4 +1,5 @@
 import ssl
+import os.path
 import traceback
 
 from mechanize import Browser, Request
@@ -21,6 +22,7 @@ class Base:
     api_key_errors = ['401']
     separator = '\n\n'
     placeholder = ('{{{{id_{}}}}}', r'({{\s*)+id\s*_\s*{}\s*(\s*}})+')
+    using_tip = None
 
     concurrency_limit = 0
     request_interval = 0.0
@@ -32,6 +34,7 @@ class Base:
         self.source_lang = None
         self.target_lang = None
         self.proxy_uri = None
+        self.search_paths = []
 
         self.merge_enabled = False
 
@@ -107,6 +110,17 @@ class Base:
                 if error in error_message:
                     return True
         return False
+
+    def set_search_paths(self, paths):
+        self.search_paths = paths
+
+    def get_external_program(self, name, paths=[]):
+        for path in paths + self.search_paths:
+            if not path.endswith('%s%s' % (os.path.sep, name)):
+                path = os.path.join(path, name)
+            if os.path.isfile(path):
+                return path
+        return None
 
     def set_endpoint(self, endpoint):
         self.endpoint = endpoint
