@@ -393,18 +393,24 @@ class TranslationSetting(QDialog):
         # ChatGPT Setting
         chatgpt_group = QGroupBox(_('Tune ChatGPT'))
         chatgpt_group.setVisible(False)
-        endpoint_layout = QFormLayout(chatgpt_group)
-        self.set_form_layout_policy(endpoint_layout)
+        chatgpt_layout = QFormLayout(chatgpt_group)
+        self.set_form_layout_policy(chatgpt_layout)
 
         self.prompt = QPlainTextEdit()
         self.prompt.setMinimumHeight(80)
         self.prompt.setMaximumHeight(80)
-        endpoint_layout.addRow(_('Prompt'), self.prompt)
+        chatgpt_layout.addRow(_('Prompt'), self.prompt)
         self.chatgpt_endpoint = QLineEdit()
-        endpoint_layout.addRow(_('Endpoint'), self.chatgpt_endpoint)
+        chatgpt_layout.addRow(_('Endpoint'), self.chatgpt_endpoint)
 
-        chatgpt_model = QComboBox()
-        endpoint_layout.addRow(_('Model'), chatgpt_model)
+        chatgpt_model = QWidget()
+        chatgpt_model_layout = QHBoxLayout(chatgpt_model)
+        chatgpt_model_layout.setContentsMargins(0, 0, 0, 0)
+        chatgpt_select = QComboBox()
+        chatgpt_custom = QLineEdit()
+        chatgpt_model_layout.addWidget(chatgpt_select)
+        chatgpt_model_layout.addWidget(chatgpt_custom)
+        chatgpt_layout.addRow(_('Model'), chatgpt_model)
 
         self.disable_wheel_event(chatgpt_model)
 
@@ -427,13 +433,13 @@ class TranslationSetting(QDialog):
         sampling_layout.addWidget(top_p)
         sampling_layout.addWidget(top_p_value)
         sampling_layout.addStretch(1)
-        endpoint_layout.addRow(_('Sampling'), sampling_widget)
+        chatgpt_layout.addRow(_('Sampling'), sampling_widget)
 
         self.disable_wheel_event(temperature_value)
         self.disable_wheel_event(top_p_value)
 
         stream_enabled = QCheckBox(_('Enable streaming text like in ChatGPT'))
-        endpoint_layout.addRow(_('Stream'), stream_enabled)
+        chatgpt_layout.addRow(_('Stream'), stream_enabled)
 
         sampling_btn_group = QButtonGroup(sampling_widget)
         sampling_btn_group.addButton(temperature, 0)
@@ -460,12 +466,42 @@ class TranslationSetting(QDialog):
             self.chatgpt_endpoint.setText(
                 config.get('endpoint', self.current_engine.endpoint))
             # Model
-            chatgpt_model.clear()
-            chatgpt_model.addItems(self.current_engine.models)
-            chatgpt_model.setCurrentText(
-                config.get('model', self.current_engine.model))
-            chatgpt_model.currentTextChanged.connect(
-                lambda model: self.current_engine.config.update(model=model))
+            if self.current_engine.model is not None:
+                chatgpt_layout.setRowVisible(chatgpt_model, True)
+                chatgpt_select.clear()
+                chatgpt_select.addItems(self.current_engine.models)
+                chatgpt_select.addItem(_('Custom'))
+                model = config.get('model', self.current_engine.model)
+                chatgpt_select.setCurrentText(
+                    model if model in self.current_engine.models
+                    else _('Custom'))
+
+                def setup_chatgpt_model(model):
+                    if model in self.current_engine.models:
+                        chatgpt_custom.setVisible(False)
+                    else:
+                        chatgpt_custom.setVisible(True)
+                        if model != _('Custom'):
+                            chatgpt_custom.setText(model)
+                setup_chatgpt_model(model)
+
+                def update_chatgpt_model(model):
+                    if not model or _(model) == _('Custom'):
+                        model = self.current_engine.models[0]
+                    config.update(model=model)
+
+                def change_chatgpt_model(model):
+                    setup_chatgpt_model(model)
+                    update_chatgpt_model(model)
+
+                chatgpt_custom.textChanged.connect(
+                    lambda model: update_chatgpt_model(model=model.strip()))
+                chatgpt_select.currentTextChanged.connect(change_chatgpt_model)
+                self.save_config.connect(
+                    lambda: chatgpt_select.setCurrentText(config.get('model')))
+            else:
+                chatgpt_layout.setRowVisible(chatgpt_model, False)
+
             # Sampling
             sampling = config.get('sampling', self.current_engine.sampling)
             btn_id = self.current_engine.samplings.index(sampling)

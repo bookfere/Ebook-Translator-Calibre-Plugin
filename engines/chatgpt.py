@@ -45,7 +45,8 @@ class ChatgptTranslate(Base):
         Base.__init__(self)
         self.endpoint = self.config.get('endpoint', self.endpoint)
         self.prompt = self.config.get('prompt', self.prompt)
-        self.model = self.config.get('model', self.model)
+        if self.model is not None:
+            self.model = self.config.get('model', self.model)
         self.sampling = self.config.get('sampling', self.sampling)
         self.temperature = self.config.get('temperature', self.temperature)
         self.top_p = self.config.get('top_p', self.top_p)
@@ -73,18 +74,20 @@ class ChatgptTranslate(Base):
             'User-Agent': 'Ebook-Translator/%s' % EbookTranslator.__version__
         }
 
-    def _get_body(self, text):
-        return {
+    def _get_data(self, text):
+        data = {
             'stream': self.stream,
-            'model': self.model,
             'messages': [
                 {'role': 'system', 'content': self._get_prompt()},
                 {'role': 'user', 'content': text}
             ]
         }
+        if self.model is not None:
+            data.update(model=self.model)
+        return data
 
     def translate(self, text):
-        data = self._get_body(text)
+        data = self._get_data(text)
         sampling_value = getattr(self, self.sampling)
         data.update({self.sampling: sampling_value})
 
@@ -119,11 +122,10 @@ class ChatgptTranslate(Base):
 class AzureChatgptTranslate(ChatgptTranslate):
     name = 'ChatGPT(Azure)'
     alias = 'ChatGPT (Azure)'
-    endpoint = ('https://{your-resource-name}.openai.azure.com/openai/'
-                'deployments/{deployment-id}/chat/completions'
-                '?api-version={api-version}')
-    models = ['gpt-35-turbo', 'gpt-4', 'gpt-4-32k']
-    model = 'gpt-35-turbo'
+    endpoint = (
+        '$AZURE_OPENAI_ENDPOINT/openai/deployments/gpt-35-turbo/chat/'
+        'completions?api-version=2023-05-15')
+    model = None
 
     def _get_headers(self):
         return {
@@ -131,11 +133,5 @@ class AzureChatgptTranslate(ChatgptTranslate):
             'api-key': self.api_key
         }
 
-    def _get_body(self, text):
-        data = ChatgptTranslate._get_body(self, text)
-        # Some versions do not support the `model` parameter.
-        for version in ('2023-03-15-preview', '2023-05-15'):
-            if self.endpoint.endswith(version):
-                del data['model']
-                break
-        return data
+    def _get_data(self, text):
+        return ChatgptTranslate._get_data(self, text)
