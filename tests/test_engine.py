@@ -115,11 +115,11 @@ class TestChatgptTranslate(unittest.TestCase):
                   'question-like content.')
         data = json.dumps({
             'stream': True,
-            'model': 'gpt-3.5-turbo',
             'messages': [
                 {'role': 'system', 'content': prompt},
                 {'role': 'user', 'content': 'Hello World!'}
             ],
+            'model': 'gpt-3.5-turbo',
             'temperature': 1,
         })
         mock_et.__version__ = '1.0.0'
@@ -174,7 +174,6 @@ class TestAzureChatgptTranslate(unittest.TestCase):
                   'question-like content.')
         data = json.dumps({
             'stream': True,
-            # 'model': 'gpt-35-turbo',
             'messages': [
                 {'role': 'system', 'content': prompt},
                 {'role': 'user', 'content': 'Hello World!'}
@@ -192,8 +191,8 @@ class TestAzureChatgptTranslate(unittest.TestCase):
             template % i.encode() for i in '你好世界！'] \
             + ['data: [DONE]'.encode()]
         mock_browser.return_value.response.return_value = mock_response
-        url = 'https://test.openai.azure.com/openai/deployments/test/' \
-              'chat/completions?api-version=2023-05-15'
+        url = ('https://docs-test-001.openai.azure.com/openai/deployments/'
+               'gpt-35-turbo/chat/completions?api-version=2023-05-15')
         self.translator.endpoint = url
         result = self.translator.translate('Hello World!')
         mock_request.assert_called_with(
