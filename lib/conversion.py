@@ -170,7 +170,7 @@ class ConversionWorker:
                 if ebook_metadata.get('language'):
                     metadata.language = ebook.lang_code
                 subjects = ebook_metadata.get('subjects')
-                metadata.tags = subjects or ['Translate by Ebook Translator']
+                metadata.tags += subjects or ['Translate by Ebook Translator']
                 # metadata.title = 'Custom Title'
                 # metadata.authors = ['bookfere.com']
                 # metadata.author_sort = 'bookfere.com'
