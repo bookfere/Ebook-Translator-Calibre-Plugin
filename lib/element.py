@@ -379,7 +379,7 @@ class ElementHandlerMerge(ElementHandler):
         # Check if the translated content contains at least one separator;
         # if none is found, use the placeholder to separate paragraphs.
         if self.separator and self.separator in content:
-            pattern = '%s+' % self.separator[0]
+            pattern = '%s+' % self.separator
             content = re.sub(pattern, self.separator, content)
         else:
             self.separator = None
