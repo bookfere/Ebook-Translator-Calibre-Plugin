@@ -2,6 +2,7 @@ import re
 import sys
 import socket
 import hashlib
+from subprocess import Popen
 
 from calibre.utils.logging import Log
 
@@ -92,6 +93,15 @@ def size_by_unit(number, unit='KB'):
     if unit not in multiple:
         unit = 'KB'
     return round(float(number) / (1000 ** multiple[unit]), 2)
+
+
+def open_path(path):
+    cmd = 'open'
+    if sys.platform.startswith('win32'):
+        cmd = 'explorer'
+    if sys.platform.startswith('linux'):
+        cmd = 'xdg-open'
+    Popen([cmd, path])
 
 
 def dummy(*args, **kwargs):

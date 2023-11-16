@@ -69,13 +69,22 @@ class BatchTranslation(QDialog):
             input_fmt = InputFormat(ebook.files.keys())
             table.setCellWidget(row, 1, input_fmt)
 
-            def change_input_format(format, row=row):
-                self.ebooks[row].set_input_format(format)
-            change_input_format(input_fmt.currentText(), row)
-            input_fmt.currentTextChanged.connect(change_input_format)
-
             output_format = OutputFormat()
             table.setCellWidget(row, 2, output_format)
+
+            exist_format = output_format.findText(ebook.input_format)
+            if ebook.is_extra_format() and exist_format:
+                output_format.addItem(ebook.input_format)
+
+            def change_input_format(format, row=row):
+                ebook = self.ebooks[row]
+                ebook.set_input_format(format)
+                if ebook.is_extra_format():
+                    output_format.lock_format(format)
+                else:
+                    output_format.unlock_format()
+            change_input_format(input_fmt.currentText(), row)
+            input_fmt.currentTextChanged.connect(change_input_format)
 
             def change_output_format(format, row=row):
                 self.ebooks[row].set_output_format(format)
@@ -135,13 +144,6 @@ class BatchTranslation(QDialog):
         if not to_library and not os.path.exists(output_path):
             return self.alert.pop(
                 _('The specified path does not exist.'), 'warning')
-
-        # glossary_enabled = self.config.get('glossary_enabled')
-        # glossary_path = self.config.get('glossary_path')
-        # if glossary_enabled and not os.path.exists(glossary_path):
-        #     return self.alert.pop(
-        #         _('The specified glossary file does not exist.'), 'warning')
-
         ebooks = ebooks if isinstance(ebooks, list) else [ebooks]
         for ebook in self.ebooks:
             self.worker.translate_ebook(ebook, is_batch=True)

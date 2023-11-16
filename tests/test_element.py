@@ -8,8 +8,8 @@ from calibre.ebooks.oeb.base import TOC
 from ..lib.utils import ns
 from ..lib.cache import Paragraph
 from ..lib.element import (
-    get_string, get_name, TocElement, PageElement, Extraction, ElementHandler,
-    ElementHandlerMerge, get_toc_elements)
+    get_string, get_name, SrtElement, TocElement, PageElement, Extraction,
+    ElementHandler, ElementHandlerMerge, get_toc_elements)
 from ..engines import DeeplFreeTranslate
 from ..engines.base import Base
 
@@ -46,6 +46,32 @@ class TestFunction(unittest.TestCase):
         self.assertEqual(3, len(elements))
 
 
+class TestSrtElement(unittest.TestCase):
+    def setUp(self):
+        self.element = SrtElement(['1', '00:01 --> 00:02', 'a'])
+
+    def test_get_raw(self):
+        self.assertEqual('a', self.element.get_raw())
+
+    def test_get_text(self):
+        self.assertEqual('a', self.element.get_text())
+
+    def test_get_content(self):
+        self.assertEqual('a', self.element.get_content(Base.placeholder))
+
+    def test_add_translation_after(self):
+        element = self.element.add_translation('A', Base.placeholder, 'after')
+        self.assertEqual('a\nA', element[2])
+
+    def test_add_translation_before(self):
+        element = self.element.add_translation('A', Base.placeholder, 'before')
+        self.assertEqual('A\na', element[2])
+
+    def test_add_translation_only(self):
+        element = self.element.add_translation('A', Base.placeholder, 'only')
+        self.assertEqual('A', element[2])
+
+
 class TestTocElement(unittest.TestCase):
     def setUp(self):
         self.element = TocElement(TOC('a', 'a.html'), 'toc.ncx')
@@ -59,9 +85,17 @@ class TestTocElement(unittest.TestCase):
     def test_get_content(self):
         self.assertEqual('a', self.element.get_content(Base.placeholder))
 
-    def test_add_translation(self):
-        element = self.element.add_translation('A', Base.placeholder)
+    def test_add_translation_after(self):
+        element = self.element.add_translation('A', Base.placeholder, 'after')
         self.assertEqual('a A', element.title)
+
+    def test_add_translation_before(self):
+        element = self.element.add_translation('A', Base.placeholder, 'before')
+        self.assertEqual('A a', element.title)
+
+    def test_add_translation_only(self):
+        element = self.element.add_translation('A', Base.placeholder, 'only')
+        self.assertEqual('A', element.title)
 
 
 class TestPageElement(unittest.TestCase):

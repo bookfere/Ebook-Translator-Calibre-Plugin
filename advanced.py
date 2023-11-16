@@ -8,7 +8,7 @@ from .lib.config import get_config
 from .lib.cache import Paragraph, TranslationCache, get_cache
 from .lib.translation import get_engine_class, get_translator, get_translation
 from .lib.element import get_element_handler, Extraction
-from .lib.conversion import extract_ebook_elements
+from .lib.conversion import extract_item
 
 from . import EbookTranslator
 from .components import (
@@ -88,7 +88,7 @@ class PreparationWorker(QObject):
             a = time.time()
             # --------------------------
             self.progress_message.emit(_('Extracting ebook content...'))
-            elements = extract_ebook_elements(input_path)
+            elements = extract_item(input_path, self.ebook.input_format)
             self.progress.emit(30)
             b = time.time()
             print('extract: ', b - a)
@@ -579,6 +579,10 @@ class AdvancedTranslation(QDialog):
             self.ebook.set_output_format(format)
         change_output_format(output_format.currentText())
         output_format.currentTextChanged.connect(change_output_format)
+
+        if self.ebook.is_extra_format():
+            output_format.lock_format(self.ebook.input_format)
+            change_output_format(self.ebook.input_format)
 
         def output_ebook():
             if len(self.table.findItems(_('Translated'), Qt.MatchExactly)) < 1:

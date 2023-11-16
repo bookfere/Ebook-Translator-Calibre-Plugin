@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-11-14 02:37+0800\n"
+"POT-Creation-Date: 2023-11-17 03:08+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -127,39 +127,39 @@ msgstr ""
 msgid "Output"
 msgstr ""
 
-#: advanced.py:540 batch.py:54 cache.py:195
+#: advanced.py:540 batch.py:54 cache.py:190
 msgid "Title"
 msgstr ""
 
-#: advanced.py:584 components/table.py:70
+#: advanced.py:588 components/table.py:70
 msgid "Translated"
 msgstr ""
 
-#: advanced.py:617
+#: advanced.py:621
 msgid "No translation yet"
 msgstr ""
 
-#: advanced.py:664 components/engine.py:206 setting.py:88
+#: advanced.py:668 components/engine.py:206 setting.py:88
 msgid "Save"
 msgstr ""
 
-#: advanced.py:723
+#: advanced.py:727
 msgid "Your changes have been saved."
 msgstr ""
 
-#: advanced.py:736
+#: advanced.py:740
 msgid "Translation log"
 msgstr ""
 
-#: advanced.py:747
+#: advanced.py:751
 msgid "Error log"
 msgstr ""
 
-#: advanced.py:767
+#: advanced.py:771
 msgid "Are you sure you want to translate all {:n} paragraphs?"
 msgstr ""
 
-#: advanced.py:793
+#: advanced.py:797
 msgid "Are you sure you want to stop the translation progress?"
 msgstr ""
 
@@ -167,15 +167,15 @@ msgstr ""
 msgid "Output Format"
 msgstr ""
 
-#: batch.py:117 components/engine.py:137 components/table.py:79
+#: batch.py:126 components/engine.py:137 components/table.py:79
 msgid "Translate"
 msgstr ""
 
-#: batch.py:128 lib/cache.py:117
+#: batch.py:137 lib/cache.py:117
 msgid "Unknown"
 msgstr ""
 
-#: batch.py:137 cache.py:130 setting.py:829
+#: batch.py:146 cache.py:130 setting.py:865
 msgid "The specified path does not exist."
 msgstr ""
 
@@ -184,7 +184,7 @@ msgid "Choose a path to store cache files."
 msgstr ""
 
 #: cache.py:73 components/mode.py:41 components/mode.py:51 setting.py:148
-#: setting.py:635 setting.py:669
+#: setting.py:671 setting.py:705
 msgid "Choose"
 msgstr ""
 
@@ -229,27 +229,27 @@ msgstr ""
 msgid "No cache exists."
 msgstr ""
 
-#: cache.py:174
+#: cache.py:169
 msgid "Total: {}"
 msgstr ""
 
-#: cache.py:195 components/table.py:36 setting.py:53
+#: cache.py:190 components/table.py:36 setting.py:53
 msgid "Engine"
 msgstr ""
 
-#: cache.py:195 components/table.py:36 setting.py:790
+#: cache.py:190 components/table.py:36 setting.py:826
 msgid "Language"
 msgstr ""
 
-#: cache.py:195
+#: cache.py:190
 msgid "Merge Length"
 msgstr ""
 
-#: cache.py:196
+#: cache.py:191
 msgid "Filename"
 msgstr ""
 
-#: cache.py:196
+#: cache.py:191
 msgid "Size (MB)"
 msgstr ""
 
@@ -310,7 +310,7 @@ msgstr ""
 msgid "Feedback"
 msgstr ""
 
-#: components/lang.py:34 engines/base.py:70 setting.py:896
+#: components/lang.py:34 engines/base.py:70 setting.py:932
 msgid "Auto detect"
 msgstr ""
 
@@ -374,55 +374,55 @@ msgstr ""
 msgid "A correct key format \"{}\" is required."
 msgstr ""
 
-#: engines/base.py:214 engines/chatgpt.py:108 tests/test_engine.py:90
+#: engines/base.py:214 engines/chatgpt.py:111 tests/test_engine.py:90
 msgid "Can not parse returned response. Raw data: {}"
 msgstr ""
 
-#: engines/custom.py:45 tests/test_engine.py:236
+#: engines/custom.py:45 tests/test_engine.py:235
 msgid "Engine data must be in valid JSON format."
 msgstr ""
 
-#: engines/custom.py:48 tests/test_engine.py:239
+#: engines/custom.py:48 tests/test_engine.py:238
 msgid "Invalid engine data."
 msgstr ""
 
-#: engines/custom.py:52 tests/test_engine.py:242
+#: engines/custom.py:52 tests/test_engine.py:241
 msgid "Engine name is required."
 msgstr ""
 
-#: engines/custom.py:55 tests/test_engine.py:246
+#: engines/custom.py:55 tests/test_engine.py:245
 msgid "Engine name must be different from builtin engine name."
 msgstr ""
 
-#: engines/custom.py:59 tests/test_engine.py:249 tests/test_engine.py:252
+#: engines/custom.py:59 tests/test_engine.py:248 tests/test_engine.py:251
 msgid "Language codes are required."
 msgstr ""
 
-#: engines/custom.py:63 tests/test_engine.py:255 tests/test_engine.py:258
+#: engines/custom.py:63 tests/test_engine.py:254 tests/test_engine.py:257
 msgid "Source and target must be added in pair."
 msgstr ""
 
-#: engines/custom.py:67 tests/test_engine.py:261
+#: engines/custom.py:67 tests/test_engine.py:260
 msgid "Request information is required."
 msgstr ""
 
-#: engines/custom.py:69 tests/test_engine.py:265
+#: engines/custom.py:69 tests/test_engine.py:264
 msgid "API URL is required."
 msgstr ""
 
-#: engines/custom.py:73 tests/test_engine.py:270
+#: engines/custom.py:73 tests/test_engine.py:269
 msgid "Placeholder <text> is required."
 msgstr ""
 
-#: engines/custom.py:77 tests/test_engine.py:275
+#: engines/custom.py:77 tests/test_engine.py:274
 msgid "Request headers must be an JSON object."
 msgstr ""
 
-#: engines/custom.py:80 tests/test_engine.py:281
+#: engines/custom.py:80 tests/test_engine.py:280
 msgid "A appropriate Content-Type in headers is required."
 msgstr ""
 
-#: engines/custom.py:84 tests/test_engine.py:286
+#: engines/custom.py:84 tests/test_engine.py:285
 msgid "Expression to parse response is required."
 msgstr ""
 
@@ -464,31 +464,39 @@ msgstr ""
 msgid "Youdao"
 msgstr ""
 
-#: lib/conversion.py:120
-msgid "Start to convert ebook format:"
+#: lib/conversion.py:140
+msgid "Start to convert ebook format ..."
 msgstr ""
 
-#: lib/conversion.py:156
+#: lib/conversion.py:163
+msgid "Starting to output subtitles file ..."
+msgstr ""
+
+#: lib/conversion.py:169
+msgid "The translation of the subtitles file was completed."
+msgstr ""
+
+#: lib/conversion.py:199
 msgid "[{} > {}] Translating \"{}\""
 msgstr ""
 
-#: lib/conversion.py:165
+#: lib/conversion.py:208
 msgid "Translation job failed"
 msgstr ""
 
-#: lib/conversion.py:193
+#: lib/conversion.py:238
 msgid "completed"
 msgstr ""
 
-#: lib/conversion.py:201
+#: lib/conversion.py:253
 msgid "Ebook Translation Log"
 msgstr ""
 
-#: lib/conversion.py:202
+#: lib/conversion.py:254
 msgid "Translation Completed"
 msgstr ""
 
-#: lib/conversion.py:203
+#: lib/conversion.py:255
 msgid "The translation of \"{}\" was completed. Do you want to open the book?"
 msgstr ""
 
@@ -588,7 +596,7 @@ msgstr ""
 msgid "Merge to Translate"
 msgstr ""
 
-#: setting.py:198 setting.py:219 setting.py:263 setting.py:666
+#: setting.py:198 setting.py:219 setting.py:263 setting.py:702
 msgid "Enable"
 msgstr ""
 
@@ -636,7 +644,7 @@ msgstr ""
 msgid "The plugin will search for external programs via these paths."
 msgstr ""
 
-#: setting.py:322
+#: setting.py:322 setting.py:473 setting.py:477 setting.py:484 setting.py:489
 msgid "Custom"
 msgstr ""
 
@@ -692,155 +700,155 @@ msgstr ""
 msgid "Endpoint"
 msgstr ""
 
-#: setting.py:407
+#: setting.py:413
 msgid "Model"
 msgstr ""
 
-#: setting.py:430
+#: setting.py:436
 msgid "Sampling"
 msgstr ""
 
-#: setting.py:435
+#: setting.py:441
 msgid "Enable streaming text like in ChatGPT"
 msgstr ""
 
-#: setting.py:436
+#: setting.py:442
 msgid "Stream"
 msgstr ""
 
-#: setting.py:596
+#: setting.py:632
 msgid "Translation Position"
 msgstr ""
 
-#: setting.py:598
+#: setting.py:634
 msgid "Add after original"
 msgstr ""
 
-#: setting.py:600
+#: setting.py:636
 msgid "Add before original"
 msgstr ""
 
-#: setting.py:601
+#: setting.py:637
 msgid "Add without original"
 msgstr ""
 
-#: setting.py:624
+#: setting.py:660
 msgid "Translation Color"
 msgstr ""
 
-#: setting.py:628
+#: setting.py:664
 msgid "CSS color value, e.g., #666666, grey, rgb(80, 80, 80)"
 msgstr ""
 
-#: setting.py:664
+#: setting.py:700
 msgid "Translation Glossary"
 msgstr ""
 
-#: setting.py:668
+#: setting.py:704
 msgid "Choose a glossary file"
 msgstr ""
 
-#: setting.py:687
+#: setting.py:723
 msgid "Ignore Paragraph"
 msgstr ""
 
-#: setting.py:693
+#: setting.py:729
 msgid "Scope"
 msgstr ""
 
-#: setting.py:694
+#: setting.py:730
 msgid "Text only"
 msgstr ""
 
-#: setting.py:696
+#: setting.py:732
 msgid "HTML element"
 msgstr ""
 
-#: setting.py:703
+#: setting.py:739
 msgid "Mode"
 msgstr ""
 
-#: setting.py:704
+#: setting.py:740
 msgid "Normal"
 msgstr ""
 
-#: setting.py:706
+#: setting.py:742
 msgid "Normal (case-sensitive)"
 msgstr ""
 
-#: setting.py:707
+#: setting.py:743
 msgid "Regular Expression"
 msgstr ""
 
-#: setting.py:749
+#: setting.py:785
 msgid "Exclude paragraph by keyword. One keyword per line:"
 msgstr ""
 
-#: setting.py:750
+#: setting.py:786
 msgid "Exclude paragraph by case-sensitive keyword. One keyword per line:"
 msgstr ""
 
-#: setting.py:752
+#: setting.py:788
 msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
 msgstr ""
 
-#: setting.py:768
+#: setting.py:804
 msgid "Ignore Element"
 msgstr ""
 
-#: setting.py:776
+#: setting.py:812
 msgid "CSS selectors to exclude elements. One rule per line:"
 msgstr ""
 
-#: setting.py:779
+#: setting.py:815
 msgid "e.g."
 msgstr ""
 
-#: setting.py:783
+#: setting.py:819
 msgid "Ebook Metadata"
 msgstr ""
 
-#: setting.py:786
+#: setting.py:822
 msgid "Set \"Target Language\" to metadata"
 msgstr ""
 
-#: setting.py:789
+#: setting.py:825
 msgid "Subjects of ebook (one subject per line)"
 msgstr ""
 
-#: setting.py:791
+#: setting.py:827
 msgid "Subject"
 msgstr ""
 
-#: setting.py:808 setting.py:843
+#: setting.py:844 setting.py:879
 msgid "Proxy host or port is incorrect."
 msgstr ""
 
-#: setting.py:810
+#: setting.py:846
 msgid "The proxy is available."
 msgstr ""
 
-#: setting.py:811
+#: setting.py:847
 msgid "The proxy is not available."
 msgstr ""
 
-#: setting.py:879
+#: setting.py:915
 msgid "the prompt must include {}."
 msgstr ""
 
-#: setting.py:923
+#: setting.py:959
 msgid "Invalid color value."
 msgstr ""
 
-#: setting.py:932
+#: setting.py:968
 msgid "The specified glossary file does not exist."
 msgstr ""
 
-#: setting.py:944
+#: setting.py:980
 msgid "{} is not a valid regular expression."
 msgstr ""
 
-#: setting.py:956
+#: setting.py:992
 msgid "{} is not a valid CSS seletor."
 msgstr ""
 
