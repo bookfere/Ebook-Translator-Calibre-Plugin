@@ -617,14 +617,12 @@ class TestElementHandlerMerge(unittest.TestCase):
 
         elements = self.xhtml.findall('./x:body/*', namespaces=ns)
 
-        self.assertEqual(8, len(elements))
+        self.assertEqual(7, len(elements))
         self.assertEqual('a', elements[0].text)
-        self.assertEqual('A', elements[1].text)
+        self.assertEqual('A B', elements[1].text)
         self.assertEqual('b', elements[2].text)
-        self.assertEqual('B', elements[3].text)
-
+        self.assertEqual('C', elements[3].text)
         self.assertEqual('c', elements[5].text)
-        self.assertEqual('C', elements[6].text)
 
     def test_add_translations_merge_separator_multiple(self):
         self.handler.merge_length = 2
