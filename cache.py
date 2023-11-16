@@ -1,8 +1,8 @@
 import os
 import sys
 import os.path
-from subprocess import Popen
 
+from .lib.utils import open_path
 from .lib.cache import default_cache_path, TranslationCache
 from .lib.config import get_config
 from .components import layout_info, AlertMessage
@@ -162,12 +162,7 @@ class CacheManager(QDialog):
         cache_path = TranslationCache.cache_path
         if not os.path.exists(cache_path):
             return self.alert.pop(_('No cache exists.'), 'warning')
-        cmd = 'open'
-        if sys.platform.startswith('win32'):
-            cmd = 'explorer'
-        if sys.platform.startswith('linux'):
-            cmd = 'xdg-open'
-        Popen([cmd, cache_path])
+        open_path(cache_path)
 
     def recount(self):
         return self.cache_size.setText(

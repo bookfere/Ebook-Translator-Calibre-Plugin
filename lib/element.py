@@ -21,7 +21,7 @@ def get_name(element):
 
 
 class Element:
-    def __init__(self, element, page_id):
+    def __init__(self, element, page_id=None):
         self.element = element
         self.element_copy = copy.deepcopy(element)
         self.page_id = page_id
@@ -54,6 +54,27 @@ class Element:
     def add_translation(self, translation, placeholder, position=None,
                         lang=None, color=None):
         raise NotImplementedError()
+
+
+class SrtElement(Element):
+    def get_raw(self):
+        return self.element[2]
+
+    def get_text(self):
+        return self.element[2]
+
+    def get_content(self, placeholder):
+        return self.element[2]
+
+    def add_translation(self, translation, placeholder, position=None,
+                        lang=None, color=None):
+        if position == 'only':
+            self.element[2] = translation
+        elif position == 'after':
+            self.element[2] += '\n%s' % translation
+        else:
+            self.element[2] = '%s\n%s' % (translation, self.element[2])
+        return self.element
 
 
 class TocElement(Element):
@@ -378,6 +399,25 @@ class ElementHandlerMerge(ElementHandler):
                     self.color)
                 self.elements.pop(eid)
         self.remove_unused_elements()
+
+
+def get_srt_elements(path):
+    sections = []
+
+    try:
+        with open(path, 'r', newline=None) as f:
+            content = f.read().strip()
+    except Exception:
+        with open(path, 'rU') as f:
+            content = f.read().strip()
+    for section in content.split('\n\n'):
+        lines = section.split('\n')
+        number = lines.pop(0)
+        time = lines.pop(0)
+        content = '\n'.join(lines)
+        sections.append([number, time, content])
+
+    return [SrtElement(section) for section in sections]
 
 
 def get_toc_elements(nodes, elements=[]):

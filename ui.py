@@ -215,24 +215,37 @@ class EbookTranslatorGui(InterfaceAction):
 
     def get_selected_ebooks(self):
         ebooks = Ebooks()
-        api = self.gui.current_db.new_api
+        db = self.gui.current_db
+        api = db.new_api
         rows = self.gui.library_view.selectionModel().selectedRows()
         model = self.gui.library_view.model()
         for row in rows:
             row_id = row.row()
             book_id = model.id(row)
             book_metadata = api.get_proxy_metadata(book_id)
-            fmt, fmts = get_input_format_for_book(
-                self.gui.current_db, book_id, 'epub')
+            fmt, fmts = None, []
+            extra_formats = []
+            try:
+                fmt, fmts = get_input_format_for_book(db, book_id, 'epub')
+            except Exception as e:
+                for extra_format in ('srt',):
+                    if api.has_format(book_id, extra_format):
+                        if fmt is None:
+                            fmt = extra_format
+                        fmts.append(extra_format)
+                        extra_formats.append(extra_format)
+                if fmt is None:
+                    raise e
             ebooks.add(
-                book_id,  # book ID in db
+                book_id,  # Book ID in db
                 model.title(row_id),  # Title
+                # Format and path
                 dict(zip(
-                    map(lambda fmt: fmt.lower(), fmts),  # Format 1
-                    map(lambda fmt: api.format_abspath(book_id, fmt),
-                        fmts),  # Format 2
+                    map(lambda fmt: fmt.lower(), fmts),
+                    map(lambda fmt: api.format_abspath(book_id, fmt), fmts),
                 )),
                 fmt.lower(),  # Input format
                 book_metadata.language,  # Source language
+                extra_formats,
             )
         return ebooks

@@ -5,11 +5,13 @@ from calibre import sanitize_file_name
 
 class Ebooks:
     class Ebook:
-        def __init__(self, id, title, files, input_format, source_lang):
+        def __init__(self, id, title, files, input_format, source_lang,
+                     extra_formats=[]):
             self.id = id
             self.files = files
             self.input_format = input_format
             self.source_lang = source_lang
+            self.extra_formats = extra_formats
 
             self.output_format = None
             self.target_lang = None
@@ -39,12 +41,14 @@ class Ebooks:
         def get_input_path(self):
             return self.files.get(self.input_format)
 
+        def is_extra_format(self):
+            return self.input_format in self.extra_formats
+
     def __init__(self):
         self.ebooks = []
 
-    def add(self, id, title, files, input_format, source_lang):
-        self.ebooks.append(
-            self.Ebook(id, title, files, input_format, source_lang))
+    def add(self, *args):
+        self.ebooks.append(self.Ebook(*args))
 
     def first(self):
         return self.ebooks.pop(0)
