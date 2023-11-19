@@ -18,7 +18,7 @@ __Plugin Homepage__: [https://translator.bookfere.com](https://translator.bookfe
 * Support languages supported by the selected translation engine (e.g. Google Translate supports 134 languages)
 * Support multiple translation engines, including Google Translate, ChatGPT, DeepL, etc.
 * Support custom translation engines (you can configure to parse response in JSON or XML format)
-* Support all ebook formats supported by Calibre (48 input formats, 20 output formats)
+* Support all ebook formats supported by Calibre (48 input formats, 20 output formats), as well as additional formats such as .srt
 * Support to translate more than one ebooks. The translation process of each book is carried out simultaneously without affecting one another
 * Support caching translated content, with no need to re-translate after request failure or network interruption
 * Provide a large number of customization settings, such as saving translated ebooks to Calibre library or designated location

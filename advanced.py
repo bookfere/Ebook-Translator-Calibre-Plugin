@@ -298,7 +298,7 @@ class AdvancedTranslation(QDialog):
 
         def working_finished():
             if self.translate_all and not self.trans_worker.cancel_request():
-                failures = len(self.table.get_seleted_items(True, True))
+                failures = len(self.table.get_selected_items(True, True))
                 if failures > 0:
                     message = _(
                         'Failed to translate {} paragraph(s), '
@@ -440,23 +440,43 @@ class AdvancedTranslation(QDialog):
         action_layout = QHBoxLayout(action_widget)
         action_layout.setContentsMargins(0, 0, 0, 0)
 
+        delete_button = QPushButton(_('Delete'))
+        paragraph_count = QLabel()
+        paragraph_count.setAlignment(Qt.AlignCenter)
         translate_all = QPushButton('  %s  ' % _('Translate All'))
         translate_selected = QPushButton('  %s  ' % _('Translate Selected'))
-        delete_button = QPushButton(_('Delete'))
-
-        translate_all.clicked.connect(self.translate_all_paragraphs)
-        translate_selected.clicked.connect(self.translate_selected_paragraph)
-        self.table.itemSelectionChanged.connect(
-            lambda: translate_selected.setDisabled(
-                self.table.selected_count() < 1))
 
         delete_button.clicked.connect(self.table.delete_by_rows)
-        self.table.itemSelectionChanged.connect(
-            lambda: delete_button.setDisabled(
-                self.table.selected_count() < 1))
+        translate_all.clicked.connect(self.translate_all_paragraphs)
+        translate_selected.clicked.connect(self.translate_selected_paragraph)
+
+        delete_button.setDisabled(True)
+        translate_selected.setDisabled(True)
+
+        def get_paragraph_count(select_all=True):
+            item_count = char_count = 0
+            paragraphs = self.table.get_selected_items(select_all=select_all)
+            for paragraph in paragraphs:
+                item_count += 1
+                char_count += len(paragraph.original)
+            return (item_count, char_count)
+        all_item_count, all_char_count = get_paragraph_count(True)
+
+        def item_selection_changed():
+            disabled = self.table.selected_count() < 1
+            delete_button.setDisabled(disabled)
+            translate_selected.setDisabled(disabled)
+            item_count, char_count = get_paragraph_count(False)
+            total = '%s/%s' % (item_count, all_item_count)
+            parts = '%s/%s' % (char_count, all_char_count)
+            paragraph_count.setText(
+                _('Total items: {}').format(total) + ' · ' +
+                _('Character count: {}').format(parts))
+        item_selection_changed()
+        self.table.itemSelectionChanged.connect(item_selection_changed)
 
         action_layout.addWidget(delete_button)
-        action_layout.addStretch(1)
+        action_layout.addWidget(paragraph_count, 1)
         action_layout.addWidget(translate_all)
         action_layout.addWidget(translate_selected)
 
@@ -678,6 +698,8 @@ class AdvancedTranslation(QDialog):
             if self.on_working:
                 return
             paragraph = self.table.current_paragraph()
+            if paragraph is None:
+                return
             self.raw_text.emit(paragraph.raw)
             self.original_text.emit(paragraph.original.strip())
             self.translation_text[str].emit(paragraph.translation)
@@ -691,10 +713,7 @@ class AdvancedTranslation(QDialog):
             self.raw_text.emit(paragraph.raw)
             self.original_text.emit(paragraph.original)
             self.translation_text[str].emit(paragraph.translation)
-            try:
-                self.cache.update_paragraph(paragraph)
-            except Exception as e:
-                raise e
+            self.cache.update_paragraph(paragraph)
             self.progress_bar.emit()
         self.trans_worker.callback.connect(translation_callback)
 
@@ -708,11 +727,12 @@ class AdvancedTranslation(QDialog):
         self.trans_worker.streaming.connect(streaming_translation)
 
         def modify_translation():
-            if not self.on_working:
-                paragraph = self.table.current_paragraph()
-                translation = translation_text.toPlainText()
-                control.setVisible(
-                    bool(translation) and translation != paragraph.translation)
+            if self.on_working and self.table.selected_count() > 1:
+                return
+            paragraph = self.table.current_paragraph()
+            translation = translation_text.toPlainText()
+            control.setVisible(
+                bool(translation) and translation != paragraph.translation)
         translation_text.textChanged.connect(modify_translation)
 
         def save_translation():
@@ -761,10 +781,10 @@ class AdvancedTranslation(QDialog):
         """Translate the untranslated paragraphs when at least one is selected.
         Otherwise, retranslate all paragraphs regardless of prior translation.
         """
-        paragraphs = self.table.get_seleted_items(True, True)
+        paragraphs = self.table.get_selected_items(True, True)
         is_fresh = len(paragraphs) < 1
         if is_fresh:
-            paragraphs = self.table.get_seleted_items(False, True)
+            paragraphs = self.table.get_selected_items(False, True)
         self.prgress_step = self.get_progress_step(len(paragraphs))
         if not self.translate_all:
             message = _(
@@ -775,8 +795,8 @@ class AdvancedTranslation(QDialog):
         self.trans_worker.translate.emit(paragraphs, is_fresh)
 
     def translate_selected_paragraph(self):
-        paragraphs = self.table.get_seleted_items()
-        # If all paragraphs are selected, consider it as translating all.
+        paragraphs = self.table.get_selected_items()
+        # Consider selecting all paragraphs as translating all.
         if len(paragraphs) == self.table.rowCount():
             self.translate_all_paragraphs()
         else:
