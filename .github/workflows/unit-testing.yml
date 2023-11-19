@@ -23,7 +23,7 @@ jobs:
         python-version: "3.10"
     - name: Install dependencies
       run: |
-        sudo apt-get install libegl1 libopengl0
+        sudo apt-get install libegl1 libopengl0 libxcb-cursor0
         sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
     - name: Test with calibre-debug
       run: |
