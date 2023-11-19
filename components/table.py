@@ -107,7 +107,9 @@ class AdvancedTranslationTable(QTableWidget):
         return paragraph
 
     def current_paragraph(self):
-        return self.paragraph(self.currentRow())
+        # return self.paragraph(self.currentRow())
+        items = self.get_selected_items()
+        return items[0] if len(items) > 0 else None
 
     def get_selected_rows(self):
         rows = []
@@ -119,7 +121,7 @@ class AdvancedTranslationTable(QTableWidget):
     def selected_count(self):
         return len(self.get_selected_rows())
 
-    def get_seleted_items(self, ignore_done=False, select_all=False):
+    def get_selected_items(self, ignore_done=False, select_all=False):
         items = []
         rows = range(self.rowCount()) if select_all else \
             self.get_selected_rows()
@@ -146,7 +148,7 @@ class AdvancedTranslationTable(QTableWidget):
 
     def select_by_attribute(self, name, value):
         rows = []
-        paragraphs = self.get_seleted_items(False, True)
+        paragraphs = self.get_selected_items(False, True)
         for paragraph in paragraphs:
             attributes = paragraph.get_attributes()
             if attributes.get(name) == value:
@@ -157,7 +159,7 @@ class AdvancedTranslationTable(QTableWidget):
 
     def select_by_page(self, page):
         rows = []
-        paragraphs = self.get_seleted_items(False, True)
+        paragraphs = self.get_selected_items(False, True)
         for paragraph in paragraphs:
             if paragraph.page == page:
                 rows.append(paragraph.row)
