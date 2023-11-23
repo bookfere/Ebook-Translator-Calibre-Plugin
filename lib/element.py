@@ -156,12 +156,12 @@ class PageElement(Element):
         new_element = etree.XML('<{0} xmlns="{1}">{2}</{0}>'.format(
             get_name(self.element), ns['x'], trim(translation)))
         # Preserve all attributes from the original element.
-        for k, v in self.element.items():
-            if k == 'id' and position != 'only':
+        for name, value in self.element.items():
+            if name == 'id' and position != 'only':
                 continue
-            if k == 'dir':
-                v = 'auto'
-            new_element.set(k, v)
+            if name == 'dir':
+                value = 'auto'
+            new_element.set(name, value)
         if color is not None:
             new_element.set('style', 'color:%s' % color)
         if lang is not None:
@@ -291,7 +291,9 @@ class ElementHandler:
         self.lang = None
 
         self.elements = {}
-        self.original = []
+        self.originals = []
+
+        self.base_originals = []
 
     def get_merge_length(self):
         return self.merge_length
@@ -305,29 +307,33 @@ class ElementHandler:
     def set_translation_lang(self, lang):
         self.lang = lang
 
-    def get_elements(self):
-        return self.elements
-
     def remove_unused_elements(self):
         if self.position == 'only':
             for element in self.elements.values():
                 element.delete()
 
     def prepare_original(self, elements):
-        for eid, element in enumerate(elements):
-            self.elements[eid] = element
+        count = 0
+        for oid, element in enumerate(elements):
             raw = element.get_raw()
             content = element.get_content(self.placeholder)
-            md5 = uid('%s%s' % (eid, content))
+            md5 = uid('%s%s' % (oid, content))
             attrs = element.get_attributes()
-            self.original.append(
-                (eid, md5, raw, content, element.ignored, attrs,
-                    element.page_id))
-        return self.original
+            if not element.ignored:
+                self.elements[count] = element
+                self.base_originals.append(content)
+                count += 1
+            self.originals.append(
+                (oid, md5, raw, content, element.ignored, attrs,
+                 element.page_id))
+        return self.originals
 
     def add_translations(self, paragraphs):
+        count = 0
         for paragraph in paragraphs:
-            element = self.elements.get(paragraph.id)
+            if paragraph.original not in self.base_originals:
+                continue
+            element = self.elements.get(count)
             if not element:
                 continue
             translation = paragraph.translation
@@ -335,7 +341,8 @@ class ElementHandler:
                 element.add_translation(
                     translation, self.placeholder, self.position,
                     self.lang, self.color)
-                self.elements.pop(paragraph.id)
+                self.elements.pop(count)
+            count += 1
         for eid, element in self.elements.copy().items():
             if element.ignored:
                 self.elements.pop(eid)
@@ -345,59 +352,69 @@ class ElementHandler:
 class ElementHandlerMerge(ElementHandler):
     def prepare_original(self, elements):
         raw = ''
-        content = ''
+        txt = ''
+        oid = 0
         count = 0
-        for eid, element in enumerate(elements):
+        for element in elements:
             if element.ignored:
                 continue
-            self.elements[eid] = element
-            separator = self.separator \
-                or ' %s ' % self.placeholder[0].format(eid)
+            self.elements[count] = element
             code = element.get_raw()
-            text = element.get_content(self.placeholder) + separator
-            if len(content + text) < self.merge_length:
-                raw += code
-                content += text
+            content = element.get_content(self.placeholder)
+            self.base_originals.append(content)
+            count += 1
+            content += self.separator
+            if len(txt + content) < self.merge_length:
+                raw += code + self.separator
+                txt += content
                 continue
-            elif content:
-                md5 = uid('%s%s' % (count, content))
-                self.original.append((count, md5, raw, content, False))
-                count += 1
+            elif txt:
+                md5 = uid('%s%s' % (oid, txt))
+                self.originals.append((oid, md5, raw, txt, False))
+                oid += 1
             raw = code
-            content = text
-        md5 = uid('%s%s' % (count, content))
-        content and self.original.append((count, md5, raw, content, False))
-        return self.original
+            txt = content
+        md5 = uid('%s%s' % (oid, txt))
+        txt and self.originals.append((oid, md5, raw, txt, False))
+        return self.originals
+
+    def align_paragraph(self, paragraph):
+        # Compatible with using the placeholder as the separator.
+        if paragraph.original[-2:] != self.separator:
+            pattern = re.compile(
+                r'\s*%s\s*' % self.placeholder[1].format(r'(0|[^0]\d*)'))
+            paragraph.original = pattern.sub(
+                self.separator, paragraph.original)
+            paragraph.translation = pattern.sub(
+                self.separator, paragraph.translation)
+        # Ensure the translation count matches the actual elements count.
+        originals = paragraph.original.strip().split(self.separator)
+        pattern = re.compile('%s+' % self.separator)
+        translations = pattern.sub(self.separator, paragraph.translation)
+        translations = translations.strip().split(self.separator)
+        offset = len(originals) - len(translations)
+        if offset > 0:
+            translations += ['-'] * offset
+        elif offset < 0:
+            translations = translations[:offset]
+        for original in originals:
+            if original and original not in self.base_originals:
+                translations.pop(originals.index(original))
+        return translations
 
     def add_translations(self, paragraphs):
-        content = ''
+        translations = []
         for paragraph in paragraphs:
-            tail = paragraph.original[-2:]
-            tail = tail if tail == self.separator else ''
-            if paragraph.translation:
-                content += paragraph.translation + tail
-        # Check if the translated content contains at least one separator;
-        # if none is found, use the placeholder to separate paragraphs.
-        if self.separator and self.separator in content:
-            pattern = '%s+' % self.separator
-            content = re.sub(pattern, self.separator, content)
-        else:
-            self.separator = None
-
+            translations.extend(self.align_paragraph(paragraph))
+        count = 0
         for eid, element in self.elements.copy().items():
-            separator = self.separator or self.placeholder[1].format(eid)
-            matches = re.search(separator, content)
-            if not matches:
+            if element.ignored:
                 continue
-            pattern = matches.group(0)
-            end = content.find(pattern)
-            part = content[:end]
-            content = content.replace(part + pattern, '', 1)
-            if not element.ignored:
-                element.add_translation(
-                    part.strip(), self.placeholder, self.position, self.lang,
-                    self.color)
-                self.elements.pop(eid)
+            element.add_translation(
+                translations[count], self.placeholder, self.position,
+                self.lang, self.color)
+            count += 1
+            self.elements.pop(eid)
         self.remove_unused_elements()
 
 
@@ -449,5 +466,4 @@ def get_element_handler(placeholder, separator):
     handler.set_translation_position(
         config.get('translation_position'))
     handler.set_translation_color(config.get('translation_color'))
-
     return handler
