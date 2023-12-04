@@ -19,14 +19,15 @@ msgstr ""
 
 #: __init__.py:19
 msgid "Ebook Translator"
-msgstr "Tradutor de Ebooks"
+msgstr "Traduzir Ebook"
 
 #: __init__.py:26
 msgid ""
 "A Calibre plugin to translate ebook into a specified language (optionally "
 "keeping the original content)."
-msgstr "Um plugin do Calibre para traduzir ebook para uma idioma específico (opcionalmente "
-"mantendo o conteúdo origina)."
+msgstr "Um plugin do Calibre para traduzir ebook para um idioma específico (opcionalmente "
+"mantendo o conteúdo original)."
+
 #: advanced.py:90
 msgid "Extracting ebook content..."
 msgstr "Extraindo o conteúdo do ebook..."
@@ -53,7 +54,7 @@ msgstr "Idioma de Destino"
 
 #: advanced.py:304
 msgid "Failed to translate {} paragraph(s), Would you like to retry?"
-msgstr "Falha ao traduzir {} paragráfo(s), gostaria de tentar novamente?"
+msgstr "Falha ao traduzir {} parágrafo(s), gostaria de tentar novamente?"
 
 #: advanced.py:310 lib/translation.py:252
 msgid "Translation completed."
@@ -113,11 +114,11 @@ msgstr "Status do Cache"
 
 #: advanced.py:525
 msgid "Disabled"
-msgstr "Desabilitar"
+msgstr "Desabilitado"
 
 #: advanced.py:525
 msgid "Enabled"
-msgstr "Habilitar"
+msgstr "Habilitado"
 
 #: advanced.py:532
 msgid "Output Ebook"
@@ -378,7 +379,7 @@ msgstr "É necessário um formato de chave correto \"{}\""
 
 #: engines/base.py:214 engines/chatgpt.py:111 tests/test_engine.py:90
 msgid "Can not parse returned response. Raw data: {}"
-msgstr "Não é possivel analisar a resposta retornada. Dados não tratados: {}"
+msgstr "Não é possível analisar a resposta retornada. Dados não tratados: {}"
 
 #: engines/custom.py:45 tests/test_engine.py:235
 msgid "Engine data must be in valid JSON format."
@@ -398,11 +399,11 @@ msgstr "O nome do mecanismo deve ser diferente do nome do mecanismo integrado."
 
 #: engines/custom.py:59 tests/test_engine.py:248 tests/test_engine.py:251
 msgid "Language codes are required."
-msgstr "Os códigos de idioma são obrigatório."
+msgstr "Os códigos de idioma são obrigatórios."
 
 #: engines/custom.py:63 tests/test_engine.py:254 tests/test_engine.py:257
 msgid "Source and target must be added in pair."
-msgstr "Fonte e tradução devem ser adicionados em pares."
+msgstr "Fonte e tradução devem ser adicionadas em pares."
 
 #: engines/custom.py:67 tests/test_engine.py:260
 msgid "Request information is required."
@@ -485,7 +486,7 @@ msgstr "A tradução dos arquivos de legendas foi finalizada."
 
 #: lib/conversion.py:199
 msgid "[{} > {}] Translating \"{}\""
-msgstr "[{} > {}]  Traduzindo \"{}\""
+msgstr "[{} > {}] Traduzindo \"{}\""
 
 #: lib/conversion.py:208
 msgid "Translation job failed"
@@ -653,7 +654,7 @@ msgstr "O plugin irá procurar por programas externos usando estes caminhos."
 
 #: setting.py:322 setting.py:473 setting.py:477 setting.py:484 setting.py:489
 msgid "Custom"
-msgstr "Personalziar"
+msgstr "Personalizar"
 
 #: setting.py:329
 msgid "Using Tip"
