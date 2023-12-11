@@ -15,7 +15,9 @@ class TestUtils(unittest.TestCase):
         self.assertEqual('a b c', trim(' a b c '))
         self.assertEqual('a b c', trim(' a    b   c '))
 
-        content = '{0}{0}a{1}b{1}c{0}{0}'.format(u'\xa0', u'\u3000')  # &#160;
+        # &#160;
+        content = '{0}{0}{1}{1}a{2}{2}{1}b{2}{0}{2}c{1}{1}{0}{0}'.format(
+            '\xa0', '\x1a', u'\u3000')
         self.assertEqual('a b c', trim(content))
 
     def test_chunk(self):

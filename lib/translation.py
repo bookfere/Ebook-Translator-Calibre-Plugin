@@ -201,7 +201,7 @@ class Translation:
         if paragraph.error is None:
             self.log(sep())
             self.log(_('Original: {}').format(original))
-            self.log(sep('-', 35))
+            self.log(sep('┈', 38))
             message = _('Translation: {}')
             if paragraph.is_cache:
                 message = _('Translation (Cached): {}')
@@ -209,7 +209,7 @@ class Translation:
         else:
             self.log(sep(), True)
             self.log(_('Original: {}').format(original), True)
-            self.log(sep('-', 35), True)
+            self.log(sep('┈', 38), True)
             self.log(_('Error: {}').format(paragraph.error), True)
             paragraph.error = None
 
