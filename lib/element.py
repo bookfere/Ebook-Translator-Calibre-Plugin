@@ -140,19 +140,21 @@ class PageElement(Element):
 
         return trim(''.join(self.element_copy.itertext()))
 
+    def _polish_translation(self, translation):
+        # Condense consecutive letters to a maximum of four.
+        return re.sub(r'((\w)\2{3})\2*', r'\1', translation)
+
     def add_translation(self, translation, placeholder, position=None,
                         lang=None, color=None):
         # Escape the markups (<m id=1 />) to replace escaped markups.
         translation = xml_escape(translation)
-        count = 0
-        for reserve in self.reserve_elements:
-            pattern = placeholder[1].format(r'\s*'.join(format(count, '05')))
-            # Prevent potential invalid escapes from affecting the replacement.
+        for rid, reserve in enumerate(self.reserve_elements):
+            pattern = placeholder[1].format(r'\s*'.join(format(rid, '05')))
+            # Prevent processe any backslash escapes in the replacement.
             translation = re.sub(
                 xml_escape(pattern), lambda _: get_string(reserve),
                 translation)
-            count += 1
-
+        translation = self._polish_translation(translation)
         new_element = etree.XML('<{0} xmlns="{1}">{2}</{0}>'.format(
             get_name(self.element), ns['x'], trim(translation)))
         # Preserve all attributes from the original element.
@@ -406,9 +408,12 @@ class ElementHandlerMerge(ElementHandler):
         translations = []
         for paragraph in paragraphs:
             translations.extend(self.align_paragraph(paragraph))
+        total = len(translations)
         count = 0
         for eid, element in self.elements.copy().items():
-            if element.ignored:
+            # TODO: Maybe the translation count does not match the elements
+            # count due to the criteria of the old version has been changed.
+            if element.ignored or eid >= total:
                 continue
             element.add_translation(
                 translations[count], self.placeholder, self.position,

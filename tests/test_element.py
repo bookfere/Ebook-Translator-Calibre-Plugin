@@ -158,13 +158,14 @@ class TestPageElement(unittest.TestCase):
 
     def test_add_translation(self):
         self.element.get_content(Base.placeholder)
-        translation = ('{{id_00000}} A {{id_00001}} B C {{id_00002}} D E '
+        translation = ('{{id_00000}} Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa '
+                       '{{id_00001}} Bbbbbbbbbbbbbbb C {{id_00002}} D E '
                        '{{id_00003}} F G {{id_00004}} H {{id_00005}} I '
                        '{{id_00006}} {{id_00007}} K{ { id _ 0 00 08 } }L')
         new = self.element.add_translation(translation, Base.placeholder)
         translation = ('<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
-                       '<img src="icon.jpg"/> A <img src="w1.jpg"/> '
-                       'B C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
+                       '<img src="icon.jpg"/> Aaaaa <img src="w1.jpg"/> '
+                       'Bbbbb C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
                        'F G <img src="w2.jpg"/> H '
                        r'<img alt="{\D}" src="w3.jpg"/> I '
                        r'<img src="w3.jpg"/> <code>App\Http</code> '
