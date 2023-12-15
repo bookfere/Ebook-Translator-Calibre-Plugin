@@ -146,14 +146,20 @@ class Translation:
                 self.log(
                     _('API key was Changed due to previous one unavailable.'))
             else:
+                self.abort_count += 1
                 message = _(
                     'Failed to retrieve data from translate engine API.')
                 retry_exceeded = retry >= self.translator.request_attempt
                 if retry_exceeded or self.need_stop():
-                    self.abort_count += 1
                     raise TranslationFailed('{}\n{}'.format(message, str(e)))
                 retry += 1
                 interval *= retry
+                # Logging any errors that occur during translation.
+                error_message = '{0}\n{2}\n{1}\n{3}\n{1}\n{4}'.format(
+                    sep(), sep('┈'), _('Original: {}').format(text),
+                    _('Status: Failed {} times / Sleeping for {} seconds')
+                    .format(retry, interval), _('Error: {}').format(str(e)))
+                self.log(error_message, True)
                 time.sleep(interval)
             return self._translate_text(text, retry, interval)
 
@@ -190,8 +196,8 @@ class Translation:
 
     def process_translation(self, paragraph):
         self.progress(
-            self.progress_bar.length, _('Translating: {}/{}')
-            .format(self.progress_bar.count, self.progress_bar.total))
+            self.progress_bar.length, _('Translating: {}/{}').format(
+                self.progress_bar.count, self.progress_bar.total))
 
         self.streaming(paragraph)
         self.callback(paragraph)
@@ -201,7 +207,7 @@ class Translation:
         if paragraph.error is None:
             self.log(sep())
             self.log(_('Original: {}').format(original))
-            self.log(sep('┈', 38))
+            self.log(sep('┈'))
             message = _('Translation: {}')
             if paragraph.is_cache:
                 message = _('Translation (Cached): {}')
@@ -209,7 +215,7 @@ class Translation:
         else:
             self.log(sep(), True)
             self.log(_('Original: {}').format(original), True)
-            self.log(sep('┈', 38), True)
+            self.log(sep('┈'), True)
             self.log(_('Error: {}').format(paragraph.error), True)
             paragraph.error = None
 
@@ -222,7 +228,7 @@ class Translation:
 
         self.log(sep())
         self.log(_('Start to translate ebook content'))
-        self.log(sep())
+        self.log(sep('┈'))
         self.log(_('Total items: {}').format(self.total))
         self.log(_('Character count: {}').format(char_count))
         if self.total < 1:
