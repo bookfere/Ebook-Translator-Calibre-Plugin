@@ -112,7 +112,7 @@ class CustomTranslate(Base):
         # to ensure pure Latin-1 (compliance with ISO-8859-1).
         data = data.replace('<source>', self._get_source_code()) \
             .replace('<target>', self._get_target_code()) \
-            .replace('<text>', json.dumps(text).strip('"')).encode('utf-8')
+            .replace('<text>', json.dumps(text)[1:-1]).encode('utf-8')
         is_json = headers and 'application/json' in headers.values()
         if need_restore and not is_json:
             data = json.loads(data)

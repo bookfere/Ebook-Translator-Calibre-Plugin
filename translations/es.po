@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-11-17 03:08+0800\n"
+"POT-Creation-Date: 2023-12-16 01:29+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -67,14 +67,20 @@ msgstr ""
 msgid "Errors"
 msgstr ""
 
+msgid "Total items: {}"
+msgstr "Articulos totales: {}"
+
+msgid "Character count: {}"
+msgstr ""
+
+msgid "Delete"
+msgstr "Eliminar"
+
 msgid "Translate All"
 msgstr ""
 
 msgid "Translate Selected"
 msgstr ""
-
-msgid "Delete"
-msgstr "Eliminar"
 
 msgid "Stop"
 msgstr ""
@@ -396,11 +402,17 @@ msgstr ""
 msgid "Failed to retrieve data from translate engine API."
 msgstr "No se pudieron recuperar los datos de la API del motor de traducción."
 
-msgid "Translating: {}/{}"
-msgstr "Traduciendo: {}/{}"
-
 msgid "Original: {}"
 msgstr "Original: {}"
+
+msgid "Status: Failed {} times / Sleeping for {} seconds"
+msgstr ""
+
+msgid "Error: {}"
+msgstr ""
+
+msgid "Translating: {}/{}"
+msgstr "Traduciendo: {}/{}"
 
 msgid "Translation: {}"
 msgstr "Traducción: {}"
@@ -408,17 +420,8 @@ msgstr "Traducción: {}"
 msgid "Translation (Cached): {}"
 msgstr "Traducción (En caché): {}"
 
-msgid "Error: {}"
-msgstr ""
-
 msgid "Start to translate ebook content"
 msgstr "Comience a traducir contenido de libros electrónicos"
-
-msgid "Total items: {}"
-msgstr "Articulos totales: {}"
-
-msgid "Character count: {}"
-msgstr ""
 
 msgid "There is no content need to translate."
 msgstr "No hay necesidad de traducir el contenido."

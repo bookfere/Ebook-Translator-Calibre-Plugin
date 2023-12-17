@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2023-11-17 03:08+0800\n"
+"POT-Creation-Date: 2023-12-16 01:29+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -64,14 +64,20 @@ msgstr "日志"
 msgid "Errors"
 msgstr "错误"
 
+msgid "Total items: {}"
+msgstr "全部条目：{}"
+
+msgid "Character count: {}"
+msgstr "字符总数：{}"
+
+msgid "Delete"
+msgstr "删除"
+
 msgid "Translate All"
 msgstr "翻译全部"
 
 msgid "Translate Selected"
 msgstr "翻译所选"
-
-msgid "Delete"
-msgstr "删除"
 
 msgid "Stop"
 msgstr "停止"
@@ -398,11 +404,17 @@ msgstr "由于上一个 API 密钥不可用，已自动更换。"
 msgid "Failed to retrieve data from translate engine API."
 msgstr "无法从翻译引擎API获取数据。"
 
-msgid "Translating: {}/{}"
-msgstr "翻译：{}/{}"
-
 msgid "Original: {}"
 msgstr "原文：{}"
+
+msgid "Status: Failed {} times / Sleeping for {} seconds"
+msgstr "状态：失败 {} 次 / 等待 {} 秒"
+
+msgid "Error: {}"
+msgstr "错误信息：{}"
+
+msgid "Translating: {}/{}"
+msgstr "翻译：{}/{}"
 
 msgid "Translation: {}"
 msgstr "译文：{}"
@@ -410,17 +422,8 @@ msgstr "译文：{}"
 msgid "Translation (Cached): {}"
 msgstr "译文（缓存）：{}"
 
-msgid "Error: {}"
-msgstr "错误信息：{}"
-
 msgid "Start to translate ebook content"
 msgstr "开始翻译电子书内容"
-
-msgid "Total items: {}"
-msgstr "全部条目：{}"
-
-msgid "Character count: {}"
-msgstr "字符总数：{}"
 
 msgid "There is no content need to translate."
 msgstr "没有需要翻译的内容。"
