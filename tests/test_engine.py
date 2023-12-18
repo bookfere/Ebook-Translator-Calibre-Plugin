@@ -84,12 +84,11 @@ class TestDeepl(unittest.TestCase):
         self.assertEqual('你好世界！', self.translator.translate('Hello World!'))
 
         result.return_value = '<dummy info>'
-        with self.assertRaises(Exception) as e:
-            self.translator.translate('Hello World!')
-        self.assertIn(
+        error = re.compile(
             _('Can not parse returned response. Raw data: {}')
-            .format('\n\n<dummy info>\n') + 'Traceback',
-            str(e.exception))
+            .format('\n\nTraceback.*\n\n<dummy info>'), re.S)
+        with self.assertRaisesRegex(Exception, error):
+            self.translator.translate('Hello World!')
 
 
 class TestChatgptTranslate(unittest.TestCase):
@@ -326,23 +325,31 @@ class TestCustom(unittest.TestCase):
         engine_data = json.loads(engine_data)
         CustomTranslate.set_engine_data(engine_data)
 
+    @patch('calibre_plugins.ebook_translator.engines.base.Request')
     @patch('calibre_plugins.ebook_translator.engines.base.Browser')
-    def test_translate_json(self, mock_browser):
+    def test_translate(self, mock_browser, mock_request):
         translator = CustomTranslate()
         translator.set_source_lang('English')
         translator.set_target_lang('Chinese')
         request = mock_browser.return_value.response.return_value.read. \
             return_value.decode
-        request.return_value = '{"text": "你好世界！"}'
-        self.assertEqual('你好世界！', translator.translate('Hello World!'))
-
+        # JSON response
+        request.return_value = '{"text": "你好世界"}'
+        self.assertEqual('你好世界', translator.translate('Hello "World"'))
+        mock_request.assert_called_with(
+            'https://example.api',
+            b'{"source": "en", "target": "zh", "text": "Hello \\"World\\""}',
+            headers={'Content-Type': 'application/json'},
+            timeout=10.0,
+            method='POST')
+        # XML response
         translator.engine_data.update({'response': 'response.text'})
-        request.return_value = '<test>你好世界！</test>'
-        self.assertEqual('你好世界！', translator.translate('Hello World!'))
-
+        request.return_value = '<test>你好世界</test>'
+        self.assertEqual('你好世界', translator.translate('Hello World'))
+        # Plain response
         translator.engine_data.update({'response': 'response'})
-        request.return_value = '你好世界！'
-        self.assertEqual('你好世界！', translator.translate('Hello World!'))
+        request.return_value = '你好世界'
+        self.assertEqual('你好世界', translator.translate('Hello World'))
 
     @patch('calibre_plugins.ebook_translator.engines.base.Browser')
     def test_translate_urlencoded(self, mock_browser):
@@ -352,6 +359,6 @@ class TestCustom(unittest.TestCase):
         translator.set_source_lang('English')
         translator.set_target_lang('Chinese')
         mock_browser.return_value.response.return_value.read.return_value \
-            .decode.return_value = '{"text": "\\"你好\\"\\n世界！"}'
+            .decode.return_value = '{"text": "\\"你好\\"\\n世界"}'
         self.assertEqual(
-            '\"你好\"\n世界！', translator.translate('\"Hello\"\nWorld!'))
+            '\"你好\"\n世界', translator.translate('\"Hello\"\nWorld'))

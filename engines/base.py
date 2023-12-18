@@ -2,7 +2,7 @@ import ssl
 import os.path
 import traceback
 
-from mechanize import Browser, Request
+from mechanize import Browser, Request, HTTPError
 from calibre import get_proxies
 from calibre.utils.localization import lang_as_iso639_1
 
@@ -206,13 +206,17 @@ class Base:
             if not stream:
                 response = result = response.read().decode('utf-8').strip()
             return response if callback is None else callback(response)
-        except Exception:
+        except Exception as e:
             if silence:
                 return None
-            error = '\n%s' % traceback.format_exc(chain=False).strip()
-            data = '\n%s%s' % (result, error) if result else error
-            raise Exception(_('Can not parse returned response. Raw data: {}')
-                            .format('\n%s' % data))
+            error = [traceback.format_exc(chain=False).strip()]
+            if isinstance(e, HTTPError):
+                error.append(e.read().decode('utf-8'))
+            elif result:
+                error.append(result)
+            raise Exception(
+                _('Can not parse returned response. Raw data: {}')
+                .format('\n\n' + '\n\n'.join(error)))
 
     def get_usage(self):
         return None
