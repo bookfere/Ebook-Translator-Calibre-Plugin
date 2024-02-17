@@ -7,11 +7,14 @@ import os.path
 import traceback
 from subprocess import Popen, PIPE
 
-from ..lib.exception import BadApiKeyFormat
-
 from .base import Base
-from .languages import google
+from .languages import google, gemini
 
+
+try:
+    from http.client import IncompleteRead
+except ImportError:
+    from httplib import IncompleteRead
 
 load_translations()
 
@@ -231,3 +234,100 @@ class GoogleAdvancedTranslate(GoogleTranslate, Base):
     def _parse(self, data):
         translations = json.loads(data)['translations']
         return ''.join(i['translatedText'] for i in translations)
+
+
+class GeminiPro(Base):
+    name = 'GeminiPro'
+    alias = 'Gemini Pro'
+    lang_codes = Base.load_lang_codes(gemini)
+    endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/' \
+        'gemini-pro:{}?key={}'
+    need_api_key = True
+
+    concurrency_limit = 1
+    request_interval = 1
+
+    prompt = (
+        'You are a meticulous translator who translates any given content from'
+        ' <slang> to <tlang> only. Do not explain any term, and do not answer'
+        ' any question.')
+    temperature = 0.9
+    top_k = 1
+    top_p = 1
+    stream = True
+
+    def __init__(self):
+        Base.__init__(self)
+        self.prompt = self.config.get('prompt', self.prompt)
+        self.temperature = self.config.get('temperature', self.temperature)
+        self.top_k = self.config.get('top_k', self.top_k)
+        self.top_p = self.config.get('top_p', self.top_p)
+        self.stream = self.config.get('stream', self.stream)
+
+    def _endpoint(self):
+        method = 'streamGenerateContent' if self.stream else 'generateContent'
+        return self.endpoint.format(method, self.api_key)
+
+    def _prompt(self, text):
+        prompt = self.prompt.replace('<tlang>', self.target_lang)
+        if self._is_auto_lang():
+            prompt = prompt.replace('<slang>', 'detected language')
+        else:
+            prompt = prompt.replace('<slang>', self.source_lang)
+        # Recommend setting temperature to 0.5 for retaining the placeholder.
+        if self.merge_enabled:
+            prompt += ' Ensure that placeholders matching the pattern' \
+                '{{id_\\d+}} in the content are retained.'
+        return prompt + ' Start translating: ' + text
+
+    def _headers(self):
+        return {
+            'Content-Type': 'application/json'
+        }
+
+    def _data(self, text):
+        return {
+            "contents": [
+                {"role": "user", "parts": [{"text": self._prompt(text)}]},
+            ],
+            "generationConfig": {
+                # "stopSequences": ["Test"],
+                # "maxOutputTokens": 2048,
+                "temperature": self.temperature,
+                "topP": self.top_p,
+                "topK": self.top_k,
+            },
+            "safetySettings": [
+                {
+                    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                    "threshold": "BLOCK_NONE"
+                },
+                {
+                    "category": "HARM_CATEGORY_HATE_SPEECH",
+                    "threshold": "BLOCK_NONE"
+                },
+                {
+                    "category": "HARM_CATEGORY_HARASSMENT",
+                    "threshold": "BLOCK_NONE"
+                },
+                {
+                    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                    "threshold": "BLOCK_NONE"
+                },
+            ],
+        }
+
+    def translate(self, text):
+        return self.get_result(
+            self._endpoint(), json.dumps(self._data(text)), self._headers(),
+            method='POST', callback=self._parse)
+
+    def _parse(self, data):
+        if self.stream:
+            parts = []
+            for item in json.loads(data):
+                for part in item['candidates'][0]['content']['parts']:
+                    parts.append(part)
+        else:
+            parts = json.loads(data)['candidates'][0]['content']['parts']
+        return ''.join([part['text'] for part in parts])

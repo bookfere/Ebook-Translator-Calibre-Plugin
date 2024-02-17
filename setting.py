@@ -7,6 +7,7 @@ from .lib.utils import css, is_proxy_availiable
 from .lib.translation import get_engine_class
 
 from .engines import builtin_engines
+from .engines import GeminiPro
 from .components import (
     layout_info, AlertMessage, TargetLang, SourceLang, EngineList,
     EngineTester, get_divider, ManageCustomEngine, InputFormat, OutputFormat)
@@ -390,16 +391,49 @@ class TranslationSetting(QDialog):
         self.disable_wheel_event(request_interval)
         self.disable_wheel_event(request_timeout)
 
+        # GeminiPro Setting
+        gemini_group = QGroupBox(_('Tune Gemini'))
+        gemini_group.setVisible(False)
+        gemini_layout = QFormLayout(gemini_group)
+        self.set_form_layout_policy(gemini_layout)
+
+        self.gemini_prompt = QPlainTextEdit()
+        self.gemini_prompt.setFixedHeight(80)
+        gemini_layout.addRow(_('Prompt'), self.gemini_prompt)
+
+        gemini_temperature = QDoubleSpinBox()
+        gemini_temperature.setDecimals(1)
+        gemini_temperature.setSingleStep(0.1)
+        gemini_temperature.setRange(0, 1)
+        gemini_layout.addRow('temperature', gemini_temperature)
+
+        gemini_top_p = QDoubleSpinBox()
+        gemini_top_p.setDecimals(1)
+        gemini_top_p.setSingleStep(0.1)
+        gemini_top_p.setRange(0, 1)
+        gemini_layout.addRow('topP', gemini_top_p)
+
+        gemini_top_k = QSpinBox()
+        gemini_top_k.setSingleStep(1)
+        gemini_top_k.setMinimum(0)
+        gemini_layout.addRow('topK', gemini_top_k)
+
+        self.disable_wheel_event(gemini_temperature)
+        self.disable_wheel_event(gemini_top_p)
+        self.disable_wheel_event(gemini_top_k)
+
+        layout.addWidget(gemini_group)
+
         # ChatGPT Setting
         chatgpt_group = QGroupBox(_('Tune ChatGPT'))
         chatgpt_group.setVisible(False)
         chatgpt_layout = QFormLayout(chatgpt_group)
         self.set_form_layout_policy(chatgpt_layout)
 
-        self.prompt = QPlainTextEdit()
-        self.prompt.setMinimumHeight(80)
-        self.prompt.setMaximumHeight(80)
-        chatgpt_layout.addRow(_('Prompt'), self.prompt)
+        self.chatgpt_prompt = QPlainTextEdit()
+        self.chatgpt_prompt.setMinimumHeight(80)
+        self.chatgpt_prompt.setMaximumHeight(80)
+        chatgpt_layout.addRow(_('Prompt'), self.chatgpt_prompt)
         self.chatgpt_endpoint = QLineEdit()
         chatgpt_layout.addRow(_('Endpoint'), self.chatgpt_endpoint)
 
@@ -451,14 +485,36 @@ class TranslationSetting(QDialog):
 
         layout.addWidget(chatgpt_group)
 
+        def show_gemini_preferences():
+            if self.current_engine != GeminiPro:
+                gemini_group.setVisible(False)
+                return
+            config = self.current_engine.config
+            gemini_group.setVisible(True)
+            self.gemini_prompt.setPlaceholderText(self.current_engine.prompt)
+            self.gemini_prompt.setPlainText(
+                config.get('prompt', self.current_engine.prompt))
+            gemini_temperature.setValue(
+                config.get('temperature', self.current_engine.temperature))
+            gemini_temperature.valueChanged.connect(
+                lambda value: config.update(temperature=round(value, 1)))
+            gemini_top_p.setValue(
+                config.get('top_p', self.current_engine.top_p))
+            gemini_top_p.valueChanged.connect(
+                lambda value: config.update(top_p=value))
+            gemini_top_k.setValue(
+                config.get('top_k', self.current_engine.top_k))
+            gemini_top_k.valueChanged.connect(
+                lambda value: config.update(top_k=value))
+
         def show_chatgpt_preferences():
             if not self.current_engine.is_chatgpt():
                 chatgpt_group.setVisible(False)
                 return
             config = self.current_engine.config
             # Prompt
-            self.prompt.setPlaceholderText(self.current_engine.prompt)
-            self.prompt.setPlainText(
+            self.chatgpt_prompt.setPlaceholderText(self.current_engine.prompt)
+            self.chatgpt_prompt.setPlainText(
                 config.get('prompt', self.current_engine.prompt))
             # Endpoint
             self.chatgpt_endpoint.setPlaceholderText(
@@ -577,7 +633,9 @@ class TranslationSetting(QDialog):
             max_error_count.valueChanged.connect(
                 lambda value: self.current_engine.config.update(
                     max_error_count=value))
-            # show prompt setting
+            # Show Gemini prompt setting
+            show_gemini_preferences()
+            # Show ChatGPT prompt setting
             show_chatgpt_preferences()
         choose_default_engine(engine_list.findData(self.current_engine.name))
         engine_list.currentIndexChanged.connect(choose_default_engine)
@@ -909,21 +967,15 @@ class TranslationSetting(QDialog):
 
         # ChatGPT prefrence
         if self.current_engine.is_chatgpt():
-            prompt = self.prompt.toPlainText().strip()
-            if prompt and '<tlang>' not in prompt:
-                self.alert.pop(
-                    _('the prompt must include {}.').format('<slang>'),
-                    'warning')
-                return None
-            if 'prompt' in config:
-                del config['prompt']
-            if prompt and prompt != self.current_engine.prompt:
-                config.update(prompt=prompt)
+            self.update_prompt(self.chatgpt_prompt, config)
             endpoint = self.chatgpt_endpoint.text().strip()
             if 'endpoint' in config:
                 del config['endpoint']
             if endpoint and endpoint != self.current_engine.endpoint:
                 config.update(endpoint=endpoint)
+
+        if self.current_engine == GeminiPro:
+            self.update_prompt(self.gemini_prompt, config)
 
         # Preferred Language
         source_lang = self.source_lang.currentText()
@@ -934,6 +986,18 @@ class TranslationSetting(QDialog):
         config.update(target_lang=self.target_lang.currentText())
 
         return config
+
+    def update_prompt(self, widget, config):
+        prompt = widget.toPlainText().strip()
+        if prompt and '<tlang>' not in prompt:
+            self.alert.pop(
+                _('the prompt must include {}.').format('<slang>'),
+                'warning')
+            return None
+        if 'prompt' in config:
+            del config['prompt']
+        if prompt and prompt != self.current_engine.prompt:
+            config.update(prompt=prompt)
 
     def update_engine_config(self):
         config = self.get_engine_config()
