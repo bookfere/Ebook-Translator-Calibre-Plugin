@@ -58,7 +58,7 @@ class ChatgptTranslate(Base):
     def _get_prompt(self):
         prompt = self.prompt.replace('<tlang>', self.target_lang)
         if self._is_auto_lang():
-            prompt = prompt.replace('<slang>', 'detect language')
+            prompt = prompt.replace('<slang>', 'detected language')
         else:
             prompt = prompt.replace('<slang>', self.source_lang)
         # Recommend setting temperature to 0.5 for retaining the placeholder.

@@ -1,6 +1,6 @@
 from .google import (
     GoogleFreeTranslate, GoogleBasicTranslate, GoogleBasicTranslateADC,
-    GoogleAdvancedTranslate)
+    GoogleAdvancedTranslate, GeminiPro)
 from .chatgpt import ChatgptTranslate, AzureChatgptTranslate
 from .deepl import DeeplTranslate, DeeplProTranslate, DeeplFreeTranslate
 from .youdao import YoudaoTranslate
@@ -11,5 +11,5 @@ from .microsoft import MicrosoftEdgeTranslate
 builtin_engines = (
     GoogleFreeTranslate, GoogleBasicTranslate, GoogleBasicTranslateADC,
     GoogleAdvancedTranslate, ChatgptTranslate, AzureChatgptTranslate,
-    DeeplTranslate, DeeplProTranslate, DeeplFreeTranslate,
+    GeminiPro, DeeplTranslate, DeeplProTranslate, DeeplFreeTranslate,
     MicrosoftEdgeTranslate, YoudaoTranslate, BaiduTranslate)
