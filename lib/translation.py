@@ -10,8 +10,7 @@ from ..engines.custom import CustomTranslate
 
 from .utils import sep, trim, dummy
 from .config import get_config
-from .exception import (
-    NoAvailableApiKey, TranslationCanceled, TranslationFailed)
+from .exception import NoAvailableApiKey, TranslationCanceled
 
 
 load_translations()
@@ -151,7 +150,7 @@ class Translation:
                     'Failed to retrieve data from translate engine API.')
                 retry_exceeded = retry >= self.translator.request_attempt
                 if retry_exceeded or self.need_stop():
-                    raise TranslationFailed('{}\n{}'.format(message, str(e)))
+                    raise TranslationCanceled('{}\n{}'.format(message, str(e)))
                 retry += 1
                 interval *= retry
                 # Logging any errors that occur during translation.
