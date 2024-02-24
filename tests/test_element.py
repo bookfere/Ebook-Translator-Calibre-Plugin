@@ -260,7 +260,9 @@ class TestExtraction(unittest.TestCase):
         <div></div>
     </body>
 </html>"""))
-        self.page_3 = Mock(media_type='text/css')
+        self.page_3 = Mock(
+            id="c", media_type='image/svg+xml', href='test.svg',
+            data=etree.XML(b'<svg xmlns="http://www.w3.org/2000/svg"></svg>'))
 
         self.extraction = Extraction(
             [self.page_3, self.page_2, self.page_1], 'normal', 'text', [], [])

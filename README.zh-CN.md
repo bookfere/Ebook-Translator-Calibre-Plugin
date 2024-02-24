@@ -17,7 +17,7 @@ __插件主页__：[https://translator.bookfere.com](https://translator.bookfere
 ## 主要功能
 
 * 支持所选翻译引擎所支持的语言（如 Google 翻译支持 134 种）
-* 支持多种翻译引擎，包括 Google 翻译、ChatGPT、DeepL 等
+* 支持多种翻译引擎，包括 Google 翻译、ChatGPT、Gemini、DeepL 等
 * 支持自定义翻译引擎（支持解析 JSON 和 XML 格式响应）
 * 支持所有 Calibre 所支持的电子书格式（输入 48 种，输出 20 种）以及 .srt 等额外格式
 * 支持批量翻译电子书，每本书的翻译过程同时进行互不影响

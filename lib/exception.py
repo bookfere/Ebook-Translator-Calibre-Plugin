@@ -1,8 +1,8 @@
-class TranslationFailed(Exception):
+class ConversionFailed(Exception):
     pass
 
 
-class TranslationCanceled(TranslationFailed):
+class TranslationCanceled(Exception):
     pass
 
 

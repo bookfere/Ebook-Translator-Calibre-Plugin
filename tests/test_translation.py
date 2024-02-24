@@ -2,8 +2,7 @@ import unittest
 from unittest.mock import patch, Mock, call
 
 from ..lib.translation import Glossary, ProgressBar, Translation
-from ..lib.exception import (
-    NoAvailableApiKey, TranslationCanceled, TranslationFailed)
+from ..lib.exception import TranslationCanceled
 from ..engines.base import Base
 from ..engines.deepl import DeeplTranslate
 
