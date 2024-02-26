@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-02-17 16:48+0800\n"
+"POT-Creation-Date: 2024-02-26 22:51+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -274,6 +274,9 @@ msgid "Status"
 msgstr ""
 
 msgid "Untranslated"
+msgstr ""
+
+msgid "The translation line count does not match the original."
 msgstr ""
 
 msgid "Select the whole chapter"

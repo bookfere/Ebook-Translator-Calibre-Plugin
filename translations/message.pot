@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-02-17 16:48+0800\n"
+"POT-Creation-Date: 2024-02-26 22:51+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -87,7 +87,7 @@ msgstr ""
 msgid "Character count: {}"
 msgstr ""
 
-#: advanced.py:465 cache.py:92 components/engine.py:200 components/table.py:92
+#: advanced.py:465 cache.py:92 components/engine.py:200 components/table.py:100
 msgid "Delete"
 msgstr ""
 
@@ -139,7 +139,7 @@ msgstr ""
 msgid "Title"
 msgstr ""
 
-#: advanced.py:613 components/table.py:81
+#: advanced.py:613 components/table.py:71
 msgid "Translated"
 msgstr ""
 
@@ -151,23 +151,23 @@ msgstr ""
 msgid "Save"
 msgstr ""
 
-#: advanced.py:752
+#: advanced.py:751
 msgid "Your changes have been saved."
 msgstr ""
 
-#: advanced.py:765
+#: advanced.py:764
 msgid "Translation log"
 msgstr ""
 
-#: advanced.py:776
+#: advanced.py:775
 msgid "Error log"
 msgstr ""
 
-#: advanced.py:796
+#: advanced.py:795
 msgid "Are you sure you want to translate all {:n} paragraphs?"
 msgstr ""
 
-#: advanced.py:822
+#: advanced.py:821
 msgid "Are you sure you want to stop the translation progress?"
 msgstr ""
 
@@ -175,7 +175,7 @@ msgstr ""
 msgid "Output Format"
 msgstr ""
 
-#: batch.py:126 components/engine.py:137 components/table.py:90
+#: batch.py:126 components/engine.py:137 components/table.py:98
 msgid "Translate"
 msgstr ""
 
@@ -241,11 +241,11 @@ msgstr ""
 msgid "Total: {}"
 msgstr ""
 
-#: cache.py:190 components/table.py:36 setting.py:54
+#: cache.py:190 components/table.py:35 setting.py:54
 msgid "Engine"
 msgstr ""
 
-#: cache.py:190 components/table.py:36 setting.py:884
+#: cache.py:190 components/table.py:35 setting.py:884
 msgid "Language"
 msgstr ""
 
@@ -261,8 +261,8 @@ msgstr ""
 msgid "Size (MB)"
 msgstr ""
 
-#: components/engine.py:64 lib/translation.py:173 tests/test_translation.py:109
-#: tests/test_translation.py:129 tests/test_translation.py:142
+#: components/engine.py:64 lib/translation.py:172 tests/test_translation.py:108
+#: tests/test_translation.py:128 tests/test_translation.py:141
 msgid "Translating..."
 msgstr ""
 
@@ -346,27 +346,31 @@ msgid ""
 "the translation process and saving time."
 msgstr ""
 
-#: components/table.py:36
+#: components/table.py:35
 msgid "Original"
 msgstr ""
 
-#: components/table.py:36
+#: components/table.py:35
 msgid "Status"
 msgstr ""
 
-#: components/table.py:77
+#: components/table.py:67
 msgid "Untranslated"
 msgstr ""
 
-#: components/table.py:96
+#: components/table.py:81
+msgid "The translation line count does not match the original."
+msgstr ""
+
+#: components/table.py:104
 msgid "Select the whole chapter"
 msgstr ""
 
-#: components/table.py:102
+#: components/table.py:110
 msgid "Select similar paragraphs: {}=\"{}\""
 msgstr ""
 
-#: components/table.py:149
+#: components/table.py:157
 msgid "Retain at least one row."
 msgstr ""
 
@@ -508,31 +512,31 @@ msgstr ""
 msgid "The translation of \"{}\" was completed. Do you want to open the book?"
 msgstr ""
 
-#: lib/translation.py:133 lib/translation.py:141 lib/translation.py:168
+#: lib/translation.py:132 lib/translation.py:140 lib/translation.py:167
 msgid "Translation canceled."
 msgstr ""
 
-#: lib/translation.py:145
+#: lib/translation.py:144
 msgid "No available API key."
 msgstr ""
 
-#: lib/translation.py:147
+#: lib/translation.py:146
 msgid "API key was Changed due to previous one unavailable."
 msgstr ""
 
-#: lib/translation.py:151
+#: lib/translation.py:150
 msgid "Failed to retrieve data from translate engine API."
 msgstr ""
 
-#: lib/translation.py:159 lib/translation.py:209 lib/translation.py:217
+#: lib/translation.py:158 lib/translation.py:209 lib/translation.py:217
 msgid "Original: {}"
 msgstr ""
 
-#: lib/translation.py:160
+#: lib/translation.py:159
 msgid "Status: Failed {} times / Sleeping for {} seconds"
 msgstr ""
 
-#: lib/translation.py:161 lib/translation.py:219
+#: lib/translation.py:160 lib/translation.py:219
 msgid "Error: {}"
 msgstr ""
 

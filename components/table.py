@@ -1,4 +1,5 @@
 from ..lib.utils import group
+from ..lib.translation import get_engine_class
 
 from .alert import AlertMessage
 
@@ -6,13 +7,11 @@ from .alert import AlertMessage
 try:
     from qt.core import (
         Qt, QTableWidget, QHeaderView, QMenu, QAbstractItemView, QCursor,
-        QAbstractItemView, QTableWidgetItem, pyqtSignal,
-        QTableWidgetSelectionRange)
+        QBrush, QTableWidgetItem, pyqtSignal, QTableWidgetSelectionRange)
 except ImportError:
     from PyQt5.Qt import (
         Qt, QTableWidget, QHeaderView, QMenu, QAbstractItemView, QCursor,
-        QAbstractItemView, QTableWidgetItem, pyqtSignal,
-        QTableWidgetSelectionRange)
+        QBrush, QTableWidgetItem, pyqtSignal, QTableWidgetSelectionRange)
 
 load_translations()
 
@@ -42,6 +41,8 @@ class AdvancedTranslationTable(QTableWidget):
         self.setEditTriggers(triggers)
         self.setAlternatingRowColors(True)
 
+        self.setVerticalHeaderLabels(
+            map(str, range(1, len(self.paragraphs) + 1)))
         for row, paragraph in enumerate(self.paragraphs):
             original = QTableWidgetItem(paragraph.original)
             original.setData(Qt.UserRole, paragraph)
@@ -70,6 +71,24 @@ class AdvancedTranslationTable(QTableWidget):
                 paragraph.engine_name, paragraph.target_lang, _('Translated')]
         for column, text in enumerate(items, 1):
             self.item(row, column).setText(text)
+        if paragraph.translation:
+            engine_class = get_engine_class(paragraph.engine_name)
+            if engine_class is not None and \
+                    not paragraph.is_alignment(engine_class.separator):
+                self.mark_row_as_problematic(row)
+
+    def mark_row_as_problematic(self, row):
+        tip = _('The translation line count does not match the original.')
+        item = self.verticalHeaderItem(row)
+        if item is None:
+            return
+        item.setBackground(QBrush(Qt.yellow))
+        item.setForeground(QBrush(Qt.white))
+        item.setToolTip(tip)
+        for column in range(self.columnCount()):
+            item = self.item(row, column)
+            item.setBackground(QBrush(Qt.yellow))
+            item.setToolTip(tip)
 
     def contextMenuEvent(self, event):
         if self.parent.on_working:

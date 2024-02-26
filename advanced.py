@@ -420,8 +420,30 @@ class AdvancedTranslation(QDialog):
             progress_bar.setValue(value)
         self.progress_bar.connect(write_progress)
 
+        paragraph_count = QLabel()
+
+        def get_paragraph_count(select_all=True):
+            item_count = char_count = 0
+            paragraphs = self.table.get_selected_items(select_all=select_all)
+            for paragraph in paragraphs:
+                item_count += 1
+                char_count += len(paragraph.original)
+            return (item_count, char_count)
+        all_item_count, all_char_count = get_paragraph_count(True)
+
+        def item_selection_changed():
+            item_count, char_count = get_paragraph_count(False)
+            total = '%s/%s' % (item_count, all_item_count)
+            parts = '%s/%s' % (char_count, all_char_count)
+            paragraph_count.setText(
+                _('Total items: {}').format(total) + ' · ' +
+                _('Character count: {}').format(parts))
+        item_selection_changed()
+        self.table.itemSelectionChanged.connect(item_selection_changed)
+
         layout.addWidget(self.table, 1)
         layout.addWidget(progress_bar)
+        layout.addWidget(paragraph_count)
         layout.addWidget(self.layout_table_control())
 
         def working_start():
@@ -441,8 +463,6 @@ class AdvancedTranslation(QDialog):
         action_layout.setContentsMargins(0, 0, 0, 0)
 
         delete_button = QPushButton(_('Delete'))
-        paragraph_count = QLabel()
-        paragraph_count.setAlignment(Qt.AlignCenter)
         translate_all = QPushButton('  %s  ' % _('Translate All'))
         translate_selected = QPushButton('  %s  ' % _('Translate Selected'))
 
@@ -453,30 +473,15 @@ class AdvancedTranslation(QDialog):
         delete_button.setDisabled(True)
         translate_selected.setDisabled(True)
 
-        def get_paragraph_count(select_all=True):
-            item_count = char_count = 0
-            paragraphs = self.table.get_selected_items(select_all=select_all)
-            for paragraph in paragraphs:
-                item_count += 1
-                char_count += len(paragraph.original)
-            return (item_count, char_count)
-        all_item_count, all_char_count = get_paragraph_count(True)
-
         def item_selection_changed():
             disabled = self.table.selected_count() < 1
             delete_button.setDisabled(disabled)
             translate_selected.setDisabled(disabled)
-            item_count, char_count = get_paragraph_count(False)
-            total = '%s/%s' % (item_count, all_item_count)
-            parts = '%s/%s' % (char_count, all_char_count)
-            paragraph_count.setText(
-                _('Total items: {}').format(total) + ' · ' +
-                _('Character count: {}').format(parts))
         item_selection_changed()
         self.table.itemSelectionChanged.connect(item_selection_changed)
 
         action_layout.addWidget(delete_button)
-        action_layout.addWidget(paragraph_count, 1)
+        action_layout.addStretch(1)
         action_layout.addWidget(translate_all)
         action_layout.addWidget(translate_selected)
 
@@ -708,8 +713,7 @@ class AdvancedTranslation(QDialog):
         change_selected_item()
 
         def translation_callback(paragraph):
-            row = paragraph.row
-            self.table.row.emit(row)
+            self.table.row.emit(paragraph.row)
             self.raw_text.emit(paragraph.raw)
             self.original_text.emit(paragraph.original)
             self.translation_text[str].emit(paragraph.translation)
