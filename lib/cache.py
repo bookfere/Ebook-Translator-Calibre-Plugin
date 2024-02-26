@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import shutil
 import sqlite3
@@ -35,6 +36,12 @@ class Paragraph:
         if self.attributes:
             return json.loads(self.attributes)
         return {}
+
+    def is_alignment(self, seperator):
+        pattern = re.compile(seperator)
+        count_original = len(pattern.split(self.original.strip()))
+        count_translation = len(pattern.split(self.translation.strip()))
+        return count_original == count_translation
 
 
 def default_cache_path():

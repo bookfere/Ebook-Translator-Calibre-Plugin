@@ -191,6 +191,7 @@ class Translation:
         paragraph.translation = translation.strip()
         paragraph.engine_name = self.translator.name
         paragraph.target_lang = self.translator.get_target_lang()
+        paragraph.seperator = self.translator.separator
         paragraph.is_cache = False
 
     def process_translation(self, paragraph):
