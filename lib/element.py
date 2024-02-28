@@ -394,8 +394,8 @@ class ElementHandlerMerge(ElementHandler):
         # Ensure the translation count matches the actual elements count.
         originals = paragraph.original.strip().split(self.separator)
         pattern = re.compile('%s+' % self.separator)
-        translations = pattern.sub(self.separator, paragraph.translation)
-        translations = translations.strip().split(self.separator)
+        translation = pattern.sub(self.separator, paragraph.translation)
+        translations = translation.strip().split(self.separator)
         offset = len(originals) - len(translations)
         if offset > 0:
             translations += ['-'] * offset

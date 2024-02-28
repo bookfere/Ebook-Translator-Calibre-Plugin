@@ -450,10 +450,13 @@ class AdvancedTranslation(QDialog):
             if self.translate_all:
                 progress_bar.setValue(0)
                 progress_bar.setVisible(True)
+                paragraph_count.setVisible(False)
         self.trans_worker.start.connect(working_start)
 
-        self.trans_worker.finished.connect(
-            lambda: progress_bar.setVisible(False))
+        def working_end():
+            progress_bar.setVisible(False)
+            paragraph_count.setVisible(True)
+        self.trans_worker.finished.connect(working_end)
 
         return widget
 
@@ -611,8 +614,15 @@ class AdvancedTranslation(QDialog):
 
         def output_ebook():
             if len(self.table.findItems(_('Translated'), Qt.MatchExactly)) < 1:
-                self.alert.pop('The ebook has not been translated yet.')
+                self.alert.pop(_('The ebook has not been translated yet.'))
                 return
+            if self.table.non_aligned_count() > 0:
+                message = _(
+                    'The number of lines in some translation units differs '
+                    'between the original text and the translated text. Are '
+                    'you sure you want to output without checking alignment?')
+                if self.alert.ask(message) != 'yes':
+                    return
             lang_code = self.current_engine.get_iso639_target_code(
                 self.ebook.target_lang)
             self.ebook.set_lang_code(lang_code)
@@ -733,6 +743,7 @@ class AdvancedTranslation(QDialog):
         def modify_translation():
             if self.on_working and self.table.selected_count() > 1:
                 return
+            save_button.setDisabled(False)
             paragraph = self.table.current_paragraph()
             translation = translation_text.toPlainText()
             control.setVisible(
@@ -740,6 +751,7 @@ class AdvancedTranslation(QDialog):
         translation_text.textChanged.connect(modify_translation)
 
         def save_translation():
+            save_button.setDisabled(True)
             paragraph = self.table.current_paragraph()
             translation = translation_text.toPlainText()
             paragraph.translation = translation

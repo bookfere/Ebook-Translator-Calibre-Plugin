@@ -9,6 +9,13 @@ class TestParagraph(unittest.TestCase):
             1, 'TEST', 'a\n\nb\n\nc', 'a\n\nb\n\nc\n\n',
             translation='A\n\nB\n\nC', attributes='{"class": "test"}')
 
+    def test_created_paragraph(self):
+        self.assertIsInstance(self.paragraph, Paragraph)
+        self.assertFalse(self.paragraph.is_cache)
+        self.assertIsNone(self.paragraph.error)
+        self.assertTrue(self.paragraph.aligned)
+        self.assertIsNone(self.paragraph.background)
+
     def test_get_attributes(self):
         self.assertEqual({'class': 'test'}, self.paragraph.get_attributes())
 

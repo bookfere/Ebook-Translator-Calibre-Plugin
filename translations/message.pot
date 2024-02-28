@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-02-26 22:51+0800\n"
+"POT-Creation-Date: 2024-02-28 22:22+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -87,7 +87,7 @@ msgstr ""
 msgid "Character count: {}"
 msgstr ""
 
-#: advanced.py:465 cache.py:92 components/engine.py:200 components/table.py:100
+#: advanced.py:465 cache.py:92 components/engine.py:200 components/table.py:113
 msgid "Delete"
 msgstr ""
 
@@ -139,35 +139,46 @@ msgstr ""
 msgid "Title"
 msgstr ""
 
-#: advanced.py:613 components/table.py:71
+#: advanced.py:613 components/table.py:74
 msgid "Translated"
 msgstr ""
 
-#: advanced.py:646
+#: advanced.py:614
+msgid "The ebook has not been translated yet."
+msgstr ""
+
+#: advanced.py:618
+msgid ""
+"The number of lines in some translation units differs between the original "
+"text and the translated text. Are you sure you want to output without "
+"checking alignment?"
+msgstr ""
+
+#: advanced.py:653
 msgid "No translation yet"
 msgstr ""
 
-#: advanced.py:693 components/engine.py:206 setting.py:89
+#: advanced.py:700 components/engine.py:206 setting.py:89
 msgid "Save"
 msgstr ""
 
-#: advanced.py:751
+#: advanced.py:760
 msgid "Your changes have been saved."
 msgstr ""
 
-#: advanced.py:764
+#: advanced.py:773
 msgid "Translation log"
 msgstr ""
 
-#: advanced.py:775
+#: advanced.py:784
 msgid "Error log"
 msgstr ""
 
-#: advanced.py:795
+#: advanced.py:804
 msgid "Are you sure you want to translate all {:n} paragraphs?"
 msgstr ""
 
-#: advanced.py:821
+#: advanced.py:830
 msgid "Are you sure you want to stop the translation progress?"
 msgstr ""
 
@@ -175,11 +186,11 @@ msgstr ""
 msgid "Output Format"
 msgstr ""
 
-#: batch.py:126 components/engine.py:137 components/table.py:98
+#: batch.py:126 components/engine.py:137 components/table.py:111
 msgid "Translate"
 msgstr ""
 
-#: batch.py:137 lib/cache.py:124
+#: batch.py:137 lib/cache.py:127
 msgid "Unknown"
 msgstr ""
 
@@ -241,11 +252,11 @@ msgstr ""
 msgid "Total: {}"
 msgstr ""
 
-#: cache.py:190 components/table.py:35 setting.py:54
+#: cache.py:190 components/table.py:37 setting.py:54
 msgid "Engine"
 msgstr ""
 
-#: cache.py:190 components/table.py:35 setting.py:884
+#: cache.py:190 components/table.py:37 setting.py:884
 msgid "Language"
 msgstr ""
 
@@ -346,31 +357,33 @@ msgid ""
 "the translation process and saving time."
 msgstr ""
 
-#: components/table.py:35
+#: components/table.py:37
 msgid "Original"
 msgstr ""
 
-#: components/table.py:35
+#: components/table.py:37
 msgid "Status"
 msgstr ""
 
-#: components/table.py:67
+#: components/table.py:69
 msgid "Untranslated"
 msgstr ""
 
-#: components/table.py:81
-msgid "The translation line count does not match the original."
+#: components/table.py:91
+msgid ""
+"The number of lines differs between the original text and the translated "
+"text."
 msgstr ""
 
-#: components/table.py:104
+#: components/table.py:117
 msgid "Select the whole chapter"
 msgstr ""
 
-#: components/table.py:110
+#: components/table.py:123
 msgid "Select similar paragraphs: {}=\"{}\""
 msgstr ""
 
-#: components/table.py:157
+#: components/table.py:170
 msgid "Retain at least one row."
 msgstr ""
 
