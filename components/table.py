@@ -67,28 +67,39 @@ class AdvancedTranslationTable(QTableWidget):
         items = ['--', '--', _('Untranslated')]
         paragraph = self.paragraph(row)
         if paragraph.translation:
+            self.check_row_alignment(paragraph)
             items = [
                 paragraph.engine_name, paragraph.target_lang, _('Translated')]
         for column, text in enumerate(items, 1):
             self.item(row, column).setText(text)
-        if paragraph.translation:
-            engine_class = get_engine_class(paragraph.engine_name)
-            if engine_class is not None and \
-                    not paragraph.is_alignment(engine_class.separator):
-                self.mark_row_as_problematic(row)
 
-    def mark_row_as_problematic(self, row):
-        tip = _('The translation line count does not match the original.')
-        item = self.verticalHeaderItem(row)
-        if item is None:
-            return
-        item.setBackground(QBrush(Qt.yellow))
-        item.setForeground(QBrush(Qt.white))
+    def check_row_alignment(self, paragraph):
+        item = self.verticalHeaderItem(paragraph.row)
+        if paragraph.background is None:
+            paragraph.background = item.background()
+
+        engine = get_engine_class(paragraph.engine_name)
+        if engine is None or paragraph.is_alignment(engine.separator):
+            background = paragraph.background
+            tip = ''
+            paragraph.aligned = True
+        else:
+            background = QBrush(Qt.yellow)
+            tip = _(
+                'The number of lines differs between the original text and '
+                'the translated text.')
+            paragraph.aligned = False
+
+        item.setBackground(background)
+        # item.setForeground(QBrush(Qt.white))
         item.setToolTip(tip)
         for column in range(self.columnCount()):
-            item = self.item(row, column)
-            item.setBackground(QBrush(Qt.yellow))
+            item = self.item(paragraph.row, column)
+            item.setBackground(background)
             item.setToolTip(tip)
+
+    def non_aligned_count(self):
+        return len([p for p in self.paragraphs if not p.aligned])
 
     def contextMenuEvent(self, event):
         if self.parent.on_working:

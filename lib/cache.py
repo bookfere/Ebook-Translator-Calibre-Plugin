@@ -32,6 +32,9 @@ class Paragraph:
         self.is_cache = False
         self.error = None
 
+        self.aligned = True
+        self.background = None
+
     def get_attributes(self):
         if self.attributes:
             return json.loads(self.attributes)
