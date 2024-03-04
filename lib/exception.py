@@ -2,6 +2,10 @@ class ConversionFailed(Exception):
     pass
 
 
+class TranslationFailed(Exception):
+    pass
+
+
 class TranslationCanceled(Exception):
     pass
 
