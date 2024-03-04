@@ -68,12 +68,13 @@ class SrtElement(Element):
 
     def add_translation(self, translation, placeholder, position=None,
                         lang=None, color=None):
-        if position == 'only':
-            self.element[2] = translation
-        elif position == 'after':
-            self.element[2] += '\n%s' % translation
-        else:
-            self.element[2] = '%s\n%s' % (translation, self.element[2])
+        if translation is not None:
+            if position == 'only':
+                self.element[2] = translation
+            elif position == 'after':
+                self.element[2] += '\n%s' % translation
+            else:
+                self.element[2] = '%s\n%s' % (translation, self.element[2])
         return self.element
 
 
@@ -89,9 +90,10 @@ class TocElement(Element):
 
     def add_translation(self, translation, placeholder, position=None,
                         lang=None, color=None):
-        items = [self.element.title, translation]
-        self.element.title = items[-1] if position == 'only' else \
-            ' '.join(reversed(items) if position == 'before' else items)
+        if translation is not None:
+            items = [self.element.title, translation]
+            self.element.title = items[-1] if position == 'only' else \
+                ' '.join(reversed(items) if position == 'before' else items)
         return self.element
 
 
@@ -146,6 +148,10 @@ class PageElement(Element):
 
     def add_translation(self, translation, placeholder, position=None,
                         lang=None, color=None):
+        if translation is None:
+            if position == 'only':
+                self.delete()
+            return self.element
         # Escape the markups (<m id=1 />) to replace escaped markups.
         translation = xml_escape(translation)
         for rid, reserve in enumerate(self.reserve_elements):
@@ -398,7 +404,11 @@ class ElementHandlerMerge(ElementHandler):
         translations = translation.strip().split(self.separator)
         offset = len(originals) - len(translations)
         if offset > 0:
-            translations += ['-'] * offset
+            addition = [None] * offset
+            if self.position == 'after':
+                translations = addition + translations
+            else:
+                translations += addition
         elif offset < 0:
             translations = translations[:offset]
         for original in originals:
