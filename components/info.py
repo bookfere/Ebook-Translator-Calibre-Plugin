@@ -16,7 +16,9 @@ def layout_info():
     layout = QHBoxLayout(widget)
     layout.setContentsMargins(0, 0, 0, 0)
     app_author = EbookTranslator.author
-    site = QLabel('♥ by <a href="https://{0}">{0}</a>'.format(app_author))
+    site = QLabel(
+        '<span style="color:crimson;">♥</span> by <a href="https://{0}">{0}</a>'
+        .format(app_author))
     site.setOpenExternalLinks(True)
     layout.addWidget(site)
     layout.addStretch(1)

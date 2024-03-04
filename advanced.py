@@ -447,7 +447,7 @@ class AdvancedTranslation(QDialog):
         layout.addWidget(self.layout_table_control())
 
         def working_start():
-            if self.translate_all:
+            if self.translate_all or self.table.selected_count() > 1:
                 progress_bar.setValue(0)
                 progress_bar.setVisible(True)
                 paragraph_count.setVisible(False)
