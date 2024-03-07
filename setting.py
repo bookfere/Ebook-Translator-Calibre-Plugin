@@ -693,18 +693,21 @@ class TranslationSetting(QDialog):
         after_original.setChecked(True)
         before_original = QRadioButton(_('Add before original'))
         delete_original = QRadioButton(_('Add without original'))
+        side_by_side = QRadioButton(_('Side-by-side'))
         position_layout.addWidget(after_original)
         position_layout.addWidget(before_original)
         position_layout.addWidget(delete_original)
+        position_layout.addWidget(side_by_side)
         position_layout.addStretch(1)
         layout.addWidget(position_group)
 
-        position_map = dict(enumerate(['after', 'before', 'only']))
+        position_map = dict(enumerate(['after', 'before', 'only', 'sidebyside']))
         position_rmap = dict((v, k) for k, v in position_map.items())
         position_btn_group = QButtonGroup(position_group)
         position_btn_group.addButton(after_original, 0)
         position_btn_group.addButton(before_original, 1)
         position_btn_group.addButton(delete_original, 2)
+        position_btn_group.addButton(side_by_side, 3)
 
         position_btn_group.button(position_rmap.get(
             self.config.get('translation_position'))).setChecked(True)
