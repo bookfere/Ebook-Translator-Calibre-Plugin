@@ -19,7 +19,7 @@ try:
         QIntValidator, QScrollArea, QRadioButton, QGridLayout, QCheckBox,
         QButtonGroup, QColorDialog, QSpinBox, QPalette, QApplication,
         QComboBox, QRegularExpression, pyqtSignal, QFormLayout, QDoubleSpinBox,
-        QSettings, QSpacerItem, QRegularExpressionValidator)
+        QSettings, QSpacerItem, QRegularExpressionValidator, QBoxLayout)
 except ImportError:
     from PyQt5.Qt import (
         Qt, QLabel, QDialog, QWidget, QLineEdit, QPushButton, QPlainTextEdit,
@@ -27,7 +27,7 @@ except ImportError:
         QIntValidator, QScrollArea, QRadioButton, QGridLayout, QCheckBox,
         QButtonGroup, QColorDialog, QSpinBox, QPalette, QApplication,
         QComboBox, QRegularExpression, pyqtSignal, QFormLayout, QDoubleSpinBox,
-        QSettings, QSpacerItem, QRegularExpressionValidator)
+        QSettings, QSpacerItem, QRegularExpressionValidator, QBoxLayout)
 
 load_translations()
 
@@ -687,35 +687,87 @@ class TranslationSetting(QDialog):
         layout = QVBoxLayout(widget)
 
         # Translation Position
+        position_radios = QWidget()
+        position_radios_layout = QVBoxLayout(position_radios)
+        position_radios_layout.setContentsMargins(0, 0, 0, 0)
+        below_original = QRadioButton(_('Below original'))
+        below_original.setChecked(True)
+        above_original = QRadioButton(_('Above original'))
+        left_to_original = QRadioButton(
+            '%s (%s)' % (_('Left to original'), _('Beta')))
+        right_to_original = QRadioButton(
+            '%s (%s)' % (_('Right to original'), _('Beta')))
+        delete_original = QRadioButton(_('Add without original'))
+        position_radios_layout.addWidget(below_original)
+        position_radios_layout.addWidget(above_original)
+        position_radios_layout.addWidget(left_to_original)
+        position_radios_layout.addWidget(right_to_original)
+        position_radios_layout.addWidget(delete_original)
+        position_radios_layout.addStretch(1)
+
+        position_samples = QWidget()
+        position_samples_layout = QVBoxLayout(position_samples)
+        position_samples_layout.setContentsMargins(0, 0, 0, 0)
+        position_samples_layout.setSpacing(10)
+        original_sample = QLabel(_('Original'))
+        original_sample.setAlignment(Qt.AlignCenter)
+        original_sample.setWordWrap(True)
+        original_sample.setStyleSheet(
+            'border:1px solid rgba(127,127,127,.3);'
+            'background-color:rgba(127,127,127,.1);padding:10px;'
+            'color:rgba(0,0,0,.3);font-size:28px;')
+        translation_sample = QLabel(_('Translation'))
+        translation_sample.setAlignment(Qt.AlignCenter)
+        translation_sample.setWordWrap(True)
+        translation_sample.setStyleSheet(
+            'border:1px solid rgba(127,127,127,.3);'
+            'background-color:rgba(127,127,127,.1);padding:10px;'
+            'color:black;font-size:28px;')
+
+        position_samples_layout.addWidget(original_sample, 1)
+        position_samples_layout.addWidget(translation_sample, 1)
+
         position_group = QGroupBox(_('Translation Position'))
         position_layout = QHBoxLayout(position_group)
-        after_original = QRadioButton(_('Add after original'))
-        after_original.setChecked(True)
-        before_original = QRadioButton(_('Add before original'))
-        delete_original = QRadioButton(_('Add without original'))
-        side_by_side = QRadioButton(_('Side-by-side'))
-        position_layout.addWidget(after_original)
-        position_layout.addWidget(before_original)
-        position_layout.addWidget(delete_original)
-        position_layout.addWidget(side_by_side)
-        position_layout.addStretch(1)
+        position_layout.addWidget(position_samples, 1)
+        position_layout.addSpacing(10)
+        position_layout.addWidget(position_radios)
+
         layout.addWidget(position_group)
 
-        position_map = dict(enumerate(['after', 'before', 'only', 'sidebyside']))
+        position_map = dict(enumerate(
+            ['below', 'above', 'left', 'right', 'only']))
         position_rmap = dict((v, k) for k, v in position_map.items())
+        # Add alias for compatibility with lower versions.
+        position_rmap['after'] = 0
+        position_rmap['before'] = 1
         position_btn_group = QButtonGroup(position_group)
-        position_btn_group.addButton(after_original, 0)
-        position_btn_group.addButton(before_original, 1)
-        position_btn_group.addButton(delete_original, 2)
-        position_btn_group.addButton(side_by_side, 3)
+        position_btn_group.addButton(below_original, 0)
+        position_btn_group.addButton(above_original, 1)
+        position_btn_group.addButton(left_to_original, 2)
+        position_btn_group.addButton(right_to_original, 3)
+        position_btn_group.addButton(delete_original, 4)
 
-        position_btn_group.button(position_rmap.get(
-            self.config.get('translation_position'))).setChecked(True)
+        map_key = self.config.get('translation_position', 'below')
+        if map_key not in position_rmap.keys():
+            map_key = 'below'
+        position_btn_group.button(position_rmap.get(map_key)).setChecked(True)
         # Check the attribute for compatibility with PyQt5.
         position_btn_click = getattr(position_btn_group, 'idClicked', None) \
             or position_btn_group.buttonClicked[int]
-        position_btn_click.connect(lambda btn_id: self.config.update(
-            translation_position=position_map.get(btn_id)))
+
+        names = ('TopToBottom', 'BottomToTop', 'RightToLeft', 'LeftToRight')
+        directions = [
+            getattr(QBoxLayout, name, None) or getattr(
+                QBoxLayout.Direction, name) for name in names]
+
+        def choose_option(btn_id):
+            original_sample.setVisible(btn_id != 4)
+            position_samples.layout().setDirection(
+                directions[btn_id] if btn_id != 4 else directions[0])
+            self.config.update(translation_position=position_map.get(btn_id))
+        choose_option(position_btn_group.checkedId())
+        position_btn_click.connect(choose_option)
 
         # Translation Color
         color_group = QGroupBox(_('Translation Color'))

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-02-28 22:22+0800\n"
+"POT-Creation-Date: 2024-03-08 21:13+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -568,17 +568,29 @@ msgstr "启用类似 ChatGPT 的文本流"
 msgid "Stream"
 msgstr "文本流"
 
-msgid "Translation Position"
-msgstr "译文位置"
+msgid "Below original"
+msgstr "原文下方"
 
-msgid "Add after original"
-msgstr "加在原文后"
+msgid "Above original"
+msgstr "原文上方"
 
-msgid "Add before original"
-msgstr "加在原文前"
+msgid "Beta"
+msgstr "测试"
+
+msgid "Left to original"
+msgstr "原文左边"
+
+msgid "Right to original"
+msgstr "原文右边"
 
 msgid "Add without original"
 msgstr "仅保留译文"
+
+msgid "Translation"
+msgstr "译文"
+
+msgid "Translation Position"
+msgstr "译文位置"
 
 msgid "Translation Color"
 msgstr "译文颜色"
@@ -699,6 +711,12 @@ msgstr "缓存管理器"
 
 msgid "Choose Translation Mode"
 msgstr "选择翻译模式"
+
+#~ msgid "Add after original"
+#~ msgstr "加在原文后"
+
+#~ msgid "Add before original"
+#~ msgstr "加在原文前"
 
 #~ msgid "The translation line count does not match the original."
 #~ msgstr "翻译行数与原文行数不一致。"
