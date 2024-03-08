@@ -7,11 +7,13 @@ from .alert import AlertMessage
 try:
     from qt.core import (
         Qt, QTableWidget, QHeaderView, QMenu, QAbstractItemView, QCursor,
-        QBrush, QTableWidgetItem, pyqtSignal, QTableWidgetSelectionRange)
+        QBrush, QTableWidgetItem, pyqtSignal, QTableWidgetSelectionRange,
+        QColor)
 except ImportError:
     from PyQt5.Qt import (
         Qt, QTableWidget, QHeaderView, QMenu, QAbstractItemView, QCursor,
-        QBrush, QTableWidgetItem, pyqtSignal, QTableWidgetSelectionRange)
+        QBrush, QTableWidgetItem, pyqtSignal, QTableWidgetSelectionRange,
+        QColor)
 
 load_translations()
 
@@ -77,21 +79,25 @@ class AdvancedTranslationTable(QTableWidget):
         item = self.verticalHeaderItem(paragraph.row)
         if paragraph.background is None:
             paragraph.background = item.background()
+        if paragraph.foreground is None:
+            paragraph.foreground = item.foreground()
 
         engine = get_engine_class(paragraph.engine_name)
         if engine is None or paragraph.is_alignment(engine.separator):
             background = paragraph.background
+            foreground = paragraph.foreground
             tip = ''
             paragraph.aligned = True
         else:
-            background = QBrush(Qt.yellow)
+            background = QBrush(QColor(255, 255, 0, 100))
+            foreground = QBrush(Qt.black)
             tip = _(
                 'The number of lines differs between the original text and '
                 'the translated text.')
             paragraph.aligned = False
 
         item.setBackground(background)
-        # item.setForeground(QBrush(Qt.white))
+        item.setForeground(foreground)
         item.setToolTip(tip)
         for column in range(self.columnCount()):
             item = self.item(paragraph.row, column)
