@@ -60,15 +60,23 @@ class TestSrtElement(unittest.TestCase):
         self.assertEqual('a', self.element.get_content(Base.placeholder))
 
     def test_add_translation_none(self):
-        element = self.element.add_translation(None, Base.placeholder, 'after')
+        element = self.element.add_translation(None, Base.placeholder, 'below')
         self.assertEqual('a', element[2])
 
-    def test_add_translation_after(self):
-        element = self.element.add_translation('A', Base.placeholder, 'after')
+    def test_add_translation_below(self):
+        element = self.element.add_translation('A', Base.placeholder, 'below')
         self.assertEqual('a\nA', element[2])
 
-    def test_add_translation_before(self):
-        element = self.element.add_translation('A', Base.placeholder, 'before')
+    def test_add_translation_right(self):
+        element = self.element.add_translation('A', Base.placeholder, 'right')
+        self.assertEqual('a\nA', element[2])
+
+    def test_add_translation_above(self):
+        element = self.element.add_translation('A', Base.placeholder, 'above')
+        self.assertEqual('A\na', element[2])
+
+    def test_add_translation_left(self):
+        element = self.element.add_translation('A', Base.placeholder, 'left')
         self.assertEqual('A\na', element[2])
 
     def test_add_translation_only(self):
@@ -90,15 +98,23 @@ class TestTocElement(unittest.TestCase):
         self.assertEqual('a', self.element.get_content(Base.placeholder))
 
     def test_add_translation_none(self):
-        element = self.element.add_translation(None, Base.placeholder, 'after')
+        element = self.element.add_translation(None, Base.placeholder, 'below')
         self.assertEqual('a', element.title)
 
-    def test_add_translation_after(self):
-        element = self.element.add_translation('A', Base.placeholder, 'after')
+    def test_add_translation_below(self):
+        element = self.element.add_translation('A', Base.placeholder, 'below')
         self.assertEqual('a A', element.title)
 
-    def test_add_translation_before(self):
-        element = self.element.add_translation('A', Base.placeholder, 'before')
+    def test_add_translation_right(self):
+        element = self.element.add_translation('A', Base.placeholder, 'right')
+        self.assertEqual('a A', element.title)
+
+    def test_add_translation_above(self):
+        element = self.element.add_translation('A', Base.placeholder, 'above')
+        self.assertEqual('A a', element.title)
+
+    def test_add_translation_left(self):
+        element = self.element.add_translation('A', Base.placeholder, 'left')
         self.assertEqual('A a', element.title)
 
     def test_add_translation_only(self):
@@ -204,16 +220,30 @@ class TestPageElement(unittest.TestCase):
                        'K<br/>L</p>')
         self.assertEqual(translation, get_string(new))
 
-    def test_add_translation_next(self):
+    def test_add_translation_below(self):
         new = self.element.add_translation(
             'test', Base.placeholder, position='next')
         self.assertEqual(self.paragraph, new.getprevious())
         self.assertIn('>test<', get_string(new))
 
-    def test_add_translation_before(self):
+    def test_add_translation_right(self):
         new = self.element.add_translation(
-            'test', Base.placeholder, position='before')
+            'test', Base.placeholder, position='right')
+        table = self.xhtml.find('.//x:table', namespaces=ns)
+        self.assertIsNotNone(table)
+        self.assertIn('>test<', get_string(new))
+
+    def test_add_translation_above(self):
+        new = self.element.add_translation(
+            'test', Base.placeholder, position='above')
         self.assertEqual(self.paragraph, new.getnext())
+        self.assertIn('>test<', get_string(new))
+
+    def test_add_translation_left(self):
+        new = self.element.add_translation(
+            'test', Base.placeholder, position='left')
+        table = self.xhtml.find('.//x:table', namespaces=ns)
+        self.assertIsNotNone(table)
         self.assertIn('>test<', get_string(new))
 
     def test_add_translation_only(self):
@@ -616,7 +646,7 @@ class TestElementHandlerMerge(unittest.TestCase):
         self.assertEqual(
             ['A', 'B', None], self.handler.align_paragraph(paragraph))
 
-        self.handler.position = 'after'
+        self.handler.position = 'below'
         self.assertEqual(
             [None, 'A', 'B'], self.handler.align_paragraph(paragraph))
 

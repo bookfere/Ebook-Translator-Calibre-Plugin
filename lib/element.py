@@ -3,6 +3,7 @@ import json
 import copy
 
 from lxml import etree
+from lxml.builder import ElementMaker
 from calibre import prepare_string_for_xml as xml_escape
 
 from .utils import ns, css, uid, trim, sorted_mixed_keys
@@ -71,7 +72,7 @@ class SrtElement(Element):
         if translation is not None:
             if position == 'only':
                 self.element[2] = translation
-            elif position == 'after':
+            elif position in ('below', 'right'):
                 self.element[2] += '\n%s' % translation
             else:
                 self.element[2] = '%s\n%s' % (translation, self.element[2])
@@ -92,8 +93,8 @@ class TocElement(Element):
                         lang=None, color=None):
         if translation is not None:
             items = [self.element.title, translation]
-            self.element.title = items[-1] if position == 'only' else \
-                ' '.join(reversed(items) if position == 'before' else items)
+            self.element.title = items[-1] if position == 'only' else ' '.join(
+                reversed(items) if position in ('above', 'left') else items)
         return self.element
 
 
@@ -162,30 +163,12 @@ class PageElement(Element):
                 translation)
         translation = self._polish_translation(translation)
 
-        if position == 'sidebyside':
-            new_element = etree.Element(get_name(self.element), xmlns=ns['x'])
-            # Create table structure
-            table = etree.SubElement(new_element, 'table')
-            tr = etree.SubElement(table, 'tr')
-
-            # Original text on the left column
-            td_original = etree.SubElement(tr, 'td')
-            td_original.set('width', '45%')
-            td_orig_elem = td_original.append(self.element_copy)
-
-            # Middle column
-            td_middle = etree.SubElement(tr, 'td')
-            td_middle.set('padding', '10px')
-            # looks awful, but I couldn't find better way to keep the gap:
-            td_middle.text = xml_escape('&#xA0;&#xA0;&#xA0;&#xA0;')
-
-            # Translation on the right column
-            td_translation = etree.SubElement(tr, 'td')
-            td_translation.set('width', '45%')
-            td_translation.text = trim(translation)
-        else:
-            new_element = etree.XML('<{0} xmlns="{1}">{2}</{0}>'.format(
+        new_element = etree.XML('<{0} xmlns="{1}">{2}</{0}>'.format(
             get_name(self.element), ns['x'], trim(translation)))
+        # new_element = self.element.makeelement(
+        #     get_name(self.element), nsmap={'xhtml': ns['x']})
+        # new_element.text = trim(translation)
+
         # Preserve all attributes from the original element.
         for name, value in self.element.items():
             if name == 'id' and position != 'only':
@@ -199,11 +182,27 @@ class PageElement(Element):
             new_element.set('lang', lang)
 
         self.element.tail = None  # Make sure the element has no tail
-        if position == 'before':
+
+        if position in ('left', 'right'):
+            # table = self.element.makeelement('table', attrib={'width': '100%'})
+            table = etree.XML(
+                '<table xmlns="{}" width="100%"></table>'.format(ns['x']))
+            tr = etree.SubElement(table, 'tr')
+            td_left = etree.SubElement(
+                tr, 'td', attrib={'width': '45%', 'valign': 'top'})
+            td_left.append(
+                new_element if position == 'left' else self.element_copy)
+            etree.SubElement(tr, 'td', attrib={'width': '10%'})
+            td_right = etree.SubElement(
+                tr, 'td', attrib={'width': '45%', 'valign': 'top'})
+            td_right.append(
+                self.element_copy if position == 'left' else new_element)
+            self.element.addnext(table)
+        elif position == 'above':
             self.element.addprevious(new_element)
         else:
             self.element.addnext(new_element)
-        if position == 'only' or position == 'sidebyside':
+        if position in ['left', 'right', 'only']:
             self.delete()
         return new_element
 
@@ -428,7 +427,7 @@ class ElementHandlerMerge(ElementHandler):
         offset = len(originals) - len(translations)
         if offset > 0:
             addition = [None] * offset
-            if self.position == 'after':
+            if self.position == 'below':
                 translations = addition + translations
             else:
                 translations += addition
@@ -503,7 +502,9 @@ def get_element_handler(placeholder, separator):
     if config.get('merge_enabled'):
         handler = ElementHandlerMerge(
             placeholder, separator, config.get('merge_length'))
+    position = config.get('translation_position', 'below')
+    position_alias = {'before': 'above', 'after': 'below'}
     handler.set_translation_position(
-        config.get('translation_position'))
+        position_alias.get(position) or position)
     handler.set_translation_color(config.get('translation_color'))
     return handler
