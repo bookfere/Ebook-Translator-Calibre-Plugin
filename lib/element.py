@@ -161,7 +161,30 @@ class PageElement(Element):
                 xml_escape(pattern), lambda _: get_string(reserve),
                 translation)
         translation = self._polish_translation(translation)
-        new_element = etree.XML('<{0} xmlns="{1}">{2}</{0}>'.format(
+
+        if position == 'sidebyside':
+            new_element = etree.Element(get_name(self.element), xmlns=ns['x'])
+            # Create table structure
+            table = etree.SubElement(new_element, 'table')
+            tr = etree.SubElement(table, 'tr')
+
+            # Original text on the left column
+            td_original = etree.SubElement(tr, 'td')
+            td_original.set('width', '45%')
+            td_orig_elem = td_original.append(self.element_copy)
+
+            # Middle column
+            td_middle = etree.SubElement(tr, 'td')
+            td_middle.set('padding', '10px')
+            # looks awful, but I couldn't find better way to keep the gap:
+            td_middle.text = xml_escape('&#xA0;&#xA0;&#xA0;&#xA0;')
+
+            # Translation on the right column
+            td_translation = etree.SubElement(tr, 'td')
+            td_translation.set('width', '45%')
+            td_translation.text = trim(translation)
+        else:
+            new_element = etree.XML('<{0} xmlns="{1}">{2}</{0}>'.format(
             get_name(self.element), ns['x'], trim(translation)))
         # Preserve all attributes from the original element.
         for name, value in self.element.items():
@@ -180,7 +203,7 @@ class PageElement(Element):
             self.element.addprevious(new_element)
         else:
             self.element.addnext(new_element)
-        if position == 'only':
+        if position == 'only' or position == 'sidebyside':
             self.delete()
         return new_element
 
