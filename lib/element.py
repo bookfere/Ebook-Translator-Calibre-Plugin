@@ -52,8 +52,8 @@ class Element:
     def get_content(self, placeholder):
         raise NotImplementedError()
 
-    def add_translation(self, translation, placeholder, position=None,
-                        lang=None, color=None):
+    def add_translation(
+            self, translation, placeholder, position, lang=None, color=None):
         raise NotImplementedError()
 
 
@@ -67,8 +67,8 @@ class SrtElement(Element):
     def get_content(self, placeholder):
         return self.element[2]
 
-    def add_translation(self, translation, placeholder, position=None,
-                        lang=None, color=None):
+    def add_translation(
+            self, translation, placeholder, position, lang=None, color=None):
         if translation is not None:
             if position == 'only':
                 self.element[2] = translation
@@ -144,13 +144,17 @@ class PageElement(Element):
         return trim(''.join(self.element_copy.itertext()))
 
     def _polish_translation(self, translation):
+        translation = translation.replace('\n', '<br />')
         # Condense consecutive letters to a maximum of four.
         return re.sub(r'((\w)\2{3})\2*', r'\1', translation)
 
-    def add_translation(self, translation, placeholder, position=None,
-                        lang=None, color=None):
+    def add_translation(
+            self, translation, placeholder, position, lang=None, color=None):
         if translation is None:
-            if position == 'only':
+            if position in ('left', 'right'):
+                self.element.addnext(
+                    self._create_table(position, self.element_copy))
+            if position in ('only', 'left', 'right'):
                 self.delete()
             return self.element
         # Escape the markups (<m id=1 />) to replace escaped markups.
@@ -184,20 +188,8 @@ class PageElement(Element):
         self.element.tail = None  # Make sure the element has no tail
 
         if position in ('left', 'right'):
-            # table = self.element.makeelement('table', attrib={'width': '100%'})
-            table = etree.XML(
-                '<table xmlns="{}" width="100%"></table>'.format(ns['x']))
-            tr = etree.SubElement(table, 'tr')
-            td_left = etree.SubElement(
-                tr, 'td', attrib={'width': '45%', 'valign': 'top'})
-            td_left.append(
-                new_element if position == 'left' else self.element_copy)
-            etree.SubElement(tr, 'td', attrib={'width': '10%'})
-            td_right = etree.SubElement(
-                tr, 'td', attrib={'width': '45%', 'valign': 'top'})
-            td_right.append(
-                self.element_copy if position == 'left' else new_element)
-            self.element.addnext(table)
+            self.element.addnext(
+                self._create_table(position, self.element_copy, new_element))
         elif position == 'above':
             self.element.addprevious(new_element)
         else:
@@ -205,6 +197,26 @@ class PageElement(Element):
         if position in ['left', 'right', 'only']:
             self.delete()
         return new_element
+
+    def _create_table(self, position, original, translation=None):
+        # table = self.element.makeelement('table', attrib={'width': '100%'})
+        table = etree.XML(
+            '<table xmlns="{}" width="100%"></table>'.format(ns['x']))
+        tr = etree.SubElement(table, 'tr')
+        td_left = etree.SubElement(
+            tr, 'td', attrib={'width': '45%', 'valign': 'top'})
+        etree.SubElement(tr, 'td', attrib={'width': '10%'})
+        td_right = etree.SubElement(
+            tr, 'td', attrib={'width': '45%', 'valign': 'top'})
+        if position == 'left':
+            if translation is not None:
+                td_left.append(translation)
+            td_right.append(original)
+        if position == 'right':
+            td_left.append(original)
+            if translation is not None:
+                td_right.append(translation)
+        return table
 
 
 class Extraction:
@@ -313,12 +325,12 @@ class Extraction:
 
 
 class ElementHandler:
-    def __init__(self, placeholder, separator, merge_length=0):
+    def __init__(self, placeholder, separator, position, merge_length=0):
         self.placeholder = placeholder
         self.separator = separator
+        self.position = position
         self.merge_length = merge_length
 
-        self.position = None
         self.color = None
         self.lang = None
 
@@ -329,9 +341,6 @@ class ElementHandler:
 
     def get_merge_length(self):
         return self.merge_length
-
-    def set_translation_position(self, position):
-        self.position = position
 
     def set_translation_color(self, color):
         self.color = color
@@ -426,16 +435,24 @@ class ElementHandlerMerge(ElementHandler):
         translations = translation.strip().split(self.separator)
         offset = len(originals) - len(translations)
         if offset > 0:
-            addition = [None] * offset
-            if self.position == 'below':
-                translations = addition + translations
-            else:
+            # TODO: Merge the original and translation for the left and right.
+            if self.position in ['left', 'right']:
+                addition = [None] * offset
                 translations += addition
+            else:
+                merged_translations = '\n\n'.join(translations)
+                translations = [None] * (len(originals) - 1)
+                if self.position in ['above']:
+                    translations.insert(0, merged_translations)
+                else:
+                    translations.append(merged_translations)
         elif offset < 0:
-            translations = translations[:offset]
-        for original in originals:
-            if original and original not in self.base_originals:
-                translations.pop(originals.index(original))
+            offset = len(originals) - 1
+            translations = translations[:offset] + [
+                '\n\n'.join(translations[offset:])]
+        # for original in originals:
+        #     if original and original not in self.base_originals:
+        #         translations.pop(originals.index(original))
         return translations
 
     def add_translations(self, paragraphs):
@@ -445,8 +462,6 @@ class ElementHandlerMerge(ElementHandler):
         total = len(translations)
         count = 0
         for eid, element in self.elements.copy().items():
-            # TODO: Maybe the translation count does not match the elements
-            # count due to the criteria of the old version has been changed.
             if element.ignored or eid >= total:
                 continue
             element.add_translation(
@@ -498,13 +513,12 @@ def get_page_elements(pages):
 
 def get_element_handler(placeholder, separator):
     config = get_config()
-    handler = ElementHandler(placeholder, separator)
+    position_alias = {'before': 'above', 'after': 'below'}
+    position = config.get('translation_position', 'below')
+    position = position_alias.get(position) or position
+    handler = ElementHandler(placeholder, separator, position)
     if config.get('merge_enabled'):
         handler = ElementHandlerMerge(
-            placeholder, separator, config.get('merge_length'))
-    position = config.get('translation_position', 'below')
-    position_alias = {'before': 'above', 'after': 'below'}
-    handler.set_translation_position(
-        position_alias.get(position) or position)
+            placeholder, separator, position, config.get('merge_length'))
     handler.set_translation_color(config.get('translation_color'))
     return handler
