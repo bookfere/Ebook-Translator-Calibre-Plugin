@@ -273,8 +273,10 @@ class Extraction:
 
     def get_sorted_pages(self):
         pages = []
+        pattern = re.compile(r'\.(xhtml|html|htm|xml|xht)$')
         for page in self.pages:
-            if isinstance(page.data, etree._Element) and 'html' in page.href:
+            if isinstance(page.data, etree._Element) \
+                    and pattern.search(page.href):
                 pages.append(page)
         return sorted(pages, key=lambda page: sorted_mixed_keys(page.href))
 

@@ -290,7 +290,7 @@ class TestPageElement(unittest.TestCase):
 class TestExtraction(unittest.TestCase):
     def setUp(self):
         self.page_1 = Mock(
-            id='a', media_type='text/html', href='test1.xhtml', data=etree.XML(
+            id='a', media_type='text/html', href='test1.htm', data=etree.XML(
                 b"""<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
