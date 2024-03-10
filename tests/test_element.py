@@ -280,8 +280,10 @@ class TestPageElement(unittest.TestCase):
 
     def test_add_translation_attr(self):
         new = self.element.add_translation(
-            'test', Base.placeholder, position='below', lang='zh', color='red')
+            'test', Base.placeholder, position='below', translation_lang='zh',
+            original_color='green', translation_color='red')
         self.assertEqual('zh', new.get('lang'))
+        self.assertEqual('color:green', self.element.element.get('style'))
         self.assertEqual('color:red', new.get('style'))
 
 

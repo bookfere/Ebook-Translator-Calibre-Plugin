@@ -21,7 +21,8 @@ class TestFunction(unittest.TestCase):
             'cache_enabled': True,
             'cache_path': None,
             'log_translation': True,
-            'translation_position': 'after',
+            'translation_position': None,
+            'original_color': None,
             'translation_color': None,
             'rule_mode': 'normal',
             'filter_scope': 'text',
@@ -130,7 +131,7 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(1, self.config.get('a.fake', 1))
         self.assertEqual({'b2': 2}, self.config.get('b.b1'))
         self.assertEqual(2, self.config.get('b.b1.b2'))
-        self.assertEqual('after', self.config.get('translation_position'))
+        self.assertIsNone(self.config.get('translation_position'))
 
     def test_set(self):
         self.config.preferences = {
