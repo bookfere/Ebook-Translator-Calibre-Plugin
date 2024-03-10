@@ -10,14 +10,14 @@ from .engines import builtin_engines
 from .engines import GeminiPro
 from .components import (
     layout_info, AlertMessage, TargetLang, SourceLang, EngineList,
-    EngineTester, get_divider, ManageCustomEngine, InputFormat, OutputFormat)
+    EngineTester, ManageCustomEngine, InputFormat, OutputFormat)
 
 try:
     from qt.core import (
         Qt, QLabel, QDialog, QWidget, QLineEdit, QPushButton, QPlainTextEdit,
         QTabWidget, QHBoxLayout, QVBoxLayout, QGroupBox, QFileDialog, QColor,
         QIntValidator, QScrollArea, QRadioButton, QGridLayout, QCheckBox,
-        QButtonGroup, QColorDialog, QSpinBox, QPalette, QApplication,
+        QButtonGroup, QColorDialog, QSpinBox, QPalette, QApplication, QFrame,
         QComboBox, QRegularExpression, pyqtSignal, QFormLayout, QDoubleSpinBox,
         QSettings, QSpacerItem, QRegularExpressionValidator, QBoxLayout)
 except ImportError:
@@ -25,7 +25,7 @@ except ImportError:
         Qt, QLabel, QDialog, QWidget, QLineEdit, QPushButton, QPlainTextEdit,
         QTabWidget, QHBoxLayout, QVBoxLayout, QGroupBox, QFileDialog, QColor,
         QIntValidator, QScrollArea, QRadioButton, QGridLayout, QCheckBox,
-        QButtonGroup, QColorDialog, QSpinBox, QPalette, QApplication,
+        QButtonGroup, QColorDialog, QSpinBox, QPalette, QApplication, QFrame,
         QComboBox, QRegularExpression, pyqtSignal, QFormLayout, QDoubleSpinBox,
         QSettings, QSpacerItem, QRegularExpressionValidator, QBoxLayout)
 
@@ -45,6 +45,13 @@ class TranslationSetting(QDialog):
         self.current_engine = get_engine_class()
 
         self.main_layout()
+
+    def _divider(self):
+        divider = QFrame()
+        divider.setFrameShape(QFrame.HLine)
+        divider.setFrameShadow(QFrame.Sunken)
+        # divider.setFrameStyle(QFrame.HLine | QFrame.Sunken)
+        return divider
 
     def main_layout(self):
         layout = QVBoxLayout(self)
@@ -111,7 +118,7 @@ class TranslationSetting(QDialog):
         mode_layout.addWidget(advanced_mode, 0, 1)
         mode_layout.addWidget(batch_mode, 0, 2)
         mode_layout.addItem(QSpacerItem(0, 0), 0, 3)
-        mode_layout.addWidget(get_divider(), 1, 1, 1, 4)
+        mode_layout.addWidget(self._divider(), 1, 1, 1, 4)
         mode_layout.addWidget(QLabel(
             _('Choose a translation mode for clicking the icon button.')),
             2, 1, 1, 4)
@@ -757,9 +764,12 @@ class TranslationSetting(QDialog):
             or position_btn_group.buttonClicked[int]
 
         names = ('TopToBottom', 'BottomToTop', 'RightToLeft', 'LeftToRight')
-        directions = [
-            getattr(QBoxLayout, name, None) or getattr(
-                QBoxLayout.Direction, name) for name in names]
+        directions = []
+        for name in names:
+            direction = getattr(QBoxLayout, name, None)
+            if direction is None:
+                direction = getattr(QBoxLayout.Direction, name)
+            directions.append(direction)
 
         def choose_option(btn_id):
             original_sample.setVisible(btn_id != 4)
@@ -906,7 +916,7 @@ class TranslationSetting(QDialog):
 
         filter_layout.addWidget(scope_group)
         filter_layout.addWidget(mode_group)
-        filter_layout.addWidget(get_divider())
+        filter_layout.addWidget(self._divider())
         filter_layout.addWidget(tip)
         filter_layout.addWidget(self.filter_rules)
         layout.addWidget(filter_group)

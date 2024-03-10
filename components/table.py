@@ -8,12 +8,12 @@ try:
     from qt.core import (
         Qt, QTableWidget, QHeaderView, QMenu, QAbstractItemView, QCursor,
         QBrush, QTableWidgetItem, pyqtSignal, QTableWidgetSelectionRange,
-        QColor)
+        QColor, QT_VERSION_STR)
 except ImportError:
     from PyQt5.Qt import (
         Qt, QTableWidget, QHeaderView, QMenu, QAbstractItemView, QCursor,
         QBrush, QTableWidgetItem, pyqtSignal, QTableWidgetSelectionRange,
-        QColor)
+        QColor, QT_VERSION_STR)
 
 load_translations()
 
@@ -25,6 +25,9 @@ class AdvancedTranslationTable(QTableWidget):
         QTableWidget.__init__(self, parent)
         self.parent = parent
         self.paragraphs = paragraphs
+
+        # self.setFocusPolicy(Qt.NoFocus)
+
         self.alert = AlertMessage(self)
         self.layout()
 
@@ -77,6 +80,7 @@ class AdvancedTranslationTable(QTableWidget):
 
     def check_row_alignment(self, paragraph):
         item = self.verticalHeaderItem(paragraph.row)
+
         if paragraph.background is None:
             paragraph.background = item.background()
         if paragraph.foreground is None:
@@ -96,12 +100,14 @@ class AdvancedTranslationTable(QTableWidget):
                 'the translated text.')
             paragraph.aligned = False
 
-        item.setBackground(background)
-        item.setForeground(foreground)
-        item.setToolTip(tip)
+        if QT_VERSION_STR >= '6.0.0':
+            item.setBackground(background)
+            item.setForeground(foreground)
+            item.setToolTip(tip)
         for column in range(self.columnCount()):
             item = self.item(paragraph.row, column)
             item.setBackground(background)
+            item.setForeground(foreground)
             item.setToolTip(tip)
 
     def non_aligned_count(self):
