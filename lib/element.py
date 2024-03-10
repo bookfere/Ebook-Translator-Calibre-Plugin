@@ -24,10 +24,10 @@ def get_name(element):
 class Element:
     def __init__(self, element, page_id=None):
         self.element = element
-        self.element_copy = copy.deepcopy(element)
         self.page_id = page_id
-        self.ignored = False
 
+        self.element_copy = copy.deepcopy(element)
+        self.ignored = False
         self.reserve_elements = []
         self.original = []
 
@@ -53,7 +53,8 @@ class Element:
         raise NotImplementedError()
 
     def add_translation(
-            self, translation, placeholder, position, lang=None, color=None):
+            self, translation, placeholder, position, translation_lang=None,
+            original_color=None, translation_color=None):
         raise NotImplementedError()
 
 
@@ -68,7 +69,8 @@ class SrtElement(Element):
         return self.element[2]
 
     def add_translation(
-            self, translation, placeholder, position, lang=None, color=None):
+            self, translation, placeholder, position, translation_lang=None,
+            original_color=None, translation_color=None):
         if translation is not None:
             if position == 'only':
                 self.element[2] = translation
@@ -89,8 +91,9 @@ class TocElement(Element):
     def get_content(self, placeholder):
         return self.element.title
 
-    def add_translation(self, translation, placeholder, position=None,
-                        lang=None, color=None):
+    def add_translation(
+            self, translation, placeholder, position, translation_lang=None,
+            original_color=None, translation_color=None):
         if translation is not None:
             items = [self.element.title, translation]
             self.element.title = items[-1] if position == 'only' else ' '.join(
@@ -149,9 +152,13 @@ class PageElement(Element):
         return re.sub(r'((\w)\2{3})\2*', r'\1', translation)
 
     def add_translation(
-            self, translation, placeholder, position, lang=None, color=None):
+            self, translation, placeholder, position, translation_lang=None,
+            original_color=None, translation_color=None):
         if translation is None:
             if position in ('left', 'right'):
+                if original_color is not None:
+                    self.element_color.set(
+                        'style', 'color:%s' % original_color)
                 self.element.addnext(
                     self._create_table(position, self.element_copy))
             if position in ('only', 'left', 'right'):
@@ -180,14 +187,18 @@ class PageElement(Element):
             if name == 'dir':
                 value = 'auto'
             new_element.set(name, value)
-        if color is not None:
-            new_element.set('style', 'color:%s' % color)
-        if lang is not None:
-            new_element.set('lang', lang)
+        if translation_lang is not None:
+            new_element.set('lang', translation_lang)
+        if original_color is not None:
+            self.element.set('style', 'color:%s' % original_color)
+        if translation_color is not None:
+            new_element.set('style', 'color:%s' % translation_color)
 
         self.element.tail = None  # Make sure the element has no tail
 
         if position in ('left', 'right'):
+            if original_color is not None:
+                self.element_copy.set('style', 'color:%s' % original_color)
             self.element.addnext(
                 self._create_table(position, self.element_copy, new_element))
         elif position == 'above':
@@ -331,8 +342,9 @@ class ElementHandler:
         self.position = position
         self.merge_length = merge_length
 
-        self.color = None
-        self.lang = None
+        self.translation_lang = None
+        self.original_color = None
+        self.translation_color = None
 
         self.elements = {}
         self.originals = []
@@ -342,11 +354,14 @@ class ElementHandler:
     def get_merge_length(self):
         return self.merge_length
 
-    def set_translation_color(self, color):
-        self.color = color
-
     def set_translation_lang(self, lang):
-        self.lang = lang
+        self.translation_lang = lang
+
+    def set_original_color(self, color):
+        self.original_color = color
+
+    def set_translation_color(self, color):
+        self.translation_color = color
 
     def remove_unused_elements(self):
         if self.position == 'only':
@@ -381,7 +396,8 @@ class ElementHandler:
             if translation:
                 element.add_translation(
                     translation, self.placeholder, self.position,
-                    self.lang, self.color)
+                    self.translation_lang, self.original_color,
+                    self.translation_color)
                 self.elements.pop(count)
             count += 1
         for eid, element in self.elements.copy().items():
@@ -466,7 +482,8 @@ class ElementHandlerMerge(ElementHandler):
                 continue
             element.add_translation(
                 translations[count], self.placeholder, self.position,
-                self.lang, self.color)
+                self.translation_lang, self.original_color,
+                self.translation_color)
             count += 1
             self.elements.pop(eid)
         self.remove_unused_elements()
@@ -520,5 +537,6 @@ def get_element_handler(placeholder, separator):
     if config.get('merge_enabled'):
         handler = ElementHandlerMerge(
             placeholder, separator, position, config.get('merge_length'))
+    handler.set_original_color(config.get('original_color'))
     handler.set_translation_color(config.get('translation_color'))
     return handler

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-03-08 21:13+0800\n"
+"POT-Creation-Date: 2024-03-10 12:31+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,7 +55,7 @@ msgstr ""
 msgid "Failed to translate {} paragraph(s), Would you like to retry?"
 msgstr ""
 
-#: advanced.py:310 lib/translation.py:260
+#: advanced.py:310 lib/translation.py:259
 msgid "Translation completed."
 msgstr ""
 
@@ -79,15 +79,15 @@ msgstr ""
 msgid "Errors"
 msgstr ""
 
-#: advanced.py:439 lib/translation.py:234
+#: advanced.py:439 lib/translation.py:233
 msgid "Total items: {}"
 msgstr ""
 
-#: advanced.py:440 lib/translation.py:235
+#: advanced.py:440 lib/translation.py:234
 msgid "Character count: {}"
 msgstr ""
 
-#: advanced.py:468 cache.py:92 components/engine.py:200 components/table.py:111
+#: advanced.py:468 cache.py:92 components/engine.py:200 components/table.py:117
 msgid "Delete"
 msgstr ""
 
@@ -139,7 +139,7 @@ msgstr ""
 msgid "Title"
 msgstr ""
 
-#: advanced.py:616 components/table.py:72
+#: advanced.py:616 components/table.py:74
 msgid "Translated"
 msgstr ""
 
@@ -186,15 +186,15 @@ msgstr ""
 msgid "Output Format"
 msgstr ""
 
-#: batch.py:126 components/engine.py:137 components/table.py:109
+#: batch.py:126 components/engine.py:137 components/table.py:115
 msgid "Translate"
 msgstr ""
 
-#: batch.py:137 lib/cache.py:127
+#: batch.py:137 lib/cache.py:128
 msgid "Unknown"
 msgstr ""
 
-#: batch.py:146 cache.py:130 setting.py:978
+#: batch.py:146 cache.py:130 setting.py:1017
 msgid "The specified path does not exist."
 msgstr ""
 
@@ -203,7 +203,7 @@ msgid "Choose a path to store cache files."
 msgstr ""
 
 #: cache.py:73 components/mode.py:41 components/mode.py:51 setting.py:149
-#: setting.py:784 setting.py:818
+#: setting.py:790 setting.py:809 setting.py:857
 msgid "Choose"
 msgstr ""
 
@@ -252,11 +252,11 @@ msgstr ""
 msgid "Total: {}"
 msgstr ""
 
-#: cache.py:190 components/table.py:35 setting.py:54
+#: cache.py:190 components/table.py:37 setting.py:54
 msgid "Engine"
 msgstr ""
 
-#: cache.py:190 components/table.py:35 setting.py:939
+#: cache.py:190 components/table.py:37 setting.py:978
 msgid "Language"
 msgstr ""
 
@@ -272,7 +272,7 @@ msgstr ""
 msgid "Size (MB)"
 msgstr ""
 
-#: components/engine.py:64 lib/translation.py:174 tests/test_translation.py:108
+#: components/engine.py:64 lib/translation.py:173 tests/test_translation.py:108
 #: tests/test_translation.py:128 tests/test_translation.py:141
 msgid "Translating..."
 msgstr ""
@@ -329,7 +329,7 @@ msgstr ""
 msgid "Feedback"
 msgstr ""
 
-#: components/lang.py:34 engines/base.py:70 setting.py:1039
+#: components/lang.py:34 engines/base.py:70 setting.py:1078
 msgid "Auto detect"
 msgstr ""
 
@@ -357,33 +357,33 @@ msgid ""
 "the translation process and saving time."
 msgstr ""
 
-#: components/table.py:35 setting.py:712
+#: components/table.py:37 setting.py:712
 msgid "Original"
 msgstr ""
 
-#: components/table.py:35
+#: components/table.py:37
 msgid "Status"
 msgstr ""
 
-#: components/table.py:67
+#: components/table.py:69
 msgid "Untranslated"
 msgstr ""
 
-#: components/table.py:89
+#: components/table.py:95
 msgid ""
 "The number of lines differs between the original text and the translated "
 "text."
 msgstr ""
 
-#: components/table.py:115
+#: components/table.py:121
 msgid "Select the whole chapter"
 msgstr ""
 
-#: components/table.py:121
+#: components/table.py:127
 msgid "Select similar paragraphs: {}=\"{}\""
 msgstr ""
 
-#: components/table.py:168
+#: components/table.py:174
 msgid "Retain at least one row."
 msgstr ""
 
@@ -525,7 +525,7 @@ msgstr ""
 msgid "The translation of \"{}\" was completed. Do you want to open the book?"
 msgstr ""
 
-#: lib/translation.py:133 lib/translation.py:141 lib/translation.py:169
+#: lib/translation.py:133 lib/translation.py:141 lib/translation.py:168
 msgid "Translation canceled."
 msgstr ""
 
@@ -541,39 +541,39 @@ msgstr ""
 msgid "Failed to retrieve data from translate engine API."
 msgstr ""
 
-#: lib/translation.py:160 lib/translation.py:211 lib/translation.py:219
+#: lib/translation.py:159 lib/translation.py:210 lib/translation.py:218
 msgid "Original: {}"
 msgstr ""
 
-#: lib/translation.py:161
+#: lib/translation.py:160
 msgid "Status: Failed {} times / Sleeping for {} seconds"
 msgstr ""
 
-#: lib/translation.py:162 lib/translation.py:221
+#: lib/translation.py:161 lib/translation.py:220
 msgid "Error: {}"
 msgstr ""
 
-#: lib/translation.py:201
+#: lib/translation.py:200
 msgid "Translating: {}/{}"
 msgstr ""
 
-#: lib/translation.py:213
+#: lib/translation.py:212
 msgid "Translation: {}"
 msgstr ""
 
-#: lib/translation.py:215
+#: lib/translation.py:214
 msgid "Translation (Cached): {}"
 msgstr ""
 
-#: lib/translation.py:232
+#: lib/translation.py:231
 msgid "Start to translate ebook content"
 msgstr ""
 
-#: lib/translation.py:237
+#: lib/translation.py:236
 msgid "There is no content need to translate."
 msgstr ""
 
-#: lib/translation.py:257
+#: lib/translation.py:256
 msgid "Translation failed."
 msgstr ""
 
@@ -617,7 +617,7 @@ msgstr ""
 msgid "Merge to Translate"
 msgstr ""
 
-#: setting.py:199 setting.py:220 setting.py:264 setting.py:815
+#: setting.py:199 setting.py:220 setting.py:264 setting.py:854
 msgid "Enable"
 msgstr ""
 
@@ -773,123 +773,127 @@ msgstr ""
 msgid "Translation Position"
 msgstr ""
 
-#: setting.py:773
-msgid "Translation Color"
+#: setting.py:778
+msgid "Original Color"
 msgstr ""
 
-#: setting.py:777
+#: setting.py:783 setting.py:801
 msgid "CSS color value, e.g., #666666, grey, rgb(80, 80, 80)"
 msgstr ""
 
-#: setting.py:813
-msgid "Translation Glossary"
-msgstr ""
-
-#: setting.py:817
-msgid "Choose a glossary file"
-msgstr ""
-
-#: setting.py:836
-msgid "Ignore Paragraph"
-msgstr ""
-
-#: setting.py:842
-msgid "Scope"
-msgstr ""
-
-#: setting.py:843
-msgid "Text only"
-msgstr ""
-
-#: setting.py:845
-msgid "HTML element"
+#: setting.py:797
+msgid "Translation Color"
 msgstr ""
 
 #: setting.py:852
-msgid "Mode"
-msgstr ""
-
-#: setting.py:853
-msgid "Normal"
-msgstr ""
-
-#: setting.py:855
-msgid "Normal (case-sensitive)"
+msgid "Translation Glossary"
 msgstr ""
 
 #: setting.py:856
+msgid "Choose a glossary file"
+msgstr ""
+
+#: setting.py:875
+msgid "Ignore Paragraph"
+msgstr ""
+
+#: setting.py:881
+msgid "Scope"
+msgstr ""
+
+#: setting.py:882
+msgid "Text only"
+msgstr ""
+
+#: setting.py:884
+msgid "HTML element"
+msgstr ""
+
+#: setting.py:891
+msgid "Mode"
+msgstr ""
+
+#: setting.py:892
+msgid "Normal"
+msgstr ""
+
+#: setting.py:894
+msgid "Normal (case-sensitive)"
+msgstr ""
+
+#: setting.py:895
 msgid "Regular Expression"
 msgstr ""
 
-#: setting.py:898
+#: setting.py:937
 msgid "Exclude paragraph by keyword. One keyword per line:"
 msgstr ""
 
-#: setting.py:899
+#: setting.py:938
 msgid "Exclude paragraph by case-sensitive keyword. One keyword per line:"
 msgstr ""
 
-#: setting.py:901
+#: setting.py:940
 msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
 msgstr ""
 
-#: setting.py:917
+#: setting.py:956
 msgid "Ignore Element"
 msgstr ""
 
-#: setting.py:925
+#: setting.py:964
 msgid "CSS selectors to exclude elements. One rule per line:"
 msgstr ""
 
-#: setting.py:928
+#: setting.py:967
 msgid "e.g."
 msgstr ""
 
-#: setting.py:932
+#: setting.py:971
 msgid "Ebook Metadata"
 msgstr ""
 
-#: setting.py:935
+#: setting.py:974
 msgid "Set \"Target Language\" to metadata"
 msgstr ""
 
-#: setting.py:938
+#: setting.py:977
 msgid "Subjects of ebook (one subject per line)"
 msgstr ""
 
-#: setting.py:940
+#: setting.py:979
 msgid "Subject"
 msgstr ""
 
-#: setting.py:957 setting.py:992
+#: setting.py:996 setting.py:1031
 msgid "Proxy host or port is incorrect."
 msgstr ""
 
-#: setting.py:959
+#: setting.py:998
 msgid "The proxy is available."
 msgstr ""
 
-#: setting.py:960
+#: setting.py:999
 msgid "The proxy is not available."
 msgstr ""
 
-#: setting.py:1049
+#: setting.py:1088
 msgid "the prompt must include {}."
 msgstr ""
 
-#: setting.py:1078
+#: setting.py:1117 setting.py:1124
 msgid "Invalid color value."
 msgstr ""
 
-#: setting.py:1087
+#: setting.py:1133
 msgid "The specified glossary file does not exist."
 msgstr ""
 
-#: setting.py:1099
+#: setting.py:1145
 msgid "{} is not a valid regular expression."
 msgstr ""
 
-#: setting.py:1111
+#: setting.py:1157
 msgid "{} is not a valid CSS seletor."
 msgstr ""
 

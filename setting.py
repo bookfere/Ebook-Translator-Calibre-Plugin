@@ -769,45 +769,84 @@ class TranslationSetting(QDialog):
         choose_option(position_btn_group.checkedId())
         position_btn_click.connect(choose_option)
 
+        # Color group
+        color_group = QWidget()
+        color_group_layout = QHBoxLayout(color_group)
+        color_group_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Original Color
+        original_color_group = QGroupBox(_('Original Color'))
+        original_color_layout = QHBoxLayout(original_color_group)
+        self.original_color = QLineEdit()
+        self.original_color.setText(self.config.get('original_color'))
+        self.original_color.setPlaceholderText(
+            _('CSS color value, e.g., #666666, grey, rgb(80, 80, 80)'))
+        original_color_show = QLabel()
+        original_color_show.setObjectName('original_color_show')
+        original_color_show.setFixedWidth(25)
+        self.setStyleSheet(
+            '#original_color{margin:1px 0;border:1 solid #eee'
+            ';border-radius:2px;}')
+        original_color_button = QPushButton(_('Choose'))
+        original_color_layout.addWidget(original_color_show)
+        original_color_layout.addWidget(self.original_color)
+        original_color_layout.addWidget(original_color_button)
+        color_group_layout.addWidget(original_color_group)
+
         # Translation Color
-        color_group = QGroupBox(_('Translation Color'))
-        color_layout = QHBoxLayout(color_group)
+        translation_color_group = QGroupBox(_('Translation Color'))
+        translation_color_layout = QHBoxLayout(translation_color_group)
         self.translation_color = QLineEdit()
         self.translation_color.setPlaceholderText(
             _('CSS color value, e.g., #666666, grey, rgb(80, 80, 80)'))
         self.translation_color.setText(self.config.get('translation_color'))
-        color_show = QLabel()
-        color_show.setObjectName('color_show')
-        color_show.setFixedWidth(25)
+        translation_color_show = QLabel()
+        translation_color_show.setObjectName('translation_color')
+        translation_color_show.setFixedWidth(25)
         self.setStyleSheet(
-            '#color_show{margin:1px 0;border:1 solid #eee;border-radius:2px;}')
-        color_button = QPushButton(_('Choose'))
-        color_layout.addWidget(color_show)
-        color_layout.addWidget(self.translation_color)
-        color_layout.addWidget(color_button)
+            '#translation_color{margin:1px 0;border:1 solid #eee;'
+            'border-radius:2px;}')
+        translation_color_button = QPushButton(_('Choose'))
+        translation_color_layout.addWidget(translation_color_show)
+        translation_color_layout.addWidget(self.translation_color)
+        translation_color_layout.addWidget(translation_color_button)
+        color_group_layout.addWidget(translation_color_group)
+
         layout.addWidget(color_group)
 
-        def show_color():
-            color = self.translation_color.text()
+        def show_color(color_show, color):
             valid = QColor(color).isValid()
             color_show.setStyleSheet(
                 'background-color:{};border-color:{};'
                 .format(valid and color or 'black',
                         valid and color or 'black'))
-        show_color()
+        show_color(original_color_show, self.original_color.text())
+        show_color(translation_color_show, self.translation_color.text())
 
-        def set_color(color):
-            self.translation_color.setText(color.name())
-            show_color()
+        self.original_color.textChanged.connect(
+            lambda: show_color(
+                original_color_show, self.original_color.text()))
+        self.translation_color.textChanged.connect(
+            lambda: show_color(
+                translation_color_show, self.translation_color.text()))
 
-        self.translation_color.textChanged.connect(show_color)
+        def create_color_picker(color_widget, color_show):
+            color_picker = QColorDialog(self)
+            color_picker.setOption(getattr(
+                QColorDialog.ColorDialogOption, 'DontUseNativeDialog', None)
+                or QColorDialog.DontUseNativeDialog)
+            color_picker.colorSelected.connect(
+                lambda color: color_widget.setText(color.name()))
+            color_picker.colorSelected.connect(
+                lambda color: show_color(color_show, color.name()))
+            return color_picker
 
-        color_picker = QColorDialog(self)
-        color_picker.setOption(getattr(
-            QColorDialog.ColorDialogOption, 'DontUseNativeDialog', None)
-            or QColorDialog.DontUseNativeDialog)
-        color_picker.colorSelected.connect(set_color)
-        color_button.clicked.connect(color_picker.open)
+        original_color_picker = create_color_picker(
+            self.original_color, original_color_show)
+        original_color_button.clicked.connect(original_color_picker.open)
+        translation_color_picker = create_color_picker(
+            self.translation_color, translation_color_show)
+        translation_color_button.clicked.connect(translation_color_picker.open)
 
         # Glossary
         glossary_group = QGroupBox(_('Translation Glossary'))
@@ -1072,6 +1111,13 @@ class TranslationSetting(QDialog):
         return True
 
     def update_content_config(self):
+        # Original color
+        original_color = self.original_color.text()
+        if original_color and not QColor(original_color).isValid():
+            self.alert.pop(_('Invalid color value.'), 'warning')
+            return False
+        self.config.update(original_color=original_color or None)
+
         # Translation color
         translation_color = self.translation_color.text()
         if translation_color and not QColor(translation_color).isValid():
