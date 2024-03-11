@@ -15,8 +15,8 @@ from .config import get_config
 from .utils import log, sep, uid, open_path
 from .cache import get_cache, TranslationCache
 from .element import (
-    get_srt_elements, get_toc_elements, get_page_elements, get_element_handler,
-    Extraction)
+    Extraction, get_element_handler, get_srt_elements, get_toc_elements,
+    get_page_elements, get_metadata_elements)
 from .translation import get_translator, get_translation
 
 
@@ -36,6 +36,7 @@ def extract_book(input_path):
     plumber = Plumber(input_path, output_path, log=log)
 
     def convert(self, oeb, output_path, input_plugin, opts, log):
+        elements.extend(get_metadata_elements(oeb.metadata))
         elements.extend(get_toc_elements(oeb.toc.nodes, []))
         elements.extend(get_page_elements(oeb.manifest.items))
     plumber.output_plugin.convert = MethodType(convert, plumber.output_plugin)
@@ -117,6 +118,8 @@ def convert_book(input_path, output_path, translation, element_handler, cache,
         log.info(debug_info)
         translation.set_progress(self.report_progress)
 
+        elements.extend(get_metadata_elements(oeb.metadata))
+        # The number of elements may vary with format conversion.
         elements.extend(get_toc_elements(oeb.toc.nodes, []))
         elements.extend(get_page_elements(oeb.manifest.items))
         original_group = element_handler.prepare_original(elements)

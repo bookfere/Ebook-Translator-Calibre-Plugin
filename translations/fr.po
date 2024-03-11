@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-03-10 12:31+0800\n"
+"POT-Creation-Date: 2024-03-11 21:06+0800\n"
 "PO-Revision-Date: 2023-10-01 15:35-0400\n"
 "Last-Translator: <a href=\"https://www.mobileread.com/forums/member.php?"
 "u=90932\">PoP</a>\n"
@@ -109,8 +109,16 @@ msgstr "Produit ebook"
 msgid "Output"
 msgstr "Produit"
 
-msgid "Title"
-msgstr "Titre"
+msgid "Filename"
+msgstr "Nom du fichier"
+
+msgid "Format"
+msgstr ""
+
+msgid ""
+"The ebook's filename is automatically managed by Calibre according to "
+"metadata since the output path is set to Calibre Library."
+msgstr ""
 
 msgid "Translated"
 msgstr "Traduit"
@@ -147,6 +155,9 @@ msgstr "Êtes-vous certain de vouloir arrêter la traduction?"
 
 msgid "Output Format"
 msgstr "Format de sortie"
+
+msgid "Title"
+msgstr "Titre"
 
 msgid "Translate"
 msgstr "Traduire"
@@ -209,9 +220,6 @@ msgstr "Langue"
 
 msgid "Merge Length"
 msgstr "Longueur de fusion"
-
-msgid "Filename"
-msgstr "Nom du fichier"
 
 msgid "Size (MB)"
 msgstr "Taille (MB)"

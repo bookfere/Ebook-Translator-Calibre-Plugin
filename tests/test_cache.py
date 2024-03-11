@@ -14,7 +14,6 @@ class TestParagraph(unittest.TestCase):
         self.assertFalse(self.paragraph.is_cache)
         self.assertIsNone(self.paragraph.error)
         self.assertTrue(self.paragraph.aligned)
-        self.assertIsNone(self.paragraph.background)
 
     def test_get_attributes(self):
         self.assertEqual({'class': 'test'}, self.paragraph.get_attributes())

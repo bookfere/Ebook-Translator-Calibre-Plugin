@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-03-10 12:31+0800\n"
+"POT-Creation-Date: 2024-03-11 21:06+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -106,8 +106,16 @@ msgstr "输出电子书"
 msgid "Output"
 msgstr "输出"
 
-msgid "Title"
-msgstr "书名"
+msgid "Filename"
+msgstr "文件名"
+
+msgid "Format"
+msgstr "格式"
+
+msgid ""
+"The ebook's filename is automatically managed by Calibre according to "
+"metadata since the output path is set to Calibre Library."
+msgstr "由于输出路径是 Calibre 书库，因此电子书文件名由 Calibre 根据原数据自动处理。"
 
 msgid "Translated"
 msgstr "已翻译"
@@ -144,6 +152,9 @@ msgstr "你确定要停止翻译过程吗？"
 
 msgid "Output Format"
 msgstr "输出格式"
+
+msgid "Title"
+msgstr "书名"
 
 msgid "Translate"
 msgstr "翻译"
@@ -203,9 +214,6 @@ msgstr "语言"
 msgid "Merge Length"
 msgstr "合并长度"
 
-msgid "Filename"
-msgstr "文件名"
-
 msgid "Size (MB)"
 msgstr "大小（MB）"
 
@@ -246,7 +254,7 @@ msgid "Ebook Specific"
 msgstr "自动选择"
 
 msgid "Donate"
-msgstr "赞赏"
+msgstr "捐助"
 
 msgid "Feedback"
 msgstr "反馈"
@@ -714,6 +722,18 @@ msgstr "缓存管理器"
 
 msgid "Choose Translation Mode"
 msgstr "选择翻译模式"
+
+#~ msgid ""
+#~ "The ebook's filename is automatically managed by Calibre according to "
+#~ "metadata“since the output path is set to Calibre Library."
+#~ msgstr ""
+#~ "由于输出路径是 Calibre 书库，因此电子书文件名由 Calibre 根据原数据自动处"
+#~ "理。"
+
+#~ msgid ""
+#~ "The ebook's filename is managed by Calibre since the output path is set "
+#~ "to Calibre Library."
+#~ msgstr "由于输出路径是 Calibre 书库，因此电子书文件名由 Calibre 管理。"
 
 #~ msgid "Add after original"
 #~ msgstr "加在原文后"

@@ -3,13 +3,14 @@ from unittest.mock import patch, Mock
 
 from lxml import etree
 
-from calibre.ebooks.oeb.base import TOC
+from calibre.ebooks.oeb.base import TOC, Metadata
 
 from ..lib.utils import ns
 from ..lib.cache import Paragraph
 from ..lib.element import (
-    get_string, get_name, SrtElement, TocElement, PageElement, Extraction,
-    ElementHandler, ElementHandlerMerge, get_toc_elements)
+    get_string, get_name, Extraction, ElementHandler, ElementHandlerMerge,
+    SrtElement, TocElement, PageElement, MetadataElement, get_toc_elements,
+    get_metadata_elements)
 from ..engines import DeeplFreeTranslate
 from ..engines.base import Base
 
@@ -44,6 +45,22 @@ class TestFunction(unittest.TestCase):
 
         elements = get_toc_elements(toc, [])
         self.assertEqual(3, len(elements))
+
+    def test_get_metadata_elements(self):
+        metadata = Mock(Metadata)
+        item_1 = Mock(Metadata.Item, content='a')
+        item_2 = Mock(Metadata.Item, content='b')
+        item_3 = Mock(Metadata.Item, content='0')
+        metadata.title = [item_1]
+        metadata.subject = [item_2, item_3]
+        metadata.language = []
+        metadata.iterkeys.return_value = ['title', 'subject', 'language']
+
+        elements = get_metadata_elements(metadata)
+
+        self.assertEqual(2, len(elements))
+        self.assertIs(item_1, elements[0].element)
+        self.assertIs(item_2, elements[1].element)
 
 
 class TestSrtElement(unittest.TestCase):
@@ -82,6 +99,46 @@ class TestSrtElement(unittest.TestCase):
     def test_add_translation_only(self):
         element = self.element.add_translation('A', Base.placeholder, 'only')
         self.assertEqual('A', element[2])
+
+
+class TestMetadataElement(unittest.TestCase):
+    def setUp(self):
+        self.medata_item = Mock(Metadata.Item, content='a')
+        self.element = MetadataElement(self.medata_item)
+
+    def test_get_raw(self):
+        self.assertEqual('a', self.element.get_raw())
+
+    def test_get_text(self):
+        self.assertEqual('a', self.element.get_text())
+
+    def test_get_content(self):
+        self.assertEqual('a', self.element.get_content(Base.placeholder))
+
+    def test_add_translation_none(self):
+        self.assertIs(
+            self.element.element,
+            self.element.add_translation(None, Base.placeholder, 'below'))
+
+    def test_add_translation_below(self):
+        element = self.element.add_translation('A', Base.placeholder, 'below')
+        self.assertEqual('a A', element.content)
+
+    def test_add_translation_right(self):
+        element = self.element.add_translation('A', Base.placeholder, 'right')
+        self.assertEqual('a A', element.content)
+
+    def test_add_translation_above(self):
+        element = self.element.add_translation('A', Base.placeholder, 'above')
+        self.assertEqual('A a', element.content)
+
+    def test_add_translation_left(self):
+        element = self.element.add_translation('A', Base.placeholder, 'left')
+        self.assertEqual('A a', element.content)
+
+    def test_add_translation_only(self):
+        element = self.element.add_translation('A', Base.placeholder, 'only')
+        self.assertEqual('A', element.content)
 
 
 class TestTocElement(unittest.TestCase):
