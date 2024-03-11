@@ -46,10 +46,22 @@ class AdvancedTranslationTable(QTableWidget):
         self.setEditTriggers(triggers)
         self.setAlternatingRowColors(True)
 
-        self.setVerticalHeaderLabels(
-            map(str, range(1, len(self.paragraphs) + 1)))
+        # self.setVerticalHeaderLabels(
+        #     map(str, range(1, len(self.paragraphs) + 1)))
+
+        # self.verticalHeader().setStyleSheet(
+        #     "QHeaderView::section{background-color:red}")
+
         for row, paragraph in enumerate(self.paragraphs):
+            vheader = QTableWidgetItem(str(row))
+            vheader.setTextAlignment(Qt.AlignCenter)
+            # vheader.setBackground(QBrush(QColor(255, 255, 0, 255)))
+            # vheader.setBackground(QBrush(Qt.NoBrush))
+            # vheader.setData(Qt.BackgroundRole, QColor(255, 255, 100, 100))
+            self.setVerticalHeaderItem(row, vheader)
+
             original = QTableWidgetItem(paragraph.original)
+            original.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
             original.setData(Qt.UserRole, paragraph)
             engine_name = QTableWidgetItem(paragraph.engine_name)
             engine_name.setTextAlignment(Qt.AlignCenter)
@@ -79,31 +91,31 @@ class AdvancedTranslationTable(QTableWidget):
             self.item(row, column).setText(text)
 
     def check_row_alignment(self, paragraph):
-        item = self.verticalHeaderItem(paragraph.row)
-
-        if paragraph.background is None:
-            paragraph.background = item.background()
-        if paragraph.foreground is None:
-            paragraph.foreground = item.foreground()
-
+        """The header item exhibits a peculiar behavior where setting the
+        background color with an alpha value visually has no effect. Emulating
+        a native background for PyQt versions lower than 6.0.0, as using
+        Qt.NoBrush results in a fully black background.
+        """
+        foreground = QBrush(Qt.black)
         engine = get_engine_class(paragraph.engine_name)
         if engine is None or paragraph.is_alignment(engine.separator):
-            background = paragraph.background
-            foreground = paragraph.foreground
+            vh_background = background = QBrush(Qt.NoBrush)
+            if QT_VERSION_STR < '6.0.0':
+                vh_background = QBrush(QColor(235, 235, 235, 255))
             tip = ''
             paragraph.aligned = True
         else:
+            vh_background = QBrush(QColor(255, 255, 0, 255))
             background = QBrush(QColor(255, 255, 0, 100))
-            foreground = QBrush(Qt.black)
             tip = _(
                 'The number of lines differs between the original text and '
                 'the translated text.')
             paragraph.aligned = False
 
-        if QT_VERSION_STR >= '6.0.0':
-            item.setBackground(background)
-            item.setForeground(foreground)
-            item.setToolTip(tip)
+        item = self.verticalHeaderItem(paragraph.row)
+        item.setBackground(vh_background)
+        item.setForeground(foreground)
+        item.setToolTip(tip)
         for column in range(self.columnCount()):
             item = self.item(paragraph.row, column)
             item.setBackground(background)

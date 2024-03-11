@@ -33,8 +33,6 @@ class Paragraph:
         self.error = None
 
         self.aligned = True
-        self.background = None
-        self.foreground = None
 
     def get_attributes(self):
         if self.attributes:
