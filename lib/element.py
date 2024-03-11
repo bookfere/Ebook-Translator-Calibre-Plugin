@@ -83,6 +83,31 @@ class SrtElement(Element):
         return self.element
 
 
+class MetadataElement(Element):
+    def get_raw(self):
+        return self.element.content
+
+    def get_text(self):
+        return self.element.content
+
+    def get_content(self, placeholder):
+        return self.element.content
+
+    def add_translation(
+            self, translation, placeholder, position, translation_lang=None,
+            original_color=None, translation_color=None):
+        if translation is not None:
+            if position == 'only':
+                self.element.content = translation
+            elif position in ['above', 'left']:
+                self.element.content = '%s %s' % (
+                    translation, self.element.content)
+            else:
+                self.element.content = '%s %s' %(
+                    self.element.content, translation)
+        return self.element
+
+
 class TocElement(Element):
     def get_raw(self):
         return self.element.title
@@ -104,9 +129,9 @@ class TocElement(Element):
 
 
 class PageElement(Element):
-    def _get_descendents(self, tags):
+    def _get_descendents(self, element, tags):
         xpath = './/*[%s]' % ' or '.join(['self::x:%s' % tag for tag in tags])
-        return self._element_copy().xpath(xpath, namespaces=ns)
+        return element.xpath(xpath, namespaces=ns)
 
     def get_name(self):
         return get_name(self.element)
@@ -125,13 +150,15 @@ class PageElement(Element):
         self.element.getparent().remove(self.element)
 
     def get_content(self, placeholder):
-        for noise in self._get_descendents(('rt', 'rp', 'sup', 'sub')):
+        element_copy = self._element_copy()
+        for noise in self._get_descendents(
+                element_copy, ('rt', 'rp', 'sup', 'sub')):
             parent = noise.getparent()
             parent.text = (parent.text or '') + (noise.tail or '')
             parent.remove(noise)
 
         self.reserve_elements = self._get_descendents(
-            ('img', 'code', 'br', 'hr', 'sub', 'sup', 'kbd'))
+            element_copy, ('img', 'code', 'br', 'hr', 'sub', 'sup', 'kbd'))
         count = 0
         for reserve in self.reserve_elements:
             replacement = placeholder[0].format(format(count, '05'))
@@ -146,7 +173,7 @@ class PageElement(Element):
             parent.remove(reserve)
             count += 1
 
-        return trim(''.join(self._element_copy().itertext()))
+        return trim(''.join(element_copy.itertext()))
 
     def _polish_translation(self, translation):
         translation = translation.replace('\n', '<br />')
@@ -511,6 +538,22 @@ def get_srt_elements(path):
         sections.append([number, time, content])
 
     return [SrtElement(section) for section in sections]
+
+
+def get_metadata_elements(metadata):
+    elements = []
+    names = (
+        'title', 'creator', 'publisher', 'rights', 'subject', 'contributor')
+    pattern = re.compile(r'[a-z]+')
+    for key in metadata.iterkeys():
+        if key not in names:
+            continue
+        items = getattr(metadata, key)
+        for item in items:
+            if pattern.search(item.content) is None:
+                continue
+            elements.append(MetadataElement(item, 'content.opf'))
+    return elements
 
 
 def get_toc_elements(nodes, elements=[]):

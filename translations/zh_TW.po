@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-03-10 12:31+0800\n"
+"POT-Creation-Date: 2024-03-11 21:06+0800\n"
 "PO-Revision-Date: 2023-04-25 15:36+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -107,8 +107,16 @@ msgstr ""
 msgid "Output"
 msgstr ""
 
-msgid "Title"
-msgstr "書名"
+msgid "Filename"
+msgstr ""
+
+msgid "Format"
+msgstr ""
+
+msgid ""
+"The ebook's filename is automatically managed by Calibre according to "
+"metadata since the output path is set to Calibre Library."
+msgstr ""
 
 msgid "Translated"
 msgstr ""
@@ -145,6 +153,9 @@ msgstr ""
 
 msgid "Output Format"
 msgstr "輸出格式"
+
+msgid "Title"
+msgstr "書名"
 
 msgid "Translate"
 msgstr "翻譯"
@@ -202,9 +213,6 @@ msgid "Language"
 msgstr ""
 
 msgid "Merge Length"
-msgstr ""
-
-msgid "Filename"
 msgstr ""
 
 msgid "Size (MB)"

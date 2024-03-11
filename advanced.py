@@ -235,9 +235,7 @@ class CreateTranslationProject(QDialog):
 
 
 class AdvancedTranslation(QDialog):
-    raw_text = pyqtSignal(str)
-    original_text = pyqtSignal(str)
-    translation_text = pyqtSignal((), (str,))
+    paragraph_sig = pyqtSignal(Paragraph)
     progress_bar = pyqtSignal()
 
     preparation_thread = QThread()
@@ -504,8 +502,7 @@ class AdvancedTranslation(QDialog):
         def terminate_finished():
             stop_button.setDisabled(False)
             stop_button.setText(_('Stop'))
-            self.translation_text[str].emit(
-                self.table.current_paragraph().translation)
+            self.paragraph_sig.emit(self.table.current_paragraph())
         self.trans_worker.finished.connect(terminate_finished)
 
         stack = QStackedWidget()
@@ -565,11 +562,18 @@ class AdvancedTranslation(QDialog):
         ebook_title.setCursorPosition(0)
         output_format = OutputFormat()
         output_format.setFixedWidth(150)
-        save_layout.addWidget(QLabel(_('Title')))
+        save_layout.addWidget(QLabel(_('Filename')))
         save_layout.addWidget(ebook_title, 1)
+        save_layout.addWidget(QLabel(_('Format')))
         save_layout.addWidget(output_format)
         save_layout.addWidget(save_ebook)
 
+        if self.config.get('to_library'):
+            ebook_title.setDisabled(True)
+            ebook_title.setToolTip(_(
+                "The ebook's filename is automatically managed by Calibre "
+                'according to metadata since the output path is set to '
+                'Calibre Library.'))
         ebook_title.textChanged.connect(self.ebook.set_title)
 
         layout.addWidget(cache_group)
@@ -662,10 +666,12 @@ class AdvancedTranslation(QDialog):
         translation_text.cursorPositionChanged.connect(
             translation_text.ensureCursorVisible)
 
-        self.raw_text.connect(raw_text.setPlainText)
-        self.original_text.connect(original_text.setPlainText)
-        self.translation_text.connect(translation_text.clear)
-        self.translation_text[str].connect(translation_text.setPlainText)
+        def refresh_translation(paragraph):
+            translation_text.clear()
+            raw_text.setPlainText(paragraph.raw)
+            original_text.setPlainText(paragraph.original)
+            translation_text.setPlainText(paragraph.translation)
+        self.paragraph_sig.connect(refresh_translation)
         self.trans_worker.start.connect(
             lambda: translation_text.setReadOnly(False))
         self.trans_worker.finished.connect(
@@ -715,25 +721,21 @@ class AdvancedTranslation(QDialog):
             paragraph = self.table.current_paragraph()
             if paragraph is None:
                 return
-            self.raw_text.emit(paragraph.raw)
-            self.original_text.emit(paragraph.original.strip())
-            self.translation_text[str].emit(paragraph.translation)
+            self.paragraph_sig.emit(paragraph)
         self.table.itemSelectionChanged.connect(change_selected_item)
         self.table.setCurrentItem(self.table.item(0, 0))
         change_selected_item()
 
         def translation_callback(paragraph):
             self.table.row.emit(paragraph.row)
-            self.raw_text.emit(paragraph.raw)
-            self.original_text.emit(paragraph.original)
-            self.translation_text[str].emit(paragraph.translation)
+            self.paragraph_sig.emit(paragraph)
             self.cache.update_paragraph(paragraph)
             self.progress_bar.emit()
         self.trans_worker.callback.connect(translation_callback)
 
         def streaming_translation(data):
             if data == '':
-                self.translation_text.emit()
+                self.paragraph_sig.emit(self.table.current_paragraph())
             elif isinstance(data, Paragraph):
                 self.table.setCurrentItem(self.table.item(data.row, 0))
             else:
