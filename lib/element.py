@@ -26,10 +26,12 @@ class Element:
         self.element = element
         self.page_id = page_id
 
-        self.element_copy = copy.deepcopy(element)
         self.ignored = False
         self.reserve_elements = []
         self.original = []
+
+    def _element_copy(self):
+        return copy.deepcopy(self.element)
 
     def set_ignored(self, ignored):
         self.ignored = ignored
@@ -104,7 +106,7 @@ class TocElement(Element):
 class PageElement(Element):
     def _get_descendents(self, tags):
         xpath = './/*[%s]' % ' or '.join(['self::x:%s' % tag for tag in tags])
-        return self.element_copy.xpath(xpath, namespaces=ns)
+        return self._element_copy().xpath(xpath, namespaces=ns)
 
     def get_name(self):
         return get_name(self.element)
@@ -144,7 +146,7 @@ class PageElement(Element):
             parent.remove(reserve)
             count += 1
 
-        return trim(''.join(self.element_copy.itertext()))
+        return trim(''.join(self._element_copy().itertext()))
 
     def _polish_translation(self, translation):
         translation = translation.replace('\n', '<br />')
@@ -160,7 +162,7 @@ class PageElement(Element):
                     self.element_color.set(
                         'style', 'color:%s' % original_color)
                 self.element.addnext(
-                    self._create_table(position, self.element_copy))
+                    self._create_table(position, self._element_copy()))
             if position in ('only', 'left', 'right'):
                 self.delete()
             return self.element
@@ -197,10 +199,11 @@ class PageElement(Element):
         self.element.tail = None  # Make sure the element has no tail
 
         if position in ('left', 'right'):
+            element_copy = self._element_copy()
             if original_color is not None:
-                self.element_copy.set('style', 'color:%s' % original_color)
+                element_copy.set('style', 'color:%s' % original_color)
             self.element.addnext(
-                self._create_table(position, self.element_copy, new_element))
+                self._create_table(position, element_copy, new_element))
         elif position == 'above':
             self.element.addprevious(new_element)
         else:
