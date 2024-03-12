@@ -11,12 +11,12 @@ try:
     from qt.core import (
         Qt, QDialog, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
         QTableView, QAbstractTableModel, QAbstractItemView, pyqtSignal,
-        QLineEdit, QFileDialog, QModelIndex)
+        QLineEdit, QFileDialog, QModelIndex, QMenu, QCursor)
 except ImportError:
     from PyQt5.Qt import (
         Qt, QDialog, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
         QTableView, QAbstractTableModel, QAbstractItemView, pyqtSignal,
-        QLineEdit, QFileDialog, QModelIndex)
+        QLineEdit, QFileDialog, QModelIndex, QMenu, QCursor)
 
 load_translations()
 
@@ -57,7 +57,7 @@ class CacheManager(QDialog):
         self.cache_reset.clicked.connect(self.reset)
         self.cache_reveal.clicked.connect(self.reveal)
         self.clear_button.clicked.connect(self.clear)
-        self.delete_button.clicked.connect(self.delete)
+        self.delete_button.clicked.connect(self.cache_list.delete_cache)
 
         self.cache_count.emit()
 
@@ -74,7 +74,7 @@ class CacheManager(QDialog):
         self.cache_reset = QPushButton(_('Reset'))
         self.cache_reveal = QPushButton(_('Reveal'))
 
-        layout.addWidget(QLabel(_('Cache path')))
+        layout.addWidget(QLabel(_('Cache Path')))
         layout.addWidget(self.cache_path, 1)
         layout.addWidget(self.cache_move)
         layout.addWidget(self.cache_reset)
@@ -87,7 +87,7 @@ class CacheManager(QDialog):
         layout = QHBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
         self.cache_size = QLabel()
-        self.clear_button = QPushButton(_('Clear'))
+        self.clear_button = QPushButton(_('Clear All'))
         self.clear_button.setDisabled(True)
         self.delete_button = QPushButton(_('Delete'))
         self.delete_button.setDisabled(True)
@@ -100,7 +100,7 @@ class CacheManager(QDialog):
         return widget
 
     def table_widget(self):
-        self.cache_list = CacheTableView()
+        self.cache_list = CacheTableView(self.alert, self)
         self.cache_list.setModel(CacheTableModel())
 
         return self.cache_list
@@ -147,17 +147,6 @@ class CacheManager(QDialog):
         self.cache_list.model().clear()
         self.cache_count.emit()
 
-    def delete(self):
-        action = self.alert.ask(
-            _('Are you sure you want to delete the selected cache(s)?'))
-        if action != 'yes':
-            return
-        for row in reversed(self.cache_list.selectionModel().selectedRows()):
-            filename = row.data(Qt.UserRole)
-            TranslationCache.remove(filename)
-            self.cache_list.model().delete(row.row())
-            self.cache_count.emit()
-
     def reveal(self):
         cache_path = TranslationCache.cache_path
         if not os.path.exists(cache_path):
@@ -172,8 +161,12 @@ class CacheManager(QDialog):
 class CacheTableView(QTableView):
     selected_rows = pyqtSignal(list)
 
-    def __init__(self, parent=None):
+    def __init__(self, alert, parent=None):
         QTableView.__init__(self, parent)
+
+        self.alert = alert
+        self.parent = parent
+
         self.setSortingEnabled(True)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.verticalHeader().setVisible(False)
@@ -183,6 +176,25 @@ class CacheTableView(QTableView):
     def selectionChanged(self, selected, deselected):
         QTableView.selectionChanged(self, selected, deselected)
         self.selected_rows.emit(self.selectionModel().selectedRows())
+
+    def contextMenuEvent(self, event):
+        menu = QMenu()
+        menu.addAction(_('Delete'), self.delete_cache)
+        menu.setMinimumSize(menu.sizeHint())
+        menu.setMaximumSize(menu.sizeHint())
+        menu.exec_(QCursor.pos())
+
+    def delete_cache(self):
+        action = self.alert.ask(
+            _('Are you sure you want to delete the selected cache(s)?'))
+        if action != 'yes':
+            return
+        for row in reversed(self.selectionModel().selectedRows()):
+            filename = row.data(Qt.UserRole)
+            TranslationCache.remove(filename)
+            self.model().delete(row.row())
+        self.clearSelection()
+        self.parent.cache_count.emit()
 
 
 class CacheTableModel(QAbstractTableModel):
@@ -195,6 +207,7 @@ class CacheTableModel(QAbstractTableModel):
         QAbstractTableModel.__init__(self)
         self.refresh()
 
+    @staticmethod
     def update(func):
         def wrapper(self, *args):
             self.layoutAboutToBeChanged.emit()

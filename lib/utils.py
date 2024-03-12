@@ -107,5 +107,17 @@ def open_path(path):
     Popen([cmd, path])
 
 
+def open_file(path):
+    content = ''
+    try:
+        with open(path, 'r', newline=None) as f:
+            content = f.read().strip()
+    except Exception:
+        with open(path, 'rU') as f:
+            content = f.read().strip()
+    finally:
+        return content
+
+
 def dummy(*args, **kwargs):
     pass

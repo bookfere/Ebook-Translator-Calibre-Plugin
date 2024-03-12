@@ -121,7 +121,7 @@ class Translation:
         return self.translator.max_error_count > 0 and \
             self.abort_count >= self.translator.max_error_count
 
-    def _translate_text(self, text, retry=0, interval=5):
+    def _translate_text(self, text, retry=0, interval=0):
         """Translation engine service error code documentation:
         * https://cloud.google.com/apis/design/errors
         * https://www.deepl.com/docs-api/api-access/error-handling/
@@ -152,7 +152,7 @@ class Translation:
                 if retry >= self.translator.request_attempt:
                     raise TranslationFailed('{}\n{}'.format(message, str(e)))
                 retry += 1
-                interval *= retry
+                interval += 5
                 # Logging any errors that occur during translation.
                 text = text[:200] + '...' if len(text) > 200 else text
                 error_message = '{0}\n{2}\n{1}\n{3}\n{1}\n{4}'.format(
@@ -204,7 +204,6 @@ class Translation:
         self.callback(paragraph)
 
         original = paragraph.original.strip()
-        translation = paragraph.translation.strip()
         if paragraph.error is None:
             self.log(sep())
             self.log(_('Original: {}').format(original))
@@ -212,12 +211,12 @@ class Translation:
             message = _('Translation: {}')
             if paragraph.is_cache:
                 message = _('Translation (Cached): {}')
-            self.log(message.format(translation))
+            self.log(message.format(paragraph.translation.strip()))
         else:
             self.log(sep(), True)
             self.log(_('Original: {}').format(original), True)
             self.log(sep('┈'), True)
-            self.log(_('Error: {}').format(paragraph.error), True)
+            self.log(_('Error: {}').format(paragraph.error.strip()), True)
             paragraph.error = None
 
     def handle(self, paragraphs=[]):
@@ -230,7 +229,7 @@ class Translation:
         self.log(sep())
         self.log(_('Start to translate ebook content'))
         self.log(sep('┈'))
-        self.log(_('Total items: {}').format(self.total))
+        self.log(_('Item count: {}').format(self.total))
         self.log(_('Character count: {}').format(char_count))
         if self.total < 1:
             raise Exception(_('There is no content need to translate.'))

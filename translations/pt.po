@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-03-11 21:06+0800\n"
+"POT-Creation-Date: 2024-03-12 21:56+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: none\n"
@@ -179,11 +179,11 @@ msgstr "Reinicar"
 msgid "Reveal"
 msgstr "Revelar"
 
-msgid "Cache path"
+msgid "Cache Path"
 msgstr "Caminho cache"
 
-msgid "Clear"
-msgstr "Limpar"
+msgid "Clear All"
+msgstr ""
 
 msgid ""
 "All cache(s) will be moved to the default path. Are you sure to proceed?"
@@ -200,14 +200,14 @@ msgstr "Por favor escolha uma pasta vazia."
 msgid "Are you sure you want to clear all caches?"
 msgstr "Você tem certeza que quer limpar todos os caches?"
 
-msgid "Are you sure you want to delete the selected cache(s)?"
-msgstr "Você tem certeza que deseja deletar todos os caches selecionados?"
-
 msgid "No cache exists."
 msgstr "Não há caches."
 
 msgid "Total: {}"
 msgstr "Total: {}"
+
+msgid "Are you sure you want to delete the selected cache(s)?"
+msgstr "Você tem certeza que deseja deletar todos os caches selecionados?"
 
 msgid "Engine"
 msgstr "Mecanismo"
@@ -238,6 +238,9 @@ msgstr "Mecanismo de Tradução Personalizado"
 
 msgid "Add"
 msgstr "Adicionar"
+
+msgid "Clear"
+msgstr "Limpar"
 
 msgid "Restore"
 msgstr "Restaurar"
@@ -396,14 +399,20 @@ msgstr "Falha ao obter chave do APP devido a um URL Base64 invalido."
 msgid "Youdao"
 msgstr "Youdao"
 
-msgid "Start to convert ebook format ..."
+msgid "Start to convert ebook format..."
 msgstr "Iniciar conversão de formato de ebook..."
 
-msgid "Starting to output subtitles file ..."
+msgid "Starting to output subtitles file..."
 msgstr "Iniciando a criação dos arquivos de legendas"
 
 msgid "The translation of the subtitles file was completed."
 msgstr "A tradução dos arquivos de legendas foi finalizada."
+
+msgid "Starting to output PGN file..."
+msgstr ""
+
+msgid "The translation of the PGN file was completed."
+msgstr ""
 
 msgid "[{} > {}] Translating \"{}\""
 msgstr "[{} > {}] Traduzindo \"{}\""
@@ -455,6 +464,9 @@ msgstr "Tradução (armazenado em cache) {}:"
 
 msgid "Start to translate ebook content"
 msgstr "Iniciar tradução do conteúdo do ebook"
+
+msgid "Item count: {}"
+msgstr ""
 
 msgid "There is no content need to translate."
 msgstr "Não há conteúdo para ser traduzido."
@@ -531,7 +543,7 @@ msgstr "O plugin irá procurar por programas externos usando estes caminhos."
 msgid "Custom"
 msgstr "Personalizar"
 
-msgid "Using Tip"
+msgid "Usage Tip"
 msgstr "Usar Dica"
 
 msgid "Tip:"
@@ -560,7 +572,7 @@ msgstr "Limite de tentativas"
 msgid "Timeout (seconds)"
 msgstr "Tempo esgotado (segundos)"
 
-msgid "Error count to stop translation"
+msgid "Error limit to stop translation"
 msgstr "Contagem de erros para interromper a tradução"
 
 msgid "Tune Gemini"
@@ -596,13 +608,13 @@ msgstr ""
 msgid "Beta"
 msgstr ""
 
-msgid "Left to original"
-msgstr ""
-
 msgid "Right to original"
 msgstr ""
 
-msgid "Add without original"
+msgid "Left to original"
+msgstr ""
+
+msgid "With no original"
 msgstr "Adicionar sem o original"
 
 msgid "Translation"
@@ -611,13 +623,10 @@ msgstr ""
 msgid "Translation Position"
 msgstr "Posição da Tradução"
 
-msgid "Original Color"
+msgid "Original Text Color"
 msgstr ""
 
-msgid "CSS color value, e.g., #666666, grey, rgb(80, 80, 80)"
-msgstr "Valor de cor CSS, por exemplo, #666666, grey, rgb(80, 80, 80)"
-
-msgid "Translation Color"
+msgid "Translation Text Color"
 msgstr "Cor da tradução"
 
 msgid "Translation Glossary"
@@ -665,11 +674,11 @@ msgstr ""
 msgid "Ignore Element"
 msgstr "Ignorar Elemento"
 
-msgid "CSS selectors to exclude elements. One rule per line:"
-msgstr "Seletores CSS para excluir elementos. Uma regra por linha:"
-
 msgid "e.g."
 msgstr "por exemplo"
+
+msgid "CSS selectors to exclude elements. One rule per line:"
+msgstr "Seletores CSS para excluir elementos. Uma regra por linha:"
 
 msgid "Ebook Metadata"
 msgstr "Metadados dos ebooks"
@@ -740,9 +749,3 @@ msgstr "Gerenciar Armazenamento Cache"
 
 msgid "Choose Translation Mode"
 msgstr "Escolha o Modo de Tradução"
-
-#~ msgid "Add after original"
-#~ msgstr "Adicionar depois do original"
-
-#~ msgid "Add before original"
-#~ msgstr "Adicionar antes do original"

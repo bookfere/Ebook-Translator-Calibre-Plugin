@@ -9,8 +9,8 @@ from ..lib.utils import ns
 from ..lib.cache import Paragraph
 from ..lib.element import (
     get_string, get_name, Extraction, ElementHandler, ElementHandlerMerge,
-    SrtElement, TocElement, PageElement, MetadataElement, get_toc_elements,
-    get_metadata_elements)
+    Element, SrtElement, TocElement, PageElement, MetadataElement,
+    get_toc_elements, get_metadata_elements)
 from ..engines import DeeplFreeTranslate
 from ..engines.base import Base
 
@@ -63,6 +63,56 @@ class TestFunction(unittest.TestCase):
         self.assertIs(item_2, elements[1].element)
 
 
+class MockedElement(Element):
+    def get_raw(self):
+        pass
+
+    def get_text(self):
+        pass
+
+    def get_content(self):
+        pass
+
+    def add_translation(
+            self, translation, placeholder, position, translation_lang=None,
+            original_color=None, translation_color=None):
+        pass
+
+
+class TestElement(unittest.TestCase):
+    def setUp(self):
+        self._element = Mock()
+        self.element = MockedElement(self._element, 'toc.ncx')
+
+    def test_create_element(self):
+        self.assertIs(self._element, self.element.element)
+        self.assertEqual('toc.ncx', self.element.page_id)
+        self.assertFalse(self.element.ignored)
+        self.assertIsNone(self.element.placeholder)
+        self.assertEqual([], self.element.reserve_elements)
+        self.assertEqual([], self.element.original)
+
+    def test_set_ignored(self):
+        self.element.set_ignored(True)
+        self.assertTrue(self.element.ignored)
+
+    def test_set_placeholder(self):
+        self.element.set_placeholder(['{{id_{}}}', r'{id_\d+}'])
+        self.assertEqual(['{{id_{}}}', r'{id_\d+}'], self.element.placeholder)
+
+    def test_get_name(self):
+        self.assertIsNone(self.element.get_name())
+
+    def test_get_attributes(self):
+        self.assertIsNone(self.element.get_name())
+
+    def test_delete(self):
+        self.assertIsNone(self.element.delete())
+
+    def test_get_translation(self):
+        self.assertIsNone(self.element.get_translation())
+
+
 class TestSrtElement(unittest.TestCase):
     def setUp(self):
         self.element = SrtElement(['1', '00:01 --> 00:02', 'a'])
@@ -74,30 +124,30 @@ class TestSrtElement(unittest.TestCase):
         self.assertEqual('a', self.element.get_text())
 
     def test_get_content(self):
-        self.assertEqual('a', self.element.get_content(Base.placeholder))
+        self.assertEqual('a', self.element.get_content())
 
     def test_add_translation_none(self):
-        element = self.element.add_translation(None, Base.placeholder, 'below')
+        element = self.element.add_translation(None, 'below')
         self.assertEqual('a', element[2])
 
     def test_add_translation_below(self):
-        element = self.element.add_translation('A', Base.placeholder, 'below')
+        element = self.element.add_translation('A', 'below')
         self.assertEqual('a\nA', element[2])
 
     def test_add_translation_right(self):
-        element = self.element.add_translation('A', Base.placeholder, 'right')
+        element = self.element.add_translation('A', 'right')
         self.assertEqual('a\nA', element[2])
 
     def test_add_translation_above(self):
-        element = self.element.add_translation('A', Base.placeholder, 'above')
+        element = self.element.add_translation('A', 'above')
         self.assertEqual('A\na', element[2])
 
     def test_add_translation_left(self):
-        element = self.element.add_translation('A', Base.placeholder, 'left')
+        element = self.element.add_translation('A', 'left')
         self.assertEqual('A\na', element[2])
 
     def test_add_translation_only(self):
-        element = self.element.add_translation('A', Base.placeholder, 'only')
+        element = self.element.add_translation('A', 'only')
         self.assertEqual('A', element[2])
 
 
@@ -113,31 +163,31 @@ class TestMetadataElement(unittest.TestCase):
         self.assertEqual('a', self.element.get_text())
 
     def test_get_content(self):
-        self.assertEqual('a', self.element.get_content(Base.placeholder))
+        self.assertEqual('a', self.element.get_content())
 
     def test_add_translation_none(self):
         self.assertIs(
             self.element.element,
-            self.element.add_translation(None, Base.placeholder, 'below'))
+            self.element.add_translation(None, 'below'))
 
     def test_add_translation_below(self):
-        element = self.element.add_translation('A', Base.placeholder, 'below')
+        element = self.element.add_translation('A', 'below')
         self.assertEqual('a A', element.content)
 
     def test_add_translation_right(self):
-        element = self.element.add_translation('A', Base.placeholder, 'right')
+        element = self.element.add_translation('A', 'right')
         self.assertEqual('a A', element.content)
 
     def test_add_translation_above(self):
-        element = self.element.add_translation('A', Base.placeholder, 'above')
+        element = self.element.add_translation('A', 'above')
         self.assertEqual('A a', element.content)
 
     def test_add_translation_left(self):
-        element = self.element.add_translation('A', Base.placeholder, 'left')
+        element = self.element.add_translation('A', 'left')
         self.assertEqual('A a', element.content)
 
     def test_add_translation_only(self):
-        element = self.element.add_translation('A', Base.placeholder, 'only')
+        element = self.element.add_translation('A', 'only')
         self.assertEqual('A', element.content)
 
 
@@ -152,30 +202,30 @@ class TestTocElement(unittest.TestCase):
         self.assertEqual('a', self.element.get_text())
 
     def test_get_content(self):
-        self.assertEqual('a', self.element.get_content(Base.placeholder))
+        self.assertEqual('a', self.element.get_content())
 
     def test_add_translation_none(self):
-        element = self.element.add_translation(None, Base.placeholder, 'below')
+        element = self.element.add_translation(None, 'below')
         self.assertEqual('a', element.title)
 
     def test_add_translation_below(self):
-        element = self.element.add_translation('A', Base.placeholder, 'below')
+        element = self.element.add_translation('A', 'below')
         self.assertEqual('a A', element.title)
 
     def test_add_translation_right(self):
-        element = self.element.add_translation('A', Base.placeholder, 'right')
+        element = self.element.add_translation('A', 'right')
         self.assertEqual('a A', element.title)
 
     def test_add_translation_above(self):
-        element = self.element.add_translation('A', Base.placeholder, 'above')
+        element = self.element.add_translation('A', 'above')
         self.assertEqual('A a', element.title)
 
     def test_add_translation_left(self):
-        element = self.element.add_translation('A', Base.placeholder, 'left')
+        element = self.element.add_translation('A', 'left')
         self.assertEqual('A a', element.title)
 
     def test_add_translation_only(self):
-        element = self.element.add_translation('A', Base.placeholder, 'only')
+        element = self.element.add_translation('A', 'only')
         self.assertEqual('A', element.title)
 
 
@@ -200,6 +250,7 @@ class TestPageElement(unittest.TestCase):
 </html>""")
         self.paragraph = self.xhtml.find('.//x:p', namespaces=ns)
         self.element = PageElement(self.paragraph, 'p1')
+        self.element.set_placeholder(Base.placeholder)
 
     def test_get_name(self):
         self.assertEqual('p', self.element.get_name())
@@ -224,11 +275,13 @@ class TestPageElement(unittest.TestCase):
             r'a bB c d e f g h i App\Http kl', self.element.get_text())
 
     def test_get_content(self):
+        raw_content = self.element.get_raw()
         content = ('{{id_00000}} a {{id_00001}} b c {{id_00002}} d e '
                    '{{id_00003}} f g {{id_00004}} h {{id_00005}} i '
                    '{{id_00006}} {{id_00007}} k{{id_00008}}l')
-        self.assertEqual(content, self.element.get_content(Base.placeholder))
+        self.assertEqual(content, self.element.get_content())
         self.assertEqual(9, len(self.element.reserve_elements))
+        self.assertEqual(raw_content, self.element.get_raw())
 
         for element in self.element.reserve_elements:
             with self.subTest(element=element):
@@ -238,23 +291,23 @@ class TestPageElement(unittest.TestCase):
         self.assertEqual('{"class": "abc"}', self.element.get_attributes())
 
     def test_add_translation_none(self):
-        element = self.element.add_translation(None, Base.placeholder, 'below')
+        element = self.element.add_translation(None, 'below')
         self.assertIs(element, self.element.element)
 
     def test_add_translation_none_with_left_position(self):
-        element = self.element.add_translation(None, Base.placeholder, 'left')
+        element = self.element.add_translation(None, 'left')
         self.assertIs(element, self.element.element)
         table = self.xhtml.find('.//x:table', namespaces=ns)
         self.assertIsNotNone(table)
 
     def test_add_translation_with_placeholder(self):
-        self.element.get_content(Base.placeholder)
+        self.element.set_placeholder(Base.placeholder)
+        self.element.get_content()
         translation = ('{{id_00000}} Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa '
                        '{{id_00001}} Bbbbbbbbbbbbbbb C {{id_00002}} D E '
                        '{{id_00003}} F G {{id_00004}} H \n\n{{id_00005}} I '
                        '{{id_00006}} {{id_00007}} K{ { id _ 0 00 08 } }L')
-        new = self.element.add_translation(
-            translation, Base.placeholder, position='below')
+        new = self.element.add_translation(translation, position='below')
         translation = ('<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
                        '<img src="icon.jpg"/> Aaaaa <img src="w1.jpg"/> '
                        'Bbbbb C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
@@ -268,12 +321,12 @@ class TestPageElement(unittest.TestCase):
         self.assertEqual('abc', new.get('class'))
 
     def test_add_translation_with_markup(self):
-        self.element.get_content(DeeplFreeTranslate.placeholder)
+        self.element.set_placeholder(DeeplFreeTranslate.placeholder)
+        self.element.get_content()
         translation = ('<m id=00000 /> A <m id=00001 /> B C <m id=00002 /> D '
                        'E <m id=00003 /> F G <m id=00004 /> H <m id=00005 /> '
                        'I <m id=00006 /> <m id=00007 /> K<m id=00008 />L')
-        new = self.element.add_translation(
-            translation, DeeplFreeTranslate.placeholder, position='below')
+        new = self.element.add_translation(translation, position='below')
         translation = ('<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
                        '<img src="icon.jpg"/> A <img src="w1.jpg"/> '
                        'B C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
@@ -284,34 +337,29 @@ class TestPageElement(unittest.TestCase):
         self.assertEqual(translation, get_string(new))
 
     def test_add_translation_below(self):
-        new = self.element.add_translation(
-            'test', Base.placeholder, position='next')
+        new = self.element.add_translation('test', position='next')
         self.assertEqual(self.paragraph, new.getprevious())
         self.assertIn('>test<', get_string(new))
 
     def test_add_translation_right(self):
-        new = self.element.add_translation(
-            'test', Base.placeholder, position='right')
+        new = self.element.add_translation('test', position='right')
         table = self.xhtml.find('.//x:table', namespaces=ns)
         self.assertIsNotNone(table)
         self.assertIn('>test<', get_string(new))
 
     def test_add_translation_above(self):
-        new = self.element.add_translation(
-            'test', Base.placeholder, position='above')
+        new = self.element.add_translation('test',  position='above')
         self.assertEqual(self.paragraph, new.getnext())
         self.assertIn('>test<', get_string(new))
 
     def test_add_translation_left(self):
-        new = self.element.add_translation(
-            'test', Base.placeholder, position='left')
+        new = self.element.add_translation('test', position='left')
         table = self.xhtml.find('.//x:table', namespaces=ns)
         self.assertIsNotNone(table)
         self.assertIn('>test<', get_string(new))
 
     def test_add_translation_only(self):
-        new = self.element.add_translation(
-            'test', Base.placeholder, position='only')
+        new = self.element.add_translation('test', position='only')
         self.assertIsNone(new.getprevious())
         self.assertIsNone(new.getnext())
         self.assertIn('>test<', get_string(new))
@@ -328,16 +376,16 @@ class TestPageElement(unittest.TestCase):
 </html>""")
 
         element = PageElement(xhtml.find('.//x:a[1]', namespaces=ns), 'p1')
-        new = element.add_translation('A', Base.placeholder, position='only')
+        new = element.add_translation('A', position='only')
         self.assertIsNone(new.get('href'))
 
         element = PageElement(xhtml.find('.//x:a[2]', namespaces=ns), 'p1')
-        new = element.add_translation('A', Base.placeholder, position='only')
+        new = element.add_translation('A', position='only')
         self.assertEqual('abc', new.get('href'))
 
     def test_add_translation_attr(self):
         new = self.element.add_translation(
-            'test', Base.placeholder, position='below', translation_lang='zh',
+            'test', position='below', translation_lang='zh',
             original_color='green', translation_color='red')
         self.assertEqual('zh', new.get('lang'))
         self.assertEqual('color:green', self.element.element.get('style'))
@@ -390,10 +438,10 @@ class TestExtraction(unittest.TestCase):
         self.assertEqual(2, len(elements))
         self.assertIsInstance(elements[0], PageElement)
         self.assertEqual('p', get_name(elements[0].get_name()))
-        self.assertEqual('abc', elements[0].get_content(Base.placeholder))
+        self.assertEqual('abc', elements[0].get_content())
         self.assertIsInstance(elements[1], PageElement)
         self.assertEqual('div', get_name(elements[1].get_name()))
-        self.assertEqual('def', elements[1].get_content(Base.placeholder))
+        self.assertEqual('def', elements[1].get_content())
 
     def test_load_filter_patterns(self):
         self.extraction.load_filter_patterns()
@@ -667,7 +715,8 @@ class TestElementHandlerMerge(unittest.TestCase):
             'a {{id_0}} b {{id_1}} c {{id_3}}', False, None, None,
             'A {{id_0}} B {{id_1}} C {{id_3}}', 'ENGINE', 'LANG')
         self.assertEqual(
-            ['A', 'B', 'C'], self.handler.align_paragraph(paragraph))
+            [('a', 'A'), ('b', 'B'), ('c', 'C')],
+            self.handler.align_paragraph(paragraph))
 
         paragraph = Paragraph(
             0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
@@ -675,28 +724,32 @@ class TestElementHandlerMerge(unittest.TestCase):
             'A {{id_0}} B {{id_1}} C {{id_4}} D {{id_5}}', 'ENGINE', 'LANG')
         self.handler.align_paragraph(paragraph)
         self.assertEqual(
-            ['A', 'B', 'C\n\nD'], self.handler.align_paragraph(paragraph))
+            [('a', 'A'), ('b', 'B'), ('c', 'C\n\nD')],
+            self.handler.align_paragraph(paragraph))
 
         paragraph = Paragraph(
             0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
             'a {{id_0}} b {{id_1}} c {{id_3}}', False, None, None,
             'A {{id_0}} B {{id_1}}', 'ENGINE', 'LANG')
         self.assertEqual(
-            [None, None, 'A\n\nB'], self.handler.align_paragraph(paragraph))
+            [('a', None), ('b', None), ('c', 'A\n\nB')],
+            self.handler.align_paragraph(paragraph))
 
         paragraph = Paragraph(
             0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
             'a\n\nb\n\nc\n\n', False, None, None, 'A\n\nB\n\nC\n\n',
             'ENGINE', 'LANG')
         self.assertEqual(
-            ['A', 'B', 'C'], self.handler.align_paragraph(paragraph))
+            [('a', 'A'), ('b', 'B'), ('c', 'C')],
+            self.handler.align_paragraph(paragraph))
 
         paragraph = Paragraph(
             0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
             'a\n\nb\n\nc\n\n', False, None, None, 'A\n\nB\n\nC\n\nD\n\nE\n\n',
             'ENGINE', 'LANG')
         self.assertEqual(
-            ['A', 'B', 'C\n\nD\n\nE'], self.handler.align_paragraph(paragraph))
+            [('a', 'A'), ('b', 'B'), ('c', 'C\n\nD\n\nE')],
+            self.handler.align_paragraph(paragraph))
 
         # paragraph = Paragraph(
         #     0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
@@ -710,11 +763,13 @@ class TestElementHandlerMerge(unittest.TestCase):
             'a\n\nb\n\nc\n\n', False, None, None, 'A\n\nB\n\n',
             'ENGINE', 'LANG')
         self.assertEqual(
-            [None, None, 'A\n\nB'], self.handler.align_paragraph(paragraph))
+            [('a', None), ('b', None), ('c', 'A\n\nB')],
+            self.handler.align_paragraph(paragraph))
 
         self.handler.position = 'above'
         self.assertEqual(
-            ['A\n\nB', None, None], self.handler.align_paragraph(paragraph))
+            [('a', 'A\n\nB'),('b', None), ('c', None)],
+            self.handler.align_paragraph(paragraph))
 
     @patch('calibre_plugins.ebook_translator.lib.element.uid')
     def test_prepare_original_merge_separator(self, mock_uid):

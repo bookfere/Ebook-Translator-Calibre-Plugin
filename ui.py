@@ -228,7 +228,7 @@ class EbookTranslatorGui(InterfaceAction):
             try:
                 fmt, fmts = get_input_format_for_book(db, book_id, 'epub')
             except Exception as e:
-                for extra_format in ('srt',):
+                for extra_format in ('srt', 'pgn'):
                     if api.has_format(book_id, extra_format):
                         if fmt is None:
                             fmt = extra_format

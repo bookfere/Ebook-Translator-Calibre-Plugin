@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-03-11 21:06+0800\n"
+"POT-Creation-Date: 2024-03-12 21:56+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -115,7 +115,8 @@ msgstr "格式"
 msgid ""
 "The ebook's filename is automatically managed by Calibre according to "
 "metadata since the output path is set to Calibre Library."
-msgstr "由于输出路径是 Calibre 书库，因此电子书文件名由 Calibre 根据原数据自动处理。"
+msgstr ""
+"由于输出路径是 Calibre 书库，因此电子书文件名由 Calibre 根据原数据自动处理。"
 
 msgid "Translated"
 msgstr "已翻译"
@@ -177,11 +178,11 @@ msgstr "重置"
 msgid "Reveal"
 msgstr "打开"
 
-msgid "Cache path"
+msgid "Cache Path"
 msgstr "缓存路径"
 
-msgid "Clear"
-msgstr "清除"
+msgid "Clear All"
+msgstr "全部清除"
 
 msgid ""
 "All cache(s) will be moved to the default path. Are you sure to proceed?"
@@ -196,14 +197,14 @@ msgstr "请选择一个空文件夹。"
 msgid "Are you sure you want to clear all caches?"
 msgstr "你确定要清除所有缓存吗？"
 
-msgid "Are you sure you want to delete the selected cache(s)?"
-msgstr "你确定想要删除所选缓存吗？"
-
 msgid "No cache exists."
 msgstr "缓存不存在。"
 
 msgid "Total: {}"
 msgstr "总计：{}"
+
+msgid "Are you sure you want to delete the selected cache(s)?"
+msgstr "你确定想要删除所选缓存吗？"
 
 msgid "Engine"
 msgstr "引擎"
@@ -234,6 +235,9 @@ msgstr "自定义翻译引擎"
 
 msgid "Add"
 msgstr "添加"
+
+msgid "Clear"
+msgstr "清除"
 
 msgid "Restore"
 msgstr "重置"
@@ -387,14 +391,20 @@ msgstr "因错误的 Base64 URL 导致 APP 密钥获取失败。"
 msgid "Youdao"
 msgstr "有道"
 
-msgid "Start to convert ebook format ..."
-msgstr "开始转换电子书格式 ……"
+msgid "Start to convert ebook format..."
+msgstr "开始转换电子书格式……"
 
-msgid "Starting to output subtitles file ..."
-msgstr "开始输出字幕文件 ..."
+msgid "Starting to output subtitles file..."
+msgstr "开始输出字幕文件……"
 
 msgid "The translation of the subtitles file was completed."
 msgstr "字幕文件已翻译完成。"
+
+msgid "Starting to output PGN file..."
+msgstr "开始输出 PGN 文件……"
+
+msgid "The translation of the PGN file was completed."
+msgstr "PGN 文件翻译完毕。"
 
 msgid "[{} > {}] Translating \"{}\""
 msgstr "[{} > {}] 翻译 \"{}\""
@@ -446,6 +456,9 @@ msgstr "译文（缓存）：{}"
 
 msgid "Start to translate ebook content"
 msgstr "开始翻译电子书内容"
+
+msgid "Item count: {}"
+msgstr "条目总数：{}"
 
 msgid "There is no content need to translate."
 msgstr "没有需要翻译的内容。"
@@ -522,7 +535,7 @@ msgstr "本插件将会通过以下路径搜索外部程序。"
 msgid "Custom"
 msgstr "自定义"
 
-msgid "Using Tip"
+msgid "Usage Tip"
 msgstr "使用提示"
 
 msgid "Tip:"
@@ -549,8 +562,8 @@ msgstr "重试次数"
 msgid "Timeout (seconds)"
 msgstr "超时（秒）"
 
-msgid "Error count to stop translation"
-msgstr "超过错误次数停止翻译"
+msgid "Error limit to stop translation"
+msgstr "超过错误限制停止翻译"
 
 msgid "Tune Gemini"
 msgstr "调节 Gemini"
@@ -585,13 +598,13 @@ msgstr "原文上方"
 msgid "Beta"
 msgstr "测试"
 
-msgid "Left to original"
-msgstr "原文左边"
-
 msgid "Right to original"
 msgstr "原文右边"
 
-msgid "Add without original"
+msgid "Left to original"
+msgstr "原文左边"
+
+msgid "With no original"
 msgstr "仅保留译文"
 
 msgid "Translation"
@@ -600,13 +613,10 @@ msgstr "译文"
 msgid "Translation Position"
 msgstr "译文位置"
 
-msgid "Original Color"
+msgid "Original Text Color"
 msgstr "原文颜色"
 
-msgid "CSS color value, e.g., #666666, grey, rgb(80, 80, 80)"
-msgstr "CSS 颜色值，如 #666666, gry, rgb(80, 80, 80)"
-
-msgid "Translation Color"
+msgid "Translation Text Color"
 msgstr "译文颜色"
 
 msgid "Translation Glossary"
@@ -651,11 +661,11 @@ msgstr "排除匹配正则表达式规则的段落。一行一条规则："
 msgid "Ignore Element"
 msgstr "忽略元素"
 
-msgid "CSS selectors to exclude elements. One rule per line:"
-msgstr "用来排除元素的 CSS 选择器。一行一条规则："
-
 msgid "e.g."
 msgstr "如"
+
+msgid "CSS selectors to exclude elements. One rule per line:"
+msgstr "用来排除元素的 CSS 选择器。一行一条规则："
 
 msgid "Ebook Metadata"
 msgstr "电子书元数据"
@@ -722,24 +732,3 @@ msgstr "缓存管理器"
 
 msgid "Choose Translation Mode"
 msgstr "选择翻译模式"
-
-#~ msgid ""
-#~ "The ebook's filename is automatically managed by Calibre according to "
-#~ "metadata“since the output path is set to Calibre Library."
-#~ msgstr ""
-#~ "由于输出路径是 Calibre 书库，因此电子书文件名由 Calibre 根据原数据自动处"
-#~ "理。"
-
-#~ msgid ""
-#~ "The ebook's filename is managed by Calibre since the output path is set "
-#~ "to Calibre Library."
-#~ msgstr "由于输出路径是 Calibre 书库，因此电子书文件名由 Calibre 管理。"
-
-#~ msgid "Add after original"
-#~ msgstr "加在原文后"
-
-#~ msgid "Add before original"
-#~ msgstr "加在原文前"
-
-#~ msgid "The translation line count does not match the original."
-#~ msgstr "翻译行数与原文行数不一致。"
