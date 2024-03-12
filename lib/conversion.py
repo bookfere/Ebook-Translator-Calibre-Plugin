@@ -12,11 +12,11 @@ from calibre.ebooks.metadata.meta import get_metadata, set_metadata
 from .. import EbookTranslator
 
 from .config import get_config
-from .utils import log, sep, uid, open_path
+from .utils import log, sep, uid, open_path, open_file
 from .cache import get_cache, TranslationCache
 from .element import (
     Extraction, get_element_handler, get_srt_elements, get_toc_elements,
-    get_page_elements, get_metadata_elements)
+    get_page_elements, get_metadata_elements, get_pgn_elements)
 from .translation import get_translator, get_translation
 
 
@@ -24,7 +24,7 @@ load_translations()
 
 
 def extract_item(input_path, input_format):
-    extractors = {'srt': extract_srt}
+    extractors = {'srt': get_srt_elements, 'pgn': get_pgn_elements}
     extractor = extractors.get(input_format) or extract_book
     return extractor(input_path)
 
@@ -36,6 +36,14 @@ def extract_book(input_path):
     plumber = Plumber(input_path, output_path, log=log)
 
     def convert(self, oeb, output_path, input_plugin, opts, log):
+        # for item in oeb.manifest.items:
+        #     if item.media_type == 'text/css':
+        #         for rule in item.data.cssRules:
+        #             print('='*20)
+        #             # CSSStyleRule or CSSPageRule
+        #             print(type(rule))
+        #             # CSSStyleDeclaration
+        #             print(rule.style.keys())
         elements.extend(get_metadata_elements(oeb.metadata))
         elements.extend(get_toc_elements(oeb.toc.nodes, []))
         elements.extend(get_page_elements(oeb.manifest.items))
@@ -43,10 +51,6 @@ def extract_book(input_path):
     plumber.run()
 
     return elements
-
-
-def extract_srt(input_path):
-    return get_srt_elements(input_path)
 
 
 def convert_item(ebook_title, input_path, output_path, source_lang,
@@ -97,7 +101,7 @@ def convert_item(ebook_title, input_path, output_path, source_lang,
     debug_info += '| Input Path: %s\n' % input_path
     debug_info += '| Output Path: %s' % output_path
 
-    convertors = {'srt': convert_srt}
+    convertors = {'srt': convert_srt, 'pgn': convert_pgn}
     convertor = convertors.get(format) or convert_book
     convertor(input_path, output_path, translation, element_handler, cache,
               debug_info, notification)
@@ -114,7 +118,7 @@ def convert_book(input_path, output_path, translation, element_handler, cache,
     elements = []
 
     def convert(self, oeb, output_path, input_plugin, opts, log):
-        log.info('Translating ebook content ... (this will take a while)')
+        log.info('Translating ebook content... (this will take a while)')
         log.info(debug_info)
         translation.set_progress(self.report_progress)
 
@@ -130,7 +134,7 @@ def convert_book(input_path, output_path, translation, element_handler, cache,
         element_handler.add_translations(paragraphs)
 
         log(sep())
-        log(_('Start to convert ebook format ...'))
+        log(_('Start to convert ebook format...'))
         log(sep())
         _convert(oeb, output_path, input_plugin, opts, log)
 
@@ -140,7 +144,7 @@ def convert_book(input_path, output_path, translation, element_handler, cache,
 
 def convert_srt(input_path, output_path, translation, element_handler, cache,
                 debug_info, notification):
-    log.info('Translating subtitles content ... (this will take a while)')
+    log.info('Translating subtitles content... (this will take a while)')
     log.info(debug_info)
 
     elements = get_srt_elements(input_path)
@@ -153,13 +157,41 @@ def convert_srt(input_path, output_path, translation, element_handler, cache,
     element_handler.add_translations(paragraphs)
 
     log(sep())
-    log(_('Starting to output subtitles file ...'))
+    log(_('Starting to output subtitles file...'))
     log(sep())
 
-    with open(output_path, 'w') as f:
-        f.write('\n\n'.join(['\n'.join(e.element) for e in elements]))
+    with open(output_path, 'w') as file:
+        file.write('\n\n'.join([e.get_translation() for e in elements]))
 
     log(_('The translation of the subtitles file was completed.'))
+
+
+def convert_pgn(input_path, output_path, translation, element_handler, cache,
+                debug_info, notification):
+    log.info('Translating PGN content... (this may be take a while)')
+    log.info(debug_info)
+
+    elements = get_pgn_elements(input_path)
+    original_group = element_handler.prepare_original(elements)
+    cache.save(original_group)
+
+    paragraphs = cache.all_paragraphs()
+    translation.set_progress(notification)
+    translation.handle(paragraphs)
+    element_handler.add_translations(paragraphs)
+
+    log(sep())
+    log(_('Starting to output PGN file...'))
+    log(sep())
+
+    pgn_content = open_file(input_path)
+    for element in elements:
+        pgn_content = pgn_content.replace(
+            element.get_raw(), element.get_translation(), 1)
+    with open(output_path, 'w') as file:
+        file.write(pgn_content)
+
+    log(_('The translation of the PGN file was completed.'))
 
 
 class ConversionWorker:
@@ -201,6 +233,22 @@ class ConversionWorker:
                 job, dialog_title=_('Translation job failed'))
             return
 
+        ebook_metadata = self.config.get('ebook_metadata')
+        if not ebook.is_extra_format() and ebook_metadata:
+            with open(output_path, 'r+b') as file:
+                metadata = get_metadata(file, ebook.output_format)
+                if ebook_metadata.get('language'):
+                    metadata.language = ebook.lang_code
+                subjects = ebook_metadata.get('subjects')
+                metadata.tags += subjects + [
+                    'Translate by Ebook Translator: '
+                    'https://translator.bookfere.com']
+                # metadata.title = 'Custom Title'
+                # metadata.authors = ['bookfere.com']
+                # metadata.author_sort = 'bookfere.com'
+                # metadata.book_producer = 'Ebook Translator'
+                set_metadata(file, metadata, ebook.output_format)
+
         if self.config.get('to_library'):
             with open(output_path, 'rb') as file:
                 metadata = get_metadata(file, ebook.output_format)
@@ -212,20 +260,6 @@ class ConversionWorker:
             self.gui.library_view.model().books_added(1)
             output_path = self.api.format_abspath(book_id, ebook.output_format)
             # os.remove(temp_file)
-
-        ebook_metadata = self.config.get('ebook_metadata')
-        if not ebook.is_extra_format() and ebook_metadata:
-            with open(output_path, 'r+b') as file:
-                metadata = get_metadata(file, ebook.output_format)
-                if ebook_metadata.get('language'):
-                    metadata.language = ebook.lang_code
-                subjects = ebook_metadata.get('subjects')
-                metadata.tags += subjects or ['Translate by Ebook Translator']
-                # metadata.title = 'Custom Title'
-                # metadata.authors = ['bookfere.com']
-                # metadata.author_sort = 'bookfere.com'
-                # metadata.book_producer = 'Ebook Translator'
-                set_metadata(file, metadata, ebook.output_format)
 
         self.gui.status_bar.show_message(
             job.description + ' ' + _('completed'), 5000)

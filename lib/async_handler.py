@@ -43,6 +43,9 @@ class AsyncHandler:
                 while not self.queue.empty():
                     await self.queue.get()
                     self.queue.task_done()
+                while not self.done_queue.empty():
+                    await self.done_queue.get()
+                    self.done_queue.task_done()
                 break
             except Exception as e:
                 paragraph.error = str(e)

@@ -334,7 +334,7 @@ class TranslationSetting(QDialog):
         layout.addWidget(engine_group)
 
         # Using Tip
-        self.tip_group = QGroupBox(_('Using Tip'))
+        self.tip_group = QGroupBox(_('Usage Tip'))
         tip_layout = QVBoxLayout(self.tip_group)
         self.using_tip = QLabel()
         self.using_tip.setTextFormat(Qt.RichText)
@@ -389,7 +389,7 @@ class TranslationSetting(QDialog):
         request_layout.addRow(_('Attempt times'), request_attempt)
         request_layout.addRow(_('Timeout (seconds)'), request_timeout)
         request_layout.addRow(
-            _('Error count to stop translation'), max_error_count)
+            _('Error limit to stop translation'), max_error_count)
         layout.addWidget(request_group, 1)
 
         self.set_form_layout_policy(request_layout)
@@ -700,15 +700,15 @@ class TranslationSetting(QDialog):
         below_original = QRadioButton(_('Below original'))
         below_original.setChecked(True)
         above_original = QRadioButton(_('Above original'))
-        left_to_original = QRadioButton(
-            '%s (%s)' % (_('Left to original'), _('Beta')))
         right_to_original = QRadioButton(
             '%s (%s)' % (_('Right to original'), _('Beta')))
-        delete_original = QRadioButton(_('Add without original'))
+        left_to_original = QRadioButton(
+            '%s (%s)' % (_('Left to original'), _('Beta')))
+        delete_original = QRadioButton(_('With no original'))
         position_radios_layout.addWidget(below_original)
         position_radios_layout.addWidget(above_original)
-        position_radios_layout.addWidget(left_to_original)
         position_radios_layout.addWidget(right_to_original)
+        position_radios_layout.addWidget(left_to_original)
         position_radios_layout.addWidget(delete_original)
         position_radios_layout.addStretch(1)
 
@@ -743,7 +743,7 @@ class TranslationSetting(QDialog):
         layout.addWidget(position_group)
 
         position_map = dict(enumerate(
-            ['below', 'above', 'left', 'right', 'only']))
+            ['below', 'above', 'right', 'left', 'only']))
         position_rmap = dict((v, k) for k, v in position_map.items())
         # Add alias for compatibility with lower versions.
         position_rmap['after'] = 0
@@ -751,8 +751,8 @@ class TranslationSetting(QDialog):
         position_btn_group = QButtonGroup(position_group)
         position_btn_group.addButton(below_original, 0)
         position_btn_group.addButton(above_original, 1)
-        position_btn_group.addButton(left_to_original, 2)
-        position_btn_group.addButton(right_to_original, 3)
+        position_btn_group.addButton(right_to_original, 2)
+        position_btn_group.addButton(left_to_original, 3)
         position_btn_group.addButton(delete_original, 4)
 
         map_key = self.config.get('translation_position', 'below')
@@ -763,7 +763,7 @@ class TranslationSetting(QDialog):
         position_btn_click = getattr(position_btn_group, 'idClicked', None) \
             or position_btn_group.buttonClicked[int]
 
-        names = ('TopToBottom', 'BottomToTop', 'RightToLeft', 'LeftToRight')
+        names = ('TopToBottom', 'BottomToTop', 'LeftToRight', 'RightToLeft')
         directions = []
         for name in names:
             direction = getattr(QBoxLayout, name, None)
@@ -784,13 +784,12 @@ class TranslationSetting(QDialog):
         color_group_layout = QHBoxLayout(color_group)
         color_group_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Original Color
-        original_color_group = QGroupBox(_('Original Color'))
+        # Original text color
+        original_color_group = QGroupBox(_('Original Text Color'))
         original_color_layout = QHBoxLayout(original_color_group)
         self.original_color = QLineEdit()
         self.original_color.setText(self.config.get('original_color'))
-        self.original_color.setPlaceholderText(
-            _('CSS color value, e.g., #666666, grey, rgb(80, 80, 80)'))
+        self.original_color.setPlaceholderText('#0055ff')
         original_color_show = QLabel()
         original_color_show.setObjectName('original_color_show')
         original_color_show.setFixedWidth(25)
@@ -804,11 +803,10 @@ class TranslationSetting(QDialog):
         color_group_layout.addWidget(original_color_group)
 
         # Translation Color
-        translation_color_group = QGroupBox(_('Translation Color'))
+        translation_color_group = QGroupBox(_('Translation Text Color'))
         translation_color_layout = QHBoxLayout(translation_color_group)
         self.translation_color = QLineEdit()
-        self.translation_color.setPlaceholderText(
-            _('CSS color value, e.g., #666666, grey, rgb(80, 80, 80)'))
+        self.translation_color.setPlaceholderText('#0055ff')
         self.translation_color.setText(self.config.get('translation_color'))
         translation_color_show = QLabel()
         translation_color_show.setObjectName('translation_color')
@@ -966,6 +964,8 @@ class TranslationSetting(QDialog):
         element_group = QGroupBox(_('Ignore Element'))
         element_layout = QVBoxLayout(element_group)
         self.element_rules = QPlainTextEdit()
+        self.element_rules.setPlaceholderText(
+            '%s %s' % (_('e.g.'), 'table, table#report, table.list'))
         self.element_rules.setMinimumHeight(100)
         self.element_rules.insertPlainText(
             '\n'.join(self.config.get('element_rules')))
@@ -973,8 +973,6 @@ class TranslationSetting(QDialog):
         element_layout.addWidget(QLabel(
             _('CSS selectors to exclude elements. One rule per line:')))
         element_layout.addWidget(self.element_rules)
-        element_layout.addWidget(QLabel('%s %s' % (
-            _('e.g.'), 'table, table#report, table.list')))
         layout.addWidget(element_group)
 
         # Ebook Metadata
@@ -1121,7 +1119,7 @@ class TranslationSetting(QDialog):
         return True
 
     def update_content_config(self):
-        # Original color
+        # Original text color
         original_color = self.original_color.text()
         if original_color and not QColor(original_color).isValid():
             self.alert.pop(_('Invalid color value.'), 'warning')

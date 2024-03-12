@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-03-11 21:06+0800\n"
+"POT-Creation-Date: 2024-03-12 21:56+0800\n"
 "PO-Revision-Date: 2023-04-25 15:36+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -178,11 +178,11 @@ msgstr ""
 msgid "Reveal"
 msgstr ""
 
-msgid "Cache path"
+msgid "Cache Path"
 msgstr ""
 
-msgid "Clear"
-msgstr "清除"
+msgid "Clear All"
+msgstr ""
 
 msgid ""
 "All cache(s) will be moved to the default path. Are you sure to proceed?"
@@ -197,14 +197,14 @@ msgstr ""
 msgid "Are you sure you want to clear all caches?"
 msgstr ""
 
-msgid "Are you sure you want to delete the selected cache(s)?"
-msgstr ""
-
 msgid "No cache exists."
 msgstr ""
 
 msgid "Total: {}"
 msgstr "總計：{}"
+
+msgid "Are you sure you want to delete the selected cache(s)?"
+msgstr ""
 
 msgid "Engine"
 msgstr ""
@@ -235,6 +235,9 @@ msgstr "自訂翻譯引擎"
 
 msgid "Add"
 msgstr "新增"
+
+msgid "Clear"
+msgstr "清除"
 
 msgid "Restore"
 msgstr "重設"
@@ -383,13 +386,19 @@ msgstr ""
 msgid "Youdao"
 msgstr "有道"
 
-msgid "Start to convert ebook format ..."
-msgstr "開始轉換電子書格式 ..."
+msgid "Start to convert ebook format..."
+msgstr "開始轉換電子書格式..."
 
-msgid "Starting to output subtitles file ..."
+msgid "Starting to output subtitles file..."
 msgstr ""
 
 msgid "The translation of the subtitles file was completed."
+msgstr ""
+
+msgid "Starting to output PGN file..."
+msgstr ""
+
+msgid "The translation of the PGN file was completed."
 msgstr ""
 
 msgid "[{} > {}] Translating \"{}\""
@@ -442,6 +451,9 @@ msgstr "譯文 (快取)：{}"
 
 msgid "Start to translate ebook content"
 msgstr "開始翻譯電子書內容"
+
+msgid "Item count: {}"
+msgstr ""
 
 msgid "There is no content need to translate."
 msgstr "沒有需要翻譯的內容。"
@@ -518,7 +530,7 @@ msgstr ""
 msgid "Custom"
 msgstr "自訂"
 
-msgid "Using Tip"
+msgid "Usage Tip"
 msgstr ""
 
 msgid "Tip:"
@@ -545,7 +557,7 @@ msgstr "嘗試次數"
 msgid "Timeout (seconds)"
 msgstr ""
 
-msgid "Error count to stop translation"
+msgid "Error limit to stop translation"
 msgstr ""
 
 msgid "Tune Gemini"
@@ -581,13 +593,13 @@ msgstr ""
 msgid "Beta"
 msgstr ""
 
-msgid "Left to original"
-msgstr ""
-
 msgid "Right to original"
 msgstr ""
 
-msgid "Add without original"
+msgid "Left to original"
+msgstr ""
+
+msgid "With no original"
 msgstr "僅保留譯文"
 
 msgid "Translation"
@@ -596,13 +608,10 @@ msgstr ""
 msgid "Translation Position"
 msgstr "譯文位置"
 
-msgid "Original Color"
+msgid "Original Text Color"
 msgstr ""
 
-msgid "CSS color value, e.g., #666666, grey, rgb(80, 80, 80)"
-msgstr "CSS 色彩值，如 #666666, gry, rgb(80, 80, 80)"
-
-msgid "Translation Color"
+msgid "Translation Text Color"
 msgstr "譯文色彩"
 
 msgid "Translation Glossary"
@@ -647,10 +656,10 @@ msgstr "依規則運算式模式排除段落。每行一條模式："
 msgid "Ignore Element"
 msgstr ""
 
-msgid "CSS selectors to exclude elements. One rule per line:"
+msgid "e.g."
 msgstr ""
 
-msgid "e.g."
+msgid "CSS selectors to exclude elements. One rule per line:"
 msgstr ""
 
 msgid "Ebook Metadata"
@@ -719,8 +728,3 @@ msgstr ""
 msgid "Choose Translation Mode"
 msgstr ""
 
-#~ msgid "Add after original"
-#~ msgstr "加在原文後"
-
-#~ msgid "Add before original"
-#~ msgstr "加在原文前"

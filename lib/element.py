@@ -3,10 +3,9 @@ import json
 import copy
 
 from lxml import etree
-from lxml.builder import ElementMaker
 from calibre import prepare_string_for_xml as xml_escape
 
-from .utils import ns, css, uid, trim, sorted_mixed_keys
+from .utils import ns, css, uid, trim, sorted_mixed_keys, open_file
 from .config import get_config
 
 
@@ -27,6 +26,7 @@ class Element:
         self.page_id = page_id
 
         self.ignored = False
+        self.placeholder = None
         self.reserve_elements = []
         self.original = []
 
@@ -36,14 +36,11 @@ class Element:
     def set_ignored(self, ignored):
         self.ignored = ignored
 
+    def set_placeholder(self, placeholder):
+        self.placeholder = placeholder
+
     def get_name(self):
         return None
-
-    def get_raw(self):
-        raise NotImplementedError()
-
-    def get_text(self):
-        raise NotImplementedError()
 
     def get_attributes(self):
         return None
@@ -51,13 +48,22 @@ class Element:
     def delete(self):
         pass
 
-    def get_content(self, placeholder):
+    def get_raw(self):
+        raise NotImplementedError()
+
+    def get_text(self):
+        raise NotImplementedError()
+
+    def get_content(self):
         raise NotImplementedError()
 
     def add_translation(
-            self, translation, placeholder, position, translation_lang=None,
+            self, translation, position, translation_lang=None,
             original_color=None, translation_color=None):
         raise NotImplementedError()
+
+    def get_translation(self):
+        pass
 
 
 class SrtElement(Element):
@@ -65,13 +71,13 @@ class SrtElement(Element):
         return self.element[2]
 
     def get_text(self):
-        return self.element[2]
+        return self.get_raw()
 
-    def get_content(self, placeholder):
-        return self.element[2]
+    def get_content(self):
+        return self.get_text()
 
     def add_translation(
-            self, translation, placeholder, position, translation_lang=None,
+            self, translation, position, translation_lang=None,
             original_color=None, translation_color=None):
         if translation is not None:
             if position == 'only':
@@ -82,6 +88,36 @@ class SrtElement(Element):
                 self.element[2] = '%s\n%s' % (translation, self.element[2])
         return self.element
 
+    def get_translation(self):
+        return '\n'.join(self.element)
+
+
+class PgnElement(Element):
+    def get_raw(self):
+        return self.element[0]
+
+    def get_text(self):
+        return self.get_raw().strip('{}')
+
+    def get_content(self):
+        return self.get_text()
+
+    def add_translation(
+            self, translation, position, translation_lang=None,
+            original_color=None, translation_color=None):
+        if translation is not None:
+            if position == 'only':
+                self.element[1] = translation
+            else:
+                content = (self.get_content(), translation)
+                if position not in ('below', 'right'):
+                    content = reversed(content)
+                self.element[1] = ' | '.join(content)
+        return self.element
+
+    def get_translation(self):
+        return '{%s}' % self.element[1]
+
 
 class MetadataElement(Element):
     def get_raw(self):
@@ -90,11 +126,11 @@ class MetadataElement(Element):
     def get_text(self):
         return self.element.content
 
-    def get_content(self, placeholder):
+    def get_content(self):
         return self.element.content
 
     def add_translation(
-            self, translation, placeholder, position, translation_lang=None,
+            self, translation, position, translation_lang=None,
             original_color=None, translation_color=None):
         if translation is not None:
             if position == 'only':
@@ -115,11 +151,11 @@ class TocElement(Element):
     def get_text(self):
         return self.element.title
 
-    def get_content(self, placeholder):
+    def get_content(self):
         return self.element.title
 
     def add_translation(
-            self, translation, placeholder, position, translation_lang=None,
+            self, translation, position, translation_lang=None,
             original_color=None, translation_color=None):
         if translation is not None:
             items = [self.element.title, translation]
@@ -149,7 +185,7 @@ class PageElement(Element):
     def delete(self):
         self.element.getparent().remove(self.element)
 
-    def get_content(self, placeholder):
+    def get_content(self):
         element_copy = self._element_copy()
         for noise in self._get_descendents(
                 element_copy, ('rt', 'rp', 'sup', 'sub')):
@@ -161,7 +197,7 @@ class PageElement(Element):
             element_copy, ('img', 'code', 'br', 'hr', 'sub', 'sup', 'kbd'))
         count = 0
         for reserve in self.reserve_elements:
-            replacement = placeholder[0].format(format(count, '05'))
+            replacement = self.placeholder[0].format(format(count, '05'))
             previous, parent = reserve.getprevious(), reserve.getparent()
             if previous is not None:
                 previous.tail = (previous.tail or '') + replacement
@@ -181,7 +217,7 @@ class PageElement(Element):
         return re.sub(r'((\w)\2{3})\2*', r'\1', translation)
 
     def add_translation(
-            self, translation, placeholder, position, translation_lang=None,
+            self, translation, position, translation_lang=None,
             original_color=None, translation_color=None):
         if translation is None:
             if position in ('left', 'right'):
@@ -196,7 +232,8 @@ class PageElement(Element):
         # Escape the markups (<m id=1 />) to replace escaped markups.
         translation = xml_escape(translation)
         for rid, reserve in enumerate(self.reserve_elements):
-            pattern = placeholder[1].format(r'\s*'.join(format(rid, '05')))
+            pattern = self.placeholder[1].format(
+                r'\s*'.join(format(rid, '05')))
             # Prevent processe any backslash escapes in the replacement.
             translation = re.sub(
                 xml_escape(pattern), lambda _: get_string(reserve),
@@ -403,17 +440,18 @@ class ElementHandler:
     def prepare_original(self, elements):
         count = 0
         for oid, element in enumerate(elements):
+            element.set_placeholder(self.placeholder)
             raw = element.get_raw()
-            content = element.get_content(self.placeholder)
+            content = element.get_content()
             md5 = uid('%s%s' % (oid, content))
             attrs = element.get_attributes()
             if not element.ignored:
                 self.elements[count] = element
                 self.base_originals.append(content)
                 count += 1
-            self.originals.append(
-                (oid, md5, raw, content, element.ignored, attrs,
-                 element.page_id))
+            self.originals.append((
+                oid, md5, raw, content, element.ignored, attrs,
+                element.page_id))
         return self.originals
 
     def add_translations(self, paragraphs):
@@ -427,9 +465,8 @@ class ElementHandler:
             translation = paragraph.translation
             if translation:
                 element.add_translation(
-                    translation, self.placeholder, self.position,
-                    self.translation_lang, self.original_color,
-                    self.translation_color)
+                    translation, self.position, self.translation_lang,
+                    self.original_color, self.translation_color)
                 self.elements.pop(count)
             count += 1
         for eid, element in self.elements.copy().items():
@@ -447,9 +484,10 @@ class ElementHandlerMerge(ElementHandler):
         for element in elements:
             if element.ignored:
                 continue
+            element.set_placeholder(self.placeholder)
             self.elements[count] = element
             code = element.get_raw()
-            content = element.get_content(self.placeholder)
+            content = element.get_content()
             self.base_originals.append(content)
             count += 1
             content += self.separator
@@ -501,28 +539,30 @@ class ElementHandlerMerge(ElementHandler):
         # for original in originals:
         #     if original and original not in self.base_originals:
         #         translations.pop(originals.index(original))
-        return translations
+        return list(zip(originals, translations))
 
     def add_translations(self, paragraphs):
         translations = []
         for paragraph in paragraphs:
             translations.extend(self.align_paragraph(paragraph))
-        total = len(translations)
-        count = 0
+        translations = dict(translations)
         for eid, element in self.elements.copy().items():
-            if element.ignored or eid >= total:
+            if element.ignored:
+                continue
+            element.set_placeholder(self.placeholder)
+            original = element.get_content()
+            translation = translations.get(original)
+            if translation is None:
                 continue
             element.add_translation(
-                translations[count], self.placeholder, self.position,
-                self.translation_lang, self.original_color,
-                self.translation_color)
-            count += 1
+                translation, self.position, self.translation_lang,
+                self.original_color, self.translation_color)
             self.elements.pop(eid)
         self.remove_unused_elements()
 
 
 def get_srt_elements(path):
-    sections = []
+    elements = []
 
     try:
         with open(path, 'r', newline=None) as f:
@@ -535,16 +575,23 @@ def get_srt_elements(path):
         number = lines.pop(0)
         time = lines.pop(0)
         content = '\n'.join(lines)
-        sections.append([number, time, content])
+        elements.append(SrtElement([number, time, content]))
 
-    return [SrtElement(section) for section in sections]
+    return elements
+
+
+def get_pgn_elements(path):
+    pattern = re.compile(r'\{[^}]*[a-zA-z][^}]*\}')
+    originals = pattern.findall(open_file(path))
+    return [PgnElement([original, None]) for original in originals]
 
 
 def get_metadata_elements(metadata):
     elements = []
     names = (
-        'title', 'creator', 'publisher', 'rights', 'subject', 'contributor')
-    pattern = re.compile(r'[a-z]+')
+        'title', 'creator', 'publisher', 'rights', 'subject', 'contributor',
+        'description')
+    pattern = re.compile(r'[a-zA-Z]+')
     for key in metadata.iterkeys():
         if key not in names:
             continue
