@@ -237,29 +237,39 @@ class ConversionWorker:
         if not ebook.is_extra_format() and ebook_metadata:
             with open(output_path, 'r+b') as file:
                 metadata = get_metadata(file, ebook.output_format)
-                if ebook_metadata.get('language'):
+                ebook_title = metadata.title
+                if ebook.custom_title is not None:
+                    ebook_title = ebook.custom_title
+                if ebook_metadata.get('lang_mark'):
+                    ebook_title = '%s [%s]' % (ebook_title, ebook.target_lang)
+                metadata.title = ebook_title
+                if ebook_metadata.get('lang_code'):
                     metadata.language = ebook.lang_code
                 subjects = ebook_metadata.get('subjects')
-                metadata.tags += subjects + [
-                    'Translate by Ebook Translator: '
+                metadata.tags += (subjects or []) + [
+                    'Translated by Ebook Translator: '
                     'https://translator.bookfere.com']
-                # metadata.title = 'Custom Title'
                 # metadata.authors = ['bookfere.com']
                 # metadata.author_sort = 'bookfere.com'
                 # metadata.book_producer = 'Ebook Translator'
                 set_metadata(file, metadata, ebook.output_format)
 
         if self.config.get('to_library'):
-            with open(output_path, 'rb') as file:
-                metadata = get_metadata(file, ebook.output_format)
-                if ebook.is_extra_format():
-                    metadata.title = ebook.title
+            # with open(output_path, 'rb') as file:
+            #     metadata = get_metadata(file, ebook.output_format)
+            #     if ebook.is_extra_format():
+            #         metadata.title = ebook.title
             book_id = self.db.create_book_entry(metadata)
             self.api.add_format(
                 book_id, ebook.output_format, output_path, run_hooks=False)
             self.gui.library_view.model().books_added(1)
             output_path = self.api.format_abspath(book_id, ebook.output_format)
             # os.remove(temp_file)
+        else:
+            dirname = os.path.dirname(output_path)
+            filename = '%s.%s' % (metadata.title, ebook.output_format)
+            new_output_path = os.path.join(dirname, filename)
+            os.rename(output_path, new_output_path)
 
         self.gui.status_bar.show_message(
             job.description + ' ' + _('completed'), 5000)

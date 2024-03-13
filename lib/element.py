@@ -29,6 +29,7 @@ class Element:
         self.placeholder = None
         self.reserve_elements = []
         self.original = []
+        self.column_gap = None
 
     def _element_copy(self):
         return copy.deepcopy(self.element)
@@ -38,6 +39,9 @@ class Element:
 
     def set_placeholder(self, placeholder):
         self.placeholder = placeholder
+
+    def set_column_gap(self, values):
+        self.column_gap = values
 
     def get_name(self):
         return None
@@ -281,11 +285,22 @@ class PageElement(Element):
         table = etree.XML(
             '<table xmlns="{}" width="100%"></table>'.format(ns['x']))
         tr = etree.SubElement(table, 'tr')
-        td_left = etree.SubElement(
-            tr, 'td', attrib={'width': '45%', 'valign': 'top'})
-        etree.SubElement(tr, 'td', attrib={'width': '10%'})
-        td_right = etree.SubElement(
-            tr, 'td', attrib={'width': '45%', 'valign': 'top'})
+        td_left = etree.SubElement(tr, 'td', attrib={'valign': 'top'})
+        td_middle = etree.SubElement(tr, 'td')
+        td_right = etree.SubElement(tr, 'td', attrib={'valign': 'top'})
+        if self.column_gap is None:
+            td_left.set('width', '45%')
+            td_middle.set('width', '10%')
+            td_right.set('width', '45%')
+        else:
+            unit, value = self.column_gap
+            if unit == 'percentage':
+                width = '%s%%' % round((100 - value) / 2)
+                td_left.set('width', width)
+                td_middle.set('width', '%s%%' % value)
+                td_right.set('width', width)
+            else:
+                td_middle.text = '\xa0' * value
         if position == 'left':
             if translation is not None:
                 td_left.append(translation)
@@ -414,6 +429,7 @@ class ElementHandler:
         self.translation_lang = None
         self.original_color = None
         self.translation_color = None
+        self.column_gap = None
 
         self.elements = {}
         self.originals = []
@@ -432,6 +448,9 @@ class ElementHandler:
     def set_translation_color(self, color):
         self.translation_color = color
 
+    def set_column_gap(self, values):
+        self.column_gap = values
+
     def remove_unused_elements(self):
         if self.position == 'only':
             for element in self.elements.values():
@@ -441,6 +460,8 @@ class ElementHandler:
         count = 0
         for oid, element in enumerate(elements):
             element.set_placeholder(self.placeholder)
+            if self.column_gap is not None:
+                element.set_column_gap(self.column_gap)
             raw = element.get_raw()
             content = element.get_content()
             md5 = uid('%s%s' % (oid, content))
@@ -485,6 +506,8 @@ class ElementHandlerMerge(ElementHandler):
             if element.ignored:
                 continue
             element.set_placeholder(self.placeholder)
+            if self.column_gap is not None:
+                element.set_column_gap(self.column_gap)
             self.elements[count] = element
             code = element.get_raw()
             content = element.get_content()
@@ -549,7 +572,6 @@ class ElementHandlerMerge(ElementHandler):
         for eid, element in self.elements.copy().items():
             if element.ignored:
                 continue
-            element.set_placeholder(self.placeholder)
             original = element.get_content()
             translation = translations.get(original)
             if translation is None:
@@ -632,6 +654,10 @@ def get_element_handler(placeholder, separator):
     if config.get('merge_enabled'):
         handler = ElementHandlerMerge(
             placeholder, separator, position, config.get('merge_length'))
+    column_gap = config.get('column_gap')
+    gap_type = column_gap.get('_type')
+    if gap_type is not None and gap_type in column_gap.keys():
+        handler.set_column_gap((gap_type, column_gap.get(gap_type)))
     handler.set_original_color(config.get('original_color'))
     handler.set_translation_color(config.get('translation_color'))
     return handler
