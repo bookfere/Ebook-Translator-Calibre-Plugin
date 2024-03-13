@@ -78,6 +78,7 @@ class TranslationSetting(QDialog):
         layout.addWidget(self.tabs)
         layout.addWidget(layout_info())
 
+    @staticmethod
     def layout_scroll_area(func):
         def scroll_widget(self):
             widget = QWidget()
@@ -381,16 +382,22 @@ class TranslationSetting(QDialog):
         request_timeout = QDoubleSpinBox()
         request_timeout.setRange(0, 9999)
         request_timeout.setDecimals(1)
-        max_error_count = QSpinBox()
-        max_error_count.setRange(0, 9999)
         request_layout = QFormLayout(request_group)
         request_layout.addRow(_('Concurrency limit'), concurrency_limit)
         request_layout.addRow(_('Interval (seconds)'), request_interval)
         request_layout.addRow(_('Attempt times'), request_attempt)
         request_layout.addRow(_('Timeout (seconds)'), request_timeout)
-        request_layout.addRow(
-            _('Error limit to stop translation'), max_error_count)
         layout.addWidget(request_group, 1)
+
+        # Abort Translation
+        abort_translation_group = QGroupBox(_('Abort Translation'))
+        abort_translation_layout = QHBoxLayout(abort_translation_group)
+        max_error_count = QSpinBox()
+        max_error_count.setRange(1, 9999)
+        abort_translation_layout.addWidget(max_error_count)
+        abort_translation_layout.addWidget(QLabel(
+            _('The number of consecutive errors to abort translation.')), 1)
+        layout.addWidget(abort_translation_group, 1)
 
         self.set_form_layout_policy(request_layout)
         self.disable_wheel_event(concurrency_limit)
@@ -730,13 +737,61 @@ class TranslationSetting(QDialog):
             'border:1px solid rgba(127,127,127,.3);'
             'background-color:rgba(127,127,127,.1);padding:10px;'
             'color:black;font-size:28px;')
-
         position_samples_layout.addWidget(original_sample, 1)
         position_samples_layout.addWidget(translation_sample, 1)
 
+        position_setup = QWidget()
+        position_setup.setVisible(False)
+        position_setup_layout = QHBoxLayout(position_setup)
+        position_setup_layout.setContentsMargins(0, 0, 0, 0)
+        column_gap_type = QComboBox()
+        column_gap_value = QSpinBox()
+        column_gap_value.setRange(1, 100)
+        position_setup_layout.addWidget(QLabel(_('Column Gap')))
+        position_setup_layout.addWidget(column_gap_type)
+        position_setup_layout.addWidget(column_gap_value)
+        percentage_unit = QLabel('%')
+        position_setup_layout.addWidget(percentage_unit)
+        position_setup_layout.addStretch(1)
+
+        self.disable_wheel_event(column_gap_type)
+        self.disable_wheel_event(column_gap_value)
+
+        column_gap_type.addItem('Percentage', 'percentage')
+        column_gap_type.addItem('Space count', 'space_count')
+
+        column_gap_config = self.config.get('column_gap').copy()
+
+        current_type = column_gap_config.get('_type')
+        current_index = column_gap_type.findData(current_type)
+        percentage_unit.setVisible(current_type == 'percentage')
+        column_gap_type.setCurrentIndex(current_index)
+        column_gap_value.setValue(column_gap_config.get(current_type))
+
+        def change_column_gap_value(value):
+            gap_type = column_gap_type.currentData()
+            column_gap_config.update({gap_type: value})
+            self.config.update(column_gap=column_gap_config)
+        column_gap_value.valueChanged.connect(change_column_gap_value)
+
+        def change_column_gap_type(index):
+            gap_type = column_gap_type.itemData(index)
+            percentage_unit.setVisible(gap_type == 'percentage')
+            column_gap_value.setValue(column_gap_config.get(gap_type))
+            column_gap_config.update(_type=gap_type)
+            self.config.update(column_gap=column_gap_config)
+        column_gap_type.currentIndexChanged.connect(change_column_gap_type)
+
+        position_preview = QWidget()
+        position_preview_layout = QVBoxLayout(position_preview)
+        position_preview_layout.setSpacing(10)
+        position_preview_layout.setContentsMargins(0, 0, 0, 0)
+        position_preview_layout.addWidget(position_samples, 1)
+        position_preview_layout.addWidget(position_setup)
+
         position_group = QGroupBox(_('Translation Position'))
         position_layout = QHBoxLayout(position_group)
-        position_layout.addWidget(position_samples, 1)
+        position_layout.addWidget(position_preview, 1)
         position_layout.addSpacing(10)
         position_layout.addWidget(position_radios)
 
@@ -775,6 +830,7 @@ class TranslationSetting(QDialog):
             original_sample.setVisible(btn_id != 4)
             position_samples.layout().setDirection(
                 directions[btn_id] if btn_id != 4 else directions[0])
+            position_setup.setVisible(btn_id in [2, 3])
             self.config.update(translation_position=position_map.get(btn_id))
         choose_option(position_btn_group.checkedId())
         position_btn_click.connect(choose_option)
@@ -789,7 +845,8 @@ class TranslationSetting(QDialog):
         original_color_layout = QHBoxLayout(original_color_group)
         self.original_color = QLineEdit()
         self.original_color.setText(self.config.get('original_color'))
-        self.original_color.setPlaceholderText('#0055ff')
+        self.original_color.setPlaceholderText(
+            '%s %s' % (_('e.g.,'), '#0055ff'))
         original_color_show = QLabel()
         original_color_show.setObjectName('original_color_show')
         original_color_show.setFixedWidth(25)
@@ -806,7 +863,8 @@ class TranslationSetting(QDialog):
         translation_color_group = QGroupBox(_('Translation Text Color'))
         translation_color_layout = QHBoxLayout(translation_color_group)
         self.translation_color = QLineEdit()
-        self.translation_color.setPlaceholderText('#0055ff')
+        self.translation_color.setPlaceholderText(
+            '%s %s' % (_('e.g.,'), '#0055ff'))
         self.translation_color.setText(self.config.get('translation_color'))
         translation_color_show = QLabel()
         translation_color_show.setObjectName('translation_color')
@@ -965,7 +1023,7 @@ class TranslationSetting(QDialog):
         element_layout = QVBoxLayout(element_group)
         self.element_rules = QPlainTextEdit()
         self.element_rules.setPlaceholderText(
-            '%s %s' % (_('e.g.'), 'table, table#report, table.list'))
+            '%s %s' % (_('e.g.,'), 'table, table#report, table.list'))
         self.element_rules.setMinimumHeight(100)
         self.element_rules.insertPlainText(
             '\n'.join(self.config.get('element_rules')))
@@ -979,16 +1037,24 @@ class TranslationSetting(QDialog):
         metadata_group = QGroupBox(_('Ebook Metadata'))
         metadata_layout = QFormLayout(metadata_group)
         self.set_form_layout_policy(metadata_layout)
-        self.metadata_lang = QCheckBox(_('Set "Target Language" to metadata'))
+        self.metadata_lang_mark = QCheckBox(
+            _('Append target language to title metadata'))
+        self.metadata_lang_code = QCheckBox(
+            _('Set target language code to language metadata'))
         self.metadata_subject = QPlainTextEdit()
         self.metadata_subject.setPlaceholderText(
             _('Subjects of ebook (one subject per line)'))
-        metadata_layout.addRow(_('Language'), self.metadata_lang)
+        metadata_layout.addRow(_('Language Mark'), self.metadata_lang_mark)
+        metadata_layout.addRow(_('Language Code'), self.metadata_lang_code)
         metadata_layout.addRow(_('Subject'), self.metadata_subject)
         layout.addWidget(metadata_group)
 
-        self.metadata_lang.setChecked(
-            self.config.get('ebook_metadata.language', False))
+        self.metadata_lang_mark.setChecked(
+            self.config.get('ebook_metadata.lang_mark', False))
+        self.metadata_lang_code.setChecked(
+            self.config.get(
+                'ebook_metadata.lang_code',
+                self.config.get('ebook_metadata.language', False)))  # old key
         self.metadata_subject.setPlainText(
             '\n'.join(self.config.get('ebook_metadata.subjects', [])))
 
@@ -1170,19 +1236,14 @@ class TranslationSetting(QDialog):
 
         # Ebook metadata
         ebook_metadata = self.config.get('ebook_metadata').copy()
-        self.config.delete('ebook_metadata')
-        if self.metadata_lang.isChecked():
-            ebook_metadata.update(language=True)
-        elif 'language' in ebook_metadata:
-            del ebook_metadata['language']
+        ebook_metadata.clear()
+        ebook_metadata.update(lang_mark=self.metadata_lang_mark.isChecked())
+        ebook_metadata.update(lang_code=self.metadata_lang_code.isChecked())
         subject_content = self.metadata_subject.toPlainText().strip()
         if subject_content:
             subjects = [s.strip() for s in subject_content.split('\n')]
             ebook_metadata.update(subjects=subjects)
-        elif 'subjects' in ebook_metadata:
-            del ebook_metadata['subjects']
-        if ebook_metadata:
-            self.config.update(ebook_metadata=ebook_metadata)
+        self.config.update(ebook_metadata=ebook_metadata)
         return True
 
     def is_valid_regex(self, rule):

@@ -17,10 +17,12 @@ class Ebooks:
             self.target_lang = None
             self.lang_code = None
 
-            self.set_title(title)
+            self.title = title
+            self.custom_title = None
 
-        def set_title(self, title):
-            self.title = sanitize_file_name(title)
+        def set_custom_title(self, title):
+            self.custom_title = None if title is None else \
+                sanitize_file_name(title)
             # self.title = re.sub(r'^\.+|[\/\\\\<>:"|?*\n\t]', '', title)
 
         def set_input_format(self, format):

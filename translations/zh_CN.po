@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-03-12 21:56+0800\n"
+"POT-Creation-Date: 2024-03-13 23:34+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -85,12 +85,6 @@ msgstr "停止"
 msgid "Stopping..."
 msgstr "停止中..."
 
-msgid "Translation Engine"
-msgstr "翻译引擎"
-
-msgid "Source Language"
-msgstr "来源语言"
-
 msgid "Cache Status"
 msgstr "缓存状态"
 
@@ -100,23 +94,23 @@ msgstr "已禁用"
 msgid "Enabled"
 msgstr "已启用"
 
+msgid "Translation Engine"
+msgstr "翻译引擎"
+
+msgid "Source Language"
+msgstr "来源语言"
+
+msgid "Custom Ebook Title"
+msgstr "自定义书名"
+
+msgid "By default, title metadata will be translated."
+msgstr "默认情况下书名元数据会被翻译"
+
 msgid "Output Ebook"
 msgstr "输出电子书"
 
 msgid "Output"
 msgstr "输出"
-
-msgid "Filename"
-msgstr "文件名"
-
-msgid "Format"
-msgstr "格式"
-
-msgid ""
-"The ebook's filename is automatically managed by Calibre according to "
-"metadata since the output path is set to Calibre Library."
-msgstr ""
-"由于输出路径是 Calibre 书库，因此电子书文件名由 Calibre 根据原数据自动处理。"
 
 msgid "Translated"
 msgstr "已翻译"
@@ -214,6 +208,9 @@ msgstr "语言"
 
 msgid "Merge Length"
 msgstr "合并长度"
+
+msgid "Filename"
+msgstr "文件名"
 
 msgid "Size (MB)"
 msgstr "大小（MB）"
@@ -562,8 +559,11 @@ msgstr "重试次数"
 msgid "Timeout (seconds)"
 msgstr "超时（秒）"
 
-msgid "Error limit to stop translation"
-msgstr "超过错误限制停止翻译"
+msgid "Abort Translation"
+msgstr "中止翻译"
+
+msgid "The number of consecutive errors to abort translation."
+msgstr "超过连续错误次数中止翻译。"
 
 msgid "Tune Gemini"
 msgstr "调节 Gemini"
@@ -610,11 +610,17 @@ msgstr "仅保留译文"
 msgid "Translation"
 msgstr "译文"
 
+msgid "Column Gap"
+msgstr "栏间距"
+
 msgid "Translation Position"
 msgstr "译文位置"
 
 msgid "Original Text Color"
 msgstr "原文颜色"
+
+msgid "e.g.,"
+msgstr "如"
 
 msgid "Translation Text Color"
 msgstr "译文颜色"
@@ -661,20 +667,26 @@ msgstr "排除匹配正则表达式规则的段落。一行一条规则："
 msgid "Ignore Element"
 msgstr "忽略元素"
 
-msgid "e.g."
-msgstr "如"
-
 msgid "CSS selectors to exclude elements. One rule per line:"
 msgstr "用来排除元素的 CSS 选择器。一行一条规则："
 
 msgid "Ebook Metadata"
 msgstr "电子书元数据"
 
-msgid "Set \"Target Language\" to metadata"
-msgstr "将目标语言设为元数据中的语言"
+msgid "Append target language to title metadata"
+msgstr "将目标语言附加到书名元数据中"
+
+msgid "Set target language code to language metadata"
+msgstr "将语言元数据设置为目标语言代码"
 
 msgid "Subjects of ebook (one subject per line)"
 msgstr "电子书主题（每行一个主题）"
+
+msgid "Language Mark"
+msgstr "语言标记"
+
+msgid "Language Code"
+msgstr "语言代码"
 
 msgid "Subject"
 msgstr "主题"
@@ -732,3 +744,12 @@ msgstr "缓存管理器"
 
 msgid "Choose Translation Mode"
 msgstr "选择翻译模式"
+
+#~ msgid "Format"
+#~ msgstr "格式"
+
+#~ msgid "Error limit to stop translation"
+#~ msgstr "超过错误限制停止翻译"
+
+#~ msgid "Set \"Target Language\" to metadata"
+#~ msgstr "将目标语言设为元数据中的语言"

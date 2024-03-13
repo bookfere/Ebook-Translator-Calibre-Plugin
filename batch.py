@@ -11,11 +11,11 @@ from .components import (
 try:
     from qt.core import (
         QDialog, QWidget, QPushButton, QHeaderView, QVBoxLayout, QTableWidget,
-        QTableWidgetItem)
+        QTableWidgetItem, Qt)
 except ImportError:
     from PyQt5.Qt import (
         QDialog, QWidget, QPushButton, QHeaderView, QVBoxLayout, QTableWidget,
-        QTableWidgetItem)
+        QTableWidgetItem, Qt)
 
 load_translations()
 
@@ -63,6 +63,7 @@ class BatchTranslation(QDialog):
 
         for row, ebook in enumerate(self.ebooks):
             ebook_title = QTableWidgetItem(ebook.title)
+            ebook_title.setFlags(Qt.ItemIsEnabled)
             ebook_title.setSizeHint(table.sizeHint())
             table.setItem(row, 0, ebook_title)
 

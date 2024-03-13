@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-03-12 21:56+0800\n"
+"POT-Creation-Date: 2024-03-13 23:34+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: none\n"
@@ -87,12 +87,6 @@ msgstr "Parar"
 msgid "Stopping..."
 msgstr "Parando..."
 
-msgid "Translation Engine"
-msgstr "Mecanismo de Tradução"
-
-msgid "Source Language"
-msgstr "Idioma de Origem"
-
 msgid "Cache Status"
 msgstr "Status do Cache"
 
@@ -102,22 +96,23 @@ msgstr "Desabilitado"
 msgid "Enabled"
 msgstr "Habilitado"
 
+msgid "Translation Engine"
+msgstr "Mecanismo de Tradução"
+
+msgid "Source Language"
+msgstr "Idioma de Origem"
+
+msgid "Custom Ebook Title"
+msgstr ""
+
+msgid "By default, title metadata will be translated."
+msgstr ""
+
 msgid "Output Ebook"
 msgstr "Ebook de Saída"
 
 msgid "Output"
 msgstr "Saída"
-
-msgid "Filename"
-msgstr "Nome do arquivo"
-
-msgid "Format"
-msgstr ""
-
-msgid ""
-"The ebook's filename is automatically managed by Calibre according to "
-"metadata since the output path is set to Calibre Library."
-msgstr ""
 
 msgid "Translated"
 msgstr "Traduzido"
@@ -217,6 +212,9 @@ msgstr "Idioma"
 
 msgid "Merge Length"
 msgstr "Comprimento da Mesclagem"
+
+msgid "Filename"
+msgstr "Nome do arquivo"
 
 msgid "Size (MB)"
 msgstr "Tamanho (MB)"
@@ -572,8 +570,11 @@ msgstr "Limite de tentativas"
 msgid "Timeout (seconds)"
 msgstr "Tempo esgotado (segundos)"
 
-msgid "Error limit to stop translation"
-msgstr "Contagem de erros para interromper a tradução"
+msgid "Abort Translation"
+msgstr ""
+
+msgid "The number of consecutive errors to abort translation."
+msgstr ""
 
 msgid "Tune Gemini"
 msgstr ""
@@ -620,11 +621,17 @@ msgstr "Adicionar sem o original"
 msgid "Translation"
 msgstr ""
 
+msgid "Column Gap"
+msgstr ""
+
 msgid "Translation Position"
 msgstr "Posição da Tradução"
 
 msgid "Original Text Color"
 msgstr ""
+
+msgid "e.g.,"
+msgstr "por exemplo,"
 
 msgid "Translation Text Color"
 msgstr "Cor da tradução"
@@ -674,20 +681,26 @@ msgstr ""
 msgid "Ignore Element"
 msgstr "Ignorar Elemento"
 
-msgid "e.g."
-msgstr "por exemplo"
-
 msgid "CSS selectors to exclude elements. One rule per line:"
 msgstr "Seletores CSS para excluir elementos. Uma regra por linha:"
 
 msgid "Ebook Metadata"
 msgstr "Metadados dos ebooks"
 
-msgid "Set \"Target Language\" to metadata"
-msgstr "Defina \"Idioma de destino\" como metadados"
+msgid "Append target language to title metadata"
+msgstr ""
+
+msgid "Set target language code to language metadata"
+msgstr "Defina idioma de destino como metadados"
 
 msgid "Subjects of ebook (one subject per line)"
 msgstr "Assuntos do e-book (um assunto por linha)"
+
+msgid "Language Mark"
+msgstr ""
+
+msgid "Language Code"
+msgstr ""
 
 msgid "Subject"
 msgstr "Assuntos"

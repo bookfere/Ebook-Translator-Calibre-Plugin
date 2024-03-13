@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-03-12 21:56+0800\n"
+"POT-Creation-Date: 2024-03-13 23:34+0800\n"
 "PO-Revision-Date: 2023-04-25 15:36+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -86,12 +86,6 @@ msgstr ""
 msgid "Stopping..."
 msgstr ""
 
-msgid "Translation Engine"
-msgstr "翻譯引擎"
-
-msgid "Source Language"
-msgstr "來源語言"
-
 msgid "Cache Status"
 msgstr ""
 
@@ -101,21 +95,22 @@ msgstr ""
 msgid "Enabled"
 msgstr ""
 
+msgid "Translation Engine"
+msgstr "翻譯引擎"
+
+msgid "Source Language"
+msgstr "來源語言"
+
+msgid "Custom Ebook Title"
+msgstr ""
+
+msgid "By default, title metadata will be translated."
+msgstr ""
+
 msgid "Output Ebook"
 msgstr ""
 
 msgid "Output"
-msgstr ""
-
-msgid "Filename"
-msgstr ""
-
-msgid "Format"
-msgstr ""
-
-msgid ""
-"The ebook's filename is automatically managed by Calibre according to "
-"metadata since the output path is set to Calibre Library."
 msgstr ""
 
 msgid "Translated"
@@ -213,6 +208,9 @@ msgid "Language"
 msgstr ""
 
 msgid "Merge Length"
+msgstr ""
+
+msgid "Filename"
 msgstr ""
 
 msgid "Size (MB)"
@@ -557,7 +555,10 @@ msgstr "嘗試次數"
 msgid "Timeout (seconds)"
 msgstr ""
 
-msgid "Error limit to stop translation"
+msgid "Abort Translation"
+msgstr ""
+
+msgid "The number of consecutive errors to abort translation."
 msgstr ""
 
 msgid "Tune Gemini"
@@ -605,10 +606,16 @@ msgstr "僅保留譯文"
 msgid "Translation"
 msgstr ""
 
+msgid "Column Gap"
+msgstr ""
+
 msgid "Translation Position"
 msgstr "譯文位置"
 
 msgid "Original Text Color"
+msgstr ""
+
+msgid "e.g.,"
 msgstr ""
 
 msgid "Translation Text Color"
@@ -656,19 +663,25 @@ msgstr "依規則運算式模式排除段落。每行一條模式："
 msgid "Ignore Element"
 msgstr ""
 
-msgid "e.g."
-msgstr ""
-
 msgid "CSS selectors to exclude elements. One rule per line:"
 msgstr ""
 
 msgid "Ebook Metadata"
 msgstr ""
 
-msgid "Set \"Target Language\" to metadata"
+msgid "Append target language to title metadata"
+msgstr ""
+
+msgid "Set target language code to language metadata"
 msgstr ""
 
 msgid "Subjects of ebook (one subject per line)"
+msgstr ""
+
+msgid "Language Mark"
+msgstr ""
+
+msgid "Language Code"
 msgstr ""
 
 msgid "Subject"
@@ -727,4 +740,3 @@ msgstr ""
 
 msgid "Choose Translation Mode"
 msgstr ""
-

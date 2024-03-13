@@ -21,13 +21,13 @@ try:
         Qt, QObject, QDialog, QGroupBox, QWidget, QVBoxLayout, QHBoxLayout,
         QPlainTextEdit, QPushButton, QSplitter, QLabel, QThread, QLineEdit,
         QGridLayout, QProgressBar, pyqtSignal, pyqtSlot, QPixmap, QEvent,
-        QStackedWidget, QSpacerItem, QTextCursor, QTabWidget)
+        QStackedWidget, QSpacerItem, QTextCursor, QTabWidget, QCheckBox)
 except ImportError:
     from PyQt5.Qt import (
         Qt, QObject, QDialog, QGroupBox, QWidget, QVBoxLayout, QHBoxLayout,
         QPlainTextEdit, QPushButton, QSplitter, QLabel, QThread, QLineEdit,
         QGridLayout, QProgressBar, pyqtSignal, pyqtSlot, QPixmap, QEvent,
-        QStackedWidget, QSpacerItem, QTextCursor, QTabWidget)
+        QStackedWidget, QSpacerItem, QTextCursor, QTabWidget, QCheckBox)
 
 load_translations()
 
@@ -236,6 +236,7 @@ class CreateTranslationProject(QDialog):
 
 class AdvancedTranslation(QDialog):
     paragraph_sig = pyqtSignal(Paragraph)
+    ebook_title = pyqtSignal()
     progress_bar = pyqtSignal()
 
     preparation_thread = QThread()
@@ -526,24 +527,6 @@ class AdvancedTranslation(QDialog):
         layout = QHBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
 
-        engine_group = QGroupBox(_('Translation Engine'))
-        engine_layout = QVBoxLayout(engine_group)
-        engine_list = EngineList(self.current_engine.name)
-        engine_list.setFixedWidth(150)
-        engine_layout.addWidget(engine_list)
-
-        source_group = QGroupBox(_('Source Language'))
-        source_layout = QVBoxLayout(source_group)
-        source_lang = SourceLang()
-        source_lang.setFixedWidth(150)
-        source_layout.addWidget(source_lang)
-
-        target_group = QGroupBox(_('Target Language'))
-        target_layout = QVBoxLayout(target_group)
-        target_lang = TargetLang()
-        target_lang.setFixedWidth(150)
-        target_layout.addWidget(target_lang)
-
         cache_group = QGroupBox(_('Cache Status'))
         cache_layout = QVBoxLayout(cache_group)
         cache_status = QLabel(
@@ -554,32 +537,71 @@ class AdvancedTranslation(QDialog):
             % ('green' if self.cache.is_persistence() else 'grey'))
         cache_layout.addWidget(cache_status)
 
+        engine_group = QGroupBox(_('Translation Engine'))
+        engine_layout = QVBoxLayout(engine_group)
+        engine_list = EngineList(self.current_engine.name)
+        engine_list.setMaximumWidth(150)
+        engine_layout.addWidget(engine_list)
+
+        source_group = QGroupBox(_('Source Language'))
+        source_layout = QVBoxLayout(source_group)
+        source_lang = SourceLang()
+        source_lang.setMaximumWidth(150)
+        source_layout.addWidget(source_lang)
+
+        target_group = QGroupBox(_('Target Language'))
+        target_layout = QVBoxLayout(target_group)
+        target_lang = TargetLang()
+        target_lang.setMaximumWidth(150)
+        target_layout.addWidget(target_lang)
+
+        title_group = QGroupBox(_('Custom Ebook Title'))
+        title_layout = QHBoxLayout(title_group)
+        custom_title = QCheckBox()
+        ebook_title = QLineEdit()
+        ebook_title.setText(self.ebook.title)
+        ebook_title.setToolTip(
+            _('By default, title metadata will be translated.'))
+        ebook_title.setDisabled(True)
+        # ebook_title.setCursorPosition(0)
+        title_layout.addWidget(custom_title)
+        title_layout.addWidget(ebook_title)
+
+        def enable_custom_title(checked):
+            ebook_title.setDisabled(not checked)
+            self.ebook.set_custom_title(
+                ebook_title.text() if checked else None)
+            if checked:
+                ebook_title.setFocus(Qt.MouseFocusReason)
+        custom_title.stateChanged.connect(enable_custom_title)
+
+        def change_ebook_title():
+            if ebook_title.text() == '':
+                ebook_title.undo()
+            self.ebook.set_custom_title(ebook_title.text())
+        ebook_title.editingFinished.connect(change_ebook_title)
+
+        # if self.config.get('to_library'):
+        #     ebook_title.setDisabled(True)
+        #     ebook_title.setToolTip(_(
+        #         "The ebook's filename is automatically managed by Calibre "
+        #         'according to metadata since the output path is set to '
+        #         'Calibre Library.'))
+        # ebook_title.textChanged.connect(self.ebook.set_custom_title)
+
         save_group = QGroupBox(_('Output Ebook'))
         save_layout = QHBoxLayout(save_group)
         save_ebook = QPushButton(_('Output'))
-        ebook_title = QLineEdit()
-        ebook_title.setText(self.ebook.title)
-        ebook_title.setCursorPosition(0)
         output_format = OutputFormat()
-        output_format.setFixedWidth(150)
-        save_layout.addWidget(QLabel(_('Filename')))
-        save_layout.addWidget(ebook_title, 1)
-        save_layout.addWidget(QLabel(_('Format')))
+        # save_layout.addWidget(QLabel(_('Format')))
         save_layout.addWidget(output_format)
         save_layout.addWidget(save_ebook)
-
-        if self.config.get('to_library'):
-            ebook_title.setDisabled(True)
-            ebook_title.setToolTip(_(
-                "The ebook's filename is automatically managed by Calibre "
-                'according to metadata since the output path is set to '
-                'Calibre Library.'))
-        ebook_title.textChanged.connect(self.ebook.set_title)
 
         layout.addWidget(cache_group)
         layout.addWidget(engine_group)
         layout.addWidget(source_group)
         layout.addWidget(target_group)
+        layout.addWidget(title_group, 1)
         layout.addWidget(save_group)
 
         source_lang.currentTextChanged.connect(
