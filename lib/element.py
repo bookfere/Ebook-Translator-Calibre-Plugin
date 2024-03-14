@@ -90,7 +90,6 @@ class SrtElement(Element):
                 self.element[2] += '\n%s' % translation
             else:
                 self.element[2] = '%s\n%s' % (translation, self.element[2])
-        return self.element
 
     def get_translation(self):
         return '\n'.join(self.element)
@@ -117,9 +116,10 @@ class PgnElement(Element):
                 if position not in ('below', 'right'):
                     content = reversed(content)
                 self.element[1] = ' | '.join(content)
-        return self.element
 
     def get_translation(self):
+        if self.element[1] is None:
+            return self.element[0]
         return '{%s}' % self.element[1]
 
 
@@ -145,7 +145,6 @@ class MetadataElement(Element):
             else:
                 self.element.content = '%s %s' %(
                     self.element.content, translation)
-        return self.element
 
 
 class TocElement(Element):
@@ -165,7 +164,6 @@ class TocElement(Element):
             items = [self.element.title, translation]
             self.element.title = items[-1] if position == 'only' else ' '.join(
                 reversed(items) if position in ('above', 'left') else items)
-        return self.element
 
 
 class PageElement(Element):
@@ -223,16 +221,16 @@ class PageElement(Element):
     def add_translation(
             self, translation, position, translation_lang=None,
             original_color=None, translation_color=None):
+        if original_color is not None:
+            self.element.set('style', 'color:%s' % original_color)
         if translation is None:
             if position in ('left', 'right'):
-                if original_color is not None:
-                    self.element_color.set(
-                        'style', 'color:%s' % original_color)
                 self.element.addnext(
                     self._create_table(position, self._element_copy()))
-            if position in ('only', 'left', 'right'):
+            if position in ('left', 'right'):
                 self.delete()
-            return self.element
+            # return self.element
+            return
         # Escape the markups (<m id=1 />) to replace escaped markups.
         translation = xml_escape(translation)
         for rid, reserve in enumerate(self.reserve_elements):
@@ -259,8 +257,6 @@ class PageElement(Element):
             new_element.set(name, value)
         if translation_lang is not None:
             new_element.set('lang', translation_lang)
-        if original_color is not None:
-            self.element.set('style', 'color:%s' % original_color)
         if translation_color is not None:
             new_element.set('style', 'color:%s' % translation_color)
 
@@ -268,8 +264,6 @@ class PageElement(Element):
 
         if position in ('left', 'right'):
             element_copy = self._element_copy()
-            if original_color is not None:
-                element_copy.set('style', 'color:%s' % original_color)
             self.element.addnext(
                 self._create_table(position, element_copy, new_element))
         elif position == 'above':
@@ -278,7 +272,6 @@ class PageElement(Element):
             self.element.addnext(new_element)
         if position in ['left', 'right', 'only']:
             self.delete()
-        return new_element
 
     def _create_table(self, position, original, translation=None):
         # table = self.element.makeelement('table', attrib={'width': '100%'})
@@ -300,7 +293,9 @@ class PageElement(Element):
                 td_middle.set('width', '%s%%' % value)
                 td_right.set('width', width)
             else:
+                td_left.set('width', '50%')
                 td_middle.text = '\xa0' * value
+                td_right.set('width', '50%')
         if position == 'left':
             if translation is not None:
                 td_left.append(translation)
@@ -378,8 +373,8 @@ class Extraction:
     def extract_elements(self, page_id, root, elements=[]):
         priority_elements = ['p', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']
         for element in root.findall('./*'):
-            if self.need_ignore(element):
-                continue
+            # if self.need_ignore(element):
+            #     continue
             element_has_content = False
             if element.text is not None and trim(element.text) != '':
                 element_has_content = True
@@ -393,12 +388,15 @@ class Extraction:
                             element_has_content = True
                             break
             if element_has_content:
-                elements.append(PageElement(element, page_id))
+                page_element = PageElement(element, page_id)
+                page_element.set_ignored(self.need_ignore(element))
+                elements.append(page_element)
             else:
                 self.extract_elements(page_id, element, elements)
         # Return root if all children have no content
-        root = PageElement(root, page_id)
-        return elements if elements else [root]
+        page_element = PageElement(root, page_id)
+        page_element.set_ignored(self.need_ignore(root))
+        return elements if elements else [page_element]
 
     def filter_content(self, element):
         # Ignore the element contains empty content
@@ -449,12 +447,8 @@ class ElementHandler:
         self.translation_color = color
 
     def set_column_gap(self, values):
-        self.column_gap = values
-
-    def remove_unused_elements(self):
-        if self.position == 'only':
-            for element in self.elements.values():
-                element.delete()
+        if isinstance(values, tuple) and len(values) == 2:
+            self.column_gap = values
 
     def prepare_original(self, elements):
         count = 0
@@ -493,7 +487,9 @@ class ElementHandler:
         for eid, element in self.elements.copy().items():
             if element.ignored:
                 self.elements.pop(eid)
-        self.remove_unused_elements()
+        for element in self.elements.values():
+            element.add_translation(
+                None, self.position, original_color=self.original_color)
 
 
 class ElementHandlerMerge(ElementHandler):
@@ -501,18 +497,16 @@ class ElementHandlerMerge(ElementHandler):
         raw = ''
         txt = ''
         oid = 0
-        count = 0
-        for element in elements:
+        for eid, element in enumerate(elements):
+            self.elements[eid] = element
             if element.ignored:
                 continue
             element.set_placeholder(self.placeholder)
             if self.column_gap is not None:
                 element.set_column_gap(self.column_gap)
-            self.elements[count] = element
             code = element.get_raw()
             content = element.get_content()
             self.base_originals.append(content)
-            count += 1
             content += self.separator
             if len(txt + content) < self.merge_length:
                 raw += code + self.separator
@@ -535,16 +529,18 @@ class ElementHandlerMerge(ElementHandler):
                 r'\s*%s\s*' % self.placeholder[1].format(r'(0|[^0]\d*)'))
             paragraph.original = pattern.sub(
                 self.separator, paragraph.original)
-            paragraph.translation = pattern.sub(
-                self.separator, paragraph.translation)
+            if paragraph.translation is not None:
+                paragraph.translation = pattern.sub(
+                    self.separator, paragraph.translation)
         # Ensure the translation count matches the actual elements count.
         originals = paragraph.original.strip().split(self.separator)
+        if paragraph.translation is None:
+            return list(zip(originals, [None] * len(originals)))
         pattern = re.compile('%s+' % self.separator)
         translation = pattern.sub(self.separator, paragraph.translation)
         translations = translation.strip().split(self.separator)
         offset = len(originals) - len(translations)
         if offset > 0:
-            # TODO: Merge the original and translation for the left and right.
             if self.position in ['left', 'right']:
                 addition = [None] * offset
                 translations += addition
@@ -571,21 +567,23 @@ class ElementHandlerMerge(ElementHandler):
         translations = dict(translations)
         for eid, element in self.elements.copy().items():
             if element.ignored:
+                element.add_translation(
+                    None, self.position, original_color=self.original_color)
                 continue
             original = element.get_content()
             translation = translations.get(original)
             if translation is None:
+                element.add_translation(
+                    None, self.position, original_color=self.original_color)
                 continue
             element.add_translation(
                 translation, self.position, self.translation_lang,
                 self.original_color, self.translation_color)
             self.elements.pop(eid)
-        self.remove_unused_elements()
 
 
 def get_srt_elements(path):
     elements = []
-
     try:
         with open(path, 'r', newline=None) as f:
             content = f.read().strip()
@@ -598,7 +596,6 @@ def get_srt_elements(path):
         time = lines.pop(0)
         content = '\n'.join(lines)
         elements.append(SrtElement([number, time, content]))
-
     return elements
 
 

@@ -154,9 +154,9 @@ class Translation:
                 retry += 1
                 interval += 5
                 # Logging any errors that occur during translation.
-                text = text[:200] + '...' if len(text) > 200 else text
+                logged_text = text[:200] + '...' if len(text) > 200 else text
                 error_message = '{0}\n{2}\n{1}\n{3}\n{1}\n{4}'.format(
-                    sep(), sep('┈'), _('Original: {}').format(text),
+                    sep(), sep('┈'), _('Original: {}').format(logged_text),
                     _('Status: Failed {} times / Sleeping for {} seconds')
                     .format(retry, interval), _('Error: {}').format(str(e)))
                 self.log(error_message, True)

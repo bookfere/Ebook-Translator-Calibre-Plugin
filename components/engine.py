@@ -230,6 +230,8 @@ class ManageCustomEngine(QDialog):
             custom_list.setCurrentText(name)
             custom_engine_data.setPlainText(template)
             self.custom_engines[name] = template
+        if len(self.custom_engines) < 1:
+            add_data()
 
         def restore_data(name=None):
             name = name or custom_list.currentText()

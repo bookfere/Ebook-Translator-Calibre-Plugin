@@ -559,11 +559,11 @@ class AdvancedTranslation(QDialog):
         title_layout = QHBoxLayout(title_group)
         custom_title = QCheckBox()
         ebook_title = QLineEdit()
-        ebook_title.setText(self.ebook.title)
         ebook_title.setToolTip(
             _('By default, title metadata will be translated.'))
+        ebook_title.setText(self.ebook.title)
+        ebook_title.setCursorPosition(0)
         ebook_title.setDisabled(True)
-        # ebook_title.setCursorPosition(0)
         title_layout.addWidget(custom_title)
         title_layout.addWidget(ebook_title)
 
