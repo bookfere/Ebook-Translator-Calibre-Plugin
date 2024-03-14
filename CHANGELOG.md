@@ -1,3 +1,38 @@
+## v2.3.0
+
+Added features:
+
+1. Added new translation engine of Google Gemini Pro.
+2. Added support for SubRip Text (.srt) translation. #162
+3. Added support for Portable Game Notation (.pgn) translation. #207
+4. Added support for side-by-side translation position. Credit to @tiropictor
+5. Added customization for changing the original color.
+6. Added feature to translate ebook metadata. #216
+7. Added a new UI language for French. Credit to @miiPoP
+8. Added a new UI language for Portuguese. Credit to Marcelo Duarte
+9. Added the context menu to cache manager for deleting caches.
+10. Added support for specifing a custom model for ChatGPT. #167
+11. Added support to count item and character in Advanced mode. #130
+
+Enhanced features:
+
+1. Supported to restore user-adjusted geometry and size for the Setting window.
+2. Changed the separator to dual-newline for the "Merge to Translate" feature.
+3. Removed all potential non-printable characters that interfere translation. #189
+4. Highlighted inconsistency between the original and translation lines. #82
+5. Enabled Google(Free) to handle the long content that exceeds length limit.
+
+
+Fixed bugs:
+
+1. Fixed bugs that caused deadlock freezes. #170, #182, #186
+2. Fixed the bug of removing all subjects from the metadata. #171
+3. Fixed malformed request bug in custom engine. #189
+
+Check all the bug fixes and feature enhancements: 682f73f...a871b7a
+
+---
+
 ## v2.2.0
 
 Fixed bugs and added features:
