@@ -270,6 +270,7 @@ class ConversionWorker:
             filename = '%s.%s' % (metadata.title, ebook.output_format)
             new_output_path = os.path.join(dirname, filename)
             os.rename(output_path, new_output_path)
+            output_path = new_output_path
 
         self.gui.status_bar.show_message(
             job.description + ' ' + _('completed'), 5000)
