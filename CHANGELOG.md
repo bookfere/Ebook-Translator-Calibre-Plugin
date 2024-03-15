@@ -1,9 +1,20 @@
+## v2.3.2
+
+Fixed bugs as follows:
+
+1. Fixed the bug preventing output when file lacks metadata. #234, #233
+2. Fixed the bug in processing srt/pgn formats in lower versions of Calibre.
+
+---
+
 ## v2.3.1
 
 Fixed bugs as follows:
 
 1. Fixed the bug to be compatible with lower versions of Calibre.
 2. Fixed the freezing issue when using the cache with multiple threads.
+
+---
 
 ## v2.3.0
 

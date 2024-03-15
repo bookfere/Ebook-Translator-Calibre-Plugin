@@ -24,7 +24,10 @@ load_translations()
 
 
 def extract_item(input_path, input_format):
-    extractors = {'srt': get_srt_elements, 'pgn': get_pgn_elements}
+    extractors = {
+        'srt': get_srt_elements,
+        'pgn': get_pgn_elements,
+    }
     extractor = extractors.get(input_format) or extract_book
     return extractor(input_path)
 
@@ -232,19 +235,20 @@ class ConversionWorker:
                 job, dialog_title=_('Translation job failed'))
             return
 
-        ebook_metadata = self.config.get('ebook_metadata')
-        if not ebook.is_extra_format() and ebook_metadata:
+        # TODO: Try to use the calibre generated metadata file.
+        ebook_metadata_config = self.config.get('ebook_metadata')
+        if not ebook.is_extra_format():
             with open(output_path, 'r+b') as file:
                 metadata = get_metadata(file, ebook.output_format)
                 ebook_title = metadata.title
                 if ebook.custom_title is not None:
                     ebook_title = ebook.custom_title
-                if ebook_metadata.get('lang_mark'):
+                if ebook_metadata_config.get('lang_mark'):
                     ebook_title = '%s [%s]' % (ebook_title, ebook.target_lang)
                 metadata.title = ebook_title
-                if ebook_metadata.get('lang_code'):
+                if ebook_metadata_config.get('lang_code'):
                     metadata.language = ebook.lang_code
-                subjects = ebook_metadata.get('subjects')
+                subjects = ebook_metadata_config.get('subjects')
                 metadata.tags += (subjects or []) + [
                     'Translated by Ebook Translator: '
                     'https://translator.bookfere.com']
@@ -252,6 +256,14 @@ class ConversionWorker:
                 # metadata.author_sort = 'bookfere.com'
                 # metadata.book_producer = 'Ebook Translator'
                 set_metadata(file, metadata, ebook.output_format)
+        else:
+            metadata = self.api.get_metadata(ebook.id)
+            ebook_title = ebook.title
+            if ebook.custom_title is not None:
+                ebook_title = ebook.custom_title
+            if ebook_metadata_config.get('lang_mark'):
+                ebook_title = '%s [%s]' % (ebook_title, ebook.target_lang)
+            metadata.title = ebook_title
 
         if self.config.get('to_library'):
             # with open(output_path, 'rb') as file:
@@ -266,7 +278,7 @@ class ConversionWorker:
             # os.remove(temp_file)
         else:
             dirname = os.path.dirname(output_path)
-            filename = '%s.%s' % (metadata.title, ebook.output_format)
+            filename = '%s.%s' % (ebook_title, ebook.output_format)
             new_output_path = os.path.join(dirname, filename)
             os.rename(output_path, new_output_path)
             output_path = new_output_path
@@ -274,7 +286,7 @@ class ConversionWorker:
         self.gui.status_bar.show_message(
             job.description + ' ' + _('completed'), 5000)
 
-        openers = {'srt': open_path}
+        openers = {'srt': open_path, 'pgn': open_path}
         opener = openers.get(ebook.input_format)
 
         def callback(payload):
@@ -290,6 +302,6 @@ class ConversionWorker:
             _('Ebook Translation Log'),
             _('Translation Completed'),
             _('The translation of "{}" was completed. '
-              'Do you want to open the book?').format(ebook.title),
+              'Do you want to open the book?').format(ebook_title),
             log_is_file=True,
             icon=self.icon)
