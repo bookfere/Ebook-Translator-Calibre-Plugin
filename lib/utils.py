@@ -1,5 +1,6 @@
 import re
 import sys
+import codecs
 import socket
 import hashlib
 from subprocess import Popen
@@ -113,7 +114,7 @@ def open_file(path):
         with open(path, 'r', newline=None) as f:
             content = f.read().strip()
     except Exception:
-        with open(path, 'rU') as f:
+        with codecs.open(path, 'rU', encoding='utf-8') as f:
             content = f.read().strip()
     finally:
         return content

@@ -432,8 +432,6 @@ class ElementHandler:
         self.elements = {}
         self.originals = []
 
-        self.base_originals = []
-
     def get_merge_length(self):
         return self.merge_length
 
@@ -462,34 +460,35 @@ class ElementHandler:
             attrs = element.get_attributes()
             if not element.ignored:
                 self.elements[count] = element
-                self.base_originals.append(content)
                 count += 1
             self.originals.append((
                 oid, md5, raw, content, element.ignored, attrs,
                 element.page_id))
         return self.originals
 
-    def add_translations(self, paragraphs):
-        count = 0
+    def prepare_translation(self, paragraphs):
+        translations = {}
         for paragraph in paragraphs:
-            if paragraph.original not in self.base_originals:
-                continue
-            element = self.elements.get(count)
-            if not element:
-                continue
-            translation = paragraph.translation
-            if translation:
-                element.add_translation(
-                    translation, self.position, self.translation_lang,
-                    self.original_color, self.translation_color)
-                self.elements.pop(count)
-            count += 1
+            translations[paragraph.original] = paragraph.translation
+        return translations
+
+    def add_translations(self, paragraphs):
+        translations = self.prepare_translation(paragraphs)
         for eid, element in self.elements.copy().items():
             if element.ignored:
-                self.elements.pop(eid)
-        for element in self.elements.values():
+                element.add_translation(
+                    None, self.position, original_color=self.original_color)
+                continue
+            original = element.get_content()
+            translation = translations.get(original)
+            if translation is None:
+                element.add_translation(
+                    None, self.position, original_color=self.original_color)
+                continue
             element.add_translation(
-                None, self.position, original_color=self.original_color)
+                translation, self.position, self.translation_lang,
+                self.original_color, self.translation_color)
+            self.elements.pop(eid)
 
 
 class ElementHandlerMerge(ElementHandler):
@@ -506,7 +505,6 @@ class ElementHandlerMerge(ElementHandler):
                 element.set_column_gap(self.column_gap)
             code = element.get_raw()
             content = element.get_content()
-            self.base_originals.append(content)
             content += self.separator
             if len(txt + content) < self.merge_length:
                 raw += code + self.separator
@@ -555,41 +553,18 @@ class ElementHandlerMerge(ElementHandler):
             offset = len(originals) - 1
             translations = translations[:offset] + [
                 '\n\n'.join(translations[offset:])]
-        # for original in originals:
-        #     if original and original not in self.base_originals:
-        #         translations.pop(originals.index(original))
         return list(zip(originals, translations))
 
-    def add_translations(self, paragraphs):
+    def prepare_translation(self, paragraphs):
         translations = []
         for paragraph in paragraphs:
             translations.extend(self.align_paragraph(paragraph))
-        translations = dict(translations)
-        for eid, element in self.elements.copy().items():
-            if element.ignored:
-                element.add_translation(
-                    None, self.position, original_color=self.original_color)
-                continue
-            original = element.get_content()
-            translation = translations.get(original)
-            if translation is None:
-                element.add_translation(
-                    None, self.position, original_color=self.original_color)
-                continue
-            element.add_translation(
-                translation, self.position, self.translation_lang,
-                self.original_color, self.translation_color)
-            self.elements.pop(eid)
+        return dict(translations)
 
 
 def get_srt_elements(path):
     elements = []
-    try:
-        with open(path, 'r', newline=None) as f:
-            content = f.read().strip()
-    except Exception:
-        with open(path, 'rU') as f:
-            content = f.read().strip()
+    content = open_file(path)
     for section in content.split('\n\n'):
         lines = section.split('\n')
         number = lines.pop(0)
