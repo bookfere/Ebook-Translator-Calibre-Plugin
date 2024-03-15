@@ -1,3 +1,10 @@
+## v2.3.1
+
+Fixed bugs as follows:
+
+1. Fixed the bug to be compatible with lower versions of Calibre.
+2. Fixed the freezing issue when using the cache with multiple threads.
+
 ## v2.3.0
 
 Added features:

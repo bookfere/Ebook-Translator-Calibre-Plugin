@@ -63,16 +63,10 @@ class ThreadHandler:
             thread = Thread(target=self.translation_thread)
             thread.start()
             threads.append(thread)
-        print('---total (%s)---' % len(threads))
         return threads
 
     def handle(self):
-        print('---start---')
         Thread(target=self.processing_thread).start()
         for thread in self.create_threads():
-            print('---create--')
             thread.join()
-            print('---killed----')
-        print('---finished---')
         self.done_queue.put(None)
-        print('---end---')
