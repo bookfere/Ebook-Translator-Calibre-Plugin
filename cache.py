@@ -207,7 +207,6 @@ class CacheTableModel(QAbstractTableModel):
         QAbstractTableModel.__init__(self)
         self.refresh()
 
-    @staticmethod
     def update(func):
         def wrapper(self, *args):
             self.layoutAboutToBeChanged.emit()

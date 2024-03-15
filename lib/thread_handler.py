@@ -27,17 +27,22 @@ class ThreadHandler:
     def translation_thread(self):
         while not self.queue.empty():
             try:
-                paragraph = self.queue.get()
+                paragraph = self.queue.get_nowait()
                 self.translate_paragraph(paragraph)
                 if self.queue.qsize() > 0 and not paragraph.is_cache:
                     time.sleep(self.request_interval)
                 self.done_queue.put(paragraph)
                 self.queue.task_done()
+            except queue.Empty:
+                break
             except TranslationCanceled:
                 self.queue.task_done()
                 while not self.queue.empty():
-                    self.queue.get()
+                    self.queue.get_nowait()
                     self.queue.task_done()
+                while not self.done_queue.empty():
+                    self.done_queue.get_nowait()
+                    self.done_queue.task_done()
                 break
             except Exception:
                 paragraph.error = traceback.format_exc().strip()
@@ -58,10 +63,16 @@ class ThreadHandler:
             thread = Thread(target=self.translation_thread)
             thread.start()
             threads.append(thread)
+        print('---total (%s)---' % len(threads))
         return threads
 
     def handle(self):
+        print('---start---')
         Thread(target=self.processing_thread).start()
         for thread in self.create_threads():
+            print('---create--')
             thread.join()
+            print('---killed----')
+        print('---finished---')
         self.done_queue.put(None)
+        print('---end---')
