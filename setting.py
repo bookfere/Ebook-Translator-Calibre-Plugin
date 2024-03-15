@@ -78,7 +78,6 @@ class TranslationSetting(QDialog):
         layout.addWidget(self.tabs)
         layout.addWidget(layout_info())
 
-    @staticmethod
     def layout_scroll_area(func):
         def scroll_widget(self):
             widget = QWidget()
@@ -757,8 +756,8 @@ class TranslationSetting(QDialog):
         self.disable_wheel_event(column_gap_type)
         self.disable_wheel_event(column_gap_value)
 
-        column_gap_type.addItem('Percentage', 'percentage')
-        column_gap_type.addItem('Space count', 'space_count')
+        column_gap_type.addItem(_('Percentage'), 'percentage')
+        column_gap_type.addItem(_('Space count'), 'space_count')
 
         column_gap_config = self.config.get('column_gap').copy()
 

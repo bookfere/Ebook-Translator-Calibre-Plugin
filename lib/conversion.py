@@ -105,7 +105,6 @@ def convert_item(ebook_title, input_path, output_path, source_lang,
     convertor = convertors.get(format) or convert_book
     convertor(input_path, output_path, translation, element_handler, cache,
               debug_info, notification)
-
     cache.done()
 
 

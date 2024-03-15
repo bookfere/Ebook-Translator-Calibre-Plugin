@@ -235,7 +235,7 @@ class CreateTranslationProject(QDialog):
 
 
 class AdvancedTranslation(QDialog):
-    paragraph_sig = pyqtSignal(Paragraph)
+    paragraph_sig = pyqtSignal(object)
     ebook_title = pyqtSignal()
     progress_bar = pyqtSignal()
 
