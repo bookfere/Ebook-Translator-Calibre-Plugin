@@ -6,8 +6,8 @@ from .lib.config import get_config
 from .lib.utils import css, is_proxy_availiable
 from .lib.translation import get_engine_class
 
-from .engines import builtin_engines
-from .engines import GeminiPro
+from .engines import (
+    builtin_engines, GeminiPro, ChatgptTranslate, ClaudeTranslate)
 from .components import (
     layout_info, AlertMessage, TargetLang, SourceLang, EngineList,
     EngineTester, ManageCustomEngine, InputFormat, OutputFormat)
@@ -393,10 +393,13 @@ class TranslationSetting(QDialog):
         abort_translation_layout = QHBoxLayout(abort_translation_group)
         max_error_count = QSpinBox()
         max_error_count.setRange(1, 9999)
+        abort_translation_layout.addWidget(QLabel(_('Max errors')))
         abort_translation_layout.addWidget(max_error_count)
         abort_translation_layout.addWidget(QLabel(
             _('The number of consecutive errors to abort translation.')), 1)
         layout.addWidget(abort_translation_group, 1)
+
+        self.disable_wheel_event(max_error_count)
 
         self.set_form_layout_policy(request_layout)
         self.disable_wheel_event(concurrency_limit)
@@ -418,18 +421,31 @@ class TranslationSetting(QDialog):
         gemini_temperature.setDecimals(1)
         gemini_temperature.setSingleStep(0.1)
         gemini_temperature.setRange(0, 1)
-        gemini_layout.addRow('temperature', gemini_temperature)
 
         gemini_top_p = QDoubleSpinBox()
         gemini_top_p.setDecimals(1)
         gemini_top_p.setSingleStep(0.1)
         gemini_top_p.setRange(0, 1)
-        gemini_layout.addRow('topP', gemini_top_p)
 
         gemini_top_k = QSpinBox()
         gemini_top_k.setSingleStep(1)
-        gemini_top_k.setMinimum(0)
-        gemini_layout.addRow('topK', gemini_top_k)
+        gemini_top_k.setRange(0, 40)
+        # gemini_top_k.setMinimum(0)
+
+        gemini_sampling = QWidget()
+        gemini_sampling_layout = QHBoxLayout(gemini_sampling)
+        gemini_sampling_layout.setContentsMargins(0, 0, 0, 0)
+        gemini_sampling_layout.addWidget(QLabel('temperature'))
+        gemini_sampling_layout.addWidget(gemini_temperature)
+        gemini_sampling_layout.addSpacing(20)
+        gemini_sampling_layout.addWidget(QLabel('topP'))
+        gemini_sampling_layout.addWidget(gemini_top_p)
+        gemini_sampling_layout.addSpacing(20)
+        gemini_sampling_layout.addWidget(QLabel('topK'))
+        gemini_sampling_layout.addWidget(gemini_top_k)
+        gemini_sampling_layout.addStretch(1)
+
+        gemini_layout.addRow(_('Sampling'), gemini_sampling)
 
         self.disable_wheel_event(gemini_temperature)
         self.disable_wheel_event(gemini_top_p)
@@ -438,7 +454,7 @@ class TranslationSetting(QDialog):
         layout.addWidget(gemini_group)
 
         # ChatGPT Setting
-        chatgpt_group = QGroupBox(_('Tune ChatGPT'))
+        chatgpt_group = QGroupBox()
         chatgpt_group.setVisible(False)
         chatgpt_layout = QFormLayout(chatgpt_group)
         self.set_form_layout_policy(chatgpt_layout)
@@ -468,17 +484,23 @@ class TranslationSetting(QDialog):
         temperature_value = QDoubleSpinBox()
         temperature_value.setDecimals(1)
         temperature_value.setSingleStep(0.1)
-        temperature_value.setRange(0, 2)
         top_p = QRadioButton('top_p')
         top_p_value = QDoubleSpinBox()
         top_p_value.setDecimals(1)
         top_p_value.setSingleStep(0.1)
         top_p_value.setRange(0, 1)
+        top_k = QLabel('top_k')
+        top_k_value = QSpinBox()
+        top_k_value.setSingleStep(1)
+        top_k_value.setRange(1, 40)
         sampling_layout.addWidget(temperature)
         sampling_layout.addWidget(temperature_value)
         sampling_layout.addSpacing(20)
         sampling_layout.addWidget(top_p)
         sampling_layout.addWidget(top_p_value)
+        sampling_layout.addSpacing(20)
+        sampling_layout.addWidget(top_k)
+        sampling_layout.addWidget(top_k_value)
         sampling_layout.addStretch(1)
         chatgpt_layout.addRow(_('Sampling'), sampling_widget)
 
@@ -499,7 +521,7 @@ class TranslationSetting(QDialog):
         layout.addWidget(chatgpt_group)
 
         def show_gemini_preferences():
-            if self.current_engine != GeminiPro:
+            if not issubclass(self.current_engine, GeminiPro):
                 gemini_group.setVisible(False)
                 return
             config = self.current_engine.config
@@ -521,9 +543,17 @@ class TranslationSetting(QDialog):
                 lambda value: config.update(top_k=value))
 
         def show_chatgpt_preferences():
-            if not self.current_engine.is_chatgpt():
+            is_chatgpt = issubclass(self.current_engine, ChatgptTranslate)
+            is_claude = issubclass(self.current_engine, ClaudeTranslate)
+            if not is_chatgpt and not is_claude:
                 chatgpt_group.setVisible(False)
                 return
+            if is_chatgpt:
+                temperature_value.setRange(0, 2)
+                chatgpt_group.setTitle(_('Tune ChatGPT'))
+            elif is_claude:
+                temperature_value.setRange(0, 1)
+                chatgpt_group.setTitle(_('Tune Claude'))
             config = self.current_engine.config
             # Prompt
             self.chatgpt_prompt.setPlaceholderText(self.current_engine.prompt)
@@ -532,8 +562,11 @@ class TranslationSetting(QDialog):
             # Endpoint
             self.chatgpt_endpoint.setPlaceholderText(
                 self.current_engine.endpoint)
+            chatgpt_layout.setRowVisible(self.chatgpt_endpoint, is_chatgpt)
             self.chatgpt_endpoint.setText(
-                config.get('endpoint', self.current_engine.endpoint))
+                config.get('endpoint', self.current_engine.endpoint)
+                if is_chatgpt else '')
+            self.chatgpt_endpoint.setCursorPosition(0)
             # Model
             if self.current_engine.model is not None:
                 chatgpt_layout.setRowVisible(chatgpt_model, True)
@@ -585,6 +618,14 @@ class TranslationSetting(QDialog):
                 config.get('top_p', self.current_engine.top_p))
             top_p_value.valueChanged.connect(
                 lambda value: self.current_engine.config.update(top_p=value))
+            top_k.setVisible(is_claude)
+            top_k_value.setVisible(is_claude)
+            if is_claude:
+                top_k_value.setValue(
+                    config.get('top_k', self.current_engine.top_k))
+                top_k_value.valueChanged.connect(
+                    lambda value: self.current_engine.config
+                    .update(top_k=value))
             # Stream
             stream_enabled.setChecked(
                 config.get('stream', self.current_engine.stream))
@@ -646,9 +687,7 @@ class TranslationSetting(QDialog):
             max_error_count.valueChanged.connect(
                 lambda value: self.current_engine.config.update(
                     max_error_count=value))
-            # Show Gemini prompt setting
             show_gemini_preferences()
-            # Show ChatGPT prompt setting
             show_chatgpt_preferences()
         choose_default_engine(engine_list.findData(self.current_engine.name))
         engine_list.currentIndexChanged.connect(choose_default_engine)
@@ -1045,7 +1084,7 @@ class TranslationSetting(QDialog):
             _('Subjects of ebook (one subject per line)'))
         metadata_layout.addRow(_('Language Mark'), self.metadata_lang_mark)
         metadata_layout.addRow(_('Language Code'), self.metadata_lang_code)
-        metadata_layout.addRow(_('Subject'), self.metadata_subject)
+        metadata_layout.addRow(_('Append Subjects'), self.metadata_subject)
         layout.addWidget(metadata_group)
 
         self.metadata_lang_mark.setChecked(
@@ -1132,9 +1171,12 @@ class TranslationSetting(QDialog):
             config.update(api_keys=api_keys)
             self.set_api_keys()
 
-        # ChatGPT prefrence
-        if self.current_engine.is_chatgpt():
+        if issubclass(self.current_engine, ChatgptTranslate) or \
+                issubclass(self.current_engine, ClaudeTranslate):
             self.update_prompt(self.chatgpt_prompt, config)
+
+        # ChatGPT preference
+        if issubclass(self.current_engine, ChatgptTranslate):
             endpoint = self.chatgpt_endpoint.text().strip()
             if 'endpoint' in config:
                 del config['endpoint']

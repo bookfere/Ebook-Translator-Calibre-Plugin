@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-03-15 09:57+0800\n"
+"POT-Creation-Date: 2024-03-17 22:05+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -305,6 +305,9 @@ msgstr "选择相似段落：{}=\"{}\""
 msgid "Retain at least one row."
 msgstr "至少保留一行。"
 
+msgid "Can not parse returned response. Raw data: {}"
+msgstr "无法解析返回的响应。原始数据：{}"
+
 msgid "Baidu"
 msgstr "百度"
 
@@ -313,9 +316,6 @@ msgstr "API密钥"
 
 msgid "A correct key format \"{}\" is required."
 msgstr "必须填写正确的密钥格式 \"{}\"。"
-
-msgid "Can not parse returned response. Raw data: {}"
-msgstr "无法解析返回的响应。原始数据：{}"
 
 msgid "Engine data must be in valid JSON format."
 msgstr "引擎数据必须是有效的的 JSON 格式。"
@@ -562,6 +562,9 @@ msgstr "超时（秒）"
 msgid "Abort Translation"
 msgstr "中止翻译"
 
+msgid "Max errors"
+msgstr "最大错误数"
+
 msgid "The number of consecutive errors to abort translation."
 msgstr "超过连续错误次数中止翻译。"
 
@@ -571,8 +574,8 @@ msgstr "调节 Gemini"
 msgid "Prompt"
 msgstr "提示词"
 
-msgid "Tune ChatGPT"
-msgstr "调节 ChatGPT"
+msgid "Sampling"
+msgstr "采样"
 
 msgid "Endpoint"
 msgstr "端点"
@@ -580,14 +583,17 @@ msgstr "端点"
 msgid "Model"
 msgstr "模型"
 
-msgid "Sampling"
-msgstr "采样"
-
 msgid "Enable streaming text like in ChatGPT"
-msgstr "启用类似 ChatGPT 的文本流"
+msgstr "启用类似 ChatGPT 的文本流效果"
 
 msgid "Stream"
 msgstr "文本流"
+
+msgid "Tune ChatGPT"
+msgstr "调节 ChatGPT"
+
+msgid "Tune Claude"
+msgstr "调节 Claude"
 
 msgid "Below original"
 msgstr "原文下方"
@@ -694,8 +700,8 @@ msgstr "语言标记"
 msgid "Language Code"
 msgstr "语言代码"
 
-msgid "Subject"
-msgstr "主题"
+msgid "Append Subjects"
+msgstr "附加主题"
 
 msgid "Proxy host or port is incorrect."
 msgstr "代理的主机或端口填写有误。"
@@ -750,12 +756,3 @@ msgstr "缓存管理器"
 
 msgid "Choose Translation Mode"
 msgstr "选择翻译模式"
-
-#~ msgid "Format"
-#~ msgstr "格式"
-
-#~ msgid "Error limit to stop translation"
-#~ msgstr "超过错误限制停止翻译"
-
-#~ msgid "Set \"Target Language\" to metadata"
-#~ msgstr "将目标语言设为元数据中的语言"

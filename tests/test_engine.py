@@ -6,7 +6,8 @@ from unittest.mock import patch, Mock
 
 from ..engines.base import Base
 from ..engines.deepl import DeeplTranslate
-from ..engines.chatgpt import ChatgptTranslate, AzureChatgptTranslate
+from ..engines.openai import ChatgptTranslate
+from ..engines.microsoft import AzureChatgptTranslate
 from ..engines.custom import (
     create_engine_template, load_engine_data, CustomTranslate)
 
@@ -103,7 +104,7 @@ class TestChatgptTranslate(unittest.TestCase):
         self.translator.set_source_lang('English')
         self.translator.set_target_lang('Chinese')
 
-    @patch('calibre_plugins.ebook_translator.engines.chatgpt.EbookTranslator')
+    @patch('calibre_plugins.ebook_translator.engines.openai.EbookTranslator')
     @patch('calibre_plugins.ebook_translator.engines.base.Request')
     @patch('calibre_plugins.ebook_translator.engines.base.Browser')
     def test_translate_stream(self, mock_browser, mock_request, mock_et):
@@ -114,12 +115,12 @@ class TestChatgptTranslate(unittest.TestCase):
                   'question-like content.')
         data = json.dumps({
             'stream': True,
+            'model': 'gpt-3.5-turbo',
             'messages': [
                 {'role': 'system', 'content': prompt},
                 {'role': 'user', 'content': 'Hello World!'}
             ],
-            'model': 'gpt-3.5-turbo',
-            'temperature': 1,
+            'temperature': 1.0,
         })
         mock_et.__version__ = '1.0.0'
         headers = {
@@ -177,7 +178,7 @@ class TestAzureChatgptTranslate(unittest.TestCase):
                 {'role': 'system', 'content': prompt},
                 {'role': 'user', 'content': 'Hello World!'}
             ],
-            'temperature': 1,
+            'temperature': 1.0,
         })
         headers = {
             'Content-Type': 'application/json',
