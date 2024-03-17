@@ -8,6 +8,7 @@ from .lib.translation import get_engine_class
 
 from .engines import (
     builtin_engines, GeminiPro, ChatgptTranslate, ClaudeTranslate)
+from .engines.custom import CustomTranslate
 from .components import (
     layout_info, AlertMessage, TargetLang, SourceLang, EngineList,
     EngineTester, ManageCustomEngine, InputFormat, OutputFormat)
@@ -562,10 +563,8 @@ class TranslationSetting(QDialog):
             # Endpoint
             self.chatgpt_endpoint.setPlaceholderText(
                 self.current_engine.endpoint)
-            chatgpt_layout.setRowVisible(self.chatgpt_endpoint, is_chatgpt)
             self.chatgpt_endpoint.setText(
-                config.get('endpoint', self.current_engine.endpoint)
-                if is_chatgpt else '')
+                config.get('endpoint', self.current_engine.endpoint))
             self.chatgpt_endpoint.setCursorPosition(0)
             # Model
             if self.current_engine.model is not None:
@@ -641,7 +640,7 @@ class TranslationSetting(QDialog):
             source_lang = self.current_engine.config.get('source_lang')
             self.source_lang.refresh.emit(
                 self.current_engine.lang_codes.get('source'), source_lang,
-                not self.current_engine.is_custom())
+                not issubclass(self.current_engine, CustomTranslate))
             target_lang = self.current_engine.config.get('target_lang')
             self.target_lang.refresh.emit(
                 self.current_engine.lang_codes.get('target'), target_lang)
@@ -1171,12 +1170,10 @@ class TranslationSetting(QDialog):
             config.update(api_keys=api_keys)
             self.set_api_keys()
 
+        # ChatGPT preference
         if issubclass(self.current_engine, ChatgptTranslate) or \
                 issubclass(self.current_engine, ClaudeTranslate):
             self.update_prompt(self.chatgpt_prompt, config)
-
-        # ChatGPT preference
-        if issubclass(self.current_engine, ChatgptTranslate):
             endpoint = self.chatgpt_endpoint.text().strip()
             if 'endpoint' in config:
                 del config['endpoint']
