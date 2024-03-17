@@ -87,14 +87,6 @@ class Base:
         return _('A correct key format "{}" is required.') \
             .format(cls.api_key_hint)
 
-    @classmethod
-    def is_chatgpt(cls):
-        return 'chatgpt' in cls.__name__.lower()
-
-    @classmethod
-    def is_custom(cls):
-        return cls.__name__ == 'CustomTranslate'
-
     def change_api_key(self):
         """Change the API key if the previous one cannot be used."""
         if self.api_key not in self.bad_api_keys:

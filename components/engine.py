@@ -5,7 +5,8 @@ from types import GeneratorType
 
 from ..lib.utils import sorted_mixed_keys
 from ..lib.config import get_config
-from ..engines.custom import create_engine_template, load_engine_data
+from ..engines.custom import (
+    create_engine_template, load_engine_data, CustomTranslate)
 from ..engines import builtin_engines, GoogleFreeTranslate
 
 from .lang import SourceLang, TargetLang
@@ -115,8 +116,9 @@ class EngineTester(QDialog):
         layout.addWidget(target, 1, 0, 1, 3)
 
         source_lang = SourceLang()
-        source_lang.set_codes(self.translator.lang_codes.get('source'),
-                              not self.translator.is_custom())
+        source_lang.set_codes(
+            self.translator.lang_codes.get('source'),
+            not isinstance(self.translator, CustomTranslate))
         layout.addWidget(source_lang, 2, 0)
 
         def change_source_lang(lang):

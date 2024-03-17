@@ -9,6 +9,7 @@ from .lib.cache import Paragraph, TranslationCache, get_cache
 from .lib.translation import get_engine_class, get_translator, get_translation
 from .lib.element import get_element_handler, Extraction
 from .lib.conversion import extract_item
+from .engines.custom import CustomTranslate
 
 from . import EbookTranslator
 from .components import (
@@ -613,7 +614,7 @@ class AdvancedTranslation(QDialog):
             source_lang.refresh.emit(
                 self.current_engine.lang_codes.get('source'),
                 self.current_engine.config.get('source_lang'),
-                not self.current_engine.is_custom())
+                not isinstance(self.current_engine, CustomTranslate))
             lang = self.current_engine.config.get('target_lang')
             if target_lang.findText(self.ebook.target_lang):
                 lang = self.ebook.target_lang

@@ -3,6 +3,7 @@ import os.path
 
 from .lib.config import get_config
 from .lib.translation import get_engine_class
+from .engines.custom import CustomTranslate
 from .components import (
     layout_info, AlertMessage, SourceLang, TargetLang, InputFormat,
     OutputFormat)
@@ -104,7 +105,7 @@ class BatchTranslation(QDialog):
             source_lang.refresh.emit(
                 translation_engine.lang_codes.get('source'),
                 translation_engine.config.get('source_lang'),
-                not translation_engine.is_custom())
+                not issubclass(translation_engine, CustomTranslate))
 
             target_lang = TargetLang()
             table.setCellWidget(row, 4, target_lang)
