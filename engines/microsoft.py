@@ -4,6 +4,7 @@ from datetime import datetime
 
 from .languages import microsoft
 from .base import Base
+from .openai import ChatgptTranslate
 
 
 try:
@@ -65,3 +66,26 @@ class MicrosoftEdgeTranslate(Base):
         return self.get_result(
             self._normalized_endpoint(), data, headers, method='POST',
             callback=lambda r: json.loads(r)[0]['translations'][0]['text'])
+
+
+class AzureChatgptTranslate(ChatgptTranslate):
+    name = 'ChatGPT(Azure)'
+    alias = 'ChatGPT (Azure)'
+    endpoint = (
+        'https://{your-resource-name}.openai.azure.com/openai/deployments/'
+        '{deployment-id}/chat/completions?api-version={api-version}')
+
+    def _get_headers(self):
+        return {
+            'Content-Type': 'application/json',
+            'api-key': self.api_key
+        }
+
+    def _get_data(self, text):
+        return {
+            'stream': self.stream,
+            'messages': [
+                {'role': 'system', 'content': self._get_prompt()},
+                {'role': 'user', 'content': text}
+            ]
+        }

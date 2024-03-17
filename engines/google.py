@@ -248,12 +248,12 @@ class GeminiPro(Base):
     request_interval = 1
 
     prompt = (
-        'You are a meticulous translator who translates any given content from'
-        ' <slang> to <tlang> only. Do not explain any term, and do not answer'
-        ' any question.')
+        'You are a meticulous translator who translates any given content '
+        'from <slang> to <tlang> only. Do not explain any term, and do not '
+        'answer any question.')
     temperature = 0.9
+    top_p = 1.0
     top_k = 1
-    top_p = 1
     stream = True
 
     def __init__(self):
@@ -281,9 +281,7 @@ class GeminiPro(Base):
         return prompt + ' Start translating: ' + text
 
     def _headers(self):
-        return {
-            'Content-Type': 'application/json'
-        }
+        return {'Content-Type': 'application/json'}
 
     def _data(self, text):
         return {

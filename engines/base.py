@@ -11,11 +11,11 @@ load_translations()
 
 
 class Base:
-    name = None
-    alias = None
+    name = 'Unknown'
+    alias = 'Unknown'
     lang_codes = {}
     config = {}
-    endpoint = None
+    endpoint = 'https://example.com'
     need_api_key = True
     api_key_hint = _('API Keys')
     api_key_pattern = r'^[^\s]+$'

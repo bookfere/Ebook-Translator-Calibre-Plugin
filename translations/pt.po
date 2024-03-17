@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-03-15 09:57+0800\n"
+"POT-Creation-Date: 2024-03-17 22:05+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: none\n"
@@ -313,6 +313,9 @@ msgstr "Selecionar parágrafos similares: {}=\"{}\""
 msgid "Retain at least one row."
 msgstr "Manter pelo menos uma linha."
 
+msgid "Can not parse returned response. Raw data: {}"
+msgstr "Não é possível analisar a resposta retornada. Dados não tratados: {}"
+
 msgid "Baidu"
 msgstr "Baidu"
 
@@ -321,9 +324,6 @@ msgstr "Chaves API"
 
 msgid "A correct key format \"{}\" is required."
 msgstr "É necessário um formato de chave correto \"{}\""
-
-msgid "Can not parse returned response. Raw data: {}"
-msgstr "Não é possível analisar a resposta retornada. Dados não tratados: {}"
 
 msgid "Engine data must be in valid JSON format."
 msgstr "O mecanismo de dados deve estar em um formato JSON válido."
@@ -573,6 +573,9 @@ msgstr "Tempo esgotado (segundos)"
 msgid "Abort Translation"
 msgstr ""
 
+msgid "Max errors"
+msgstr ""
+
 msgid "The number of consecutive errors to abort translation."
 msgstr ""
 
@@ -582,8 +585,8 @@ msgstr ""
 msgid "Prompt"
 msgstr "Prompt"
 
-msgid "Tune ChatGPT"
-msgstr "Ajustar ChatGPT"
+msgid "Sampling"
+msgstr "Amostragem"
 
 msgid "Endpoint"
 msgstr "Ponto final"
@@ -591,14 +594,17 @@ msgstr "Ponto final"
 msgid "Model"
 msgstr "Modelo"
 
-msgid "Sampling"
-msgstr "Amostragem"
-
 msgid "Enable streaming text like in ChatGPT"
 msgstr "Habilite de texto em tempo real como no ChatGPT"
 
 msgid "Stream"
 msgstr "Fluxo"
+
+msgid "Tune ChatGPT"
+msgstr "Ajustar ChatGPT"
+
+msgid "Tune Claude"
+msgstr ""
 
 msgid "Below original"
 msgstr ""
@@ -708,8 +714,8 @@ msgstr ""
 msgid "Language Code"
 msgstr ""
 
-msgid "Subject"
-msgstr "Assuntos"
+msgid "Append Subjects"
+msgstr ""
 
 msgid "Proxy host or port is incorrect."
 msgstr "O host ou porta proxy está incorreto."
