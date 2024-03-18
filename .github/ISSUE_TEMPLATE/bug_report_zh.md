@@ -8,10 +8,10 @@ assignees: ''
 ---
 
 **基础信息**
-一些有关你使用情况的必要信息。
 
 * 操作系统: **Windows/macOS/Linux 发行版**
 * Calibre 版本: **x.x.x**
+* 插件版本：**x.x.x**
 * 插件来源: **安装自 Calibre/Rolling Release**
 
 **描述错误**

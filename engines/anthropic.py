@@ -113,5 +113,5 @@ class ClaudeTranslate(Base):
                 chunk = json.loads(line.split('data: ')[1])
                 if chunk.get('type') == 'message_stop':
                     break
-                if chunk.get('type') == 'content_block_start':
+                if chunk.get('type') == 'content_block_delta':
                     yield str(chunk.get('delta').get('text'))

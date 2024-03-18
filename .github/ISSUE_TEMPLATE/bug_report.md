@@ -8,10 +8,10 @@ assignees: ''
 ---
 
 **Basic information**
-Some required information from your use case.
 
 * Operating System: **Windows/macOS/Linux distro**
 * Calibre Version: **x.x.x**
+* Plugin Version: **x.x.x**
 * Plugin Installation: **From Calibre/Rolling Release**
 
 **Describe the bug**
