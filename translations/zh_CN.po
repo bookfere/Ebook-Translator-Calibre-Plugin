@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-03-17 22:05+0800\n"
+"POT-Creation-Date: 2024-03-18 15:59+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -594,6 +594,9 @@ msgstr "调节 ChatGPT"
 
 msgid "Tune Claude"
 msgstr "调节 Claude"
+
+msgid "The model depends on your Azure project."
+msgstr "模型取决于你的 Azure 项目。"
 
 msgid "Below original"
 msgstr "原文下方"

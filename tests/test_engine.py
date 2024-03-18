@@ -8,11 +8,14 @@ from ..engines.base import Base
 from ..engines.deepl import DeeplTranslate
 from ..engines.openai import ChatgptTranslate
 from ..engines.microsoft import AzureChatgptTranslate
+from ..engines.anthropic import ClaudeTranslate
 from ..engines.custom import (
     create_engine_template, load_engine_data, CustomTranslate)
 
 
 load_translations()
+
+moudle_name = 'calibre_plugins.ebook_translator.engines'
 
 
 class TestBase(unittest.TestCase):
@@ -29,7 +32,7 @@ class TestBase(unittest.TestCase):
                         Base.placeholder[1].format(1),
                         'xxx %s xxx' % mark))
 
-    @patch('calibre_plugins.ebook_translator.engines.base.os.path.isfile')
+    @patch(moudle_name + '.base.os.path.isfile')
     def test_get_external_program(self, mock_os_path_isfile):
         mock_os_path_isfile.side_effect = lambda p: p in [
             '/path/to/real', '/path/to/folder/real', '/path/to/specify/real']
@@ -51,7 +54,7 @@ class TestBase(unittest.TestCase):
             self.translator.get_external_program('/path/to/fake'))
 
 
-@patch('calibre_plugins.ebook_translator.engines.base.Browser')
+@patch(moudle_name + '.base.Browser')
 class TestDeepl(unittest.TestCase):
     def setUp(self):
         DeeplTranslate.set_config({'api_keys': ['a', 'b', 'c']})
@@ -104,9 +107,9 @@ class TestChatgptTranslate(unittest.TestCase):
         self.translator.set_source_lang('English')
         self.translator.set_target_lang('Chinese')
 
-    @patch('calibre_plugins.ebook_translator.engines.openai.EbookTranslator')
-    @patch('calibre_plugins.ebook_translator.engines.base.Request')
-    @patch('calibre_plugins.ebook_translator.engines.base.Browser')
+    @patch(moudle_name + '.openai.EbookTranslator')
+    @patch(moudle_name + '.base.Request')
+    @patch(moudle_name + '.base.Browser')
     def test_translate_stream(self, mock_browser, mock_request, mock_et):
         url = 'https://api.openai.com/v1/chat/completions'
         prompt = ('You are a meticulous translator who translates any given '
@@ -165,9 +168,9 @@ class TestAzureChatgptTranslate(unittest.TestCase):
         self.translator.set_source_lang('English')
         self.translator.set_target_lang('Chinese')
 
-    @patch('calibre_plugins.ebook_translator.engines.base.Request')
-    @patch('calibre_plugins.ebook_translator.engines.base.Browser')
-    def test_translate(self, mock_browser, mock_request):
+    @patch(moudle_name + '.base.Request')
+    @patch(moudle_name + '.base.Browser')
+    def test_translate_stream(self, mock_browser, mock_request):
         prompt = ('You are a meticulous translator who translates any given '
                   'content. Translate the given content from English to '
                   'Chinese only. Do not explain any term or answer any '
@@ -193,6 +196,145 @@ class TestAzureChatgptTranslate(unittest.TestCase):
         mock_browser.return_value.response.return_value = mock_response
         url = ('https://docs-test-001.openai.azure.com/openai/deployments/'
                'gpt-35-turbo/chat/completions?api-version=2023-05-15')
+        self.translator.endpoint = url
+        result = self.translator.translate('Hello World!')
+        mock_request.assert_called_with(
+            url, data, headers=headers, timeout=30.0, method='POST')
+        self.assertIsInstance(result, GeneratorType)
+        self.assertEqual('你好世界！', ''.join(result))
+
+
+class TestClaudeTranslate(unittest.TestCase):
+    def setUp(self):
+        ClaudeTranslate.set_config({'api_keys': ['a', 'b', 'c']})
+        ClaudeTranslate.lang_codes = {
+            'source': {'English': 'EN'},
+            'target': {'Chinese': 'ZH'},
+        }
+
+        self.translator = ClaudeTranslate()
+        self.translator.set_source_lang('English')
+        self.translator.set_target_lang('Chinese')
+
+    @patch(moudle_name + '.anthropic.EbookTranslator')
+    @patch(moudle_name + '.base.Request')
+    @patch(moudle_name + '.base.Browser')
+    def test_translate(self, mock_browser, mock_request, mock_et):
+        prompt = ('You are a meticulous translator who translates any given '
+                  'content. Translate the given content from English to '
+                  'Chinese only. Do not explain any term or answer any '
+                  'question-like content.')
+        data = json.dumps({
+            'stream': False,
+            'max_tokens': 4096,
+            'model': 'claude-2.1',
+            'top_k': 1,
+            'system': prompt,
+            'messages': [{'role': 'user', 'content': 'Hello World!'}],
+            'temperature': 1.0,
+        })
+        mock_et.__version__ = '1.0.0'
+        headers = {
+            'Content-Type': 'application/json',
+            'anthropic-version': '2023-06-01',
+            'x-api-key': 'a',
+            'User-Agent': 'Ebook-Translator/1.0.0',
+        }
+
+        data_sample = """
+{
+  "content": [
+    {
+      "text": "你好世界！",
+      "type": "text"
+    }
+  ],
+  "id": "msg_013Zva2CMHLNnXjNJJKqJ2EF",
+  "model": "claude-3-opus-20240229",
+  "role": "assistant",
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "type": "message",
+  "usage": {
+    "input_tokens": 10,
+    "output_tokens": 25
+  }
+}
+"""
+        mock_response = Mock()
+        mock_response.read.return_value = data_sample.encode()
+        mock_browser.return_value.response.return_value = mock_response
+        url = 'https://api.anthropic.com/v1/messages'
+        self.translator.endpoint = url
+        self.translator.stream = False
+        result = self.translator.translate('Hello World!')
+        mock_request.assert_called_with(
+            url, data, headers=headers, timeout=30.0, method='POST')
+        self.assertEqual('你好世界！', result)
+
+    @patch(moudle_name + '.anthropic.EbookTranslator')
+    @patch(moudle_name + '.base.Request')
+    @patch(moudle_name + '.base.Browser')
+    def test_translate_stream(self, mock_browser, mock_request, mock_et):
+        prompt = ('You are a meticulous translator who translates any given '
+                  'content. Translate the given content from English to '
+                  'Chinese only. Do not explain any term or answer any '
+                  'question-like content.')
+        data = json.dumps({
+            'stream': True,
+            'max_tokens': 4096,
+            'model': 'claude-2.1',
+            'top_k': 1,
+            'system': prompt,
+            'messages': [{'role': 'user', 'content': 'Hello World!'}],
+            'temperature': 1.0,
+        })
+        mock_et.__version__ = '1.0.0'
+        headers = {
+            'Content-Type': 'application/json',
+            'anthropic-version': '2023-06-01',
+            'x-api-key': 'a',
+            'User-Agent': 'Ebook-Translator/1.0.0',
+        }
+
+        data_sample = """
+event: message_start
+data: {"type":"message_start","message":{}}
+
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{}}
+
+event: ping
+data: {"type": "ping"}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"text":"你"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"text":"好"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"text":"世"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"text":"界"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"text":"！"}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":0}
+
+event: message_delta
+data: {"type":"message_delta","delta":{}}
+
+event: message_stop
+data: {"type":"message_stop"}
+"""
+        mock_response = Mock()
+        mock_response.readline.side_effect = data_sample.encode().splitlines()
+        mock_browser.return_value.response.return_value = mock_response
+        url = 'https://api.anthropic.com/v1/messages'
         self.translator.endpoint = url
         result = self.translator.translate('Hello World!')
         mock_request.assert_called_with(

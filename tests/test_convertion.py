@@ -195,7 +195,7 @@ class TestConversionWorker(unittest.TestCase):
             self, mock_open, mock_os_rename, mock_open_path):
         self.job.failed = False
         self.job.description = 'test description'
-        self.job.log_path = '/path/to/log'
+        self.job.log_path = 'C:\\path\\to\\log'
         metadata_config = {'lang_mark': True}
         self.worker.config = {
             'ebook_metadata': metadata_config,
@@ -210,10 +210,11 @@ class TestConversionWorker(unittest.TestCase):
         self.ebook.custom_title = 'test custom title'
         self.ebook.target_lang = 'German'
         self.worker.working_jobs = {
-            self.job: (self.ebook, '/path/to/test.srt')}
+            self.job: (self.ebook, 'C:\\path\\to\\test.srt')}
         metadata = Mock()
         self.worker.api.get_metadata.return_value = metadata
-        self.worker.api.format_abspath.return_value = '/path/to/test[m].srt'
+        self.worker.api.format_abspath.return_value = \
+            'C:\\path\\to\\test[m].srt'
         self.worker.db.create_book_entry.return_value = 90
 
         self.worker.translate_done(self.job)
@@ -221,7 +222,7 @@ class TestConversionWorker(unittest.TestCase):
         self.worker.api.get_metadata.assert_called_once_with(89)
         self.worker.db.create_book_entry.assert_called_once_with(metadata)
         self.worker.api.add_format.assert_called_once_with(
-            90, 'srt', '/path/to/test.srt', run_hooks=False)
+            90, 'srt', 'C:\\path\\to\\test.srt', run_hooks=False)
         self.worker.gui.library_view.model.assert_called_once()
         self.worker.gui.library_view.model().books_added \
             .assert_called_once_with(1)
@@ -233,7 +234,7 @@ class TestConversionWorker(unittest.TestCase):
         arguments = self.worker.gui.proceed_question.mock_calls[0].args
         self.assertIsInstance(arguments[0], Callable)
         self.assertIs(self.worker.gui.job_manager.launch_gui_app, arguments[1])
-        self.assertEqual('/path/to/log', arguments[2])
+        self.assertEqual('C:\\path\\to\\log', arguments[2])
         self.assertEqual(_('Ebook Translation Log'), arguments[3])
         self.assertEqual(_('Translation Completed'), arguments[4])
         self.assertEqual(_(
@@ -244,12 +245,11 @@ class TestConversionWorker(unittest.TestCase):
 
         mock_payload = Mock()
         arguments[0](mock_payload)
-        mock_open_path.assert_called_once_with('/path/to/test[m].srt')
+        mock_open_path.assert_called_once_with('C:\\path\\to\\test[m].srt')
 
         arguments = self.worker.gui.proceed_question.mock_calls[0].kwargs
         self.assertEqual(True, arguments.get('log_is_file'))
         self.assertIs(self.icon, arguments.get('icon'))
-
 
     @patch(module_name + '.open_path')
     @patch(module_name + '.os.rename')

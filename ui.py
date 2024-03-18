@@ -120,6 +120,7 @@ class EbookTranslatorGui(InterfaceAction):
         if self.show_window('setting'):
             return
         window = TranslationSetting(self, self.gui, self.icon)
+        window.setModal(True)
         window.setMinimumWidth(600)
         window.setMinimumHeight(520)
         window.setWindowTitle('%s - %s' % (_('Setting'), self.title))

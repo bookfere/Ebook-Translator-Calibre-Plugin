@@ -7,7 +7,8 @@ from .lib.utils import css, is_proxy_availiable
 from .lib.translation import get_engine_class
 
 from .engines import (
-    builtin_engines, GeminiPro, ChatgptTranslate, ClaudeTranslate)
+    builtin_engines, GeminiPro, ChatgptTranslate, AzureChatgptTranslate,
+    ClaudeTranslate)
 from .engines.custom import CustomTranslate
 from .components import (
     layout_info, AlertMessage, TargetLang, SourceLang, EngineList,
@@ -470,10 +471,10 @@ class TranslationSetting(QDialog):
         chatgpt_model = QWidget()
         chatgpt_model_layout = QHBoxLayout(chatgpt_model)
         chatgpt_model_layout.setContentsMargins(0, 0, 0, 0)
-        chatgpt_select = QComboBox()
-        chatgpt_custom = QLineEdit()
-        chatgpt_model_layout.addWidget(chatgpt_select)
-        chatgpt_model_layout.addWidget(chatgpt_custom)
+        chatgpt_model_select = QComboBox()
+        chatgpt_model_custom = QLineEdit()
+        chatgpt_model_layout.addWidget(chatgpt_model_select)
+        chatgpt_model_layout.addWidget(chatgpt_model_custom)
         chatgpt_layout.addRow(_('Model'), chatgpt_model)
 
         self.disable_wheel_event(chatgpt_model)
@@ -549,6 +550,7 @@ class TranslationSetting(QDialog):
             if not is_chatgpt and not is_claude:
                 chatgpt_group.setVisible(False)
                 return
+            chatgpt_group.setVisible(True)
             if is_chatgpt:
                 temperature_value.setRange(0, 2)
                 chatgpt_group.setTitle(_('Tune ChatGPT'))
@@ -568,22 +570,28 @@ class TranslationSetting(QDialog):
             self.chatgpt_endpoint.setCursorPosition(0)
             # Model
             if self.current_engine.model is not None:
-                chatgpt_layout.setRowVisible(chatgpt_model, True)
-                chatgpt_select.clear()
-                chatgpt_select.addItems(self.current_engine.models)
-                chatgpt_select.addItem(_('Custom'))
+                chatgpt_model_select.clear()
+                if issubclass(self.current_engine, AzureChatgptTranslate):
+                    chatgpt_model_select.addItem(
+                        _('The model depends on your Azure project.'))
+                    chatgpt_model_select.setDisabled(True)
+                    chatgpt_model_custom.setVisible(False)
+                    return
+                chatgpt_model_select.setDisabled(False)
+                chatgpt_model_select.addItems(self.current_engine.models)
+                chatgpt_model_select.addItem(_('Custom'))
                 model = config.get('model', self.current_engine.model)
-                chatgpt_select.setCurrentText(
+                chatgpt_model_select.setCurrentText(
                     model if model in self.current_engine.models
                     else _('Custom'))
 
                 def setup_chatgpt_model(model):
                     if model in self.current_engine.models:
-                        chatgpt_custom.setVisible(False)
+                        chatgpt_model_custom.setVisible(False)
                     else:
-                        chatgpt_custom.setVisible(True)
+                        chatgpt_model_custom.setVisible(True)
                         if model != _('Custom'):
-                            chatgpt_custom.setText(model)
+                            chatgpt_model_custom.setText(model)
                 setup_chatgpt_model(model)
 
                 def update_chatgpt_model(model):
@@ -595,13 +603,13 @@ class TranslationSetting(QDialog):
                     setup_chatgpt_model(model)
                     update_chatgpt_model(model)
 
-                chatgpt_custom.textChanged.connect(
+                chatgpt_model_custom.textChanged.connect(
                     lambda model: update_chatgpt_model(model=model.strip()))
-                chatgpt_select.currentTextChanged.connect(change_chatgpt_model)
+                chatgpt_model_select.currentTextChanged.connect(
+                    change_chatgpt_model)
                 self.save_config.connect(
-                    lambda: chatgpt_select.setCurrentText(config.get('model')))
-            else:
-                chatgpt_layout.setRowVisible(chatgpt_model, False)
+                    lambda: chatgpt_model_select.setCurrentText(
+                        config.get('model')))
 
             # Sampling
             sampling = config.get('sampling', self.current_engine.sampling)
