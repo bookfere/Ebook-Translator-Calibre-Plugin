@@ -1,4 +1,5 @@
 import os
+import shutil
 import os.path
 from types import MethodType
 from tempfile import gettempdir
@@ -209,8 +210,8 @@ class ConversionWorker:
         input_path = ebook.get_input_path()
         if not self.config.get('to_library'):
             output_path = os.path.join(
-                self.config.get('output_path'), '%s [%s].%s' % (
-                    ebook.title[:200], ebook.target_lang, ebook.output_format))
+                self.config.get('output_path'),
+                '%s.%s' % (ebook.title[:200], ebook.output_format))
         else:
             output_path = PersistentTemporaryFile(
                 suffix='.' + ebook.output_format).name
@@ -266,21 +267,17 @@ class ConversionWorker:
             metadata.title = ebook_title
 
         if self.config.get('to_library'):
-            # with open(output_path, 'rb') as file:
-            #     metadata = get_metadata(file, ebook.output_format)
-            #     if ebook.is_extra_format():
-            #         metadata.title = ebook.title
             book_id = self.db.create_book_entry(metadata)
             self.api.add_format(
                 book_id, ebook.output_format, output_path, run_hooks=False)
             self.gui.library_view.model().books_added(1)
             output_path = self.api.format_abspath(book_id, ebook.output_format)
-            # os.remove(temp_file)
         else:
             dirname = os.path.dirname(output_path)
             filename = '%s.%s' % (ebook_title, ebook.output_format)
             new_output_path = os.path.join(dirname, filename)
-            os.rename(output_path, new_output_path)
+            # os.rename(output_path, new_output_path)
+            shutil.move(output_path, new_output_path)
             output_path = new_output_path
 
         self.gui.status_bar.show_message(

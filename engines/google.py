@@ -246,6 +246,7 @@ class GeminiPro(Base):
 
     concurrency_limit = 1
     request_interval = 1
+    request_timeout = 30.0
 
     prompt = (
         'You are a meticulous translator who translates any given content '
