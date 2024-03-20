@@ -5,13 +5,10 @@ import socket
 import hashlib
 from subprocess import Popen
 
-from calibre.utils.logging import Log
-
 from ..lib.cssselect import GenericTranslator, SelectorError
 
 
 ns = {'x': 'http://www.w3.org/1999/xhtml'}
-log = Log()
 is_test = 'unittest' in sys.modules
 
 

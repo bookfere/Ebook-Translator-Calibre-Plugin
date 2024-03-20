@@ -55,6 +55,7 @@ class PreparationWorker(QObject):
     start = pyqtSignal()
     progress = pyqtSignal(int)
     progress_message = pyqtSignal(str)
+    progress_detail = pyqtSignal(str)
     finished = pyqtSignal(str)
 
     def __init__(self, engine_class, ebook):
@@ -78,6 +79,9 @@ class PreparationWorker(QObject):
             + Extraction.__version__)
         cache = get_cache(cache_id)
 
+        self.progress_detail.emit(
+            'Start processing the ebook: %s' % self.ebook.title)
+
         if cache.is_fresh() or not cache.is_persistence():
             cache.set_info('title', self.ebook.title)
             cache.set_info('engine_name', self.engine_class.name)
@@ -89,10 +93,11 @@ class PreparationWorker(QObject):
             a = time.time()
             # --------------------------
             self.progress_message.emit(_('Extracting ebook content...'))
-            elements = extract_item(input_path, self.ebook.input_format)
+            elements = extract_item(
+                input_path, self.ebook.input_format, self.progress_detail.emit)
             self.progress.emit(30)
             b = time.time()
-            print('extract: ', b - a)
+            self.progress_detail.emit('extracting timing: %s' % (b - a))
             if self.cancel():
                 self.clean_cache(cache)
                 return
@@ -101,7 +106,7 @@ class PreparationWorker(QObject):
             original_group = element_handler.prepare_original(elements)
             self.progress.emit(80)
             c = time.time()
-            print('filter: ', c - b)
+            self.progress_detail.emit('filtering timing: %s' % (c - b))
             if self.cancel():
                 self.clean_cache(cache)
                 return
@@ -110,10 +115,13 @@ class PreparationWorker(QObject):
             cache.save(original_group)
             self.progress.emit(100)
             d = time.time()
-            print('cache: ', d - c)
+            self.progress_detail.emit('cache timing: %s' % (d - c))
             if self.cancel():
                 self.clean_cache(cache)
                 return
+
+        self.progress_detail.emit(
+            'The ebook content was extracted successfully.')
 
         self.finished.emit(cache_id)
 
@@ -351,28 +359,43 @@ class AdvancedTranslation(QDialog):
         cover.setAlignment(Qt.AlignCenter)
         cover.setPixmap(cover_image)
 
+        title = QLabel()
+        title.setText(title.fontMetrics().elidedText(
+            self.ebook.title, Qt.ElideRight, title.width()))
+
         progress_bar = QProgressBar()
         progress_bar.setFormat('')
         progress_bar.setValue(0)
         # progress_bar.setFixedWidth(300)
-        # progress_bar.setMaximum(0)
-        # progress_bar.setMinimum(0)
-        self.preparation_worker.progress.connect(progress_bar.setValue)
+        progress_bar.setMinimum(0)
+        progress_bar.setMaximum(0)
+
+        def show_progress(value):
+            if progress_bar.maximum() == 0:
+                progress_bar.setMaximum(100)
+            progress_bar.setValue(value)
+        self.preparation_worker.progress.connect(show_progress)
 
         label = QLabel(_('Loading ebook data, please wait...'))
         label.setAlignment(Qt.AlignCenter)
         self.preparation_worker.progress_message.connect(label.setText)
 
-        layout.addItem(QSpacerItem(0, 0), 0, 0, 1, 3)
-        layout.addWidget(cover, 1, 1)
-        layout.addItem(QSpacerItem(0, 30), 2, 0, 1, 3)
-        layout.addWidget(progress_bar, 3, 1)
-        layout.addWidget(label, 4, 1)
+        detail = QPlainTextEdit()
+        detail.setReadOnly(True)
+        self.preparation_worker.progress_detail.connect(detail.appendPlainText)
+
+        layout.addWidget(cover, 0, 0)
+        layout.addWidget(title, 1, 0)
+        layout.addItem(QSpacerItem(0, 20), 2, 0, 1, 3)
+        layout.addWidget(progress_bar, 3, 0)
+        layout.addWidget(label, 4, 0)
         layout.addItem(QSpacerItem(0, 0), 5, 0, 1, 3)
-        layout.setRowStretch(0, 1)
-        layout.setRowStretch(5, 1)
-        layout.setColumnStretch(0, 1)
+        layout.addItem(QSpacerItem(10, 0), 0, 1, 6, 1)
+        layout.addWidget(detail, 0, 2, 6, 1)
+        # layout.setRowStretch(0, 1)
+        layout.setRowStretch(2, 1)
         layout.setColumnStretch(2, 1)
+        # layout.setColumnStretch(2, 1)
 
         return widget
 
@@ -691,8 +714,8 @@ class AdvancedTranslation(QDialog):
 
         def refresh_translation(paragraph):
             translation_text.clear()
-            raw_text.setPlainText(paragraph.raw)
-            original_text.setPlainText(paragraph.original)
+            raw_text.setPlainText(paragraph.raw.strip())
+            original_text.setPlainText(paragraph.original.strip())
             translation_text.setPlainText(paragraph.translation)
         self.paragraph_sig.connect(refresh_translation)
         self.trans_worker.start.connect(

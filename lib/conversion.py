@@ -5,6 +5,7 @@ from types import MethodType
 from tempfile import gettempdir
 
 from calibre.gui2 import Dispatcher
+from calibre.utils.logging import Log, Stream
 from calibre.constants import DEBUG, __version__
 from calibre.ebooks.conversion.plumber import Plumber
 from calibre.ptempfile import PersistentTemporaryFile
@@ -13,18 +14,40 @@ from calibre.ebooks.metadata.meta import get_metadata, set_metadata
 from .. import EbookTranslator
 
 from .config import get_config
-from .utils import log, sep, uid, open_path, open_file
+from .utils import sep, uid, open_path, open_file
 from .cache import get_cache, TranslationCache
 from .element import (
     Extraction, get_element_handler, get_srt_elements, get_toc_elements,
     get_page_elements, get_metadata_elements, get_pgn_elements)
 from .translation import get_translator, get_translation
-
+from .exception import ConversionAbort
 
 load_translations()
 
 
-def extract_item(input_path, input_format):
+class PrepareStream:
+    mode = 'r'
+
+    def __init__(self, callback):
+        self.callback = callback
+        self.temp = ''
+
+    def write(self, text):
+        self.temp += text
+        if text == '\n':
+            self.callback(self.temp.strip('\n'))
+            self.temp = ''
+
+    def flush(self):
+        pass
+
+
+log = Log()
+
+
+def extract_item(input_path, input_format, callback=None):
+    if callback is not None:
+        log.outputs = [Stream(PrepareStream(callback))]
     extractors = {
         'srt': get_srt_elements,
         'pgn': get_pgn_elements,
@@ -35,7 +58,6 @@ def extract_item(input_path, input_format):
 
 def extract_book(input_path):
     elements = []
-
     output_path = os.path.join(gettempdir(), 'temp.epub')
     plumber = Plumber(input_path, output_path, log=log)
 
@@ -51,10 +73,12 @@ def extract_book(input_path):
         elements.extend(get_metadata_elements(oeb.metadata))
         elements.extend(get_toc_elements(oeb.toc.nodes, []))
         elements.extend(get_page_elements(oeb.manifest.items))
+        raise ConversionAbort()
     plumber.output_plugin.convert = MethodType(convert, plumber.output_plugin)
-    plumber.run()
-
-    return elements
+    try:
+        plumber.run()
+    except ConversionAbort:
+        return elements
 
 
 def convert_item(ebook_title, input_path, output_path, source_lang,
