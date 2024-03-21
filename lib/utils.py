@@ -7,6 +7,8 @@ from subprocess import Popen
 
 from ..lib.cssselect import GenericTranslator, SelectorError
 
+from .encodings import encoding_list
+
 
 ns = {'x': 'http://www.w3.org/1999/xhtml'}
 is_test = 'unittest' in sys.modules
@@ -105,16 +107,13 @@ def open_path(path):
     Popen([cmd, path])
 
 
-def open_file(path):
-    content = ''
+def open_file(path, encoding='utf-8'):
     try:
-        with open(path, 'r', newline=None) as f:
-            content = f.read().strip()
-    except Exception:
-        with codecs.open(path, 'rU', encoding='utf-8') as f:
-            content = f.read().strip()
-    finally:
-        return content
+        with open(path, 'r', encoding=encoding, newline=None) as file:
+            return file.read()
+    except TypeError:
+        with codecs.open(path, 'rbU') as file:
+            return file.read().decode(encoding)
 
 
 def dummy(*args, **kwargs):

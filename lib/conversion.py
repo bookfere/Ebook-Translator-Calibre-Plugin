@@ -1,9 +1,9 @@
 import os
-import shutil
 import os.path
 from types import MethodType
 from tempfile import gettempdir
 
+from calibre import sanitize_file_name
 from calibre.gui2 import Dispatcher
 from calibre.utils.logging import Log, Stream
 from calibre.constants import DEBUG, __version__
@@ -24,6 +24,8 @@ from .exception import ConversionAbort
 
 load_translations()
 
+log = Log()
+
 
 class PrepareStream:
     mode = 'r'
@@ -42,102 +44,9 @@ class PrepareStream:
         pass
 
 
-log = Log()
-
-
-def extract_item(input_path, input_format, callback=None):
-    if callback is not None:
-        log.outputs = [Stream(PrepareStream(callback))]
-    extractors = {
-        'srt': get_srt_elements,
-        'pgn': get_pgn_elements,
-    }
-    extractor = extractors.get(input_format) or extract_book
-    return extractor(input_path)
-
-
-def extract_book(input_path):
-    elements = []
-    output_path = os.path.join(gettempdir(), 'temp.epub')
-    plumber = Plumber(input_path, output_path, log=log)
-
-    def convert(self, oeb, output_path, input_plugin, opts, log):
-        # for item in oeb.manifest.items:
-        #     if item.media_type == 'text/css':
-        #         for rule in item.data.cssRules:
-        #             print('='*20)
-        #             # CSSStyleRule or CSSPageRule
-        #             print(type(rule))
-        #             # CSSStyleDeclaration
-        #             print(rule.style.keys())
-        elements.extend(get_metadata_elements(oeb.metadata))
-        elements.extend(get_toc_elements(oeb.toc.nodes, []))
-        elements.extend(get_page_elements(oeb.manifest.items))
-        raise ConversionAbort()
-    plumber.output_plugin.convert = MethodType(convert, plumber.output_plugin)
-    try:
-        plumber.run()
-    except ConversionAbort:
-        return elements
-
-
-def convert_item(ebook_title, input_path, output_path, source_lang,
-                 target_lang, cache_only, is_batch, format, notification):
-    """The following parameters need attention:
-    :cache_only: Only use the translation which exists in the cache.
-    :notification: It is automatically added by arbitrary_n.
-    """
-    translator = get_translator()
-    translator.set_source_lang(source_lang)
-    translator.set_target_lang(target_lang)
-
-    element_handler = get_element_handler(
-        translator.placeholder, translator.separator)
-    element_handler.set_translation_lang(
-        translator.get_iso639_target_code(target_lang))
-
-    merge_length = str(element_handler.get_merge_length())
-    cache_id = uid(
-        input_path + translator.name + target_lang + merge_length
-        + TranslationCache.__version__ + Extraction.__version__)
-    cache = get_cache(cache_id)
-    cache.set_cache_only(cache_only)
-    cache.set_info('title', ebook_title)
-    cache.set_info('engine_name', translator.name)
-    cache.set_info('target_lang', target_lang)
-    cache.set_info('merge_length', merge_length)
-    cache.set_info('plugin_version', EbookTranslator.__version__)
-    cache.set_info('calibre_version', __version__)
-
-    translation = get_translation(
-        translator, lambda text, error=False: log.info(text))
-    translation.set_batch(is_batch)
-    translation.set_callback(cache.update_paragraph)
-
-    debug_info = '{0}\n| Diagnosis Information\n{0}'.format(sep())
-    debug_info += '\n| Calibre Version: %s\n' % __version__
-    debug_info += '| Plugin Version: %s\n' % EbookTranslator.__version__
-    debug_info += '| Translation Engine: %s\n' % translator.name
-    debug_info += '| Source Language: %s\n' % source_lang
-    debug_info += '| Target Language: %s\n' % target_lang
-    debug_info += '| Cache Enabled: %s\n' % cache.is_persistence()
-    debug_info += '| Merging Length: %s\n' % element_handler.merge_length
-    debug_info += '| Concurrent requests: %s\n' % translator.concurrency_limit
-    debug_info += '| Request Interval: %s\n' % translator.request_interval
-    debug_info += '| Request Attempt: %s\n' % translator.request_attempt
-    debug_info += '| Request Timeout: %s\n' % translator.request_timeout
-    debug_info += '| Input Path: %s\n' % input_path
-    debug_info += '| Output Path: %s' % output_path
-
-    convertors = {'srt': convert_srt, 'pgn': convert_pgn}
-    convertor = convertors.get(format) or convert_book
-    convertor(input_path, output_path, translation, element_handler, cache,
-              debug_info, notification)
-    cache.done()
-
-
-def convert_book(input_path, output_path, translation, element_handler, cache,
-                 debug_info, notification):
+def convert_book(
+        input_path, output_path, translation, element_handler, cache,
+        debug_info, encoding, notification):
     """Process ebooks that Calibre supported."""
     plumber = Plumber(
         input_path, output_path, log=log, report_progress=notification)
@@ -170,11 +79,11 @@ def convert_book(input_path, output_path, translation, element_handler, cache,
 
 
 def convert_srt(input_path, output_path, translation, element_handler, cache,
-                debug_info, notification):
+                debug_info, encoding, notification):
     log.info('Translating subtitles content... (this will take a while)')
     log.info(debug_info)
 
-    elements = get_srt_elements(input_path)
+    elements = get_srt_elements(input_path, encoding)
     original_group = element_handler.prepare_original(elements)
     cache.save(original_group)
 
@@ -194,11 +103,11 @@ def convert_srt(input_path, output_path, translation, element_handler, cache,
 
 
 def convert_pgn(input_path, output_path, translation, element_handler, cache,
-                debug_info, notification):
+                debug_info, encoding, notification):
     log.info('Translating PGN content... (this may be take a while)')
     log.info(debug_info)
 
-    elements = get_pgn_elements(input_path)
+    elements = get_pgn_elements(input_path, encoding)
     original_group = element_handler.prepare_original(elements)
     cache.save(original_group)
 
@@ -211,14 +120,119 @@ def convert_pgn(input_path, output_path, translation, element_handler, cache,
     log(_('Starting to output PGN file...'))
     log(sep())
 
-    pgn_content = open_file(input_path)
+    pgn_content = open_file(input_path, encoding)
     for element in elements:
         pgn_content = pgn_content.replace(
             element.get_raw(), element.get_translation(), 1)
-    with open(output_path, 'w') as file:
+    with open(output_path, 'w', encoding='utf-8') as file:
         file.write(pgn_content)
 
     log(_('The translation of the PGN file was completed.'))
+
+
+extra_formats = {
+    'srt': {
+        'extractor': get_srt_elements,
+        'convertor': convert_srt,
+    },
+    'pgn': {
+        'extractor': get_pgn_elements,
+        'convertor': convert_pgn,
+    }
+}
+
+
+def extract_item(input_path, input_format, encoding, callback=None):
+    if callback is not None:
+        log.outputs = [Stream(PrepareStream(callback))]
+    handler = extra_formats.get(input_format)
+    extractor = extract_book if handler is None else handler.get('extractor')
+    return extractor(input_path, encoding)
+
+
+def extract_book(input_path, encoding):
+    elements = []
+    output_path = os.path.join(gettempdir(), 'temp.epub')
+    plumber = Plumber(input_path, output_path, log=log)
+
+    def convert(self, oeb, output_path, input_plugin, opts, log):
+        # for item in oeb.manifest.items:
+        #     if item.media_type == 'text/css':
+        #         for rule in item.data.cssRules:
+        #             print('='*20)
+        #             # CSSStyleRule or CSSPageRule
+        #             print(type(rule))
+        #             # CSSStyleDeclaration
+        #             print(rule.style.keys())
+        elements.extend(get_metadata_elements(oeb.metadata))
+        elements.extend(get_toc_elements(oeb.toc.nodes, []))
+        elements.extend(get_page_elements(oeb.manifest.items))
+        raise ConversionAbort()
+    plumber.output_plugin.convert = MethodType(convert, plumber.output_plugin)
+    try:
+        plumber.run()
+    except ConversionAbort:
+        return elements
+
+
+def convert_item(
+        ebook_title, input_path, output_path, source_lang, target_lang,
+        cache_only, is_batch, format, encoding, notification):
+    """The following parameters need attention:
+    :cache_only: Only use the translation which exists in the cache.
+    :notification: It is automatically added by arbitrary_n.
+    """
+    translator = get_translator()
+    translator.set_source_lang(source_lang)
+    translator.set_target_lang(target_lang)
+
+    element_handler = get_element_handler(
+        translator.placeholder, translator.separator)
+    element_handler.set_translation_lang(
+        translator.get_iso639_target_code(target_lang))
+
+    merge_length = str(element_handler.get_merge_length())
+    _encoding = ''
+    if encoding.lower() != 'utf-8':
+        _encoding = encoding.lower()
+    cache_id = uid(
+        input_path + translator.name + target_lang + merge_length + _encoding
+        + TranslationCache.__version__ + Extraction.__version__)
+    cache = get_cache(cache_id)
+    cache.set_cache_only(cache_only)
+    cache.set_info('title', ebook_title)
+    cache.set_info('engine_name', translator.name)
+    cache.set_info('target_lang', target_lang)
+    cache.set_info('merge_length', merge_length)
+    cache.set_info('plugin_version', EbookTranslator.__version__)
+    cache.set_info('calibre_version', __version__)
+
+    translation = get_translation(
+        translator, lambda text, error=False: log.info(text))
+    translation.set_batch(is_batch)
+    translation.set_callback(cache.update_paragraph)
+
+    debug_info = '{0}\n| Diagnosis Information\n{0}'.format(sep())
+    debug_info += '\n| Calibre Version: %s\n' % __version__
+    debug_info += '| Plugin Version: %s\n' % EbookTranslator.__version__
+    debug_info += '| Translation Engine: %s\n' % translator.name
+    debug_info += '| Source Language: %s\n' % source_lang
+    debug_info += '| Target Language: %s\n' % target_lang
+    debug_info += '| Encoding: %s\n' % encoding
+    debug_info += '| Cache Enabled: %s\n' % cache.is_persistence()
+    debug_info += '| Merging Length: %s\n' % element_handler.merge_length
+    debug_info += '| Concurrent requests: %s\n' % translator.concurrency_limit
+    debug_info += '| Request Interval: %s\n' % translator.request_interval
+    debug_info += '| Request Attempt: %s\n' % translator.request_attempt
+    debug_info += '| Request Timeout: %s\n' % translator.request_timeout
+    debug_info += '| Input Path: %s\n' % input_path
+    debug_info += '| Output Path: %s' % output_path
+
+    handler = extra_formats.get(format)
+    convertor = convert_book if handler is None else handler.get('convertor')
+    convertor(input_path, output_path, translation, element_handler, cache,
+              debug_info, encoding, notification)
+    cache.done()
 
 
 class ConversionWorker:
@@ -233,9 +247,10 @@ class ConversionWorker:
     def translate_ebook(self, ebook, cache_only=False, is_batch=False):
         input_path = ebook.get_input_path()
         if not self.config.get('to_library'):
+            filename = sanitize_file_name(ebook.title[:200])
             output_path = os.path.join(
                 self.config.get('output_path'),
-                '%s.%s' % (ebook.title[:200], ebook.output_format))
+                '%s.%s' % (filename, ebook.output_format))
         else:
             output_path = PersistentTemporaryFile(
                 suffix='.' + ebook.output_format).name
@@ -247,7 +262,8 @@ class ConversionWorker:
                 'calibre_plugins.ebook_translator.lib.conversion',
                 'convert_item',
                 (ebook.title, input_path, output_path, ebook.source_lang,
-                 ebook.target_lang, cache_only, is_batch, ebook.input_format)),
+                 ebook.target_lang, cache_only, is_batch, ebook.input_format,
+                 ebook.encoding)),
             description=(_('[{} > {}] Translating "{}"').format(
                 ebook.source_lang, ebook.target_lang, ebook.title)))
         self.working_jobs[job] = (ebook, output_path)
@@ -298,24 +314,22 @@ class ConversionWorker:
             output_path = self.api.format_abspath(book_id, ebook.output_format)
         else:
             dirname = os.path.dirname(output_path)
-            filename = '%s.%s' % (ebook_title, ebook.output_format)
-            new_output_path = os.path.join(dirname, filename)
-            # os.rename(output_path, new_output_path)
-            shutil.move(output_path, new_output_path)
+            filename = sanitize_file_name(ebook_title[:200])
+            new_output_path = os.path.join(
+                dirname, '%s.%s' % (filename, ebook.output_format))
+            os.rename(output_path, new_output_path)
             output_path = new_output_path
 
         self.gui.status_bar.show_message(
             job.description + ' ' + _('completed'), 5000)
 
-        openers = {'srt': open_path, 'pgn': open_path}
-        opener = openers.get(ebook.input_format)
-
         def callback(payload):
-            if opener is not None:
-                opener(output_path)
+            if ebook.input_format in extra_formats.keys():
+                open_path(output_path)
             else:
                 kwargs = {'args': ['ebook-viewer', output_path]}
                 payload('ebook-viewer', kwargs=kwargs)
+
         self.gui.proceed_question(
             callback,
             self.gui.job_manager.launch_gui_app,

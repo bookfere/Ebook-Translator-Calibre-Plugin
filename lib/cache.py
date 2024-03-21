@@ -129,6 +129,7 @@ class TranslationCache:
             merge = int(cache.get_info('merge_length') or 0) or 'N/A'
             size = size_by_unit(os.path.getsize(file_path), 'MB')
             names.append((title, engine, lang, merge, size, name))
+            cache.close()
         return names
 
     def _path(self, name):

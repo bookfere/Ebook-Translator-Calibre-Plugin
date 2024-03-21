@@ -1,14 +1,16 @@
 import time
+import traceback
 from types import MethodType
 
 from calibre.constants import __version__
 
 from .lib.utils import uid
 from .lib.config import get_config
+from .lib.encodings import encoding_list
 from .lib.cache import Paragraph, TranslationCache, get_cache
 from .lib.translation import get_engine_class, get_translator, get_translation
 from .lib.element import get_element_handler, Extraction
-from .lib.conversion import extract_item
+from .lib.conversion import extract_item, extra_formats
 from .engines.custom import CustomTranslate
 
 from . import EbookTranslator
@@ -22,13 +24,15 @@ try:
         Qt, QObject, QDialog, QGroupBox, QWidget, QVBoxLayout, QHBoxLayout,
         QPlainTextEdit, QPushButton, QSplitter, QLabel, QThread, QLineEdit,
         QGridLayout, QProgressBar, pyqtSignal, pyqtSlot, QPixmap, QEvent,
-        QStackedWidget, QSpacerItem, QTextCursor, QTabWidget, QCheckBox)
+        QStackedWidget, QSpacerItem, QTextCursor, QTabWidget, QCheckBox,
+        QComboBox)
 except ImportError:
     from PyQt5.Qt import (
         Qt, QObject, QDialog, QGroupBox, QWidget, QVBoxLayout, QHBoxLayout,
         QPlainTextEdit, QPushButton, QSplitter, QLabel, QThread, QLineEdit,
         QGridLayout, QProgressBar, pyqtSignal, pyqtSlot, QPixmap, QEvent,
-        QStackedWidget, QSpacerItem, QTextCursor, QTabWidget, QCheckBox)
+        QStackedWidget, QSpacerItem, QTextCursor, QTabWidget, QCheckBox,
+        QComboBox)
 
 load_translations()
 
@@ -69,18 +73,20 @@ class PreparationWorker(QObject):
 
     @pyqtSlot()
     def prepare_ebook_data(self):
+        self.progress_detail.emit(
+            'Start processing the ebook: %s' % self.ebook.title)
         input_path = self.ebook.get_input_path()
         element_handler = get_element_handler(
             self.engine_class.placeholder, self.engine_class.separator)
         merge_length = str(element_handler.get_merge_length())
+        encoding = ''
+        if self.ebook.encoding.lower() != 'utf-8':
+            encoding = self.ebook.encoding.lower()
         cache_id = uid(
             input_path + self.engine_class.name + self.ebook.target_lang
-            + merge_length + TranslationCache.__version__
+            + merge_length + encoding + TranslationCache.__version__
             + Extraction.__version__)
         cache = get_cache(cache_id)
-
-        self.progress_detail.emit(
-            'Start processing the ebook: %s' % self.ebook.title)
 
         if cache.is_fresh() or not cache.is_persistence():
             cache.set_info('title', self.ebook.title)
@@ -93,8 +99,17 @@ class PreparationWorker(QObject):
             a = time.time()
             # --------------------------
             self.progress_message.emit(_('Extracting ebook content...'))
-            elements = extract_item(
-                input_path, self.ebook.input_format, self.progress_detail.emit)
+            try:
+                elements = extract_item(
+                    input_path, self.ebook.input_format, self.ebook.encoding,
+                    self.progress_detail.emit)
+            except Exception:
+                self.progress_message.emit(
+                    _('Failed to extract ebook content'))
+                self.progress_detail.emit('\n' + traceback.format_exc())
+                self.progress.emit(100)
+                self.clean_cache(cache)
+                return
             self.progress.emit(30)
             b = time.time()
             self.progress_detail.emit('extracting timing: %s' % (b - a))
@@ -232,8 +247,21 @@ class CreateTranslationProject(QDialog):
         change_target_format(target_lang.currentText())
         target_lang.currentTextChanged.connect(change_target_format)
 
+        encoding_group = QGroupBox(_('Encoding'))
+        encoding_layout = QVBoxLayout(encoding_group)
+        encoding_select = QComboBox()
+        encoding_select.addItems(encoding_list)
+        encoding_layout.addWidget(encoding_select)
+        encoding_group.setVisible(
+            self.ebook.input_format in extra_formats.keys())
+
+        def change_encoding(encoding):
+            self.ebook.set_encoding(encoding)
+        encoding_select.currentTextChanged.connect(change_encoding)
+
         layout.addWidget(input_group)
         layout.addWidget(target_group)
+        layout.addWidget(encoding_group)
 
         return widget
 

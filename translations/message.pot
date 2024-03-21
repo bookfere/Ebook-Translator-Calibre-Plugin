@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-03-18 15:59+0800\n"
+"POT-Creation-Date: 2024-03-21 20:51+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,163 +27,171 @@ msgid ""
 "keeping the original content)."
 msgstr ""
 
-#: advanced.py:91
+#: advanced.py:101
 msgid "Extracting ebook content..."
 msgstr ""
 
-#: advanced.py:100
+#: advanced.py:108
+msgid "Failed to extract ebook content"
+msgstr ""
+
+#: advanced.py:120
 msgid "Filtering ebook content..."
 msgstr ""
 
-#: advanced.py:109
+#: advanced.py:129
 msgid "Preparing user interface..."
 msgstr ""
 
-#: advanced.py:186
+#: advanced.py:209
 msgid "Start"
 msgstr ""
 
-#: advanced.py:200 batch.py:55 setting.py:186
+#: advanced.py:223 batch.py:55 setting.py:186
 msgid "Input Format"
 msgstr ""
 
-#: advanced.py:211 advanced.py:553 batch.py:56 setting.py:369
+#: advanced.py:234 advanced.py:604 batch.py:56 setting.py:369
 msgid "Target Language"
 msgstr ""
 
-#: advanced.py:304
+#: advanced.py:250
+msgid "Encoding"
+msgstr ""
+
+#: advanced.py:340
 msgid "Failed to translate {} paragraph(s), Would you like to retry?"
 msgstr ""
 
-#: advanced.py:310 lib/translation.py:258
+#: advanced.py:346 lib/translation.py:258
 msgid "Translation completed."
 msgstr ""
 
-#: advanced.py:325
+#: advanced.py:361
 msgid "There is no content that needs to be translated."
 msgstr ""
 
-#: advanced.py:362
+#: advanced.py:407
 msgid "Loading ebook data, please wait..."
 msgstr ""
 
-#: advanced.py:385
+#: advanced.py:436
 msgid "Review"
 msgstr ""
 
-#: advanced.py:386
+#: advanced.py:437
 msgid "Log"
 msgstr ""
 
-#: advanced.py:387
+#: advanced.py:438
 msgid "Errors"
 msgstr ""
 
-#: advanced.py:439
+#: advanced.py:490
 msgid "Total items: {}"
 msgstr ""
 
-#: advanced.py:440 lib/translation.py:233
+#: advanced.py:491 lib/translation.py:233
 msgid "Character count: {}"
 msgstr ""
 
-#: advanced.py:468 cache.py:92 cache.py:182 components/engine.py:202
+#: advanced.py:519 cache.py:92 cache.py:182 components/engine.py:202
 #: components/table.py:135
 msgid "Delete"
 msgstr ""
 
-#: advanced.py:469
+#: advanced.py:520
 msgid "Translate All"
 msgstr ""
 
-#: advanced.py:470
+#: advanced.py:521
 msgid "Translate Selected"
 msgstr ""
 
-#: advanced.py:495 advanced.py:506
+#: advanced.py:546 advanced.py:557
 msgid "Stop"
 msgstr ""
 
-#: advanced.py:501
+#: advanced.py:552
 msgid "Stopping..."
 msgstr ""
 
-#: advanced.py:531
+#: advanced.py:582
 msgid "Cache Status"
 msgstr ""
 
-#: advanced.py:534
+#: advanced.py:585
 msgid "Disabled"
 msgstr ""
 
-#: advanced.py:534
+#: advanced.py:585
 msgid "Enabled"
 msgstr ""
 
-#: advanced.py:541 setting.py:328
+#: advanced.py:592 setting.py:328
 msgid "Translation Engine"
 msgstr ""
 
-#: advanced.py:547 batch.py:56 setting.py:368
+#: advanced.py:598 batch.py:56 setting.py:368
 msgid "Source Language"
 msgstr ""
 
-#: advanced.py:559
+#: advanced.py:610
 msgid "Custom Ebook Title"
 msgstr ""
 
-#: advanced.py:564
+#: advanced.py:615
 msgid "By default, title metadata will be translated."
 msgstr ""
 
-#: advanced.py:593
+#: advanced.py:644
 msgid "Output Ebook"
 msgstr ""
 
-#: advanced.py:595
+#: advanced.py:646
 msgid "Output"
 msgstr ""
 
-#: advanced.py:643 components/table.py:89
+#: advanced.py:694 components/table.py:89
 msgid "Translated"
 msgstr ""
 
-#: advanced.py:644
+#: advanced.py:695
 msgid "The ebook has not been translated yet."
 msgstr ""
 
-#: advanced.py:648
+#: advanced.py:699
 msgid ""
 "The number of lines in some translation units differs between the original "
 "text and the translated text. Are you sure you want to output without "
 "checking alignment?"
 msgstr ""
 
-#: advanced.py:683
+#: advanced.py:734
 msgid "No translation yet"
 msgstr ""
 
-#: advanced.py:732 components/engine.py:208 setting.py:98
+#: advanced.py:783 components/engine.py:208 setting.py:98
 msgid "Save"
 msgstr ""
 
-#: advanced.py:788
+#: advanced.py:839
 msgid "Your changes have been saved."
 msgstr ""
 
-#: advanced.py:801
+#: advanced.py:852
 msgid "Translation log"
 msgstr ""
 
-#: advanced.py:812
+#: advanced.py:863
 msgid "Error log"
 msgstr ""
 
-#: advanced.py:832
+#: advanced.py:883
 msgid "Are you sure you want to translate all {:n} paragraphs?"
 msgstr ""
 
-#: advanced.py:858
+#: advanced.py:909
 msgid "Are you sure you want to stop the translation progress?"
 msgstr ""
 
@@ -503,55 +511,55 @@ msgstr ""
 msgid "Youdao"
 msgstr ""
 
-#: lib/conversion.py:139
+#: lib/conversion.py:73
 msgid "Start to convert ebook format..."
 msgstr ""
 
-#: lib/conversion.py:162
+#: lib/conversion.py:96
 msgid "Starting to output subtitles file..."
 msgstr ""
 
-#: lib/conversion.py:168
+#: lib/conversion.py:102
 msgid "The translation of the subtitles file was completed."
 msgstr ""
 
-#: lib/conversion.py:186
+#: lib/conversion.py:120
 msgid "Starting to output PGN file..."
 msgstr ""
 
-#: lib/conversion.py:196
+#: lib/conversion.py:130
 msgid "The translation of the PGN file was completed."
 msgstr ""
 
-#: lib/conversion.py:226
+#: lib/conversion.py:267
 msgid "[{} > {}] Translating \"{}\""
 msgstr ""
 
-#: lib/conversion.py:235 tests/test_convertion.py:40
+#: lib/conversion.py:276 tests/test_convertion.py:40
 msgid "Translation job failed"
 msgstr ""
 
-#: lib/conversion.py:287 tests/test_convertion.py:98
-#: tests/test_convertion.py:167 tests/test_convertion.py:231
-#: tests/test_convertion.py:287
+#: lib/conversion.py:324 tests/test_convertion.py:98
+#: tests/test_convertion.py:164 tests/test_convertion.py:228
+#: tests/test_convertion.py:284
 msgid "completed"
 msgstr ""
 
-#: lib/conversion.py:302 tests/test_convertion.py:103
-#: tests/test_convertion.py:172 tests/test_convertion.py:238
-#: tests/test_convertion.py:292
+#: lib/conversion.py:337 tests/test_convertion.py:103
+#: tests/test_convertion.py:169 tests/test_convertion.py:235
+#: tests/test_convertion.py:289
 msgid "Ebook Translation Log"
 msgstr ""
 
-#: lib/conversion.py:303 tests/test_convertion.py:104
-#: tests/test_convertion.py:173 tests/test_convertion.py:239
-#: tests/test_convertion.py:293
+#: lib/conversion.py:338 tests/test_convertion.py:104
+#: tests/test_convertion.py:170 tests/test_convertion.py:236
+#: tests/test_convertion.py:290
 msgid "Translation Completed"
 msgstr ""
 
-#: lib/conversion.py:304 tests/test_convertion.py:106
-#: tests/test_convertion.py:175 tests/test_convertion.py:241
-#: tests/test_convertion.py:295
+#: lib/conversion.py:339 tests/test_convertion.py:106
+#: tests/test_convertion.py:172 tests/test_convertion.py:238
+#: tests/test_convertion.py:292
 msgid "The translation of \"{}\" was completed. Do you want to open the book?"
 msgstr ""
 

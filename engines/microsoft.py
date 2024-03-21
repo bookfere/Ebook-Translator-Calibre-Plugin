@@ -16,7 +16,7 @@ load_translations()
 
 
 class MicrosoftEdgeTranslate(Base):
-    name = 'MicrosoftEdge(Free))'
+    name = 'MicrosoftEdge(Free)'
     alias = 'Microsoft Edge (Free)'
     lang_codes = Base.load_lang_codes(microsoft)
     endpoint = 'https://api-edge.cognitive.microsofttranslator.com/translate'
