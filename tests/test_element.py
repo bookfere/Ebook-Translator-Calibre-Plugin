@@ -10,7 +10,8 @@ from ..lib.cache import Paragraph
 from ..lib.element import (
     get_string, get_name, Extraction, ElementHandler, ElementHandlerMerge,
     Element, SrtElement, PgnElement, TocElement, PageElement, MetadataElement,
-    get_toc_elements, get_metadata_elements)
+    get_srt_elements, get_pgn_elements, get_toc_elements,
+    get_metadata_elements)
 from ..engines import DeeplFreeTranslate
 from ..engines.base import Base
 
@@ -34,11 +35,23 @@ class TestFunction(unittest.TestCase):
         xhtml = '<p xmlns="http://www.w3.org/1999/xhtml">a</p>'
         self.assertEqual('p', get_name(etree.XML(xhtml)))
 
-    def test_get_srt_elements(self):
-        pass
+    @patch('calibre_plugins.ebook_translator.lib.element.open_file')
+    def test_get_srt_elements(self, mock_open_file):
+        mock_open_file.return_value = '01:00\n0\na\nb\n\n02:00\n1\nc\n\n'
+        elements = get_srt_elements('/path/to/srt', 'utf-8')
+        mock_open_file.assert_called_once_with('/path/to/srt', 'utf-8')
+        self.assertEqual(2, len(elements))
+        self.assertEqual(['01:00', '0', 'a\nb'], elements[0].element)
+        self.assertEqual(['02:00', '1', 'c'], elements[1].element)
 
-    def test_get_pgn_elements(self):
-        pass
+    @patch('calibre_plugins.ebook_translator.lib.element.open_file')
+    def test_get_pgn_elements(self, mock_open_file):
+        mock_open_file.return_value = '1\n2\n3\n\nabc{abc}abc\n\ndef{def}def'
+        elements = get_pgn_elements('/path/to/pgn', 'utf-8')
+        mock_open_file.assert_called_once_with('/path/to/pgn', 'utf-8')
+        self.assertEqual(2, len(elements))
+        self.assertEqual(['{abc}', None], elements[0].element)
+        self.assertEqual(['{def}', None], elements[1].element)
 
     def test_get_toc_elements(self):
         toc = TOC()

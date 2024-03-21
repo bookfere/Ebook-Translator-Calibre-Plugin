@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-03-18 15:59+0800\n"
+"POT-Creation-Date: 2024-03-21 20:51+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: none\n"
@@ -30,6 +30,9 @@ msgstr ""
 msgid "Extracting ebook content..."
 msgstr "Extraindo o conteúdo do ebook..."
 
+msgid "Failed to extract ebook content"
+msgstr ""
+
 msgid "Filtering ebook content..."
 msgstr "Filtrando conteúdo do ebook..."
 
@@ -44,6 +47,9 @@ msgstr "Formato de Entrada"
 
 msgid "Target Language"
 msgstr "Idioma de Destino"
+
+msgid "Encoding"
+msgstr ""
 
 msgid "Failed to translate {} paragraph(s), Would you like to retry?"
 msgstr "Falha ao traduzir {} parágrafo(s), gostaria de tentar novamente?"

@@ -143,7 +143,7 @@ class TestConversionWorker(unittest.TestCase):
         self.ebook.title = 'test title'
         self.ebook.input_format = 'epub'
         self.ebook.output_format = 'epub'
-        self.ebook.custom_title = 'test custom title'
+        self.ebook.custom_title = 'test: custom title*'
         self.ebook.target_lang = 'German'
         self.ebook.lang_code = 'de'
         file = Mock()
@@ -154,15 +154,12 @@ class TestConversionWorker(unittest.TestCase):
         metadata.language = 'en'
         mock_get_metadata.return_value = metadata
 
-        self.worker.db.create_book_entry.return_value = 89
-        self.worker.api.format_abspath.return_value = '/path/to/test[m].epub'
-
         self.worker.translate_done(self.job)
 
         mock_open.assert_called_once_with('/path/to/test.epub', 'r+b')
         mock_os_rename.assert_called_once_with(
             '/path/to/test.epub',
-            '/path/to/test custom title [German].epub')
+            '/path/to/test_ custom title_ [German].epub')
         self.worker.gui.status_bar.show_message.assert_called_once_with(
             'test description ' + _('completed'), 5000)
         arguments = self.worker.gui.proceed_question.mock_calls[0].args
@@ -174,14 +171,14 @@ class TestConversionWorker(unittest.TestCase):
         self.assertEqual(_(
             'The translation of "{}" was completed. '
             'Do you want to open the book?')
-            .format('test custom title [German]'),
+            .format('test: custom title* [German]'),
             arguments[5])
 
         mock_payload = Mock()
         arguments[0](mock_payload)
         mock_payload.assert_called_once_with(
             'ebook-viewer', kwargs={'args': [
-                'ebook-viewer', '/path/to/test custom title [German].epub']})
+                'ebook-viewer', '/path/to/test_ custom title_ [German].epub']})
 
         arguments = self.worker.gui.proceed_question.mock_calls[0].kwargs
         self.assertEqual(True, arguments.get('log_is_file'))
@@ -270,7 +267,7 @@ class TestConversionWorker(unittest.TestCase):
         self.ebook.custom_title = 'test custom title'
         self.ebook.input_format = 'srt'
         self.ebook.output_format = 'srt'
-        self.ebook.custom_title = 'test custom title'
+        self.ebook.custom_title = 'test: custom title*'
         self.ebook.target_lang = 'German'
         self.worker.working_jobs = {
             self.job: (self.ebook, '/path/to/test.srt')}
@@ -282,7 +279,7 @@ class TestConversionWorker(unittest.TestCase):
         self.worker.api.get_metadata.assert_called_once_with(89)
         mock_os_rename.assert_called_once_with(
             '/path/to/test.srt',
-            '/path/to/test custom title [German].srt')
+            '/path/to/test_ custom title_ [German].srt')
         self.worker.gui.status_bar.show_message.assert_called_once_with(
             'test description ' + _('completed'), 5000)
         arguments = self.worker.gui.proceed_question.mock_calls[0].args
@@ -294,13 +291,13 @@ class TestConversionWorker(unittest.TestCase):
         self.assertEqual(_(
             'The translation of "{}" was completed. '
             'Do you want to open the book?')
-            .format('test custom title [German]'),
+            .format('test: custom title* [German]'),
             arguments[5])
 
         mock_payload = Mock()
         arguments[0](mock_payload)
         mock_open_path.assert_called_once_with(
-            '/path/to/test custom title [German].srt')
+            '/path/to/test_ custom title_ [German].srt')
 
         arguments = self.worker.gui.proceed_question.mock_calls[0].kwargs
         self.assertEqual(True, arguments.get('log_is_file'))

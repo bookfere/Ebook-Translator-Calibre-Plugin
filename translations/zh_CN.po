@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-03-18 15:59+0800\n"
+"POT-Creation-Date: 2024-03-21 20:51+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -28,6 +28,9 @@ msgstr "一个可以将电子书翻译成指定语言（原文译文对照）的
 msgid "Extracting ebook content..."
 msgstr "提取电子书内容..."
 
+msgid "Failed to extract ebook content"
+msgstr "抽取电子书内容失败"
+
 msgid "Filtering ebook content..."
 msgstr "过滤电子书内容..."
 
@@ -42,6 +45,9 @@ msgstr "输入格式"
 
 msgid "Target Language"
 msgstr "目标语言"
+
+msgid "Encoding"
+msgstr "编码"
 
 msgid "Failed to translate {} paragraph(s), Would you like to retry?"
 msgstr "{} 个段落翻译失败，是否重试？"

@@ -48,3 +48,6 @@ class TestUtils(unittest.TestCase):
             [(1, 7)], group([1, 2, 3, 4, 5, 6, 7]))
         self.assertEqual(
             [(1, 3), (5, 7), (9, 9)], group([1, 2, 3, 5, 6, 7, 9]))
+
+    def test_open_file(self):
+        pass

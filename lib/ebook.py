@@ -1,8 +1,3 @@
-import re
-
-from calibre import sanitize_file_name
-
-
 class Ebooks:
     class Ebook:
         def __init__(self, id, title, files, input_format, source_lang,
@@ -19,11 +14,7 @@ class Ebooks:
 
             self.title = title
             self.custom_title = None
-
-        def set_custom_title(self, title):
-            self.custom_title = None if title is None else \
-                sanitize_file_name(title)
-            # self.title = re.sub(r'^\.+|[\/\\\\<>:"|?*\n\t]', '', title)
+            self.encoding = 'utf-8'
 
         def set_input_format(self, format):
             self.input_format = format
@@ -39,6 +30,12 @@ class Ebooks:
 
         def set_lang_code(self, code):
             self.lang_code = code
+
+        def set_custom_title(self, title):
+            self.custom_title = title
+
+        def set_encoding(self, encoding):
+            self.encoding = encoding
 
         def get_input_path(self):
             return self.files.get(self.input_format)

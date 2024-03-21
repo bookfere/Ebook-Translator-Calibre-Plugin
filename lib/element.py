@@ -562,10 +562,10 @@ class ElementHandlerMerge(ElementHandler):
         return dict(translations)
 
 
-def get_srt_elements(path):
+def get_srt_elements(path, encoding):
     elements = []
-    content = open_file(path)
-    for section in content.split('\n\n'):
+    content = open_file(path, encoding)
+    for section in content.strip().split('\n\n'):
         lines = section.split('\n')
         number = lines.pop(0)
         time = lines.pop(0)
@@ -574,9 +574,9 @@ def get_srt_elements(path):
     return elements
 
 
-def get_pgn_elements(path):
+def get_pgn_elements(path, encoding):
     pattern = re.compile(r'\{[^}]*[a-zA-z][^}]*\}')
-    originals = pattern.findall(open_file(path))
+    originals = pattern.findall(open_file(path, encoding))
     return [PgnElement([original, None]) for original in originals]
 
 
