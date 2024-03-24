@@ -1,0 +1,1033 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the Ebook Translator Calibre Plugin package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Ebook Translator Calibre Plugin\n"
+"Report-Msgid-Bugs-To: bookfere@gmail.com\n"
+"POT-Creation-Date: 2024-03-21 20:51+0800\n"
+"PO-Revision-Date: 2024-03-23 15:12+0300\n"
+"Last-Translator: DogancanYr <EMAIL@ADDRESS>\n"
+"Language-Team: Turkish <LL@li.org>\n"
+"Language: tr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: __init__.py:19
+msgid "Ebook Translator"
+msgstr "E-kitap Çevirmeni"
+
+#: __init__.py:26
+msgid ""
+"A Calibre plugin to translate ebook into a specified language (optionally "
+"keeping the original content)."
+msgstr ""
+"E-kitabı belirli bir dile çevirmek için bir Calibre eklentisi"
+"(isteğe bağlı olarak orijinal içeriği korur)."
+
+#: advanced.py:101
+msgid "Extracting ebook content..."
+msgstr "E-kitap içeriği çıkarılıyor..."
+
+#: advanced.py:108
+msgid "Failed to extract ebook content"
+msgstr "E-kitap içeriği çıkarılamadı"
+
+#: advanced.py:120
+msgid "Filtering ebook content..."
+msgstr "E-kitap içeriği filtreleniyor..."
+
+#: advanced.py:129
+msgid "Preparing user interface..."
+msgstr "Kullanıcı arayüzü hazırlanıyor..."
+
+#: advanced.py:209
+msgid "Start"
+msgstr "Başlat"
+
+#: advanced.py:223 batch.py:55 setting.py:186
+msgid "Input Format"
+msgstr "Giriş Formatı"
+
+#: advanced.py:234 advanced.py:604 batch.py:56 setting.py:369
+msgid "Target Language"
+msgstr "Hedef Dil"
+
+#: advanced.py:250
+msgid "Encoding"
+msgstr "Kodlama"
+
+#: advanced.py:340
+msgid "Failed to translate {} paragraph(s), Would you like to retry?"
+msgstr "{} paragrafın çevirisi başarısız oldu, Tekrar denemek ister misiniz?"
+
+#: advanced.py:346 lib/translation.py:258
+msgid "Translation completed."
+msgstr "Çeviri tamamlandı."
+
+#: advanced.py:361
+msgid "There is no content that needs to be translated."
+msgstr "Çeviri gerektiren bir içerik yok."
+
+#: advanced.py:407
+msgid "Loading ebook data, please wait..."
+msgstr "E-kitap verileri yükleniyor, lütfen bekleyin..."
+
+#: advanced.py:436
+msgid "Review"
+msgstr "İnceleme"
+
+#: advanced.py:437
+msgid "Log"
+msgstr "Günlük"
+
+#: advanced.py:438
+msgid "Errors"
+msgstr "Hatalar"
+
+#: advanced.py:490
+msgid "Total items: {}"
+msgstr "Toplam öğe: {}"
+
+#: advanced.py:491 lib/translation.py:233
+msgid "Character count: {}"
+msgstr "Karakter sayısı: {}"
+
+#: advanced.py:519 cache.py:92 cache.py:182 components/engine.py:202
+#: components/table.py:135
+msgid "Delete"
+msgstr "Sil"
+
+#: advanced.py:520
+msgid "Translate All"
+msgstr "Tümünü Çevir"
+
+#: advanced.py:521
+msgid "Translate Selected"
+msgstr "Seçilenleri Çevir"
+
+#: advanced.py:546 advanced.py:557
+msgid "Stop"
+msgstr "Dur"
+
+#: advanced.py:552
+msgid "Stopping..."
+msgstr "Duruyor..."
+
+#: advanced.py:582
+msgid "Cache Status"
+msgstr "Önbellek Durumu"
+
+#: advanced.py:585
+msgid "Disabled"
+msgstr "Devre Dışı"
+
+#: advanced.py:585
+msgid "Enabled"
+msgstr "Etkin"
+
+#: advanced.py:592 setting.py:328
+msgid "Translation Engine"
+msgstr "Çeviri Motoru"
+
+#: advanced.py:598 batch.py:56 setting.py:368
+msgid "Source Language"
+msgstr "Kaynak Dil"
+
+#: advanced.py:610
+msgid "Custom Ebook Title"
+msgstr "Özel E-Kitap Başlığı"
+
+#: advanced.py:615
+msgid "By default, title metadata will be translated."
+msgstr "Varsayılan olarak başlık meta verileri çevrilecek."
+
+#: advanced.py:644
+msgid "Output Ebook"
+msgstr "E-kitap Çıktıları"
+
+#: advanced.py:646
+msgid "Output"
+msgstr "Çıktı"
+
+#: advanced.py:694 components/table.py:89
+msgid "Translated"
+msgstr "Çeviri"
+
+#: advanced.py:695
+msgid "The ebook has not been translated yet."
+msgstr "E-kitap henüz tercüme edilmedi."
+
+#: advanced.py:699
+msgid ""
+"The number of lines in some translation units differs between the original "
+"text and the translated text. Are you sure you want to output without "
+"checking alignment?"
+msgstr ""
+"Bazı çeviri birimlerindeki satır sayısı orijinal"
+"metin ve çevrilmiş metin olmadan çıktı almak istediğinizden emin misiniz?"
+"Hizalamayı kontrol et."
+
+#: advanced.py:734
+msgid "No translation yet"
+msgstr "Henüz çeviri yok"
+
+#: advanced.py:783 components/engine.py:208 setting.py:98
+msgid "Save"
+msgstr "Kaydet"
+
+#: advanced.py:839
+msgid "Your changes have been saved."
+msgstr "Değişiklikleriniz kaydedildi."
+
+#: advanced.py:852
+msgid "Translation log"
+msgstr "Çeviri günlüğü"
+
+#: advanced.py:863
+msgid "Error log"
+msgstr "Hata günlüğü"
+
+#: advanced.py:883
+msgid "Are you sure you want to translate all {:n} paragraphs?"
+msgstr "Tüm {:n} paragrafı çevirmek istediğinizden emin misiniz?"
+
+#: advanced.py:909
+msgid "Are you sure you want to stop the translation progress?"
+msgstr "Çeviri ilerlemesini durdurmak istediğinizden emin misiniz?"
+
+#: batch.py:55 setting.py:187
+msgid "Output Format"
+msgstr "Çıktı Formatı"
+
+#: batch.py:55 cache.py:202
+msgid "Title"
+msgstr "Başlık"
+
+#: batch.py:128 components/engine.py:139 components/table.py:133
+msgid "Translate"
+msgstr "Çevir"
+
+#: batch.py:139 lib/cache.py:126
+msgid "Unknown"
+msgstr "Bilinmiyor"
+
+#: batch.py:148 cache.py:130 setting.py:1136
+msgid "The specified path does not exist."
+msgstr "Belirtilen yol mevcut değil."
+
+#: cache.py:72
+msgid "Choose a path to store cache files."
+msgstr "Önbellek dosyalarını depolamak için bir yol seçin."
+
+#: cache.py:73 components/mode.py:41 components/mode.py:51 setting.py:158
+#: setting.py:901 setting.py:920 setting.py:968
+msgid "Choose"
+msgstr "Seç"
+
+#: cache.py:74
+msgid "Reset"
+msgstr "Sıfırla"
+
+#: cache.py:75
+msgid "Reveal"
+msgstr "Açıkla"
+
+#: cache.py:77
+msgid "Cache Path"
+msgstr "Önbellek Yolu"
+
+#: cache.py:90
+msgid "Clear All"
+msgstr "Hepsini Temizle"
+
+#: cache.py:110
+msgid ""
+"All cache(s) will be moved to the default path. Are you sure to proceed?"
+msgstr ""
+"Tüm önbellek(ler) varsayılan yola taşınacak. "
+
+#: cache.py:125
+msgid "All cache(s) will be moved to the new path. Are you sure to proceed?"
+msgstr "Tüm önbellekler yeni yola taşınacak. "
+
+#: cache.py:133
+msgid "Please choose an empty folder."
+msgstr "Lütfen boş bir klasör seçin."
+
+#: cache.py:143
+msgid "Are you sure you want to clear all caches?"
+msgstr "Tüm önbellekleri temizlemek istediğinizden emin misiniz?"
+
+#: cache.py:153
+msgid "No cache exists."
+msgstr "Önbellek yok."
+
+#: cache.py:158
+msgid "Total: {}"
+msgstr "Toplam: {}"
+
+#: cache.py:189
+msgid "Are you sure you want to delete the selected cache(s)?"
+msgstr "Seçili önbellekleri silmek istediğinizden emin misiniz?"
+
+#: cache.py:202 components/table.py:40 setting.py:63
+msgid "Engine"
+msgstr "Motor"
+
+#: cache.py:202 components/table.py:40
+msgid "Language"
+msgstr "Dil"
+
+#: cache.py:202
+msgid "Merge Length"
+msgstr "Birleştirme Uzunluğu"
+
+#: cache.py:203
+msgid "Filename"
+msgstr "Dosya adı"
+
+#: cache.py:203
+msgid "Size (MB)"
+msgstr "Boyut (MB)"
+
+#: components/engine.py:65 lib/translation.py:173 tests/test_translation.py:108
+#: tests/test_translation.py:128 tests/test_translation.py:141
+msgid "Translating..."
+msgstr "Çeviri yapılıyor..."
+
+#: components/engine.py:97
+msgid "Test Translation Engine"
+msgstr "Çeviri Motorunu Test Edin"
+
+#: components/engine.py:144
+msgid "Usage: checking..."
+msgstr "Kullanım: kontrol ediliyor..."
+
+#: components/engine.py:155
+msgid "Usage: {}"
+msgstr "Kullanım: {}"
+
+#: components/engine.py:193
+msgid "Custom Translation Engine"
+msgstr "Özel Çeviri Motoru"
+
+#: components/engine.py:201
+msgid "Add"
+msgstr "Ekle"
+
+#: components/engine.py:205
+msgid "Clear"
+msgstr "Temizle"
+
+#: components/engine.py:206
+msgid "Restore"
+msgstr "Geri Yükle"
+
+#: components/engine.py:207
+msgid "Verify"
+msgstr "Doğrula"
+
+#: components/engine.py:248
+msgid "Valid engine data format."
+msgstr "Geçerli motor veri formatı."
+
+#: components/engine.py:267
+msgid "The engine name is already in use."
+msgstr "Motor adı zaten kullanılıyor."
+
+#: components/engine.py:289 setting.py:77
+msgid "The setting has been saved."
+msgstr "Ayar kaydedildi."
+
+#: components/format.py:27 setting.py:196
+msgid "Ebook Specific"
+msgstr "E-kitaba Özel"
+
+#: components/info.py:35
+msgid "Donate"
+msgstr "Bağış yap"
+
+#: components/info.py:35
+msgid "Feedback"
+msgstr "Geri bildirim"
+
+#: components/lang.py:34 engines/base.py:70 setting.py:1198
+msgid "Auto detect"
+msgstr "Otomatik algılama"
+
+#: components/mode.py:28 setting.py:125
+msgid "Choose a translation mode for clicking the icon button."
+msgstr "Simge düğmesine tıklamak için bir çeviri modu seçin."
+
+#: components/mode.py:33 setting.py:115 ui.py:54 ui.py:82
+msgid "Advanced Mode"
+msgstr "Gelişmiş Mod"
+
+#: components/mode.py:38
+msgid ""
+"This mode provides additional options for the translation process, allowing "
+"for more control and customization."
+msgstr ""
+"Bu mod, çeviri işlemi için ek seçenekler sağlayarak"
+"daha fazla kontrol ve özelleştirme için."
+
+#: components/mode.py:43 setting.py:116 ui.py:55 ui.py:109
+msgid "Batch Mode"
+msgstr "Toplu Mod"
+
+#: components/mode.py:48
+msgid ""
+"This mode allows users to translate multiple ebooks at once, streamlining "
+"the translation process and saving time."
+msgstr ""
+"Bu mod, kullanıcıların birden fazla e-kitabı aynı anda çevirmesine olanak tanıyarak "
+"çeviri sürecini kolaylaştırır ve zamandan tasarruf sağlar."
+
+#: components/table.py:40 setting.py:771
+msgid "Original"
+msgstr "Orijinal"
+
+#: components/table.py:40
+msgid "Status"
+msgstr "Durum"
+
+#: components/table.py:84
+msgid "Untranslated"
+msgstr "çevrilmemiş"
+
+#: components/table.py:111
+msgid ""
+"The number of lines differs between the original text and the translated "
+"text."
+msgstr ""
+"Orijinal metin ile çevrilmiş metin arasındaki satır sayısı farklılık gösteriyor."
+
+#: components/table.py:139
+msgid "Select the whole chapter"
+msgstr "Tüm bölümü seç"
+
+#: components/table.py:145
+msgid "Select similar paragraphs: {}=\"{}\""
+msgstr "Benzer paragrafları seç: {}=\"{}\""
+
+#: components/table.py:192
+msgid "Retain at least one row."
+msgstr "En az bir satırı koru."
+
+#: engines/anthropic.py:110 engines/base.py:210 engines/openai.py:109
+#: tests/test_engine.py:92
+msgid "Can not parse returned response. Raw data: {}"
+msgstr "Geri dönen yanıt ayrıştırılamıyor. "
+
+#: engines/baidu.py:18
+msgid "Baidu"
+msgstr "Baidu"
+
+#: engines/base.py:20 setting.py:349
+msgid "API Keys"
+msgstr "API Anahtarları"
+
+#: engines/base.py:87
+msgid "A correct key format \"{}\" is required."
+msgstr "Doğru bir anahtar biçimi \"{}\" gerekli."
+
+#: engines/custom.py:45 tests/test_engine.py:377
+msgid "Engine data must be in valid JSON format."
+msgstr "Motor verileri geçerli JSON formatında olmalıdır."
+
+#: engines/custom.py:48 tests/test_engine.py:380
+msgid "Invalid engine data."
+msgstr "Geçersiz motor verileri."
+
+#: engines/custom.py:52 tests/test_engine.py:383
+msgid "Engine name is required."
+msgstr "Motor adı gerekli."
+
+#: engines/custom.py:55 tests/test_engine.py:387
+msgid "Engine name must be different from builtin engine name."
+msgstr "Motor adı yerleşik motor adından farklı olmalıdır."
+
+#: engines/custom.py:59 tests/test_engine.py:390 tests/test_engine.py:393
+msgid "Language codes are required."
+msgstr "Dil kodları gerekli."
+
+#: engines/custom.py:63 tests/test_engine.py:396 tests/test_engine.py:399
+msgid "Source and target must be added in pair."
+msgstr "Kaynak ve hedef çift olarak eklenmelidir."
+
+#: engines/custom.py:67 tests/test_engine.py:402
+msgid "Request information is required."
+msgstr "İstek bilgisi gerekli."
+
+#: engines/custom.py:69 tests/test_engine.py:406
+msgid "API URL is required."
+msgstr "API URL'si gerekli."
+
+#: engines/custom.py:73 tests/test_engine.py:411
+msgid "Placeholder <text> is required."
+msgstr "Yer tutucu <metin> gerekli."
+
+#: engines/custom.py:77 tests/test_engine.py:416
+msgid "Request headers must be an JSON object."
+msgstr "İstek üstbilgileri bir JSON nesnesi olmalıdır."
+
+#: engines/custom.py:80 tests/test_engine.py:422
+msgid "A appropriate Content-Type in headers is required."
+msgstr "Başlıklarda uygun bir İçerik Türü gerekli."
+
+#: engines/custom.py:84 tests/test_engine.py:427
+msgid "Expression to parse response is required."
+msgstr "Yanıtı ayrıştırmak için ifade gerekli."
+
+#: engines/custom.py:134
+msgid "Response was parsed incorrectly."
+msgstr "Yanıt yanlış ayrıştırıldı."
+
+#: engines/deepl.py:36 tests/test_engine.py:76
+msgid "{} total, {} used, {} left"
+msgstr "{} toplam, {} kullanıldı, {} kaldı"
+
+#: engines/google.py:66
+msgid ""
+"This plugin uses Application Default Credentials (ADC) in your local "
+"environment to access your Google Translate service. To set up the ADC, "
+"follow these steps:\n"
+"1. Install the gcloud CLI by checking out its instructions {}.\n"
+"2. Run the command: gcloud auth application-default login.\n"
+"3. Sign in to your Google account and grant needed privileges."
+msgstr ""
+"Bu eklenti, yerel bilgisayarınızdaki Uygulama Varsayılan Kimlik Bilgilerini (ADC) kullanır"
+"ortamına Google Çeviri hizmetinize erişmek için. ADC'yi kurmak için "
+"şu adımları izleyin:\n"
+"1. Talimatlarını kontrol ederek gcloud CLI'yi yükleyin {}.\n"
+"2. Şu komutu çalıştırın: gcloud auth application-default login.\n"
+"3. Google hesabınızda oturum açın ve gerekli ayrıcalıkları verin."
+
+#: engines/google.py:76
+msgid "Cannot run the command \"{}\"."
+msgstr "\"{}\" komutu çalıştırılamıyor."
+
+#: engines/google.py:121
+msgid "Cannot find the command \"{}\"."
+msgstr "\"{}\" komutu bulunamıyor."
+
+#: engines/microsoft.py:39
+msgid "Failed get APP key due to an invalid Token."
+msgstr "Geçersiz bir Belirteç nedeniyle APP anahtarı alınamadı."
+
+#: engines/microsoft.py:43
+msgid "Failed get APP key due to and invalid Base64 URL."
+msgstr "Geçersiz Base64 URL'si nedeniyle APP anahtarı alınamadı."
+
+#: engines/youdao.py:19
+msgid "Youdao"
+msgstr "Youdao"
+
+#: lib/conversion.py:73
+msgid "Start to convert ebook format..."
+msgstr "E-kitap formatını dönüştürmeye başla..."
+
+#: lib/conversion.py:96
+msgid "Starting to output subtitles file..."
+msgstr "Altyazı dosyasının çıktısı alınmaya başlanıyor..."
+
+#: lib/conversion.py:102
+msgid "The translation of the subtitles file was completed."
+msgstr "Altyazı dosyasının çevirisi tamamlandı."
+
+#: lib/conversion.py:120
+msgid "Starting to output PGN file..."
+msgstr "PGN dosyasının çıktısı alınmaya başlanıyor..."
+
+#: lib/conversion.py:130
+msgid "The translation of the PGN file was completed."
+msgstr "PGN dosyasının çevirisi tamamlandı."
+
+#: lib/conversion.py:267
+msgid "[{} > {}] Translating \"{}\""
+msgstr "[{} > {}] \"{}\" Çevriliyor"
+
+#: lib/conversion.py:276 tests/test_convertion.py:40
+msgid "Translation job failed"
+msgstr "Çeviri işi başarısız oldu"
+
+#: lib/conversion.py:324 tests/test_convertion.py:98
+#: tests/test_convertion.py:164 tests/test_convertion.py:228
+#: tests/test_convertion.py:284
+msgid "completed"
+msgstr "tamamlandı"
+
+#: lib/conversion.py:337 tests/test_convertion.py:103
+#: tests/test_convertion.py:169 tests/test_convertion.py:235
+#: tests/test_convertion.py:289
+msgid "Ebook Translation Log"
+msgstr "E-kitap Çeviri Günlüğü"
+
+#: lib/conversion.py:338 tests/test_convertion.py:104
+#: tests/test_convertion.py:170 tests/test_convertion.py:236
+#: tests/test_convertion.py:290
+msgid "Translation Completed"
+msgstr "Çeviri Tamamlandı"
+
+#: lib/conversion.py:339 tests/test_convertion.py:106
+#: tests/test_convertion.py:172 tests/test_convertion.py:238
+#: tests/test_convertion.py:292
+msgid "The translation of \"{}\" was completed. Do you want to open the book?"
+msgstr "\"{}\" çevirisi tamamlandı. "
+
+#: lib/translation.py:133 lib/translation.py:141 lib/translation.py:168
+msgid "Translation canceled."
+msgstr "Çeviri iptal edildi."
+
+#: lib/translation.py:145
+msgid "No available API key."
+msgstr "Kullanılabilir API anahtarı yok."
+
+#: lib/translation.py:147
+msgid "API key was Changed due to previous one unavailable."
+msgstr "API anahtarı öncekinin kullanılamaması nedeniyle değiştirildi."
+
+#: lib/translation.py:151
+msgid "Failed to retrieve data from translate engine API."
+msgstr "Çeviri motoru API'sinden veri alınamadı."
+
+#: lib/translation.py:159 lib/translation.py:209 lib/translation.py:217
+msgid "Original: {}"
+msgstr "Orijinal: {}"
+
+#: lib/translation.py:160
+msgid "Status: Failed {} times / Sleeping for {} seconds"
+msgstr "Durum: {} kez başarısız oldu / {} saniye boyunca uyuyor"
+
+#: lib/translation.py:161 lib/translation.py:219
+msgid "Error: {}"
+msgstr "Hata: {}"
+
+#: lib/translation.py:200
+msgid "Translating: {}/{}"
+msgstr "Çeviriliyor: {}/{}"
+
+#: lib/translation.py:211
+msgid "Translation: {}"
+msgstr "Çeviri: {}"
+
+#: lib/translation.py:213
+msgid "Translation (Cached): {}"
+msgstr "Çeviri (Önbelleğe Alınmış): {}"
+
+#: lib/translation.py:230
+msgid "Start to translate ebook content"
+msgstr "E-kitap içeriğini çevirmeye başla"
+
+#: lib/translation.py:232
+msgid "Item count: {}"
+msgstr "Ürün sayısı: {}"
+
+#: lib/translation.py:235
+msgid "There is no content need to translate."
+msgstr "Çevirilmesi gereken içerik yok."
+
+#: lib/translation.py:255
+msgid "Translation failed."
+msgstr "Çeviri başarısız oldu."
+
+#: setting.py:62
+msgid "General"
+msgstr "Genel"
+
+#: setting.py:64
+msgid "Content"
+msgstr "İçerik"
+
+#: setting.py:113
+msgid "Preferred Mode"
+msgstr "Tercih Edilen Mod"
+
+#: setting.py:147
+msgid "Output Path"
+msgstr "Çıkış Yolu"
+
+#: setting.py:149
+msgid "Library"
+msgstr "Kütüphane"
+
+#: setting.py:150
+msgid "Path"
+msgstr "Yol"
+
+#: setting.py:155
+msgid "Choose a path to store translated book(s)"
+msgstr "Çeviri kitap(lar)ı depolamak için bir yol seçin"
+
+#: setting.py:182
+msgid "Preferred Format"
+msgstr "Tercih Edilen Format"
+
+#: setting.py:206
+msgid "(Beta)"
+msgstr "(Beta)"
+
+#: setting.py:206
+msgid "Merge to Translate"
+msgstr "Çevirmek için Birleştir"
+
+#: setting.py:208 setting.py:229 setting.py:273 setting.py:965
+msgid "Enable"
+msgstr "Etkinleştir"
+
+#: setting.py:214
+msgid "The number of characters to translate at once."
+msgstr "Bir kerede çevrilecek karakter sayısı."
+
+#: setting.py:226
+msgid "HTTP Proxy"
+msgstr "HTTP Proxy"
+
+#: setting.py:241
+msgid "Host"
+msgstr "Host"
+
+#: setting.py:244
+msgid "Port"
+msgstr "Port"
+
+#: setting.py:255 setting.py:331
+msgid "Test"
+msgstr "Deneme"
+
+#: setting.py:271 ui.py:57
+msgid "Cache"
+msgstr "Önbellek"
+
+#: setting.py:274
+msgid "Manage"
+msgstr "Yönet"
+
+#: setting.py:291
+msgid "Job Log"
+msgstr "İş Günlüğü"
+
+#: setting.py:292
+msgid "Show translation"
+msgstr "Çeviriyi göster"
+
+#: setting.py:305
+msgid "Search Paths"
+msgstr "Arama Yolları"
+
+#: setting.py:308
+msgid "The plugin will search for external programs via these paths."
+msgstr "Eklenti bu yollar aracılığıyla harici programları arayacaktır."
+
+#: setting.py:332 setting.py:582 setting.py:586 setting.py:593 setting.py:598
+msgid "Custom"
+msgstr "Özel"
+
+#: setting.py:339
+msgid "Usage Tip"
+msgstr "Kullanım İpucu"
+
+#: setting.py:353
+msgid "Tip:"
+msgstr "İpucu:"
+
+#: setting.py:354
+msgid "API keys will auto-switch if the previous one is unavailable."
+msgstr "API anahtarları, öncekinin mevcut olmaması durumunda otomatik olarak geçiş yapacaktır."
+
+#: setting.py:364
+msgid "Preferred Language"
+msgstr "Tercih Edilen Dil"
+
+#: setting.py:375
+msgid "HTTP Request"
+msgstr "HTTP İsteği"
+
+#: setting.py:387
+msgid "Concurrency limit"
+msgstr "Eşzamanlılık sınırı"
+
+#: setting.py:388
+msgid "Interval (seconds)"
+msgstr "Aralık (saniye)"
+
+#: setting.py:389
+msgid "Attempt times"
+msgstr "Deneme süreleri"
+
+#: setting.py:390
+msgid "Timeout (seconds)"
+msgstr "Zaman aşımı (saniye)"
+
+#: setting.py:394
+msgid "Abort Translation"
+msgstr "Çeviriyi İptal Et"
+
+#: setting.py:398
+msgid "Max errors"
+msgstr "Maksimum hatalar"
+
+#: setting.py:401
+msgid "The number of consecutive errors to abort translation."
+msgstr "Çeviriyi iptal etmek için ardışık hataların sayısı."
+
+#: setting.py:413
+msgid "Tune Gemini"
+msgstr "İkizler'i Ayarla"
+
+#: setting.py:420 setting.py:467
+msgid "Prompt"
+msgstr "İstem"
+
+#: setting.py:450 setting.py:507
+msgid "Sampling"
+msgstr "Örnekleme"
+
+#: setting.py:469
+msgid "Endpoint"
+msgstr "Son nokta"
+
+#: setting.py:478
+msgid "Model"
+msgstr "Model"
+
+#: setting.py:512
+msgid "Enable streaming text like in ChatGPT"
+msgstr "ChatGPT'deki gibi metin akışını etkinleştir"
+
+#: setting.py:513
+msgid "Stream"
+msgstr "Yayın"
+
+#: setting.py:556
+msgid "Tune ChatGPT"
+msgstr "ChatGPT'yi Ayarla"
+
+#: setting.py:559
+msgid "Tune Claude"
+msgstr "Claude'yi dinle"
+
+#: setting.py:576
+msgid "The model depends on your Azure project."
+msgstr "Model, Azure projenize bağlıdır."
+
+#: setting.py:752
+msgid "Below original"
+msgstr "Orijinalin altında"
+
+#: setting.py:754
+msgid "Above original"
+msgstr "Orijinalin üstünde"
+
+#: setting.py:756 setting.py:758
+msgid "Beta"
+msgstr "Beta"
+
+#: setting.py:756
+msgid "Right to original"
+msgstr "Orijinal hakkı"
+
+#: setting.py:758
+msgid "Left to original"
+msgstr "Orijinale sola"
+
+#: setting.py:759
+msgid "With no original"
+msgstr "Orijinali yok"
+
+#: setting.py:778
+msgid "Translation"
+msgstr "Çeviri"
+
+#: setting.py:795
+msgid "Column Gap"
+msgstr "Sütun Boşluğu"
+
+#: setting.py:805
+msgid "Percentage"
+msgstr "Yüzde"
+
+#: setting.py:806
+msgid "Space count"
+msgstr "Boşluk sayımı"
+
+#: setting.py:837
+msgid "Translation Position"
+msgstr "Çeviri Konumu"
+
+#: setting.py:889
+msgid "Original Text Color"
+msgstr "Orijinal Metin Rengi"
+
+#: setting.py:894 setting.py:912 setting.py:1071
+msgid "e.g.,"
+msgstr "örneğin,"
+
+#: setting.py:908
+msgid "Translation Text Color"
+msgstr "Çeviri Metni Rengi"
+
+#: setting.py:963
+msgid "Translation Glossary"
+msgstr "Çeviri Sözlüğü"
+
+#: setting.py:967
+msgid "Choose a glossary file"
+msgstr "Bir sözlük dosyası seç"
+
+#: setting.py:986
+msgid "Ignore Paragraph"
+msgstr "Paragrafı Yoksay"
+
+#: setting.py:992
+msgid "Scope"
+msgstr "Kapsam"
+
+#: setting.py:993
+msgid "Text only"
+msgstr "Yalnızca metin"
+
+#: setting.py:995
+msgid "HTML element"
+msgstr "HTML öğesi"
+
+#: setting.py:1002
+msgid "Mode"
+msgstr "Mod"
+
+#: setting.py:1003
+msgid "Normal"
+msgstr "Normal"
+
+#: setting.py:1005
+msgid "Normal (case-sensitive)"
+msgstr "Normal (büyük/küçük harfe duyarlı)"
+
+#: setting.py:1006
+msgid "Regular Expression"
+msgstr "Normal İfade"
+
+#: setting.py:1048
+msgid "Exclude paragraph by keyword. One keyword per line:"
+msgstr "Paragrafı anahtar kelimeye göre hariç tut. "
+
+#: setting.py:1049
+msgid "Exclude paragraph by case-sensitive keyword. One keyword per line:"
+msgstr "Paragrafı büyük/küçük harfe duyarlı anahtar sözcükle hariç tut. "
+
+#: setting.py:1051
+msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
+msgstr "Paragrafı normal ifade düzeniyle hariç tut. "
+
+#: setting.py:1067
+msgid "Ignore Element"
+msgstr "Öğeyi Yoksay"
+
+#: setting.py:1077
+msgid "CSS selectors to exclude elements. One rule per line:"
+msgstr "Öğeleri dışlamak için CSS seçicileri. "
+
+#: setting.py:1082
+msgid "Ebook Metadata"
+msgstr "E-kitap Meta Verisi"
+
+#: setting.py:1086
+msgid "Append target language to title metadata"
+msgstr "Hedef dili başlık meta verilerine ekle"
+
+#: setting.py:1088
+msgid "Set target language code to language metadata"
+msgstr "Hedef dil kodunu dil meta verilerine ayarla"
+
+#: setting.py:1091
+msgid "Subjects of ebook (one subject per line)"
+msgstr "E-kitabın konuları (her satıra bir konu)"
+
+#: setting.py:1092
+msgid "Language Mark"
+msgstr "Dil İşareti"
+
+#: setting.py:1093
+msgid "Language Code"
+msgstr "Dil Kodu"
+
+#: setting.py:1094
+msgid "Append Subjects"
+msgstr "Konu Ekle"
+
+#: setting.py:1115 setting.py:1150
+msgid "Proxy host or port is incorrect."
+msgstr "Proxy ana bilgisayarı veya bağlantı noktası yanlış."
+
+#: setting.py:1117
+msgid "The proxy is available."
+msgstr "Proxy kullanılabilir."
+
+#: setting.py:1118
+msgid "The proxy is not available."
+msgstr "Proxy kullanılamıyor."
+
+#: setting.py:1208
+msgid "the prompt must include {}."
+msgstr "istem {} içermelidir."
+
+#: setting.py:1237 setting.py:1244
+msgid "Invalid color value."
+msgstr "Geçersiz renk değeri."
+
+#: setting.py:1253
+msgid "The specified glossary file does not exist."
+msgstr "Belirtilen sözlük dosyası mevcut değil."
+
+#: setting.py:1265
+msgid "{} is not a valid regular expression."
+msgstr "{} geçerli bir normal ifade değil."
+
+#: setting.py:1277
+msgid "{} is not a valid CSS seletor."
+msgstr "{} geçerli bir CSS seçici değil."
+
+#: ui.py:38
+msgid "Translate Book"
+msgstr "Kitabı Çevir"
+
+#: ui.py:38
+msgid "Translate Ebook Content"
+msgstr "E-kitap İçeriğini Çevir"
+
+#: ui.py:58 ui.py:126
+msgid "Setting"
+msgstr "Ayar"
+
+#: ui.py:59 ui.py:154
+msgid "About"
+msgstr "Hakkında"
+
+#: ui.py:90
+msgid "Please choose one single book."
+msgstr "Lütfen tek bir kitap seçin."
+
+#: ui.py:103
+msgid "Please choose at least one book."
+msgstr "Lütfen en az bir kitap seçin."
+
+#: ui.py:117
+msgid "Cannot change setting while book(s) are under translation."
+msgstr "Kitap(lar) çeviri aşamasındayken ayar değiştirilemez."
+
+#: ui.py:134
+msgid "Cannot manage cache while book(s) are under translation."
+msgstr "Kitap(lar) çeviri aşamasındayken önbellek yönetilemiyor."
+
+#: ui.py:143
+msgid "Cache Manager"
+msgstr "Önbellek Yöneticisi"
+
+#: ui.py:172
+msgid "Choose Translation Mode"
+msgstr "Çeviri Modunu Seçin"
