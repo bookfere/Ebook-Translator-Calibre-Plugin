@@ -62,7 +62,6 @@ def cache_path():
 
 
 class TranslationCache:
-    __version__ = '20230608'
     fresh = True
     dir_path = cache_path()
     cache_path = os.path.join(dir_path, 'cache')

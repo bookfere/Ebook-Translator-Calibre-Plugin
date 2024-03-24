@@ -31,6 +31,11 @@ class Element:
         self.original = []
         self.column_gap = None
 
+        self.position = None
+        self.translation_lang = None
+        self.original_color = None
+        self.translation_color = None
+
     def _element_copy(self):
         return copy.deepcopy(self.element)
 
@@ -42,6 +47,18 @@ class Element:
 
     def set_column_gap(self, values):
         self.column_gap = values
+
+    def set_position(self, position):
+        self.position = position
+
+    def set_translation_lang(self, lang):
+        self.translation_lang = lang
+
+    def set_original_color(self, color):
+        self.original_color = color
+
+    def set_translation_color(self, color):
+        self.translation_color = color
 
     def get_name(self):
         return None
@@ -61,9 +78,7 @@ class Element:
     def get_content(self):
         raise NotImplementedError()
 
-    def add_translation(
-            self, translation, position, translation_lang=None,
-            original_color=None, translation_color=None):
+    def add_translation(self, translation=None):
         raise NotImplementedError()
 
     def get_translation(self):
@@ -80,13 +95,11 @@ class SrtElement(Element):
     def get_content(self):
         return self.get_text()
 
-    def add_translation(
-            self, translation, position, translation_lang=None,
-            original_color=None, translation_color=None):
+    def add_translation(self, translation=None):
         if translation is not None:
-            if position == 'only':
+            if self.position == 'only':
                 self.element[2] = translation
-            elif position in ('below', 'right'):
+            elif self.position in ('below', 'right'):
                 self.element[2] += '\n%s' % translation
             else:
                 self.element[2] = '%s\n%s' % (translation, self.element[2])
@@ -105,15 +118,13 @@ class PgnElement(Element):
     def get_content(self):
         return self.get_text()
 
-    def add_translation(
-            self, translation, position, translation_lang=None,
-            original_color=None, translation_color=None):
+    def add_translation(self, translation=None):
         if translation is not None:
-            if position == 'only':
+            if self.position == 'only':
                 self.element[1] = translation
             else:
                 content = (self.get_content(), translation)
-                if position not in ('below', 'right'):
+                if self.position not in ('below', 'right'):
                     content = reversed(content)
                 self.element[1] = ' | '.join(content)
 
@@ -133,13 +144,11 @@ class MetadataElement(Element):
     def get_content(self):
         return self.element.content
 
-    def add_translation(
-            self, translation, position, translation_lang=None,
-            original_color=None, translation_color=None):
+    def add_translation(self, translation=None):
         if translation is not None:
-            if position == 'only':
+            if self.position == 'only':
                 self.element.content = translation
-            elif position in ['above', 'left']:
+            elif self.position in ['above', 'left']:
                 self.element.content = '%s %s' % (
                     translation, self.element.content)
             else:
@@ -157,17 +166,17 @@ class TocElement(Element):
     def get_content(self):
         return self.element.title
 
-    def add_translation(
-            self, translation, position, translation_lang=None,
-            original_color=None, translation_color=None):
+    def add_translation(self, translation=None):
         if translation is not None:
             items = [self.element.title, translation]
-            self.element.title = items[-1] if position == 'only' else ' '.join(
-                reversed(items) if position in ('above', 'left') else items)
+            self.element.title = items[-1] if self.position == 'only' else \
+                ' '.join(reversed(items) if self.position in ('above', 'left')
+                         else items)
 
 
 class PageElement(Element):
     def _get_descendents(self, element, tags):
+        tags = (tags,) if isinstance(tags, str) else tags
         xpath = './/*[%s]' % ' or '.join(['self::x:%s' % tag for tag in tags])
         return element.xpath(xpath, namespaces=ns)
 
@@ -187,49 +196,72 @@ class PageElement(Element):
     def delete(self):
         self.element.getparent().remove(self.element)
 
+    def _safe_remove(self, element, replacement=''):
+        previous, parent = element.getprevious(), element.getparent()
+        if previous is not None:
+            previous.tail = (previous.tail or '') + replacement
+            previous.tail += (element.tail or '')
+        else:
+            parent.text = (parent.text or '') + replacement
+            parent.text += (element.tail or '')
+        element.tail = None
+        parent.remove(element)
+
     def get_content(self):
         element_copy = self._element_copy()
-        for noise in self._get_descendents(
-                element_copy, ('rt', 'rp', 'sup', 'sub')):
-            parent = noise.getparent()
-            parent.text = (parent.text or '') + (noise.tail or '')
-            parent.remove(noise)
+        for noise in self._get_descendents(element_copy, ('rt', 'rp')):
+            self._safe_remove(noise)
 
+        target_elements = (
+            'img', 'code', 'hr', 'sub', 'sup', 'kbd', 'abbr', 'wbr', 'var',
+            'canvas', 'svg', 'script', 'style')
         self.reserve_elements = self._get_descendents(
-            element_copy, ('img', 'code', 'br', 'hr', 'sub', 'sup', 'kbd'))
-        count = 0
-        for reserve in self.reserve_elements:
-            replacement = self.placeholder[0].format(format(count, '05'))
-            previous, parent = reserve.getprevious(), reserve.getparent()
-            if previous is not None:
-                previous.tail = (previous.tail or '') + replacement
-                previous.tail += (reserve.tail or '')
-            else:
-                parent.text = (parent.text or '') + replacement
-                parent.text += (reserve.tail or '')
-            reserve.tail = None
-            parent.remove(reserve)
-            count += 1
+            element_copy, target_elements)
+        for eid, reserve in enumerate(self.reserve_elements):
+            replacement = self.placeholder[0].format(format(eid, '05'))
+            parent = reserve.getparent()
+            if parent is not None and get_name(parent) == 'a':
+                index = self.reserve_elements.index(reserve)
+                self.reserve_elements[index] = reserve = parent
+            self._safe_remove(reserve, replacement)
+        for br in self._get_descendents(element_copy, 'br'):
+            self._safe_remove(br, '<br/>')
 
-        return trim(''.join(element_copy.itertext()))
+        return trim(''.join(element_copy.itertext())).replace('<br/>', '\n')
 
     def _polish_translation(self, translation):
-        translation = translation.replace('\n', '<br />')
+        translation = translation.replace('\n', '<br/>')
         # Condense consecutive letters to a maximum of four.
         return re.sub(r'((\w)\2{3})\2*', r'\1', translation)
 
-    def add_translation(
-            self, translation, position, translation_lang=None,
-            original_color=None, translation_color=None):
-        if original_color is not None:
-            self.element.set('style', 'color:%s' % original_color)
+    def _create_new_element(self, name, content, excluding_tags=[]):
+        # new_element = self.element.makeelement(
+        #     get_name(self.element), nsmap={'xhtml': ns['x']})
+        # new_element.text = trim(translation)
+        new_element = etree.XML('<{0} xmlns="{1}">{2}</{0}>'.format(
+            name, ns['x'], trim(content)))
+        # Preserve all attributes from the original element.
+        for name, value in self.element.items():
+            if (name == 'id' and self.position != 'only') or \
+                    name in excluding_tags:
+                continue
+            if name == 'dir':
+                value = 'auto'
+            new_element.set(name, value)
+        if self.translation_lang is not None:
+            new_element.set('lang', self.translation_lang)
+        if self.translation_color is not None:
+            new_element.set('style', 'color:%s' % self.translation_color)
+        return new_element
+
+    def add_translation(self, translation=None):
+        # self.element.tail = None  # Make sure the element has no tail
+        if self.original_color is not None:
+            self.element.set('style', 'color:%s' % self.original_color)
         if translation is None:
-            if position in ('left', 'right'):
-                self.element.addnext(
-                    self._create_table(position, self._element_copy()))
-            if position in ('left', 'right'):
+            if self.position in ('left', 'right'):
+                self.element.addnext(self._create_table())
                 self.delete()
-            # return self.element
             return
         # Escape the markups (<m id=1 />) to replace escaped markups.
         translation = xml_escape(translation)
@@ -242,39 +274,80 @@ class PageElement(Element):
                 translation)
         translation = self._polish_translation(translation)
 
-        new_element = etree.XML('<{0} xmlns="{1}">{2}</{0}>'.format(
-            get_name(self.element), ns['x'], trim(translation)))
-        # new_element = self.element.makeelement(
-        #     get_name(self.element), nsmap={'xhtml': ns['x']})
-        # new_element.text = trim(translation)
+        element_name = get_name(self.element)
+        new_element = self._create_new_element(element_name, translation)
 
-        # Preserve all attributes from the original element.
-        for name, value in self.element.items():
-            if name == 'id' and position != 'only':
-                continue
-            if name == 'dir':
-                value = 'auto'
-            new_element.set(name, value)
-        if translation_lang is not None:
-            new_element.set('lang', translation_lang)
-        if translation_color is not None:
-            new_element.set('style', 'color:%s' % translation_color)
+        # Add translation for table elements.
+        group_elements = ('li', 'th', 'td', 'caption')
+        if element_name in group_elements:
+            if self.position == 'only':
+                self.element.addnext(new_element)
+                self.delete()
+            new_element = self._create_new_element(
+                'span', translation, excluding_tags=['class'])
+            if self.position in ['left', 'above']:
+                if self.element.text is not None:
+                    if self.position == 'above':
+                        br = etree.SubElement(self.element, 'br')
+                        br.tail = self.element.text
+                        self.element.insert(0, br)
+                    else:
+                        new_element.tail = ' ' + self.element.text
+                    self.element.text = None
+                self.element.insert(0, new_element)
+            else:
+                if self.position == 'below':
+                    self.element.append(etree.SubElement(self.element, 'br'))
+                else:
+                    children = self.element.getchildren()
+                    if len(children) > 0:
+                        element = children[-1]
+                        if element.tail is not None:
+                            element.tail += ' '
+                        else:
+                            element.tail = ' '
+                    else:
+                        self.element.text += ' '
+                self.element.append(new_element)
+            return
 
-        self.element.tail = None  # Make sure the element has no tail
+        text_elements = (
+            'a', 'em', 'strong', 'small', 's', 'cite', 'q', 'time', 'samp',
+            'i', 'b', 'u', 'mark', 'span', 'data', 'del', 'ins')
 
-        if position in ('left', 'right'):
-            element_copy = self._element_copy()
-            self.element.addnext(
-                self._create_table(position, element_copy, new_element))
-        elif position == 'above':
+        is_text_element = element_name in text_elements
+
+        # Add translation for left or right position.
+        if self.position in ('left', 'right') and not is_text_element:
+            self.element.addnext(self._create_table(new_element))
+            self.delete()
+            return
+
+        parent = self.element.getparent()
+        is_table_element = parent is not None and \
+            get_name(parent) in group_elements
+
+        if self.position in ('left', 'above'):
             self.element.addprevious(new_element)
+            if is_text_element and is_table_element:
+                new_element.addnext(etree.SubElement(self.element, 'br'))
+            elif is_text_element:
+                new_element.tail = ' '
         else:
             self.element.addnext(new_element)
-        if position in ['left', 'right', 'only']:
-            self.delete()
+            if self.position == 'only':
+                self.delete()
+                return
+            if is_text_element and is_table_element:
+                self.element.addnext(etree.SubElement(self.element, 'br'))
+            elif is_text_element:
+                if self.element.tail is not None:
+                    new_element.tail = self.element.tail
+                self.element.tail = ' '
 
-    def _create_table(self, position, original, translation=None):
+    def _create_table(self, translation=None):
         # table = self.element.makeelement('table', attrib={'width': '100%'})
+        original = self._element_copy()
         table = etree.XML(
             '<table xmlns="{}" width="100%"></table>'.format(ns['x']))
         tr = etree.SubElement(table, 'tr')
@@ -296,11 +369,11 @@ class PageElement(Element):
                 td_left.set('width', '50%')
                 td_middle.text = '\xa0' * value
                 td_right.set('width', '50%')
-        if position == 'left':
+        if self.position == 'left':
             if translation is not None:
                 td_left.append(translation)
             td_right.append(original)
-        if position == 'right':
+        if self.position == 'right':
             td_left.append(original)
             if translation is not None:
                 td_right.append(translation)
@@ -308,12 +381,9 @@ class PageElement(Element):
 
 
 class Extraction:
-    __version__ = '20230608'
-
-    def __init__(self, pages, rule_mode, filter_scope, filter_rules,
-                 element_rules):
+    def __init__(
+            self, pages, rule_mode, filter_scope, filter_rules, element_rules):
         self.pages = pages
-
         self.rule_mode = rule_mode
         self.filter_scope = filter_scope
         self.filter_rules = filter_rules
@@ -327,7 +397,7 @@ class Extraction:
 
     def load_filter_patterns(self):
         default_rules = [
-            r'^[-\d\s\.\'\\"‘’“”,=~!@#$%^&º*|<>?/`—…+:_(){}[\]]+$']
+            r'^[-\d\s\.\'\\"‘’“”,=~!@#$%^&º*|≈<>?/`—…+:–_(){}[\]]+$']
         patterns = [re.compile(rule) for rule in default_rules]
         for rule in self.filter_rules:
             if self.rule_mode == 'normal':
@@ -371,10 +441,9 @@ class Extraction:
         return False
 
     def extract_elements(self, page_id, root, elements=[]):
-        priority_elements = ['p', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+        priority_elements = [
+            'p', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote']
         for element in root.findall('./*'):
-            # if self.need_ignore(element):
-            #     continue
             element_has_content = False
             if element.text is not None and trim(element.text) != '':
                 element_has_content = True
@@ -452,6 +521,10 @@ class ElementHandler:
         count = 0
         for oid, element in enumerate(elements):
             element.set_placeholder(self.placeholder)
+            element.set_position(self.position)
+            element.set_translation_lang(self.translation_lang)
+            element.set_original_color(self.original_color)
+            element.set_translation_color(self.translation_color)
             if self.column_gap is not None:
                 element.set_column_gap(self.column_gap)
             raw = element.get_raw()
@@ -476,18 +549,14 @@ class ElementHandler:
         translations = self.prepare_translation(paragraphs)
         for eid, element in self.elements.copy().items():
             if element.ignored:
-                element.add_translation(
-                    None, self.position, original_color=self.original_color)
+                element.add_translation()
                 continue
             original = element.get_content()
             translation = translations.get(original)
             if translation is None:
-                element.add_translation(
-                    None, self.position, original_color=self.original_color)
+                element.add_translation()
                 continue
-            element.add_translation(
-                translation, self.position, self.translation_lang,
-                self.original_color, self.translation_color)
+            element.add_translation(translation)
             self.elements.pop(eid)
 
 
@@ -501,6 +570,10 @@ class ElementHandlerMerge(ElementHandler):
             if element.ignored:
                 continue
             element.set_placeholder(self.placeholder)
+            element.set_position(self.position)
+            element.set_translation_lang(self.translation_lang)
+            element.set_original_color(self.original_color)
+            element.set_translation_color(self.translation_color)
             if self.column_gap is not None:
                 element.set_column_gap(self.column_gap)
             code = element.get_raw()

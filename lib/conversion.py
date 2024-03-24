@@ -15,12 +15,13 @@ from .. import EbookTranslator
 
 from .config import get_config
 from .utils import sep, uid, open_path, open_file
-from .cache import get_cache, TranslationCache
+from .cache import get_cache
 from .element import (
-    Extraction, get_element_handler, get_srt_elements, get_toc_elements,
-    get_page_elements, get_metadata_elements, get_pgn_elements)
+    get_element_handler, get_srt_elements, get_toc_elements, get_page_elements,
+    get_metadata_elements, get_pgn_elements)
 from .translation import get_translator, get_translation
 from .exception import ConversionAbort
+
 
 load_translations()
 
@@ -78,8 +79,9 @@ def convert_book(
     plumber.run()
 
 
-def convert_srt(input_path, output_path, translation, element_handler, cache,
-                debug_info, encoding, notification):
+def convert_srt(
+        input_path, output_path, translation, element_handler, cache,
+        debug_info, encoding, notification):
     log.info('Translating subtitles content... (this will take a while)')
     log.info(debug_info)
 
@@ -102,8 +104,9 @@ def convert_srt(input_path, output_path, translation, element_handler, cache,
     log(_('The translation of the subtitles file was completed.'))
 
 
-def convert_pgn(input_path, output_path, translation, element_handler, cache,
-                debug_info, encoding, notification):
+def convert_pgn(
+        input_path, output_path, translation, element_handler, cache,
+        debug_info, encoding, notification):
     log.info('Translating PGN content... (this may be take a while)')
     log.info(debug_info)
 
@@ -196,8 +199,7 @@ def convert_item(
     if encoding.lower() != 'utf-8':
         _encoding = encoding.lower()
     cache_id = uid(
-        input_path + translator.name + target_lang + merge_length + _encoding
-        + TranslationCache.__version__ + Extraction.__version__)
+        input_path + translator.name + target_lang + merge_length + _encoding)
     cache = get_cache(cache_id)
     cache.set_cache_only(cache_only)
     cache.set_info('title', ebook_title)
