@@ -7,9 +7,9 @@ from calibre.constants import __version__
 from .lib.utils import uid
 from .lib.config import get_config
 from .lib.encodings import encoding_list
-from .lib.cache import Paragraph, TranslationCache, get_cache
+from .lib.cache import Paragraph, get_cache
 from .lib.translation import get_engine_class, get_translator, get_translation
-from .lib.element import get_element_handler, Extraction
+from .lib.element import get_element_handler
 from .lib.conversion import extract_item, extra_formats
 from .engines.custom import CustomTranslate
 
@@ -84,8 +84,7 @@ class PreparationWorker(QObject):
             encoding = self.ebook.encoding.lower()
         cache_id = uid(
             input_path + self.engine_class.name + self.ebook.target_lang
-            + merge_length + encoding + TranslationCache.__version__
-            + Extraction.__version__)
+            + merge_length + encoding)
         cache = get_cache(cache_id)
 
         if cache.is_fresh() or not cache.is_persistence():
@@ -765,8 +764,11 @@ class AdvancedTranslation(QDialog):
             disable_translation_text)
 
         def auto_open_close_splitter():
-            size = 0 if splitter.sizes()[0] > 0 else 1
-            splitter.setSizes([size, 1, 1])
+            if splitter.sizes()[0] > 0:
+                sizes = [0] + [int(splitter.height() / 2)] * 2
+            else:
+                sizes = [int(splitter.height() / 3)] * 3
+            splitter.setSizes(sizes)
         self.install_widget_event(
             splitter, splitter.handle(1), QEvent.MouseButtonDblClick,
             auto_open_close_splitter)
