@@ -73,8 +73,6 @@ class PreparationWorker(QObject):
 
     @pyqtSlot()
     def prepare_ebook_data(self):
-        self.progress_detail.emit(
-            'Start processing the ebook: %s' % self.ebook.title)
         input_path = self.ebook.get_input_path()
         element_handler = get_element_handler(
             self.engine_class.placeholder, self.engine_class.separator)
@@ -88,6 +86,8 @@ class PreparationWorker(QObject):
         cache = get_cache(cache_id)
 
         if cache.is_fresh() or not cache.is_persistence():
+            self.progress_detail.emit(
+                'Start processing the ebook: %s' % self.ebook.title)
             cache.set_info('title', self.ebook.title)
             cache.set_info('engine_name', self.engine_class.name)
             cache.set_info('target_lang', self.ebook.target_lang)
@@ -133,9 +133,10 @@ class PreparationWorker(QObject):
             if self.cancel():
                 self.clean_cache(cache)
                 return
-
-        self.progress_detail.emit(
-            'The ebook content was extracted successfully.')
+        else:
+            self.progress_detail.emit(
+                'Loading data from cache and preparing user interface...')
+            time.sleep(0.1)
 
         self.finished.emit(cache_id)
 

@@ -1,5 +1,3 @@
-from types import MethodType
-
 from calibre.gui2.actions import InterfaceAction
 
 from . import EbookTranslator
@@ -103,7 +101,7 @@ class EbookTranslatorGui(InterfaceAction):
                 _('Please choose at least one book.'), 'warning')
         worker = ConversionWorker(self.gui, self.icon)
         window = BatchTranslation(self.gui, worker, ebooks)
-        window.setMinimumWidth(600)
+        window.setMinimumWidth(800)
         window.setMinimumHeight(520)
         window.setWindowTitle(
             '%s - %s' % (_('Batch Mode'), self.title))

@@ -3,6 +3,8 @@ import os.path
 
 from .lib.config import get_config
 from .lib.translation import get_engine_class
+from .lib.conversion import extra_formats
+from .lib.encodings import encoding_list
 from .engines.custom import CustomTranslate
 from .components import (
     layout_info, AlertMessage, SourceLang, TargetLang, InputFormat,
@@ -12,11 +14,11 @@ from .components import (
 try:
     from qt.core import (
         QDialog, QWidget, QPushButton, QHeaderView, QVBoxLayout, QTableWidget,
-        QTableWidgetItem, Qt)
+        QTableWidgetItem, Qt, QComboBox, QLabel)
 except ImportError:
     from PyQt5.Qt import (
         QDialog, QWidget, QPushButton, QHeaderView, QVBoxLayout, QTableWidget,
-        QTableWidgetItem, Qt)
+        QTableWidgetItem, Qt, QComboBox, QLabel)
 
 load_translations()
 
@@ -52,7 +54,7 @@ class BatchTranslation(QDialog):
         table.setRowCount(len(self.ebooks))
         table.setColumnCount(5)
         table.setHorizontalHeaderLabels([
-            _('Title'), _('Input Format'), _('Output Format'),
+            _('Title'), _('Encoding'), _('Input Format'), _('Output Format'),
             _('Source Language'), _('Target Language')])
 
         header = table.horizontalHeader()
@@ -68,11 +70,21 @@ class BatchTranslation(QDialog):
             ebook_title.setSizeHint(table.sizeHint())
             table.setItem(row, 0, ebook_title)
 
+            if ebook.input_format in extra_formats.keys():
+                input_encoding = QComboBox()
+                input_encoding.addItems(encoding_list)
+                input_encoding.currentTextChanged.connect(
+                    lambda encoding, row=row: self.ebooks[row]
+                    .set_encoding(encoding))
+            else:
+                input_encoding = QLabel(_('Default'))
+            table.setCellWidget(row, 2, input_encoding)
+
             input_fmt = InputFormat(ebook.files.keys())
             table.setCellWidget(row, 1, input_fmt)
 
             output_format = OutputFormat()
-            table.setCellWidget(row, 2, output_format)
+            table.setCellWidget(row, 3, output_format)
 
             exist_format = output_format.findText(ebook.input_format)
             if ebook.is_extra_format() and exist_format:
@@ -94,7 +106,7 @@ class BatchTranslation(QDialog):
             output_format.currentTextChanged.connect(change_output_format)
 
             source_lang = SourceLang(book_lang=ebook.source_lang)
-            table.setCellWidget(row, 3, source_lang)
+            table.setCellWidget(row, 4, source_lang)
             self.source_langs.append(source_lang)
 
             def change_source_lang(lang, row=row):
@@ -108,7 +120,7 @@ class BatchTranslation(QDialog):
                 not issubclass(translation_engine, CustomTranslate))
 
             target_lang = TargetLang()
-            table.setCellWidget(row, 4, target_lang)
+            table.setCellWidget(row, 5, target_lang)
             self.target_langs.append(target_lang)
 
             def change_target_lang(lang, row=row):

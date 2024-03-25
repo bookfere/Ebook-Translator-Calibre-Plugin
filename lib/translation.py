@@ -255,9 +255,8 @@ class Translation:
             raise Exception(_('Translation failed.'))
         consuming = round((time.time() - start_time) / 60, 2)
         self.log('Time consuming: %s minutes' % consuming)
-        message = _('Translation completed.')
-        self.log(message)
-        self.progress(1, message)
+        self.log(_('Translation completed.'))
+        self.progress(1, _('Outputting ebook file...'))
 
 
 def get_engine_class(engine_name=None):

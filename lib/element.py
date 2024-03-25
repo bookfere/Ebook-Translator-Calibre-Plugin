@@ -193,9 +193,6 @@ class PageElement(Element):
         attributes = dict(self.element.attrib.items())
         return json.dumps(attributes) if attributes else None
 
-    def delete(self):
-        self.element.getparent().remove(self.element)
-
     def _safe_remove(self, element, replacement=''):
         previous, parent = element.getprevious(), element.getparent()
         if previous is not None:
@@ -211,23 +208,25 @@ class PageElement(Element):
         element_copy = self._element_copy()
         for noise in self._get_descendents(element_copy, ('rt', 'rp')):
             self._safe_remove(noise)
-
+        # Reserve the <br> element instead of using a line break to prevent
+        # conflicts with the mechanism of merge translation.
         target_elements = (
-            'img', 'code', 'hr', 'sub', 'sup', 'kbd', 'abbr', 'wbr', 'var',
+            'img', 'code', 'br', 'hr', 'sub', 'sup', 'kbd', 'abbr', 'wbr', 'var',
             'canvas', 'svg', 'script', 'style')
         self.reserve_elements = self._get_descendents(
             element_copy, target_elements)
         for eid, reserve in enumerate(self.reserve_elements):
             replacement = self.placeholder[0].format(format(eid, '05'))
-            parent = reserve.getparent()
-            if parent is not None and get_name(parent) == 'a':
-                index = self.reserve_elements.index(reserve)
-                self.reserve_elements[index] = reserve = parent
+            if get_name(reserve) in ['sub', 'sup']:
+                parent = reserve.getparent()
+                if parent is not None and get_name(parent) == 'a' and \
+                        parent.text is None and reserve.tail is None and \
+                        len(parent.getchildren()) == 1:
+                    index = self.reserve_elements.index(reserve)
+                    self.reserve_elements[index] = reserve = parent
             self._safe_remove(reserve, replacement)
-        for br in self._get_descendents(element_copy, 'br'):
-            self._safe_remove(br, '<br/>')
 
-        return trim(''.join(element_copy.itertext())).replace('<br/>', '\n')
+        return trim(''.join(element_copy.itertext()))
 
     def _polish_translation(self, translation):
         translation = translation.replace('\n', '<br/>')
@@ -261,7 +260,7 @@ class PageElement(Element):
         if translation is None:
             if self.position in ('left', 'right'):
                 self.element.addnext(self._create_table())
-                self.delete()
+                self._safe_remove(self.element)
             return
         # Escape the markups (<m id=1 />) to replace escaped markups.
         translation = xml_escape(translation)
@@ -282,7 +281,7 @@ class PageElement(Element):
         if element_name in group_elements:
             if self.position == 'only':
                 self.element.addnext(new_element)
-                self.delete()
+                self._safe_remove(self.element)
             new_element = self._create_new_element(
                 'span', translation, excluding_tags=['class'])
             if self.position in ['left', 'above']:
@@ -320,25 +319,68 @@ class PageElement(Element):
         # Add translation for left or right position.
         if self.position in ('left', 'right') and not is_text_element:
             self.element.addnext(self._create_table(new_element))
-            self.delete()
+            self._safe_remove(self.element)
             return
 
-        parent = self.element.getparent()
-        is_table_element = parent is not None and \
-            get_name(parent) in group_elements
+        # TODO: Needs to be optimized for various situations.
+        # Add translation for line breaks.
+        line_break_tag = '{%s}br' % ns['x']
+        original_br_list = list(self.element.iterchildren(line_break_tag))
+        translation_br_list = list(new_element.iterchildren(line_break_tag))
+        if len(original_br_list) == len(translation_br_list) >= 5:
+            tail = None
+            for index, br in enumerate(original_br_list):
+                new_br = etree.SubElement(self.element, 'br')
+                translation_br = translation_br_list[index]
+                br.addprevious(new_br)
+                if self.position == 'below':
+                    for sibling in translation_br.itersiblings(preceding=True):
+                        if get_name(sibling) == 'br':
+                            break
+                        new_br.addnext(sibling)
+                    new_br.tail = new_element.text if index == 0 else tail
+                    tail = translation_br.tail
+                    if br == original_br_list[-1]:
+                        new_br = etree.SubElement(self.element, 'br')
+                        self.element.append(new_br)
+                        translation_br = translation_br_list[-1]
+                        for sibling in translation_br.itersiblings():
+                            new_br.addnext(sibling)
+                        new_br.tail = translation_br.tail
+                else:
+                    for sibling in translation_br.itersiblings():
+                        if get_name(sibling) == 'br':
+                            break
+                        new_br.addnext(sibling)
+                    new_br.tail = translation_br.tail
+                    if br == original_br_list[-1]:
+                        new_br = etree.SubElement(self.element, 'br')
+                        new_br.tail = self.element.text
+                        self.element.text = new_element.text
+                        self.element.insert(0, new_br)
+                        translation_br = translation_br_list[0]
+                        sblings = list(
+                            translation_br.itersiblings(preceding=True))
+                        for sibling in reversed(sblings):
+                            new_br.addprevious(sibling)
+            return
+
+        parent_element = self.element.getparent()
+        is_table_descendant = parent_element is not None and \
+            get_name(parent_element) in group_elements
 
         if self.position in ('left', 'above'):
             self.element.addprevious(new_element)
-            if is_text_element and is_table_element:
+            if is_text_element and is_table_descendant:
                 new_element.addnext(etree.SubElement(self.element, 'br'))
             elif is_text_element:
                 new_element.tail = ' '
         else:
             self.element.addnext(new_element)
             if self.position == 'only':
-                self.delete()
+                self._safe_remove(self.element)
                 return
-            if is_text_element and is_table_element:
+            if is_text_element and is_table_descendant:
                 self.element.addnext(etree.SubElement(self.element, 'br'))
             elif is_text_element:
                 if self.element.tail is not None:
