@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-03-21 20:51+0800\n"
+"POT-Creation-Date: 2024-03-25 21:02+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,19 +27,19 @@ msgid ""
 "keeping the original content)."
 msgstr ""
 
-#: advanced.py:101
+#: advanced.py:100
 msgid "Extracting ebook content..."
 msgstr ""
 
-#: advanced.py:108
+#: advanced.py:107
 msgid "Failed to extract ebook content"
 msgstr ""
 
-#: advanced.py:120
+#: advanced.py:119
 msgid "Filtering ebook content..."
 msgstr ""
 
-#: advanced.py:129
+#: advanced.py:128
 msgid "Preparing user interface..."
 msgstr ""
 
@@ -47,15 +47,15 @@ msgstr ""
 msgid "Start"
 msgstr ""
 
-#: advanced.py:223 batch.py:55 setting.py:186
+#: advanced.py:223 batch.py:57 setting.py:186
 msgid "Input Format"
 msgstr ""
 
-#: advanced.py:234 advanced.py:604 batch.py:56 setting.py:369
+#: advanced.py:234 advanced.py:604 batch.py:58 setting.py:369
 msgid "Target Language"
 msgstr ""
 
-#: advanced.py:250
+#: advanced.py:250 batch.py:57
 msgid "Encoding"
 msgstr ""
 
@@ -132,7 +132,7 @@ msgstr ""
 msgid "Translation Engine"
 msgstr ""
 
-#: advanced.py:598 batch.py:56 setting.py:368
+#: advanced.py:598 batch.py:58 setting.py:368
 msgid "Source Language"
 msgstr ""
 
@@ -171,47 +171,51 @@ msgstr ""
 msgid "No translation yet"
 msgstr ""
 
-#: advanced.py:783 components/engine.py:208 setting.py:98
+#: advanced.py:786 components/engine.py:208 setting.py:98
 msgid "Save"
 msgstr ""
 
-#: advanced.py:839
+#: advanced.py:842
 msgid "Your changes have been saved."
 msgstr ""
 
-#: advanced.py:852
+#: advanced.py:855
 msgid "Translation log"
 msgstr ""
 
-#: advanced.py:863
+#: advanced.py:866
 msgid "Error log"
 msgstr ""
 
-#: advanced.py:883
+#: advanced.py:886
 msgid "Are you sure you want to translate all {:n} paragraphs?"
 msgstr ""
 
-#: advanced.py:909
+#: advanced.py:912
 msgid "Are you sure you want to stop the translation progress?"
 msgstr ""
 
-#: batch.py:55 setting.py:187
+#: batch.py:57 setting.py:187
 msgid "Output Format"
 msgstr ""
 
-#: batch.py:55 cache.py:202
+#: batch.py:57 cache.py:202
 msgid "Title"
 msgstr ""
 
-#: batch.py:128 components/engine.py:139 components/table.py:133
+#: batch.py:80
+msgid "Default"
+msgstr ""
+
+#: batch.py:140 components/engine.py:139 components/table.py:133
 msgid "Translate"
 msgstr ""
 
-#: batch.py:139 lib/cache.py:126
+#: batch.py:151 lib/cache.py:125
 msgid "Unknown"
 msgstr ""
 
-#: batch.py:148 cache.py:130 setting.py:1136
+#: batch.py:160 cache.py:130 setting.py:1136
 msgid "The specified path does not exist."
 msgstr ""
 
@@ -358,7 +362,7 @@ msgstr ""
 msgid "Choose a translation mode for clicking the icon button."
 msgstr ""
 
-#: components/mode.py:33 setting.py:115 ui.py:54 ui.py:82
+#: components/mode.py:33 setting.py:115 ui.py:52 ui.py:80
 msgid "Advanced Mode"
 msgstr ""
 
@@ -368,7 +372,7 @@ msgid ""
 "for more control and customization."
 msgstr ""
 
-#: components/mode.py:43 setting.py:116 ui.py:55 ui.py:109
+#: components/mode.py:43 setting.py:116 ui.py:53 ui.py:107
 msgid "Batch Mode"
 msgstr ""
 
@@ -511,53 +515,53 @@ msgstr ""
 msgid "Youdao"
 msgstr ""
 
-#: lib/conversion.py:73
+#: lib/conversion.py:74
 msgid "Start to convert ebook format..."
 msgstr ""
 
-#: lib/conversion.py:96
+#: lib/conversion.py:98
 msgid "Starting to output subtitles file..."
 msgstr ""
 
-#: lib/conversion.py:102
+#: lib/conversion.py:104
 msgid "The translation of the subtitles file was completed."
 msgstr ""
 
-#: lib/conversion.py:120
+#: lib/conversion.py:123
 msgid "Starting to output PGN file..."
 msgstr ""
 
-#: lib/conversion.py:130
+#: lib/conversion.py:133
 msgid "The translation of the PGN file was completed."
 msgstr ""
 
-#: lib/conversion.py:267
+#: lib/conversion.py:269
 msgid "[{} > {}] Translating \"{}\""
 msgstr ""
 
-#: lib/conversion.py:276 tests/test_convertion.py:40
+#: lib/conversion.py:278 tests/test_convertion.py:40
 msgid "Translation job failed"
 msgstr ""
 
-#: lib/conversion.py:324 tests/test_convertion.py:98
+#: lib/conversion.py:326 tests/test_convertion.py:98
 #: tests/test_convertion.py:164 tests/test_convertion.py:228
 #: tests/test_convertion.py:284
 msgid "completed"
 msgstr ""
 
-#: lib/conversion.py:337 tests/test_convertion.py:103
+#: lib/conversion.py:339 tests/test_convertion.py:103
 #: tests/test_convertion.py:169 tests/test_convertion.py:235
 #: tests/test_convertion.py:289
 msgid "Ebook Translation Log"
 msgstr ""
 
-#: lib/conversion.py:338 tests/test_convertion.py:104
+#: lib/conversion.py:340 tests/test_convertion.py:104
 #: tests/test_convertion.py:170 tests/test_convertion.py:236
 #: tests/test_convertion.py:290
 msgid "Translation Completed"
 msgstr ""
 
-#: lib/conversion.py:339 tests/test_convertion.py:106
+#: lib/conversion.py:341 tests/test_convertion.py:106
 #: tests/test_convertion.py:172 tests/test_convertion.py:238
 #: tests/test_convertion.py:292
 msgid "The translation of \"{}\" was completed. Do you want to open the book?"
@@ -617,6 +621,10 @@ msgstr ""
 
 #: lib/translation.py:255
 msgid "Translation failed."
+msgstr ""
+
+#: lib/translation.py:259
+msgid "Outputting ebook file..."
 msgstr ""
 
 #: setting.py:62
@@ -683,7 +691,7 @@ msgstr ""
 msgid "Test"
 msgstr ""
 
-#: setting.py:271 ui.py:57
+#: setting.py:271 ui.py:55
 msgid "Cache"
 msgstr ""
 
@@ -975,42 +983,42 @@ msgstr ""
 msgid "{} is not a valid CSS seletor."
 msgstr ""
 
-#: ui.py:38
+#: ui.py:36
 msgid "Translate Book"
 msgstr ""
 
-#: ui.py:38
+#: ui.py:36
 msgid "Translate Ebook Content"
 msgstr ""
 
-#: ui.py:58 ui.py:126
+#: ui.py:56 ui.py:124
 msgid "Setting"
 msgstr ""
 
-#: ui.py:59 ui.py:154
+#: ui.py:57 ui.py:152
 msgid "About"
 msgstr ""
 
-#: ui.py:90
+#: ui.py:88
 msgid "Please choose one single book."
 msgstr ""
 
-#: ui.py:103
+#: ui.py:101
 msgid "Please choose at least one book."
 msgstr ""
 
-#: ui.py:117
+#: ui.py:115
 msgid "Cannot change setting while book(s) are under translation."
 msgstr ""
 
-#: ui.py:134
+#: ui.py:132
 msgid "Cannot manage cache while book(s) are under translation."
 msgstr ""
 
-#: ui.py:143
+#: ui.py:141
 msgid "Cache Manager"
 msgstr ""
 
-#: ui.py:172
+#: ui.py:170
 msgid "Choose Translation Mode"
 msgstr ""

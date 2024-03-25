@@ -216,7 +216,7 @@ class TestPgnElement(unittest.TestCase):
     def test_get_text(self):
         self.assertEqual('a', self.element.get_text())
 
-    def test_test_content(self):
+    def test_get_content(self):
         self.assertEqual('a', self.element.get_content())
 
     def test_add_translation_only(self):
@@ -381,13 +381,37 @@ class TestPageElement(unittest.TestCase):
     def test_get_content(self):
         content = ('{{id_00000}} a {{id_00001}} b c {{id_00002}} d e '
                    '{{id_00003}} f g {{id_00004}} h {{id_00005}} i '
-                   '{{id_00006}} {{id_00007}} k{{id_00008}}\nl')
+                   '{{id_00006}} {{id_00007}} k{{id_00008}}{{id_00009}}l')
         self.assertEqual(content, self.element.get_content())
-        self.assertEqual(9, len(self.element.reserve_elements))
+        self.assertEqual(10, len(self.element.reserve_elements))
 
         for element in self.element.reserve_elements:
             with self.subTest(element=element):
                 self.assertIsNone(element.tail)
+
+    def test_get_content_with_sup_sub(self):
+        xhtml = etree.XML(rb"""<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head><title>Test Document</title></head>
+    <body>
+        <p class="abc">
+            a<a><sup>[1]</sup></a>
+            b<a><sup>[1]</sup> <span>x</span></a>
+            c<a>x <sup>[2]</sup></a>
+            d<a><sup>[3]</sup> x</a>
+        </p>
+    </body>
+</html>""")
+        self.element = PageElement(xhtml.find('.//x:p', namespaces=ns), 'p1')
+        self.element.placeholder = Base.placeholder
+        content = (
+            'a{{id_00000}} b{{id_00001}} x cx {{id_00002}} d{{id_00003}} x')
+        self.assertEqual(content, self.element.get_content())
+        self.assertEqual('a', get_name(self.element.reserve_elements[0]))
+        self.assertEqual('sup', get_name(self.element.reserve_elements[1]))
+        self.assertEqual('sup', get_name(self.element.reserve_elements[2]))
+        self.assertEqual('sup', get_name(self.element.reserve_elements[3]))
 
     def test_get_attributes(self):
         self.assertEqual('{"class": "abc"}', self.element.get_attributes())
@@ -451,7 +475,8 @@ class TestPageElement(unittest.TestCase):
         translation = ('{{id_00000}} Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa '
                        '{{id_00001}} Bbbbbbbbbbbbbbb C {{id_00002}} D E '
                        '{{id_00003}} F G {{id_00004}} H \n\n{{id_00005}} I '
-                       '{{id_00006}} {{id_00007}} K{ { id _ 0 00 08 } }\nL')
+                       '{{id_00006}} {{id_00007}} K{ { id _ 0 00 08 } }'
+                       '{{id_00009}}L')
         self.element.add_translation(translation)
 
         translation = ('<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
@@ -473,7 +498,8 @@ class TestPageElement(unittest.TestCase):
         self.element.get_content()
         translation = ('<m id=00000 /> A <m id=00001 /> B C <m id=00002 /> D '
                        'E <m id=00003 /> F G <m id=00004 /> H <m id=00005 /> '
-                       'I <m id=00006 /> <m id=00007 /> K<m id=00008 />\nL')
+                       'I <m id=00006 /> <m id=00007 /> K<m id=00008 />'
+                       '<m id=00009 />L')
         self.element.add_translation(translation)
 
         translation = ('<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
@@ -588,6 +614,68 @@ class TestPageElement(unittest.TestCase):
 
     def test_add_translation_table_only(slef):
         pass
+
+    def test_add_translation_line_break_below(self):
+        xhtml = etree.XML(rb"""<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head><title>Test Document</title></head>
+    <body>
+        <p>
+            a<sup>[1]</sup> <span>b</span> c<sup>[2]</sup><br />
+            <em>d</em> e <img src="/test.jpg" /><br />
+            f <strong>g</strong><br/>h<br/>i<br/>j
+        </p>
+    </body>
+</html>""")
+
+        element = PageElement(xhtml.find('.//x:p', namespaces=ns), 'p1')
+        element.placeholder = Base.placeholder
+        element.position = 'below'
+        element.get_content()
+        element.add_translation(
+            'A{{id_00000}} B C{{id_00001}}{{id_00002}} D E {{id_00003}}'
+            '{{id_00004}} F G{{id_00005}}H{{id_00006}}I{{id_00007}}J ')
+        translation = (
+            '<html xmlns="http://www.w3.org/1999/xhtml" lang="en"> <head>'
+            '<title>Test Document</title></head> <body> '
+            '<p> a<sup>[1]</sup> <span>b</span> c<sup>[2]</sup><br/>'
+            'A<sup>[1]</sup> B C<sup>[2]</sup><br/> <em>d</em> e '
+            '<img src="/test.jpg"/><br/> D E <img src="/test.jpg"/><br/>'
+            ' f <strong>g</strong><br/> F G<br/>h<br/>H<br/>i<br/>I<br/>j '
+            '<br/>J</p> </body> </html>')
+        self.assertEqual(translation, get_string(xhtml))
+
+    def test_add_translation_line_break_above(self):
+        xhtml = etree.XML(rb"""<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head><title>Test Document</title></head>
+    <body>
+        <p>
+            a<sup>[1]</sup> <span>b</span> c<sup>[2]</sup><br />
+            <em>d</em> e <img src="/test.jpg" /><br />
+            f <strong>g</strong><br/>h<br/>i<br/>j
+        </p>
+    </body>
+</html>""")
+
+        element = PageElement(xhtml.find('.//x:p', namespaces=ns), 'p1')
+        element.placeholder = Base.placeholder
+        element.position = 'above'
+        element.get_content()
+        element.add_translation(
+            'A{{id_00000}} B C{{id_00001}}{{id_00002}} D E {{id_00003}}'
+            '{{id_00004}} F G{{id_00005}}H{{id_00006}}I{{id_00007}}J')
+        translation = (
+            '<html xmlns="http://www.w3.org/1999/xhtml" lang="en"> <head>'
+            '<title>Test Document</title></head> <body> '
+            '<p>A<sup>[1]</sup> B C<sup>[2]</sup><br/>'
+            ' a<sup>[1]</sup> <span>b</span> c<sup>[2]</sup><br/>'
+            ' D E <img src="/test.jpg"/><br/> <em>d</em> e '
+            '<img src="/test.jpg"/><br/> F G<br/> f <strong>g</strong><br/>'
+            'H<br/>h<br/>I<br/>i<br/>J<br/>j </p> </body> </html>')
+        self.assertEqual(translation, get_string(xhtml))
 
     def test_add_translation_attr(self):
         self.element.translation_lang = 'zh'
