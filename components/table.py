@@ -8,12 +8,12 @@ try:
     from qt.core import (
         Qt, QTableWidget, QHeaderView, QMenu, QAbstractItemView, QCursor,
         QBrush, QTableWidgetItem, pyqtSignal, QTableWidgetSelectionRange,
-        QColor, QT_VERSION_STR)
+        QColor, QPalette, QT_VERSION_STR)
 except ImportError:
     from PyQt5.Qt import (
         Qt, QTableWidget, QHeaderView, QMenu, QAbstractItemView, QCursor,
         QBrush, QTableWidgetItem, pyqtSignal, QTableWidgetSelectionRange,
-        QColor, QT_VERSION_STR)
+        QColor, QPalette, QT_VERSION_STR)
 
 load_translations()
 
@@ -55,9 +55,6 @@ class AdvancedTranslationTable(QTableWidget):
         for row, paragraph in enumerate(self.paragraphs):
             vheader = QTableWidgetItem(str(row))
             vheader.setTextAlignment(Qt.AlignCenter)
-            # vheader.setBackground(QBrush(QColor(255, 255, 0, 255)))
-            # vheader.setBackground(QBrush(Qt.NoBrush))
-            # vheader.setData(Qt.BackgroundRole, QColor(255, 255, 100, 100))
             self.setVerticalHeaderItem(row, vheader)
 
             original = QTableWidgetItem(paragraph.original)
@@ -76,8 +73,9 @@ class AdvancedTranslationTable(QTableWidget):
             self.track_row_data(row)
 
         header = self.horizontalHeader()
-        stretch = (getattr(QHeaderView.ResizeMode, 'Stretch', None)
-                   or QHeaderView.Stretch)
+        stretch = (
+            getattr(QHeaderView.ResizeMode, 'Stretch', None)
+            or QHeaderView.Stretch)
         header.setSectionResizeMode(0, stretch)
 
     def track_row_data(self, row):
@@ -96,16 +94,19 @@ class AdvancedTranslationTable(QTableWidget):
         a native background for PyQt versions lower than 6.0.0, as using
         Qt.NoBrush results in a fully black background.
         """
-        foreground = QBrush(Qt.black)
         engine = get_engine_class(paragraph.engine_name)
         if engine is None or paragraph.is_alignment(engine.separator):
-            vh_background = background = QBrush(Qt.NoBrush)
+            vh_background = vh_foreground = background = QBrush(Qt.NoBrush)
             if QT_VERSION_STR < '6.0.0':
                 vh_background = QBrush(QColor(235, 235, 235, 255))
+                vh_foreground = QBrush(Qt.black)
             tip = ''
             paragraph.aligned = True
         else:
-            vh_background = QBrush(QColor(255, 255, 0, 255))
+            is_light = self.palette().color(QPalette.Window).lightness() > 127
+            vh_background = QBrush(
+                QColor(255, 255, 100) if is_light else QColor(100, 100, 0))
+            vh_foreground = QBrush(Qt.black if is_light else Qt.white)
             background = QBrush(QColor(255, 255, 0, 100))
             tip = _(
                 'The number of lines differs between the original text and '
@@ -114,12 +115,11 @@ class AdvancedTranslationTable(QTableWidget):
 
         item = self.verticalHeaderItem(paragraph.row)
         item.setBackground(vh_background)
-        item.setForeground(foreground)
+        item.setForeground(vh_foreground)
         item.setToolTip(tip)
         for column in range(self.columnCount()):
             item = self.item(paragraph.row, column)
             item.setBackground(background)
-            item.setForeground(foreground)
             item.setToolTip(tip)
 
     def non_aligned_count(self):
