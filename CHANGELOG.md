@@ -1,3 +1,17 @@
+## v2.3.3
+
+Added features and fixed bugs as follows:
+
+1. feat: Added Claude as a translation engine. #232
+2. feat: Optimized adding translation feature. #244
+3. feat: Added Turkish UI translation. Credit to @DogancanYr
+4. feat: Show details while extracting the content of an ebook.
+5. feat: Support choosing encoding when translating plain text.
+6. fix: Fixed the bug causing output errors on Windows. #242
+7. fix: Fixed the bug preventing cache deletion on Windows. #246
+
+---
+
 ## v2.3.2
 
 Fixed bugs as follows:
