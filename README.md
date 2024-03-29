@@ -32,7 +32,6 @@ __Plugin Homepage__: [https://translator.bookfere.com](https://translator.bookfe
 * [Installation](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/wiki/English#installation)
 * [Usage](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/wiki/English#usage)
 * [Settings](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/wiki/English#settings)
-* [Contributing](CONTRIBUTING.md)
 
 ---
 
@@ -41,8 +40,8 @@ __Plugin Homepage__: [https://translator.bookfere.com](https://translator.bookfe
 * [GitHub ](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin)
 * [MobileRead](https://www.mobileread.com/forums/showthread.php?t=353052)
 * [Release](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/releases)
+* [Contributing](CONTRIBUTING.md)
 * [Donate](https://www.paypal.com/paypalme/bookfere)
-* [Sponsor](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/wiki#sponsor)
 
 ---
 

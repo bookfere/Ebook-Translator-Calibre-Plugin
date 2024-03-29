@@ -294,6 +294,10 @@ class TestMetadataElement(unittest.TestCase):
         self.element.add_translation('A')
         self.assertEqual('A', self.element.element.content)
 
+    def test_add_translation_same_content(self):
+        self.element.add_translation('a')
+        self.assertEqual('a', self.element.element.content)
+
 
 class TestTocElement(unittest.TestCase):
     def setUp(self):

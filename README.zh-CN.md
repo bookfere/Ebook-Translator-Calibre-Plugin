@@ -31,7 +31,6 @@ __插件主页__：[https://translator.bookfere.com](https://translator.bookfere
 * [安装插件](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/wiki/简体中文#安装插件)
 * [使用方法](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/wiki/简体中文#使用方法)
 * [设置说明](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/wiki/简体中文#设置说明)
-* [贡献代码](CONTRIBUTING.md)
 
 ---
 
@@ -41,8 +40,8 @@ __插件主页__：[https://translator.bookfere.com](https://translator.bookfere
 * [MobileRead](https://www.mobileread.com/forums/showthread.php?t=353052)
 * [发布页面](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/releases)
 * [详细介绍](https://bookfere.com/post/1057.html)
+* [贡献代码](CONTRIBUTING.md)
 * [捐助页面](https://bookfere.com/donate)
-* [致谢列表](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/wiki#sponsor)
 
 ---
 
