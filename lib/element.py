@@ -145,7 +145,7 @@ class MetadataElement(Element):
         return self.element.content
 
     def add_translation(self, translation=None):
-        if translation is not None:
+        if translation is not None and translation != self.get_content():
             if self.position == 'only':
                 self.element.content = translation
             elif self.position in ['above', 'left']:
