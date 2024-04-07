@@ -231,6 +231,7 @@ class Translation:
         self.log(sep('┈'))
         self.log(_('Item count: {}').format(self.total))
         self.log(_('Character count: {}').format(char_count))
+
         if self.total < 1:
             raise Exception(_('There is no content need to translate.'))
         self.progress_bar.load(self.total)

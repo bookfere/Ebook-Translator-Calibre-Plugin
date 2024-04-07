@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-03-25 21:02+0800\n"
+"POT-Creation-Date: 2024-04-08 00:18+0800\n"
 "PO-Revision-Date: 2024-03-23 15:12+0300\n"
 "Last-Translator: DogancanYr <EMAIL@ADDRESS>\n"
 "Language-Team: Turkish <LL@li.org>\n"
@@ -72,11 +72,29 @@ msgstr "Günlük"
 msgid "Errors"
 msgstr "Hatalar"
 
+msgid "All"
+msgstr ""
+
+msgid "Non-aligned"
+msgstr ""
+
+msgid "Translated"
+msgstr "Çeviri"
+
+msgid "Untranslated"
+msgstr "çevrilmemiş"
+
+msgid "keyword for filtering"
+msgstr ""
+
 msgid "Total items: {}"
 msgstr "Toplam öğe: {}"
 
 msgid "Character count: {}"
 msgstr "Karakter sayısı: {}"
+
+msgid "Non-aligned items: {}"
+msgstr ""
 
 msgid "Delete"
 msgstr "Sil"
@@ -119,9 +137,6 @@ msgstr "E-kitap Çıktıları"
 
 msgid "Output"
 msgstr "Çıktı"
-
-msgid "Translated"
-msgstr "Çeviri"
 
 msgid "The ebook has not been translated yet."
 msgstr "E-kitap henüz tercüme edilmedi."
@@ -304,9 +319,6 @@ msgstr "Orijinal"
 
 msgid "Status"
 msgstr "Durum"
-
-msgid "Untranslated"
-msgstr "çevrilmemiş"
 
 msgid ""
 "The number of lines differs between the original text and the translated "

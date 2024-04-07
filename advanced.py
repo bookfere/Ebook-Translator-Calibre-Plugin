@@ -25,21 +25,22 @@ try:
         QPlainTextEdit, QPushButton, QSplitter, QLabel, QThread, QLineEdit,
         QGridLayout, QProgressBar, pyqtSignal, pyqtSlot, QPixmap, QEvent,
         QStackedWidget, QSpacerItem, QTextCursor, QTabWidget, QCheckBox,
-        QComboBox)
+        QComboBox, QSizePolicy)
 except ImportError:
     from PyQt5.Qt import (
         Qt, QObject, QDialog, QGroupBox, QWidget, QVBoxLayout, QHBoxLayout,
         QPlainTextEdit, QPushButton, QSplitter, QLabel, QThread, QLineEdit,
         QGridLayout, QProgressBar, pyqtSignal, pyqtSlot, QPixmap, QEvent,
         QStackedWidget, QSpacerItem, QTextCursor, QTabWidget, QCheckBox,
-        QComboBox)
+        QComboBox, QSizePolicy)
 
 load_translations()
 
 
-class StatusWorker(QObject):
+class EditorWorker(QObject):
     start = pyqtSignal((str,), (str, object))
     show = pyqtSignal(str)
+    finished = pyqtSignal()
 
     def __init__(self):
         QObject.__init__(self)
@@ -53,6 +54,7 @@ class StatusWorker(QObject):
         time.sleep(1)
         self.show.emit('')
         callback and callback()
+        self.finished.emit()
 
 
 class PreparationWorker(QObject):
@@ -278,7 +280,7 @@ class AdvancedTranslation(QDialog):
 
     preparation_thread = QThread()
     trans_thread = QThread()
-    status_thread = QThread()
+    editor_thread = QThread()
 
     def __init__(self, parent, icon, worker, ebook):
         QDialog.__init__(self, parent)
@@ -291,15 +293,16 @@ class AdvancedTranslation(QDialog):
         # self.error = JobError(self)
         self.current_engine = get_engine_class()
         self.cache = None
+        self.merge_enabled = False
 
         self.on_working = False
         self.prgress_step = 0
         self.translate_all = False
 
-        self.status_worker = StatusWorker()
-        self.status_worker.moveToThread(self.status_thread)
-        self.status_thread.finished.connect(self.status_worker.deleteLater)
-        self.status_thread.start()
+        self.editor_worker = EditorWorker()
+        self.editor_worker.moveToThread(self.editor_thread)
+        self.editor_thread.finished.connect(self.editor_worker.deleteLater)
+        self.editor_thread.start()
 
         self.trans_worker = TranslationWorker(self.current_engine, self.ebook)
         self.trans_worker.moveToThread(self.trans_thread)
@@ -355,6 +358,7 @@ class AdvancedTranslation(QDialog):
 
         def prepare_table_layout(cache_id):
             self.cache = get_cache(cache_id)
+            self.merge_enabled = int(self.cache.get_info('merge_length')) > 0
             paragraphs = self.cache.all_paragraphs()
             if len(paragraphs) < 1:
                 self.alert.pop(
@@ -449,14 +453,64 @@ class AdvancedTranslation(QDialog):
         splitter = QSplitter()
         splitter.addWidget(self.layout_table())
         splitter.addWidget(tabs)
+        splitter.setSizes([int(splitter.width() / 2)] * 2)
 
         layout.addWidget(self.layout_control())
         layout.addWidget(splitter, 1)
 
         return widget
 
+    def layout_filter(self):
+        widget = QWidget()
+        layout = QHBoxLayout(widget)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        categories = QComboBox()
+        categories.addItem(_('All'), 'all')
+        categories.addItem(_('Non-aligned'), 'non_aligned')
+        categories.addItem(_('Translated'), 'translated')
+        categories.addItem(_('Untranslated'), 'untranslated')
+
+        search_input = QLineEdit()
+        search_input.setPlaceholderText(_('keyword for filtering'))
+
+        def filter_table_items(index):
+            self.table.show_all_rows()
+            category = categories.itemData(index)
+            if category == 'non_aligned':
+                self.table.hide_by_paragraphs(self.table.aligned_paragraphs())
+            elif category == 'translated':
+                self.table.hide_by_paragraphs(
+                    self.table.untranslated_paragraphs())
+            elif category == 'untranslated':
+                self.table.hide_by_paragraphs(
+                    self.table.translated_paragraphs())
+
+        def filter_by_category(index):
+            filter_table_items(index)
+            self.table.show_by_text(search_input.text())
+        categories.currentIndexChanged.connect(filter_by_category)
+
+        def filter_by_keyword(text):
+            filter_table_items(categories.currentIndex())
+            self.table.show_by_text(text)
+        search_input.textChanged.connect(filter_by_keyword)
+
+        # def reset_filter():
+        #     filter_table_items(categories.currentIndex())
+        #     self.table.show_by_text(search_input.text())
+        # self.editor_worker.finished.connect(reset_filter)
+        # self.trans_worker.finished.connect(reset_filter)
+
+        layout.addWidget(categories)
+        layout.addWidget(search_input)
+
+        return widget
+
     def layout_table(self):
         widget = QWidget()
+        widget.setSizePolicy(
+            QSizePolicy.Ignored, QSizePolicy.Preferred)
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
 
@@ -472,6 +526,16 @@ class AdvancedTranslation(QDialog):
         self.progress_bar.connect(write_progress)
 
         paragraph_count = QLabel()
+        non_aligned_paragraph_count = QLabel()
+        non_aligned_paragraph_count.setVisible(False)
+
+        counter = QWidget()
+        counter_layout = QHBoxLayout(counter)
+        counter_layout.setContentsMargins(0, 0, 0, 0)
+        counter_layout.setSpacing(0)
+        counter_layout.addWidget(paragraph_count)
+        counter_layout.addWidget(non_aligned_paragraph_count)
+        counter_layout.addStretch(1)
 
         def get_paragraph_count(select_all=True):
             item_count = char_count = 0
@@ -482,37 +546,46 @@ class AdvancedTranslation(QDialog):
             return (item_count, char_count)
         all_item_count, all_char_count = get_paragraph_count(True)
 
-        def non_aligned_paragraphs_count():
-            return len([p for p in self.table.paragraphs if not p.aligned])
-
         def item_selection_changed():
             item_count, char_count = get_paragraph_count(False)
             total = '%s/%s' % (item_count, all_item_count)
             parts = '%s/%s' % (char_count, all_char_count)
-            non_aligned_paragraphs = '%s/%s' % ( non_aligned_paragraphs_count(),all_item_count)
             paragraph_count.setText(
-                _('Total items: {}').format(total) + ' · ' +
-                _('Character count: {}').format(parts)+ ' · ' +
-                _('Non-aligned paragraphs count: {}').format(non_aligned_paragraphs))
-                
+                _('Total items: {}').format(total) + ' · '
+                + _('Character count: {}').format(parts))
         item_selection_changed()
         self.table.itemSelectionChanged.connect(item_selection_changed)
 
+        if self.merge_enabled:
+            non_aligned_paragraph_count.setVisible(True)
+
+            def show_none_aligned_count():
+                non_aligned_paragraph_count.setText(
+                    ' · ' + _('Non-aligned items: {}')
+                    .format(self.table.non_aligned_count))
+            show_none_aligned_count()
+            self.table.row.connect(show_none_aligned_count)
+
+        filter_widget = self.layout_filter()
+
+        layout.addWidget(filter_widget)
         layout.addWidget(self.table, 1)
         layout.addWidget(progress_bar)
-        layout.addWidget(paragraph_count)
+        layout.addWidget(counter)
         layout.addWidget(self.layout_table_control())
 
         def working_start():
             if self.translate_all or self.table.selected_count() > 1:
+                filter_widget.setVisible(False)
                 progress_bar.setValue(0)
                 progress_bar.setVisible(True)
-                paragraph_count.setVisible(False)
+                counter.setVisible(False)
         self.trans_worker.start.connect(working_start)
 
         def working_end():
+            filter_widget.setVisible(True)
             progress_bar.setVisible(False)
-            paragraph_count.setVisible(True)
+            counter.setVisible(True)
         self.trans_worker.finished.connect(working_end)
 
         return widget
@@ -700,7 +773,7 @@ class AdvancedTranslation(QDialog):
             if len(self.table.findItems(_('Translated'), Qt.MatchExactly)) < 1:
                 self.alert.pop(_('The ebook has not been translated yet.'))
                 return
-            if self.table.non_aligned_count() > 0:
+            if self.table.non_aligned_count > 0:
                 message = _(
                     'The number of lines in some translation units differs '
                     'between the original text and the translated text. Are '
@@ -741,7 +814,7 @@ class AdvancedTranslation(QDialog):
         splitter.addWidget(raw_text)
         splitter.addWidget(original_text)
         splitter.addWidget(translation_text)
-        splitter.setSizes([0, 1, 1])
+        splitter.setSizes([0] + [int(splitter.height() / 2)] * 2)
 
         translation_text.cursorPositionChanged.connect(
             translation_text.ensureCursorVisible)
@@ -776,6 +849,7 @@ class AdvancedTranslation(QDialog):
             else:
                 sizes = [int(splitter.height() / 3)] * 3
             splitter.setSizes(sizes)
+
         self.install_widget_event(
             splitter, splitter.handle(1), QEvent.MouseButtonDblClick,
             auto_open_close_splitter)
@@ -785,15 +859,15 @@ class AdvancedTranslation(QDialog):
 
         control = QWidget()
         control.setVisible(False)
-        controle_layout = QHBoxLayout(control)
-        controle_layout.setContentsMargins(0, 0, 0, 0)
+        control_layout = QHBoxLayout(control)
+        control_layout.setContentsMargins(0, 0, 0, 0)
 
         save_status = QLabel()
         save_button = QPushButton(_('Save'))
 
-        controle_layout.addWidget(save_status)
-        controle_layout.addStretch(1)
-        controle_layout.addWidget(save_button)
+        control_layout.addWidget(save_status)
+        control_layout.addStretch(1)
+        control_layout.addWidget(save_button)
 
         layout.addWidget(splitter)
         layout.addWidget(control)
@@ -818,7 +892,7 @@ class AdvancedTranslation(QDialog):
 
         def streaming_translation(data):
             if data == '':
-                self.paragraph_sig.emit(self.table.current_paragraph())
+                translation_text.clear()
             elif isinstance(data, Paragraph):
                 self.table.setCurrentItem(self.table.item(data.row, 0))
             else:
@@ -844,11 +918,11 @@ class AdvancedTranslation(QDialog):
             paragraph.target_lang = self.ebook.target_lang
             self.table.row.emit(paragraph.row)
             self.cache.update_paragraph(paragraph)
-            self.status_worker.start[str, object].emit(
+            self.editor_worker.start[str, object].emit(
                 _('Your changes have been saved.'),
                 lambda: control.setVisible(False))
             translation_text.setFocus(Qt.OtherFocusReason)
-        self.status_worker.show.connect(save_status.setText)
+        self.editor_worker.show.connect(save_status.setText)
         save_button.clicked.connect(save_translation)
 
         return widget
@@ -929,8 +1003,8 @@ class AdvancedTranslation(QDialog):
         self.preparation_thread.wait()
         self.trans_thread.quit()
         self.trans_thread.wait()
-        self.status_thread.quit()
-        self.status_thread.wait()
+        self.editor_thread.quit()
+        self.editor_thread.wait()
         if self.cache is not None:
             if self.cache.is_persistence():
                 self.cache.close()

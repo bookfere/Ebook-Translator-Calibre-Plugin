@@ -26,8 +26,8 @@ class AdvancedTranslationTable(QTableWidget):
         self.parent = parent
         self.paragraphs = paragraphs
 
+        self.non_aligned_count = 0
         # self.setFocusPolicy(Qt.NoFocus)
-
         self.alert = AlertMessage(self)
         self.layout()
 
@@ -38,7 +38,7 @@ class AdvancedTranslationTable(QTableWidget):
         self.setColumnCount(4)
         self.setHorizontalHeaderLabels(
             [_('Original'), _('Engine'), _('Language'), _('Status')])
-
+        self.verticalHeader().setMinimumWidth(28)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         triggers = (getattr(
             QAbstractItemView.EditTrigger, 'NoEditTriggers', None)
@@ -48,16 +48,17 @@ class AdvancedTranslationTable(QTableWidget):
 
         # self.setVerticalHeaderLabels(
         #     map(str, range(1, len(self.paragraphs) + 1)))
-
         # self.verticalHeader().setStyleSheet(
         #     "QHeaderView::section{background-color:red}")
 
         for row, paragraph in enumerate(self.paragraphs):
+            paragraph.row = row
+
             vheader = QTableWidgetItem(str(row))
             vheader.setTextAlignment(Qt.AlignCenter)
             self.setVerticalHeaderItem(row, vheader)
 
-            original = QTableWidgetItem(paragraph.original)
+            original = QTableWidgetItem(paragraph.original.replace('\n', ' '))
             original.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
             original.setData(Qt.UserRole, paragraph)
             engine_name = QTableWidgetItem(paragraph.engine_name)
@@ -82,7 +83,13 @@ class AdvancedTranslationTable(QTableWidget):
         items = ['--', '--', _('Untranslated')]
         paragraph = self.paragraph(row)
         if paragraph.translation:
+            before_aligned = paragraph.aligned
             self.check_row_alignment(paragraph)
+            # If the alignment of before and after is the same, do nothing.
+            if before_aligned and not paragraph.aligned:
+                self.non_aligned_count += 1
+            elif not before_aligned and paragraph.aligned:
+                self.non_aligned_count -= 1
             items = [
                 paragraph.engine_name, paragraph.target_lang, _('Translated')]
         for column, text in enumerate(items, 1):
@@ -122,9 +129,6 @@ class AdvancedTranslationTable(QTableWidget):
             item.setBackground(background)
             item.setToolTip(tip)
 
-    def non_aligned_count(self):
-        return len([p for p in self.paragraphs if not p.aligned])
-
     def contextMenuEvent(self, event):
         if self.parent.on_working:
             return
@@ -135,9 +139,10 @@ class AdvancedTranslationTable(QTableWidget):
         menu.addAction(_('Delete'), self.delete_by_rows)
         menu.addSeparator()
 
-        menu.addAction(
-            _('Select the whole chapter'),
-            lambda: self.select_by_page(self.current_paragraph().page))
+        if not self.parent.merge_enabled:
+            menu.addAction(
+                _('Select the whole chapter'),
+                lambda: self.select_by_page(self.current_paragraph().page))
 
         attributes = self.current_paragraph().get_attributes()
         for name, value in attributes.items():
@@ -156,14 +161,24 @@ class AdvancedTranslationTable(QTableWidget):
 
     def paragraph(self, row):
         item = self.item(row, 0)
-        paragraph = item.data(Qt.UserRole)
-        paragraph.row = row
-        return paragraph
+        return item.data(Qt.UserRole)
 
     def current_paragraph(self):
         # return self.paragraph(self.currentRow())
         items = self.get_selected_items()
         return items[0] if len(items) > 0 else None
+
+    def non_aligned_paragraphs(self):
+        return [p for p in self.paragraphs if not p.aligned]
+
+    def aligned_paragraphs(self):
+        return [p for p in self.paragraphs if p.aligned]
+
+    def untranslated_paragraphs(self):
+        return [p for p in self.paragraphs if not p.translation]
+
+    def translated_paragraphs(self):
+        return [p for p in self.paragraphs if p.translation]
 
     def get_selected_rows(self):
         rows = []
@@ -181,10 +196,32 @@ class AdvancedTranslationTable(QTableWidget):
             self.get_selected_rows()
         for row in rows:
             paragraph = self.paragraph(row)
+            if self.isRowHidden(row):
+                continue
             if ignore_done and paragraph.translation:
                 continue
             items.append(paragraph)
         return items
+
+    def hide_by_paragraphs(self, paragraphs):
+        for paragraph in paragraphs:
+            self.hideRow(paragraph.row)
+
+    def show_all_rows(self):
+        for row in range(self.rowCount()):
+            self.showRow(row)
+
+    def show_by_text(self, text):
+        if not text:
+            return
+        paragraphs = []
+        for row in range(self.rowCount()):
+            if self.isRowHidden(row):
+                continue
+            paragraph = self.paragraph(row)
+            if text.lower() not in paragraph.original.lower():
+                paragraphs.append(paragraph)
+        self.hide_by_paragraphs(paragraphs)
 
     def delete_by_rows(self, rows=[]):
         rows = rows or self.get_selected_rows()

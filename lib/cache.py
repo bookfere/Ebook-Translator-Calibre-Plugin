@@ -29,9 +29,9 @@ class Paragraph:
         self.engine_name = engine_name
         self.target_lang = target_lang
 
+        self.row = -1
         self.is_cache = False
         self.error = None
-
         self.aligned = True
 
     def get_attributes(self):

@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-03-25 21:02+0800\n"
+"POT-Creation-Date: 2024-04-08 00:18+0800\n"
 "PO-Revision-Date: 2023-10-01 15:35-0400\n"
 "Last-Translator: <a href=\"https://www.mobileread.com/forums/member.php?"
 "u=90932\">PoP</a>\n"
@@ -73,14 +73,29 @@ msgstr "Registre"
 msgid "Errors"
 msgstr "Erreurs"
 
+msgid "All"
+msgstr ""
+
+msgid "Non-aligned"
+msgstr ""
+
+msgid "Translated"
+msgstr "Traduit"
+
+msgid "Untranslated"
+msgstr "Non-traduit"
+
+msgid "keyword for filtering"
+msgstr ""
+
 msgid "Total items: {}"
 msgstr "Items totaux: {}"
 
 msgid "Character count: {}"
 msgstr "Nombre de caractères: {}"
 
-msgid "Non-aligned paragraphs count: {}"
-msgstr "Nombre total de désalignements：{}"
+msgid "Non-aligned items: {}"
+msgstr ""
 
 msgid "Delete"
 msgstr "Effacer"
@@ -123,9 +138,6 @@ msgstr "Produit ebook"
 
 msgid "Output"
 msgstr "Produit"
-
-msgid "Translated"
-msgstr "Traduit"
 
 msgid "The ebook has not been translated yet."
 msgstr ""
@@ -310,9 +322,6 @@ msgstr "Original"
 
 msgid "Status"
 msgstr "Statut"
-
-msgid "Untranslated"
-msgstr "Non-traduit"
 
 msgid ""
 "The number of lines differs between the original text and the translated "
