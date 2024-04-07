@@ -95,6 +95,10 @@ msgstr ""
 msgid "Character count: {}"
 msgstr ""
 
+#: advanced.py:491 lib/translation.py:233
+msgid "Non-aligned paragraphs count: {}"
+msgstr ""
+
 #: advanced.py:519 cache.py:92 cache.py:182 components/engine.py:202
 #: components/table.py:135
 msgid "Delete"
