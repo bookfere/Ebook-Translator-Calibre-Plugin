@@ -79,6 +79,9 @@ msgstr "Items totaux: {}"
 msgid "Character count: {}"
 msgstr "Nombre de caractères: {}"
 
+msgid "Non-aligned paragraphs count: {}"
+msgstr "Nombre total de désalignements：{}"
+
 msgid "Delete"
 msgstr "Effacer"
 
