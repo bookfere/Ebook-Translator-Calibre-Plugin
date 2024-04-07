@@ -79,6 +79,9 @@ msgstr "Articulos totales: {}"
 msgid "Character count: {}"
 msgstr ""
 
+msgid "Non-aligned paragraphs count: {}"
+msgstr "Non-aligned paragraphs count：{}"
+
 msgid "Delete"
 msgstr "Eliminar"
 

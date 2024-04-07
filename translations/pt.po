@@ -78,6 +78,9 @@ msgstr "Total de itens: {}"
 msgid "Character count: {}"
 msgstr "Contador de caracteres: {}"
 
+msgid "Non-aligned paragraphs count: {}"
+msgstr "Número total de desalinhamentos：{}"
+
 msgid "Delete"
 msgstr "Deletar"
 

@@ -482,13 +482,19 @@ class AdvancedTranslation(QDialog):
             return (item_count, char_count)
         all_item_count, all_char_count = get_paragraph_count(True)
 
+        def non_aligned_paragraphs_count():
+            return len([p for p in self.table.paragraphs if not p.aligned])
+
         def item_selection_changed():
             item_count, char_count = get_paragraph_count(False)
             total = '%s/%s' % (item_count, all_item_count)
             parts = '%s/%s' % (char_count, all_char_count)
+            non_aligned_paragraphs = '%s/%s' % ( non_aligned_paragraphs_count(),all_item_count)
             paragraph_count.setText(
                 _('Total items: {}').format(total) + ' · ' +
-                _('Character count: {}').format(parts))
+                _('Character count: {}').format(parts)+ ' · ' +
+                _('Non-aligned paragraphs count: {}').format(non_aligned_paragraphs))
+                
         item_selection_changed()
         self.table.itemSelectionChanged.connect(item_selection_changed)
 
