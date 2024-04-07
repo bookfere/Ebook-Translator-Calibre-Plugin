@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-03-25 21:02+0800\n"
+"POT-Creation-Date: 2024-04-08 00:18+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -70,14 +70,29 @@ msgstr "日志"
 msgid "Errors"
 msgstr "错误"
 
+msgid "All"
+msgstr "全部"
+
+msgid "Non-aligned"
+msgstr "未对齐"
+
+msgid "Translated"
+msgstr "已翻译"
+
+msgid "Untranslated"
+msgstr "未翻译"
+
+msgid "keyword for filtering"
+msgstr "筛选关键词"
+
 msgid "Total items: {}"
 msgstr "全部条目：{}"
 
 msgid "Character count: {}"
 msgstr "字符总数：{}"
 
-msgid "Non-aligned paragraphs count: {}"
-msgstr "未对齐总数：{}"
+msgid "Non-aligned items: {}"
+msgstr "未对齐条目：{}"
 
 msgid "Delete"
 msgstr "删除"
@@ -120,9 +135,6 @@ msgstr "输出电子书"
 
 msgid "Output"
 msgstr "输出"
-
-msgid "Translated"
-msgstr "已翻译"
 
 msgid "The ebook has not been translated yet."
 msgstr "该电子书还未完成翻译。"
@@ -299,9 +311,6 @@ msgstr "原文"
 
 msgid "Status"
 msgstr "状态"
-
-msgid "Untranslated"
-msgstr "未翻译"
 
 msgid ""
 "The number of lines differs between the original text and the translated "
