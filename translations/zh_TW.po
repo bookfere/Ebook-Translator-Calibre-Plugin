@@ -77,6 +77,9 @@ msgstr "項目總計：{}"
 msgid "Character count: {}"
 msgstr ""
 
+msgid "Non-aligned paragraphs count: {}"
+msgstr "未對齊總數：{}"
+
 msgid "Delete"
 msgstr "刪除"
 
