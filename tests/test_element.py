@@ -1,3 +1,4 @@
+import re
 import unittest
 from unittest.mock import patch, Mock
 
@@ -5,7 +6,7 @@ from lxml import etree
 
 from calibre.ebooks.oeb.base import TOC, Metadata
 
-from ..lib.utils import ns
+from ..lib.utils import ns, create_xpath
 from ..lib.cache import Paragraph
 from ..lib.element import (
     get_string, get_name, Extraction, ElementHandler, ElementHandlerMerge,
@@ -20,7 +21,7 @@ class TestFunction(unittest.TestCase):
     def test_get_string(self):
         markup = '<div xmlns="http://www.w3.org/1999/xhtml">' \
                  '<p class="a">abc</p> def</div>'
-        element = etree.XML(markup).find('x:p', namespaces=ns)
+        element = etree.XML(markup).find('.//x:p', namespaces=ns)
         self.assertEqual(
             '<p xmlns="http://www.w3.org/1999/xhtml" class="a">abc</p>',
             get_string(element, False))
@@ -115,6 +116,8 @@ class TestElement(unittest.TestCase):
         self.assertIsNone(self.element.translation_lang)
         self.assertIsNone(self.element.original_color)
         self.assertIsNone(self.element.translation_color)
+        self.assertIsNone(self.element.remove_pattern)
+        self.assertIsNone(self.element.reserve_pattern)
 
     def test_set_ignored(self):
         self.element.set_ignored(True)
@@ -143,6 +146,14 @@ class TestElement(unittest.TestCase):
     def test_set_translation_color(self):
         self.element.set_translation_color('green')
         self.assertEqual('green', self.element.translation_color)
+
+    def test_set_remove_pattern(self):
+        self.element.set_remove_pattern('.//*[self::x:sup]')
+        self.assertEqual('.//*[self::x:sup]', self.element.remove_pattern)
+
+    def test_set_reserve_pattern(self):
+        self.element.set_reserve_pattern('.//*[self::x:sup]')
+        self.assertEqual('.//*[self::x:sup]', self.element.reserve_pattern)
 
     def test_get_name(self):
         self.assertIsNone(self.element.get_name())
@@ -363,6 +374,9 @@ class TestPageElement(unittest.TestCase):
 </html>""")
         self.paragraph = self.xhtml.find('.//x:p', namespaces=ns)
         self.element = PageElement(self.paragraph, 'p1')
+        self.element.remove_pattern = create_xpath(('rt',))
+        self.element.reserve_pattern = create_xpath(
+            ('img', 'sup', 'br', 'code'))
         self.element.placeholder = Base.placeholder
         self.element.position = 'below'
 
@@ -407,15 +421,16 @@ class TestPageElement(unittest.TestCase):
         </p>
     </body>
 </html>""")
-        self.element = PageElement(xhtml.find('.//x:p', namespaces=ns), 'p1')
-        self.element.placeholder = Base.placeholder
+        element = PageElement(xhtml.find('.//x:p', namespaces=ns), 'p1')
+        element.reserve_pattern = create_xpath(('sup',))
+        element.placeholder = Base.placeholder
         content = (
             'a{{id_00000}} b{{id_00001}} x cx {{id_00002}} d{{id_00003}} x')
-        self.assertEqual(content, self.element.get_content())
-        self.assertEqual('a', get_name(self.element.reserve_elements[0]))
-        self.assertEqual('sup', get_name(self.element.reserve_elements[1]))
-        self.assertEqual('sup', get_name(self.element.reserve_elements[2]))
-        self.assertEqual('sup', get_name(self.element.reserve_elements[3]))
+        self.assertEqual(content, element.get_content())
+        self.assertEqual('a', get_name(element.reserve_elements[0]))
+        self.assertEqual('sup', get_name(element.reserve_elements[1]))
+        self.assertEqual('sup', get_name(element.reserve_elements[2]))
+        self.assertEqual('sup', get_name(element.reserve_elements[3]))
 
     def test_get_attributes(self):
         self.assertEqual('{"class": "abc"}', self.element.get_attributes())
@@ -634,6 +649,7 @@ class TestPageElement(unittest.TestCase):
 </html>""")
 
         element = PageElement(xhtml.find('.//x:p', namespaces=ns), 'p1')
+        element.reserve_pattern = create_xpath(('sup', 'img', 'br'))
         element.placeholder = Base.placeholder
         element.position = 'below'
         element.get_content()
@@ -665,6 +681,7 @@ class TestPageElement(unittest.TestCase):
 </html>""")
 
         element = PageElement(xhtml.find('.//x:p', namespaces=ns), 'p1')
+        element.reserve_pattern = create_xpath(('sup', 'img', 'br'))
         element.placeholder = Base.placeholder
         element.position = 'above'
         element.get_content()
@@ -724,6 +741,26 @@ class TestExtraction(unittest.TestCase):
 
         self.extraction = Extraction(
             [self.page_3, self.page_2, self.page_1], 'normal', 'text', [], [])
+
+    def test_create_extraction(self):
+        self.assertEqual(
+            ('p', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote'),
+            Extraction.priority_elements)
+        self.assertEqual(
+            (r'^[-\d\s\.\'\\"‘’“”,=~!@#$%^&º*|≈<>?/`—…+:–_(){}[\]]+$',),
+            Extraction.default_filter_rules)
+        self.assertIsInstance(self.extraction, Extraction)
+        self.assertEqual(
+            [self.page_3, self.page_2, self.page_1], self.extraction.pages)
+        self.assertEqual('normal', self.extraction.rule_mode)
+        self.assertEqual('text', self.extraction.filter_scope)
+        self.assertEqual([], self.extraction.filter_rules)
+        self.assertEqual([], self.extraction.element_rules)
+        self.assertEqual(
+            [re.compile(Extraction.default_filter_rules[0])],
+            self.extraction.filter_patterns)
+        self.assertEqual(
+            ['self::x:pre', 'self::x:code'], self.extraction.element_patterns)
 
     def test_get_sorted_pages(self):
         self.assertEqual(
@@ -804,26 +841,63 @@ class TestExtraction(unittest.TestCase):
     </div>
 </body>
 </html>""")
-        root = xhtml.find('x:body', namespaces=ns)
+        root = xhtml.find('.//x:body', namespaces=ns)
         elements = self.extraction.extract_elements('p1', root, [])
-        self.assertEqual(9, len(elements))
+        self.assertEqual(8, len(elements))
         self.assertEqual('h2', elements[0].get_name())
         self.assertFalse(elements[0].ignored)
-        self.assertEqual('pre', elements[-2].get_name())
-        self.assertTrue(elements[-2].ignored)
         self.assertEqual('p', elements[-1].get_name())
         self.assertFalse(elements[-1].ignored)
 
+    def test_extract_elements_root_wihout_elements(self):
         xhtml = etree.XML(b"""<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head><title>Document</title></head>
 <body>123456789</body>
 </html>""")
-        root = xhtml.find('x:body', namespaces=ns)
+        root = xhtml.find('.//x:body', namespaces=ns)
+
         elements = self.extraction.extract_elements('test', root, [])
         self.assertEqual(1, len(elements))
         self.assertEqual('123456789', elements[0].element.text)
+
+    def test_extract_elements_ignore_root(self):
+        xhtml = etree.XML(b"""<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head><title>Document</title></head>
+<body class="test"><p>a</p></body>
+</html>""")
+        root = xhtml.find('.//x:body', namespaces=ns)
+        self.extraction.element_rules = ['.test']
+        self.extraction.load_element_patterns()
+
+        self.assertEqual(
+            [], self.extraction.extract_elements('test', root, []))
+
+    def test_extract_elements_ignore_certain_elements(self):
+        xhtml = etree.XML(b"""<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head><title>Document</title></head>
+<body>
+    <div><p>a</p></div>
+    <div class="test"><p>b</p><p class="test">c</p></div>
+    <div><p>d</p></div>
+    <div id="test"><p>e</p></div>
+</body>
+</html>""")
+        root = xhtml.find('.//x:body', namespaces=ns)
+        self.extraction.element_rules = ['.test', '#test']
+        self.extraction.load_element_patterns()
+
+        elements = self.extraction.extract_elements('test', root, [])
+        self.assertEqual(2, len(elements))
+        self.assertEqual(
+            xhtml.find('.//x:div[1]/x:p', namespaces=ns), elements[0].element)
+        self.assertEqual(
+            xhtml.find('.//x:div[3]/x:p', namespaces=ns), elements[1].element)
 
     def test_filter_content(self):
         def elements(markups):
@@ -935,6 +1009,8 @@ class TestElementHandler(unittest.TestCase):
         self.assertIsNone(self.handler.original_color)
         self.assertIsNone(self.handler.translation_color)
         self.assertIsNone(self.handler.column_gap)
+        self.assertIsNone(self.handler.remove_pattern)
+        self.assertIsNone(self.handler.reserve_pattern)
         self.assertEqual({}, self.handler.elements)
         self.assertEqual([], self.handler.originals)
 
@@ -963,8 +1039,24 @@ class TestElementHandler(unittest.TestCase):
         self.handler.set_column_gap(('percentage', 2))
         self.assertEqual(('percentage', 2), self.handler.column_gap)
 
+    def test_load_remove_rules(self):
+        self.handler.load_remove_rules()
+        self.assertEqual(
+            './/*[self::x:rt or self::x:rp]', self.handler.remove_pattern)
+
+    def test_load_reserve_rules(self):
+        self.handler.load_reserve_rules()
+        self.assertRegex(
+            self.handler.reserve_pattern, r'^\.//\*\[self::x:img.*style\]$')
+
     @patch('calibre_plugins.ebook_translator.lib.element.uid')
     def test_prepare_original(self, mock_uid):
+        self.handler.translation_lang = 'en'
+        self.handler.original_color = 'red'
+        self.handler.translation_color = 'green'
+        self.handler.column_gap = ('percentage', 20)
+        self.handler.load_remove_rules()
+        self.handler.load_reserve_rules()
         mock_uid.side_effect = ['m1', 'm2', 'm3', 'm4', 'm5']
         self.assertEqual([
             (0, 'm1', '<p id="a">a</p>', 'a', False, '{"id": "a"}', 'p1'),
@@ -975,6 +1067,19 @@ class TestElementHandler(unittest.TestCase):
              '{"id": "c", "class": "c"}', 'p1'),
             (4, 'm5', '<p></p>', '', True, None, 'p1')],
             self.handler.prepare_original(self.elements))
+        for element in self.elements:
+            with self.subTest(element=element):
+                self.assertEqual(Base.placeholder, element.placeholder)
+                self.assertEqual('below', element.position)
+                self.assertEqual('en', element.translation_lang)
+                self.assertEqual('red', element.original_color)
+                self.assertEqual('green', element.translation_color)
+                self.assertEqual(('percentage', 20), element.column_gap)
+                self.assertEqual(
+                    './/*[self::x:rt or self::x:rp]',
+                    self.handler.remove_pattern)
+                self.assertRegex(
+                    element.reserve_pattern, r'^\.//\*\[self::x:img.*style\]$')
 
     def test_prepare_translation(self):
         pass
@@ -1146,17 +1251,36 @@ class TestElementHandlerMerge(unittest.TestCase):
 
         self.handler.position = 'above'
         self.assertEqual(
-            [('a', 'A\n\nB'),('b', None), ('c', None)],
+            [('a', 'A\n\nB'), ('b', None), ('c', None)],
             self.handler.align_paragraph(paragraph))
 
     @patch('calibre_plugins.ebook_translator.lib.element.uid')
     def test_prepare_original_merge_separator(self, mock_uid):
         mock_uid.return_value = 'm1'
         self.handler.separator = Base.separator
+        self.handler.translation_lang = 'en'
+        self.handler.original_color = 'red'
+        self.handler.translation_color = 'green'
+        self.handler.column_gap = ('percentage', 20)
+        self.handler.load_remove_rules()
+        self.handler.load_reserve_rules()
         self.assertEqual([(
             0, 'm1', '<p id="a">a</p>\n\n<p id="b">b</p>\n\n<p id="c" '
             'class="c">c</p>\n\n', 'a\n\nb\n\nc\n\n', False)],
             self.handler.prepare_original(self.elements))
+        for element in [e for e in self.elements if not e.ignored]:
+            with self.subTest(element=element):
+                self.assertEqual(Base.placeholder, element.placeholder)
+                self.assertEqual('below', element.position)
+                self.assertEqual('en', element.translation_lang)
+                self.assertEqual('red', element.original_color)
+                self.assertEqual('green', element.translation_color)
+                self.assertEqual(('percentage', 20), element.column_gap)
+                self.assertEqual(
+                    './/*[self::x:rt or self::x:rp]',
+                    self.handler.remove_pattern)
+                self.assertRegex(
+                    element.reserve_pattern, r'^\.//\*\[self::x:img.*style\]$')
 
     @patch('calibre_plugins.ebook_translator.lib.element.uid')
     def test_prepare_original_merge_separator_multiple(self, mock_uid):

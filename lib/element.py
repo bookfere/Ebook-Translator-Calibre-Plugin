@@ -5,7 +5,8 @@ import copy
 from lxml import etree
 from calibre import prepare_string_for_xml as xml_escape
 
-from .utils import ns, css, uid, trim, sorted_mixed_keys, open_file
+from .utils import (
+    ns, uid, trim, sorted_mixed_keys, open_file, css_to_xpath, create_xpath)
 from .config import get_config
 
 
@@ -36,6 +37,9 @@ class Element:
         self.original_color = None
         self.translation_color = None
 
+        self.remove_pattern = None
+        self.reserve_pattern = None
+
     def _element_copy(self):
         return copy.deepcopy(self.element)
 
@@ -59,6 +63,12 @@ class Element:
 
     def set_translation_color(self, color):
         self.translation_color = color
+
+    def set_remove_pattern(self, pattern):
+        self.remove_pattern = pattern
+
+    def set_reserve_pattern(self, pattern):
+        self.reserve_pattern = pattern
 
     def get_name(self):
         return None
@@ -152,7 +162,7 @@ class MetadataElement(Element):
                 self.element.content = '%s %s' % (
                     translation, self.element.content)
             else:
-                self.element.content = '%s %s' %(
+                self.element.content = '%s %s' % (
                     self.element.content, translation)
 
 
@@ -175,11 +185,6 @@ class TocElement(Element):
 
 
 class PageElement(Element):
-    def _get_descendents(self, element, tags):
-        tags = (tags,) if isinstance(tags, str) else tags
-        xpath = './/*[%s]' % ' or '.join(['self::x:%s' % tag for tag in tags])
-        return element.xpath(xpath, namespaces=ns)
-
     def get_name(self):
         return get_name(self.element)
 
@@ -206,18 +211,16 @@ class PageElement(Element):
 
     def get_content(self):
         element_copy = self._element_copy()
-        for noise in self._get_descendents(element_copy, ('rt', 'rp')):
-            self._safe_remove(noise)
-        # Reserve the <br> element instead of using a line break to prevent
-        # conflicts with the mechanism of merge translation.
-        target_elements = (
-            'img', 'code', 'br', 'hr', 'sub', 'sup', 'kbd', 'abbr', 'wbr', 'var',
-            'canvas', 'svg', 'script', 'style')
-        self.reserve_elements = self._get_descendents(
-            element_copy, target_elements)
+        if self.remove_pattern is not None:
+            for noise in element_copy.xpath(
+                    self.remove_pattern, namespaces=ns):
+                self._safe_remove(noise)
+        if self.reserve_pattern is not None:
+            self.reserve_elements = element_copy.xpath(
+                self.reserve_pattern, namespaces=ns)
         for eid, reserve in enumerate(self.reserve_elements):
             replacement = self.placeholder[0].format(format(eid, '05'))
-            if get_name(reserve) in ['sub', 'sup']:
+            if get_name(reserve) in ('sub', 'sup'):
                 parent = reserve.getparent()
                 if parent is not None and get_name(parent) == 'a' and \
                         parent.text is None and reserve.tail is None and \
@@ -423,6 +426,11 @@ class PageElement(Element):
 
 
 class Extraction:
+    priority_elements = (
+        'p', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote')
+    default_filter_rules = (
+        r'^[-\d\s\.\'\\"‘’“”,=~!@#$%^&º*|≈<>?/`—…+:–_(){}[\]]+$',)
+
     def __init__(
             self, pages, rule_mode, filter_scope, filter_rules, element_rules):
         self.pages = pages
@@ -438,9 +446,7 @@ class Extraction:
         self.load_element_patterns()
 
     def load_filter_patterns(self):
-        default_rules = [
-            r'^[-\d\s\.\'\\"‘’“”,=~!@#$%^&º*|≈<>?/`—…+:–_(){}[\]]+$']
-        patterns = [re.compile(rule) for rule in default_rules]
+        patterns = [re.compile(rule) for rule in self.default_filter_rules]
         for rule in self.filter_rules:
             if self.rule_mode == 'normal':
                 rule = re.compile(re.escape(rule), re.I)
@@ -452,13 +458,9 @@ class Extraction:
         self.filter_patterns = patterns
 
     def load_element_patterns(self):
-        rules = ['pre', 'code']
-        rules.extend(self.element_rules)
-        patterns = []
-        for selector in rules:
-            rule = css(selector)
-            rule and patterns.append(rule)
-        self.element_patterns = patterns
+        default_selectors = ['pre', 'code']
+        self.element_patterns = css_to_xpath(
+            default_selectors + self.element_rules)
 
     def get_sorted_pages(self):
         pages = []
@@ -483,15 +485,20 @@ class Extraction:
         return False
 
     def extract_elements(self, page_id, root, elements=[]):
-        priority_elements = [
-            'p', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote']
+        """If the root matches the pattern, return an empty list; otherwise,
+        just break the recursion without doing anything.
+        """
+        if self.need_ignore(root):
+            return []
         for element in root.findall('./*'):
+            if self.need_ignore(element):
+                continue
             element_has_content = False
             if element.text is not None and trim(element.text) != '':
                 element_has_content = True
             else:
                 children = element.findall('./*')
-                if children and get_name(element) in priority_elements:
+                if children and get_name(element) in self.priority_elements:
                     element_has_content = True
                 else:
                     for child in children:
@@ -540,6 +547,9 @@ class ElementHandler:
         self.translation_color = None
         self.column_gap = None
 
+        self.remove_pattern = None
+        self.reserve_pattern = None
+
         self.elements = {}
         self.originals = []
 
@@ -559,6 +569,18 @@ class ElementHandler:
         if isinstance(values, tuple) and len(values) == 2:
             self.column_gap = values
 
+    def load_remove_rules(self, rules=[]):
+        default_rules = ('rt', 'rp')
+        self.remove_pattern = create_xpath(default_rules + tuple(rules))
+
+    def load_reserve_rules(self, rules=[]):
+        # Reserve the <br> element instead of using a line break to prevent
+        # conflicts with the mechanism of merge translation.
+        default_rules = (
+            'img', 'code', 'br', 'hr', 'sub', 'sup', 'kbd', 'abbr', 'wbr',
+            'var', 'canvas', 'svg', 'script', 'style')
+        self.reserve_pattern = create_xpath(default_rules + tuple(rules))
+
     def prepare_original(self, elements):
         count = 0
         for oid, element in enumerate(elements):
@@ -569,6 +591,8 @@ class ElementHandler:
             element.set_translation_color(self.translation_color)
             if self.column_gap is not None:
                 element.set_column_gap(self.column_gap)
+            element.set_remove_pattern(self.remove_pattern)
+            element.set_reserve_pattern(self.reserve_pattern)
             raw = element.get_raw()
             content = element.get_content()
             md5 = uid('%s%s' % (oid, content))
@@ -618,6 +642,8 @@ class ElementHandlerMerge(ElementHandler):
             element.set_translation_color(self.translation_color)
             if self.column_gap is not None:
                 element.set_column_gap(self.column_gap)
+            element.set_remove_pattern(self.remove_pattern)
+            element.set_reserve_pattern(self.reserve_pattern)
             code = element.get_raw()
             content = element.get_content()
             content += self.separator
@@ -725,7 +751,7 @@ def get_page_elements(pages):
     config = get_config()
     rule_mode = config.get('rule_mode')
     filter_scope = config.get('filter_scope')
-    filter_rules = config.get('filter_rules')
+    filter_rules = config.get('filter_rules', [])
     element_rules = config.get('element_rules', [])
     extraction = Extraction(
         pages, rule_mode, filter_scope, filter_rules, element_rules)
@@ -747,4 +773,6 @@ def get_element_handler(placeholder, separator):
         handler.set_column_gap((gap_type, column_gap.get(gap_type)))
     handler.set_original_color(config.get('original_color'))
     handler.set_translation_color(config.get('translation_color'))
+    handler.load_remove_rules(config.get('element_rules', []))
+    handler.load_reserve_rules(config.get('reserve_rules', []))
     return handler
