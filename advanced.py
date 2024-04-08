@@ -467,7 +467,8 @@ class AdvancedTranslation(QDialog):
 
         categories = QComboBox()
         categories.addItem(_('All'), 'all')
-        categories.addItem(_('Non-aligned'), 'non_aligned')
+        if self.merge_enabled:
+            categories.addItem(_('Non-aligned'), 'non_aligned')
         categories.addItem(_('Translated'), 'translated')
         categories.addItem(_('Untranslated'), 'untranslated')
 
