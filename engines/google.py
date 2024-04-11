@@ -4,8 +4,9 @@ import sys
 import time
 import json
 import os.path
-import traceback
 from subprocess import Popen, PIPE
+
+from ..lib.utils import traceback_error
 
 from .base import Base
 from .languages import google, gemini
@@ -88,7 +89,7 @@ class GoogleTranslate:
             if silence:
                 return None
             raise Exception(
-                message.format(command, '\n\n%s' % traceback.format_exc()))
+                message.format(command, '\n\n%s' % traceback_error()))
         if process.wait() != 0:
             if silence:
                 return None

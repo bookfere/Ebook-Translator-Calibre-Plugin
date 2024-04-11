@@ -1,10 +1,11 @@
 import ssl
 import os.path
-import traceback
 
 from mechanize import Browser, Request, HTTPError
 from calibre import get_proxies
 from calibre.utils.localization import lang_as_iso639_1
+
+from ..lib.utils import traceback_error
 
 
 load_translations()
@@ -201,7 +202,7 @@ class Base:
         except Exception as e:
             if silence:
                 return None
-            error = [traceback.format_exc(chain=False).strip()]
+            error = [traceback_error()]
             if isinstance(e, HTTPError):
                 error.append(e.read().decode('utf-8'))
             elif result:

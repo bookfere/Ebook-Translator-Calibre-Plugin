@@ -8,7 +8,7 @@ from ..engines import builtin_engines
 from ..engines import GoogleFreeTranslate
 from ..engines.custom import CustomTranslate
 
-from .utils import sep, trim, dummy
+from .utils import sep, trim, dummy, traceback_error
 from .config import get_config
 from .exception import (
     TranslationFailed, TranslationCanceled, NoAvailableApiKey)
@@ -121,7 +121,7 @@ class Translation:
         return self.translator.max_error_count > 0 and \
             self.abort_count >= self.translator.max_error_count
 
-    def _translate_text(self, text, retry=0, interval=0):
+    def _translate_text(self, row, text, retry=0, interval=0):
         """Translation engine service error code documentation:
         * https://cloud.google.com/apis/design/errors
         * https://www.deepl.com/docs-api/api-access/error-handling/
@@ -155,11 +155,14 @@ class Translation:
                 interval += 5
                 # Logging any errors that occur during translation.
                 logged_text = text[:200] + '...' if len(text) > 200 else text
-                error_message = '{0}\n{2}\n{1}\n{3}\n{1}\n{4}'.format(
-                    sep(), sep('┈'), _('Original: {}').format(logged_text),
+                error_messages = [
+                    sep(), _('Original: {}').format(logged_text), sep('┈'),
                     _('Status: Failed {} times / Sleeping for {} seconds')
-                    .format(retry, interval), _('Error: {}').format(str(e)))
-                self.log(error_message, True)
+                    .format(retry, interval), sep('┈'), _('Error: {}')
+                    .format(traceback_error())]
+                if row >= 0:
+                    error_messages.insert(1, _('row: {}').format(row))
+                self.log('\n'.join(error_messages), True)
                 time.sleep(interval)
             return self._translate_text(text, retry, interval)
 
@@ -171,7 +174,7 @@ class Translation:
             return
         self.streaming('')
         self.streaming(_('Translating...'))
-        translation = self._translate_text(paragraph.original)
+        translation = self._translate_text(paragraph.row, paragraph.original)
         # Process streaming text
         if isinstance(translation, GeneratorType):
             if self.total == 1:
@@ -203,21 +206,25 @@ class Translation:
         self.streaming(paragraph)
         self.callback(paragraph)
 
+        row = paragraph.row
         original = paragraph.original.strip()
         if paragraph.error is None:
             self.log(sep())
+            if row >= 0:
+                self.log(_('Row: {}').format(row))
             self.log(_('Original: {}').format(original))
             self.log(sep('┈'))
             message = _('Translation: {}')
             if paragraph.is_cache:
                 message = _('Translation (Cached): {}')
             self.log(message.format(paragraph.translation.strip()))
-        else:
-            self.log(sep(), True)
-            self.log(_('Original: {}').format(original), True)
-            self.log(sep('┈'), True)
-            self.log(_('Error: {}').format(paragraph.error.strip()), True)
-            # paragraph.error = None
+        # else:
+        #     self.log(sep(), True)
+        #     self.log(_('Row: {}').format(row))
+        #     self.log(_('Original: {}').format(original), True)
+        #     self.log(sep('┈'), True)
+        #     self.log(_('Error: {}').format(paragraph.error.strip()), True)
+        #     # paragraph.error = None
 
     def handle(self, paragraphs=[]):
         start_time = time.time()

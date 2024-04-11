@@ -1,6 +1,7 @@
 import time
-import traceback
 from threading import Thread
+
+from ..lib.utils import traceback_error
 
 from .exception import TranslationCanceled
 
@@ -46,7 +47,7 @@ class ThreadHandler:
                     self.done_queue.task_done()
                 break
             except Exception:
-                paragraph.error = traceback.format_exc(chain=False).strip()
+                paragraph.error = traceback_error()
                 self.done_queue.put(paragraph)
                 self.queue.task_done()
 
