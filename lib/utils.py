@@ -25,6 +25,19 @@ def css(seletor):
         return None
 
 
+def css_to_xpath(selectors):
+    patterns = []
+    for selector in selectors:
+        rule = css(selector)
+        rule and patterns.append(rule)
+    return patterns
+
+
+def create_xpath(selectors):
+    selectors = (selectors,) if isinstance(selectors, str) else selectors
+    return './/*[%s]' % ' or '.join(css_to_xpath(selectors))
+
+
 def uid(*args):
     md5 = hashlib.md5()
     for arg in args:

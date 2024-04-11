@@ -1072,11 +1072,24 @@ class TranslationSetting(QDialog):
         self.element_rules.setMinimumHeight(100)
         self.element_rules.insertPlainText(
             '\n'.join(self.config.get('element_rules')))
-
         element_layout.addWidget(QLabel(
             _('CSS selectors to exclude elements. One rule per line:')))
         element_layout.addWidget(self.element_rules)
         layout.addWidget(element_group)
+
+        # Reserve element
+        reserve_group = QGroupBox(_('Reserve Element'))
+        reserve_layout = QVBoxLayout(reserve_group)
+        self.reserve_rules = QPlainTextEdit()
+        self.reserve_rules.setPlaceholderText(
+            '%s %s' % (_('e.g.,'), 'span.footnote, a#footnote'))
+        self.reserve_rules.setMinimumHeight(100)
+        self.reserve_rules.insertPlainText(
+            '\n'.join(self.config.get('reserve_rules')))
+        reserve_layout.addWidget(QLabel(
+            _('CSS selectors to reserve elements. One rule per line:')))
+        reserve_layout.addWidget(self.reserve_rules)
+        layout.addWidget(reserve_group)
 
         # Ebook Metadata
         metadata_group = QGroupBox(_('Ebook Metadata'))
@@ -1279,6 +1292,18 @@ class TranslationSetting(QDialog):
                 return False
         self.config.delete('element_rules')
         element_rules and self.config.update(element_rules=element_rules)
+
+        # Reserve rules
+        rule_content = self.reserve_rules.toPlainText()
+        reserve_rules = [r for r in rule_content.split('\n') if r.strip()]
+        for rule in reserve_rules:
+            if css(rule) is None:
+                self.alert.pop(
+                    _('{} is not a valid CSS seletor.')
+                    .format(rule), 'warning')
+                return False
+        self.config.delete('reserve_rules')
+        reserve_rules and self.config.update(reserve_rules=reserve_rules)
 
         # Ebook metadata
         ebook_metadata = self.config.get('ebook_metadata').copy()
