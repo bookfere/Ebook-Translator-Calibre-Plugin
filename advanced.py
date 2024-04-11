@@ -41,11 +41,13 @@ load_translations()
 class Color:
     # 存储颜色和对应的含义
     _color_meanings = {
-        'green':'已翻译',
-        'yellow': '未对齐',
-        'gray': '未翻译',
-        'transparent': '未选中',
-        'red': '错误'
+        'green':_('Translated'),
+        'yellow': _('Non-aligned'),
+        'gray': _('Untranslated'),
+        # transparent一闪而过，不需要国际化
+        'transparent': 'Non-selected',
+        # cache的paragraph中目前无red状态，之后可以加上
+        # 'red': 'error'
     }
 
     def __init__(self, color_str):
