@@ -1,9 +1,8 @@
 import time
 import uuid
-import traceback
 from types import GeneratorType
 
-from ..lib.utils import sorted_mixed_keys
+from ..lib.utils import sorted_mixed_keys, traceback_error
 from ..lib.config import get_config
 from ..engines.custom import (
     create_engine_template, load_engine_data, CustomTranslate)
@@ -79,7 +78,7 @@ class EngineWorker(QObject):
             self.complete.emit()
         except Exception:
             self.clear.emit()
-            self.result.emit(traceback.format_exc(chain=False).strip())
+            self.result.emit(traceback_error())
 
     @pyqtSlot()
     def check_usage(self):

@@ -1,10 +1,9 @@
 import time
-import traceback
 from types import MethodType
 
 from calibre.constants import __version__
 
-from .lib.utils import uid
+from .lib.utils import uid, traceback_error
 from .lib.config import get_config
 from .lib.encodings import encoding_list
 from .lib.cache import Paragraph, get_cache
@@ -107,7 +106,7 @@ class PreparationWorker(QObject):
             except Exception:
                 self.progress_message.emit(
                     _('Failed to extract ebook content'))
-                self.progress_detail.emit('\n' + traceback.format_exc())
+                self.progress_detail.emit('\n' + traceback_error())
                 self.progress.emit(100)
                 self.clean_cache(cache)
                 return

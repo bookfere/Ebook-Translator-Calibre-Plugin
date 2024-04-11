@@ -3,11 +3,10 @@ import sys
 import codecs
 import socket
 import hashlib
+import traceback
 from subprocess import Popen
 
 from ..lib.cssselect import GenericTranslator, SelectorError
-
-from .encodings import encoding_list
 
 
 ns = {'x': 'http://www.w3.org/1999/xhtml'}
@@ -127,6 +126,13 @@ def open_file(path, encoding='utf-8'):
     except TypeError:
         with codecs.open(path, 'rbU') as file:
             return file.read().decode(encoding)
+
+
+def traceback_error():
+    try:
+        return traceback.format_exc(chain=False).strip()
+    except Exception:
+        return traceback.format_exc().strip()
 
 
 def dummy(*args, **kwargs):
