@@ -5,6 +5,7 @@ import shutil
 import sqlite3
 import os.path
 import tempfile
+from datetime import datetime
 from glob import glob
 
 from .utils import size_by_unit
@@ -125,9 +126,11 @@ class TranslationCache:
             title = cache.get_info('title') or '[%s]' % _('Unknown')
             engine = cache.get_info('engine_name')
             lang = cache.get_info('target_lang')
-            merge = int(cache.get_info('merge_length') or 0) or 'N/A'
+            merge = int(cache.get_info('merge_length') or 0)
             size = size_by_unit(os.path.getsize(file_path), 'MB')
-            names.append((title, engine, lang, merge, size, name))
+            time = datetime.fromtimestamp(os.path.getmtime(file_path)) \
+                .strftime('%Y-%m-%d %H:%M:%S')
+            names.append((title, engine, lang, merge, size, time, name))
             cache.close()
         return names
 

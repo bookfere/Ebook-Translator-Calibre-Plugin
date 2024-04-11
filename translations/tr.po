@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-11 22:35+0800\n"
+"POT-Creation-Date: 2024-04-12 03:10+0800\n"
 "PO-Revision-Date: 2024-03-23 15:12+0300\n"
 "Last-Translator: DogancanYr <EMAIL@ADDRESS>\n"
 "Language-Team: Turkish <LL@li.org>\n"
@@ -191,8 +191,8 @@ msgstr "Belirtilen yol mevcut değil."
 msgid "Choose a path to store cache files."
 msgstr "Önbellek dosyalarını depolamak için bir yol seçin."
 
-msgid "Choose"
-msgstr "Seç"
+msgid "Move"
+msgstr ""
 
 msgid "Reset"
 msgstr "Sıfırla"
@@ -239,6 +239,9 @@ msgstr "Birleştirme Uzunluğu"
 
 msgid "Filename"
 msgstr "Dosya adı"
+
+msgid "Last Modification Time"
+msgstr ""
 
 msgid "Size (MB)"
 msgstr "Boyut (MB)"
@@ -309,6 +312,9 @@ msgid ""
 msgstr ""
 "Bu mod, çeviri işlemi için ek seçenekler sağlayarakdaha fazla kontrol ve "
 "özelleştirme için."
+
+msgid "Choose"
+msgstr "Seç"
 
 msgid "Batch Mode"
 msgstr "Toplu Mod"
@@ -479,6 +485,9 @@ msgstr "Durum: {} kez başarısız oldu / {} saniye boyunca uyuyor"
 
 msgid "Error: {}"
 msgstr "Hata: {}"
+
+msgid "Row: {}"
+msgstr ""
 
 msgid "Translating: {}/{}"
 msgstr "Çeviriliyor: {}/{}"
