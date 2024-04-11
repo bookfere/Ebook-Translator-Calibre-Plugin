@@ -28,6 +28,7 @@ defaults = {
     'filter_scope': 'text',
     'filter_rules': [],
     'element_rules': [],
+    'reserve_rules': [],
     'custom_engines': {},
     'glossary_enabled': False,
     'glossary_path': None,

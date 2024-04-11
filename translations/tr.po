@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-08 00:18+0800\n"
+"POT-Creation-Date: 2024-04-08 23:03+0800\n"
 "PO-Revision-Date: 2024-03-23 15:12+0300\n"
 "Last-Translator: DogancanYr <EMAIL@ADDRESS>\n"
 "Language-Team: Turkish <LL@li.org>\n"
@@ -721,6 +721,12 @@ msgstr "Öğeyi Yoksay"
 
 msgid "CSS selectors to exclude elements. One rule per line:"
 msgstr "Öğeleri dışlamak için CSS seçicileri. "
+
+msgid "Reserve Element"
+msgstr ""
+
+msgid "CSS selectors to reserve elements. One rule per line:"
+msgstr ""
 
 msgid "Ebook Metadata"
 msgstr "E-kitap Meta Verisi"

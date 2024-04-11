@@ -84,7 +84,7 @@ class AdvancedTranslationTable(QTableWidget):
         paragraph = self.paragraph(row)
         if paragraph.translation:
             before_aligned = paragraph.aligned
-            self.check_row_alignment(paragraph)
+            self.parent.merge_enabled and self.check_row_alignment(paragraph)
             # If the alignment of before and after is the same, do nothing.
             if before_aligned and not paragraph.aligned:
                 self.non_aligned_count += 1

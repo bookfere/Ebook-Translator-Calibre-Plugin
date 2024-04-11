@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-08 00:18+0800\n"
+"POT-Creation-Date: 2024-04-08 23:03+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: none\n"
@@ -722,6 +722,12 @@ msgstr "Ignorar Elemento"
 
 msgid "CSS selectors to exclude elements. One rule per line:"
 msgstr "Seletores CSS para excluir elementos. Uma regra por linha:"
+
+msgid "Reserve Element"
+msgstr ""
+
+msgid "CSS selectors to reserve elements. One rule per line:"
+msgstr ""
 
 msgid "Ebook Metadata"
 msgstr "Metadados dos ebooks"
