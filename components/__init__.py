@@ -5,3 +5,4 @@ from .format import InputFormat, OutputFormat
 from .alert import AlertMessage
 from .table import AdvancedTranslationTable
 from .mode import ModeSelection
+from .indicator import StatusColor, TranslationStatus

@@ -29,6 +29,7 @@ class ThreadHandler:
             try:
                 paragraph = self.queue.get_nowait()
                 self.translate_paragraph(paragraph)
+                paragraph.error = None
                 if self.queue.qsize() > 0 and not paragraph.is_cache:
                     time.sleep(self.request_interval)
                 self.done_queue.put(paragraph)
@@ -45,7 +46,7 @@ class ThreadHandler:
                     self.done_queue.task_done()
                 break
             except Exception:
-                paragraph.error = traceback.format_exc().strip()
+                paragraph.error = traceback.format_exc(chain=False).strip()
                 self.done_queue.put(paragraph)
                 self.queue.task_done()
 

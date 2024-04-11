@@ -394,7 +394,7 @@ class TranslationSetting(QDialog):
         abort_translation_group = QGroupBox(_('Abort Translation'))
         abort_translation_layout = QHBoxLayout(abort_translation_group)
         max_error_count = QSpinBox()
-        max_error_count.setRange(1, 9999)
+        max_error_count.setMinimum(0)
         abort_translation_layout.addWidget(QLabel(_('Max errors')))
         abort_translation_layout.addWidget(max_error_count)
         abort_translation_layout.addWidget(QLabel(
