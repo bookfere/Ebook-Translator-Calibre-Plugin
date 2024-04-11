@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-11 22:35+0800\n"
+"POT-Creation-Date: 2024-04-12 03:10+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -187,8 +187,8 @@ msgstr "指定路径不存在。"
 msgid "Choose a path to store cache files."
 msgstr "选择一个用来存放缓存文件的路径。"
 
-msgid "Choose"
-msgstr "选择"
+msgid "Move"
+msgstr "移动"
 
 msgid "Reset"
 msgstr "重置"
@@ -235,6 +235,9 @@ msgstr "合并长度"
 
 msgid "Filename"
 msgstr "文件名"
+
+msgid "Last Modification Time"
+msgstr "最后修改时间"
 
 msgid "Size (MB)"
 msgstr "大小（MB）"
@@ -303,6 +306,9 @@ msgid ""
 "This mode provides additional options for the translation process, allowing "
 "for more control and customization."
 msgstr "此模式为翻译过程提供了额外选项，允许更多的控制和自定义。"
+
+msgid "Choose"
+msgstr "选择"
 
 msgid "Batch Mode"
 msgstr "批量模式"
@@ -468,6 +474,9 @@ msgstr "状态：失败 {} 次 / 等待 {} 秒"
 
 msgid "Error: {}"
 msgstr "错误信息：{}"
+
+msgid "Row: {}"
+msgstr "行号：{}"
 
 msgid "Translating: {}/{}"
 msgstr "翻译：{}/{}"

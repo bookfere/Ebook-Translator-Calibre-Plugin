@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-11 22:35+0800\n"
+"POT-Creation-Date: 2024-04-12 03:10+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: none\n"
@@ -189,8 +189,8 @@ msgstr "O caminho especificado não existe"
 msgid "Choose a path to store cache files."
 msgstr "Escolha um caminho para armazenar os arquivos cache"
 
-msgid "Choose"
-msgstr "Escolher"
+msgid "Move"
+msgstr ""
 
 msgid "Reset"
 msgstr "Reinicar"
@@ -239,6 +239,9 @@ msgstr "Comprimento da Mesclagem"
 
 msgid "Filename"
 msgstr "Nome do arquivo"
+
+msgid "Last Modification Time"
+msgstr ""
 
 msgid "Size (MB)"
 msgstr "Tamanho (MB)"
@@ -309,6 +312,9 @@ msgid ""
 msgstr ""
 "Este modo oferece opções adicionais para o processo de tradução, permitindo "
 "para mais controle e personalização."
+
+msgid "Choose"
+msgstr "Escolher"
 
 msgid "Batch Mode"
 msgstr "Modo Lote"
@@ -477,6 +483,9 @@ msgstr ""
 
 msgid "Error: {}"
 msgstr "Erro: {}"
+
+msgid "Row: {}"
+msgstr ""
 
 msgid "Translating: {}/{}"
 msgstr "Traduzindo: {}/{}"

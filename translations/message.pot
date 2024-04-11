@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-11 22:35+0800\n"
+"POT-Creation-Date: 2024-04-12 03:10+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,192 +27,192 @@ msgid ""
 "keeping the original content)."
 msgstr ""
 
-#: advanced.py:102
+#: advanced.py:101
 msgid "Extracting ebook content..."
 msgstr ""
 
-#: advanced.py:109
+#: advanced.py:108
 msgid "Failed to extract ebook content"
 msgstr ""
 
-#: advanced.py:121
+#: advanced.py:120
 msgid "Filtering ebook content..."
 msgstr ""
 
-#: advanced.py:130
+#: advanced.py:129
 msgid "Preparing user interface..."
 msgstr ""
 
-#: advanced.py:211
+#: advanced.py:210
 msgid "Start"
 msgstr ""
 
-#: advanced.py:225 batch.py:57 setting.py:186
+#: advanced.py:224 batch.py:57 setting.py:186
 msgid "Input Format"
 msgstr ""
 
-#: advanced.py:236 advanced.py:701 batch.py:58 setting.py:369
+#: advanced.py:235 advanced.py:696 batch.py:58 setting.py:369
 msgid "Target Language"
 msgstr ""
 
-#: advanced.py:252 batch.py:57
+#: advanced.py:251 batch.py:57
 msgid "Encoding"
 msgstr ""
 
-#: advanced.py:344
+#: advanced.py:343
 msgid "Failed to translate {} paragraph(s), Would you like to retry?"
 msgstr ""
 
-#: advanced.py:350 lib/translation.py:259
+#: advanced.py:349 lib/translation.py:266
 msgid "Translation completed."
 msgstr ""
 
-#: advanced.py:366
+#: advanced.py:365
 msgid "There is no content that needs to be translated."
 msgstr ""
 
-#: advanced.py:412
+#: advanced.py:411
 msgid "Loading ebook data, please wait..."
 msgstr ""
 
-#: advanced.py:441
+#: advanced.py:440
 msgid "Review"
 msgstr ""
 
-#: advanced.py:442
+#: advanced.py:441
 msgid "Log"
 msgstr ""
 
-#: advanced.py:443
+#: advanced.py:442
 msgid "Errors"
 msgstr ""
 
-#: advanced.py:470
+#: advanced.py:469
 msgid "All"
 msgstr ""
 
-#: advanced.py:472 components/indicator.py:14
+#: advanced.py:471 components/indicator.py:14
 msgid "Non-aligned"
 msgstr ""
 
-#: advanced.py:473 advanced.py:791 components/indicator.py:13
-#: components/table.py:95
+#: advanced.py:472 advanced.py:786 components/indicator.py:13
+#: components/table.py:94
 msgid "Translated"
 msgstr ""
 
-#: advanced.py:474 components/indicator.py:15 components/table.py:83
+#: advanced.py:473 components/indicator.py:15 components/table.py:83
 msgid "Untranslated"
 msgstr ""
 
-#: advanced.py:477
+#: advanced.py:476
 msgid "keyword for filtering"
 msgstr ""
 
-#: advanced.py:571
+#: advanced.py:567
 msgid "Total items: {}"
 msgstr ""
 
-#: advanced.py:572 lib/translation.py:233
+#: advanced.py:568 lib/translation.py:240
 msgid "Character count: {}"
 msgstr ""
 
-#: advanced.py:582
+#: advanced.py:577
 msgid "Non-aligned items: {}"
 msgstr ""
 
-#: advanced.py:616 cache.py:92 cache.py:182 components/engine.py:202
-#: components/table.py:163
+#: advanced.py:611 cache.py:92 cache.py:182 components/engine.py:201
+#: components/table.py:164
 msgid "Delete"
 msgstr ""
 
-#: advanced.py:617
+#: advanced.py:612
 msgid "Translate All"
 msgstr ""
 
-#: advanced.py:618
+#: advanced.py:613
 msgid "Translate Selected"
 msgstr ""
 
-#: advanced.py:643 advanced.py:654
+#: advanced.py:638 advanced.py:649
 msgid "Stop"
 msgstr ""
 
-#: advanced.py:649
+#: advanced.py:644
 msgid "Stopping..."
 msgstr ""
 
-#: advanced.py:679
+#: advanced.py:674
 msgid "Cache Status"
 msgstr ""
 
-#: advanced.py:682
+#: advanced.py:677
 msgid "Disabled"
 msgstr ""
 
-#: advanced.py:682
+#: advanced.py:677
 msgid "Enabled"
 msgstr ""
 
-#: advanced.py:689 setting.py:328
+#: advanced.py:684 setting.py:328
 msgid "Translation Engine"
 msgstr ""
 
-#: advanced.py:695 batch.py:58 setting.py:368
+#: advanced.py:690 batch.py:58 setting.py:368
 msgid "Source Language"
 msgstr ""
 
-#: advanced.py:707
+#: advanced.py:702
 msgid "Custom Ebook Title"
 msgstr ""
 
-#: advanced.py:712
+#: advanced.py:707
 msgid "By default, title metadata will be translated."
 msgstr ""
 
-#: advanced.py:741
+#: advanced.py:736
 msgid "Output Ebook"
 msgstr ""
 
-#: advanced.py:743
+#: advanced.py:738
 msgid "Output"
 msgstr ""
 
-#: advanced.py:792
+#: advanced.py:787
 msgid "The ebook has not been translated yet."
 msgstr ""
 
-#: advanced.py:796
+#: advanced.py:791
 msgid ""
 "The number of lines in some translation units differs between the original "
 "text and the translated text. Are you sure you want to output without "
 "checking alignment?"
 msgstr ""
 
-#: advanced.py:831
+#: advanced.py:826
 msgid "No translation yet"
 msgstr ""
 
-#: advanced.py:883 components/engine.py:208 setting.py:98
+#: advanced.py:878 components/engine.py:207 setting.py:98
 msgid "Save"
 msgstr ""
 
-#: advanced.py:942
+#: advanced.py:937
 msgid "Your changes have been saved."
 msgstr ""
 
-#: advanced.py:954
+#: advanced.py:949
 msgid "Translation log"
 msgstr ""
 
-#: advanced.py:965
+#: advanced.py:960
 msgid "Error log"
 msgstr ""
 
-#: advanced.py:985
+#: advanced.py:980
 msgid "Are you sure you want to translate all {:n} paragraphs?"
 msgstr ""
 
-#: advanced.py:1011
+#: advanced.py:1006
 msgid "Are you sure you want to stop the translation progress?"
 msgstr ""
 
@@ -228,11 +228,11 @@ msgstr ""
 msgid "Default"
 msgstr ""
 
-#: batch.py:140 components/engine.py:139 components/table.py:161
+#: batch.py:140 components/engine.py:138 components/table.py:162
 msgid "Translate"
 msgstr ""
 
-#: batch.py:151 lib/cache.py:125
+#: batch.py:151 lib/cache.py:126
 msgid "Unknown"
 msgstr ""
 
@@ -244,9 +244,8 @@ msgstr ""
 msgid "Choose a path to store cache files."
 msgstr ""
 
-#: cache.py:73 components/mode.py:41 components/mode.py:51 setting.py:158
-#: setting.py:901 setting.py:920 setting.py:968
-msgid "Choose"
+#: cache.py:73
+msgid "Move"
 msgstr ""
 
 #: cache.py:74
@@ -311,55 +310,59 @@ msgid "Filename"
 msgstr ""
 
 #: cache.py:203
+msgid "Last Modification Time"
+msgstr ""
+
+#: cache.py:203
 msgid "Size (MB)"
 msgstr ""
 
-#: components/engine.py:65 lib/translation.py:173 tests/test_translation.py:108
+#: components/engine.py:64 lib/translation.py:176 tests/test_translation.py:108
 #: tests/test_translation.py:128 tests/test_translation.py:141
 msgid "Translating..."
 msgstr ""
 
-#: components/engine.py:97
+#: components/engine.py:96
 msgid "Test Translation Engine"
 msgstr ""
 
-#: components/engine.py:144
+#: components/engine.py:143
 msgid "Usage: checking..."
 msgstr ""
 
-#: components/engine.py:155
+#: components/engine.py:154
 msgid "Usage: {}"
 msgstr ""
 
-#: components/engine.py:193
+#: components/engine.py:192
 msgid "Custom Translation Engine"
 msgstr ""
 
-#: components/engine.py:201
+#: components/engine.py:200
 msgid "Add"
 msgstr ""
 
-#: components/engine.py:205
+#: components/engine.py:204
 msgid "Clear"
 msgstr ""
 
-#: components/engine.py:206
+#: components/engine.py:205
 msgid "Restore"
 msgstr ""
 
-#: components/engine.py:207
+#: components/engine.py:206
 msgid "Verify"
 msgstr ""
 
-#: components/engine.py:248
+#: components/engine.py:247
 msgid "Valid engine data format."
 msgstr ""
 
-#: components/engine.py:267
+#: components/engine.py:266
 msgid "The engine name is already in use."
 msgstr ""
 
-#: components/engine.py:289 setting.py:77
+#: components/engine.py:288 setting.py:77
 msgid "The setting has been saved."
 msgstr ""
 
@@ -383,7 +386,7 @@ msgstr ""
 msgid "Feedback"
 msgstr ""
 
-#: components/lang.py:34 engines/base.py:70 setting.py:1211
+#: components/lang.py:34 engines/base.py:71 setting.py:1211
 msgid "Auto detect"
 msgstr ""
 
@@ -399,6 +402,11 @@ msgstr ""
 msgid ""
 "This mode provides additional options for the translation process, allowing "
 "for more control and customization."
+msgstr ""
+
+#: components/mode.py:41 components/mode.py:51 setting.py:158 setting.py:901
+#: setting.py:920 setting.py:968
+msgid "Choose"
 msgstr ""
 
 #: components/mode.py:43 setting.py:116 ui.py:53 ui.py:107
@@ -419,25 +427,25 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: components/table.py:140
+#: components/table.py:141
 msgid ""
 "The number of lines differs between the original text and the translated "
 "text."
 msgstr ""
 
-#: components/table.py:168
+#: components/table.py:169
 msgid "Select the whole chapter"
 msgstr ""
 
-#: components/table.py:174
+#: components/table.py:175
 msgid "Select similar paragraphs: {}=\"{}\""
 msgstr ""
 
-#: components/table.py:253
+#: components/table.py:254
 msgid "Retain at least one row."
 msgstr ""
 
-#: engines/anthropic.py:110 engines/base.py:210 engines/openai.py:109
+#: engines/anthropic.py:110 engines/base.py:211 engines/openai.py:109
 #: tests/test_engine.py:92
 msgid "Can not parse returned response. Raw data: {}"
 msgstr ""
@@ -446,11 +454,11 @@ msgstr ""
 msgid "Baidu"
 msgstr ""
 
-#: engines/base.py:20 setting.py:349
+#: engines/base.py:21 setting.py:349
 msgid "API Keys"
 msgstr ""
 
-#: engines/base.py:87
+#: engines/base.py:88
 msgid "A correct key format \"{}\" is required."
 msgstr ""
 
@@ -510,7 +518,7 @@ msgstr ""
 msgid "{} total, {} used, {} left"
 msgstr ""
 
-#: engines/google.py:66
+#: engines/google.py:67
 msgid ""
 "This plugin uses Application Default Credentials (ADC) in your local "
 "environment to access your Google Translate service. To set up the ADC, "
@@ -520,11 +528,11 @@ msgid ""
 "3. Sign in to your Google account and grant needed privileges."
 msgstr ""
 
-#: engines/google.py:76
+#: engines/google.py:77
 msgid "Cannot run the command \"{}\"."
 msgstr ""
 
-#: engines/google.py:121
+#: engines/google.py:122
 msgid "Cannot find the command \"{}\"."
 msgstr ""
 
@@ -592,7 +600,7 @@ msgstr ""
 msgid "The translation of \"{}\" was completed. Do you want to open the book?"
 msgstr ""
 
-#: lib/translation.py:133 lib/translation.py:141 lib/translation.py:168
+#: lib/translation.py:133 lib/translation.py:141 lib/translation.py:171
 msgid "Translation canceled."
 msgstr ""
 
@@ -608,7 +616,7 @@ msgstr ""
 msgid "Failed to retrieve data from translate engine API."
 msgstr ""
 
-#: lib/translation.py:159 lib/translation.py:209 lib/translation.py:217
+#: lib/translation.py:159 lib/translation.py:215
 msgid "Original: {}"
 msgstr ""
 
@@ -616,39 +624,43 @@ msgstr ""
 msgid "Status: Failed {} times / Sleeping for {} seconds"
 msgstr ""
 
-#: lib/translation.py:161 lib/translation.py:219
+#: lib/translation.py:161
 msgid "Error: {}"
 msgstr ""
 
-#: lib/translation.py:200
+#: lib/translation.py:164 lib/translation.py:214
+msgid "Row: {}"
+msgstr ""
+
+#: lib/translation.py:203
 msgid "Translating: {}/{}"
 msgstr ""
 
-#: lib/translation.py:211
+#: lib/translation.py:217
 msgid "Translation: {}"
 msgstr ""
 
-#: lib/translation.py:213
+#: lib/translation.py:219
 msgid "Translation (Cached): {}"
 msgstr ""
 
-#: lib/translation.py:230
+#: lib/translation.py:237
 msgid "Start to translate ebook content"
 msgstr ""
 
-#: lib/translation.py:232
+#: lib/translation.py:239
 msgid "Item count: {}"
 msgstr ""
 
-#: lib/translation.py:236
+#: lib/translation.py:243
 msgid "There is no content need to translate."
 msgstr ""
 
-#: lib/translation.py:256
+#: lib/translation.py:263
 msgid "Translation failed."
 msgstr ""
 
-#: lib/translation.py:260
+#: lib/translation.py:267
 msgid "Outputting ebook file..."
 msgstr ""
 

@@ -161,7 +161,7 @@ class Translation:
                     .format(retry, interval), sep('┈'), _('Error: {}')
                     .format(traceback_error())]
                 if row >= 0:
-                    error_messages.insert(1, _('row: {}').format(row))
+                    error_messages.insert(1, _('Row: {}').format(row))
                 self.log('\n'.join(error_messages), True)
                 time.sleep(interval)
             return self._translate_text(text, retry, interval)

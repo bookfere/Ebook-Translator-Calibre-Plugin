@@ -11,12 +11,12 @@ try:
     from qt.core import (
         Qt, QDialog, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
         QTableView, QAbstractTableModel, QAbstractItemView, pyqtSignal,
-        QLineEdit, QFileDialog, QModelIndex, QMenu, QCursor)
+        QLineEdit, QFileDialog, QModelIndex, QMenu, QCursor, QHeaderView)
 except ImportError:
     from PyQt5.Qt import (
         Qt, QDialog, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
         QTableView, QAbstractTableModel, QAbstractItemView, pyqtSignal,
-        QLineEdit, QFileDialog, QModelIndex, QMenu, QCursor)
+        QLineEdit, QFileDialog, QModelIndex, QMenu, QCursor, QHeaderView)
 
 load_translations()
 
@@ -70,7 +70,7 @@ class CacheManager(QDialog):
         self.cache_path.setReadOnly(True)
         self.cache_path.setPlaceholderText(
             _('Choose a path to store cache files.'))
-        self.cache_move = QPushButton(_('Choose'))
+        self.cache_move = QPushButton(_('Move'))
         self.cache_reset = QPushButton(_('Reset'))
         self.cache_reveal = QPushButton(_('Reveal'))
 
@@ -200,7 +200,7 @@ class CacheTableView(QTableView):
 class CacheTableModel(QAbstractTableModel):
     headers = [
         _('Title'), _('Engine'), _('Language'), _('Merge Length'),
-        _('Size (MB)'), _('Filename'),
+        _('Size (MB)'), _('Last Modification Time'), _('Filename'),
     ]
 
     def __init__(self):
