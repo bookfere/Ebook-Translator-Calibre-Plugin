@@ -84,7 +84,7 @@ class AdvancedTranslationTable(QTableWidget):
         paragraph = self.paragraph(row)
         if paragraph.translation:
             before_aligned = paragraph.aligned
-            self.parent.merge_enabled and self.check_row_alignment(paragraph)
+            self.parent.merge_enabled and self.check_line_alignment(paragraph)
             # If the alignment of before and after is the same, do nothing.
             if before_aligned and not paragraph.aligned:
                 self.non_aligned_count += 1
@@ -92,10 +92,35 @@ class AdvancedTranslationTable(QTableWidget):
                 self.non_aligned_count -= 1
             items = [
                 paragraph.engine_name, paragraph.target_lang, _('Translated')]
+        else:
+            self.check_translation_error(paragraph)
         for column, text in enumerate(items, 1):
             self.item(row, column).setText(text)
 
-    def check_row_alignment(self, paragraph):
+    def _is_light_theme(self):
+        return self.palette().color(QPalette.Window).lightness() > 127
+
+    def _normal_row_background_color(self):
+        vh_background = vh_foreground = background = QBrush(Qt.NoBrush)
+        if QT_VERSION_STR < '6.0.0':
+            vh_background = QBrush(QColor(235, 235, 235, 255))
+            vh_foreground = QBrush(Qt.black)
+        return (vh_background, vh_foreground, background)
+
+    def check_translation_error(self, paragraph):
+        if paragraph.error is not None:
+            vh_bg = QBrush(
+                QColor(255, 100, 100) if self._is_light_theme() else
+                QColor(100, 0, 0))
+            vh_fg = QBrush(
+                Qt.black if self._is_light_theme() else Qt.white)
+            bg = QBrush(QColor(255, 0, 0, 100))
+            tip = paragraph.error
+        else:
+            (vh_bg, vh_fg, bg), tip = self._normal_row_background_color(), ''
+        self.set_row_background_color(paragraph.row, vh_bg, vh_fg, bg, tip)
+
+    def check_line_alignment(self, paragraph):
         """The header item exhibits a peculiar behavior where setting the
         background color with an alpha value visually has no effect. Emulating
         a native background for PyQt versions lower than 6.0.0, as using
@@ -103,29 +128,29 @@ class AdvancedTranslationTable(QTableWidget):
         """
         engine = get_engine_class(paragraph.engine_name)
         if engine is None or paragraph.is_alignment(engine.separator):
-            vh_background = vh_foreground = background = QBrush(Qt.NoBrush)
-            if QT_VERSION_STR < '6.0.0':
-                vh_background = QBrush(QColor(235, 235, 235, 255))
-                vh_foreground = QBrush(Qt.black)
-            tip = ''
+            (vh_bg, vh_fg, bg), tip = self._normal_row_background_color(), ''
             paragraph.aligned = True
         else:
-            is_light = self.palette().color(QPalette.Window).lightness() > 127
-            vh_background = QBrush(
-                QColor(255, 255, 100) if is_light else QColor(100, 100, 0))
-            vh_foreground = QBrush(Qt.black if is_light else Qt.white)
-            background = QBrush(QColor(255, 255, 0, 100))
+            vh_bg = QBrush(
+                QColor(255, 255, 100) if self._is_light_theme() else
+                QColor(100, 100, 0))
+            vh_fg = QBrush(
+                Qt.black if self._is_light_theme() else Qt.white)
+            bg = QBrush(QColor(255, 255, 0, 100))
             tip = _(
                 'The number of lines differs between the original text and '
                 'the translated text.')
             paragraph.aligned = False
+        self.set_row_background_color(paragraph.row, vh_bg, vh_fg, bg, tip)
 
-        item = self.verticalHeaderItem(paragraph.row)
+    def set_row_background_color(
+            self, row, vh_background, vh_foreground, background, tip):
+        item = self.verticalHeaderItem(row)
         item.setBackground(vh_background)
         item.setForeground(vh_foreground)
         item.setToolTip(tip)
         for column in range(self.columnCount()):
-            item = self.item(paragraph.row, column)
+            item = self.item(row, column)
             item.setBackground(background)
             item.setToolTip(tip)
 

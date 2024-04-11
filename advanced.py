@@ -13,12 +13,10 @@ from .lib.element import get_element_handler
 from .lib.conversion import extract_item, extra_formats
 from .engines.custom import CustomTranslate
 
-from PyQt5.QtGui import QPainter, QColor
-
 from . import EbookTranslator
 from .components import (
     EngineList, layout_info, SourceLang, TargetLang, InputFormat, OutputFormat,
-    AlertMessage, AdvancedTranslationTable)
+    AlertMessage, AdvancedTranslationTable, StatusColor, TranslationStatus)
 
 
 try:
@@ -37,53 +35,6 @@ except ImportError:
         QComboBox, QSizePolicy)
 
 load_translations()
-
-class Color:
-    # 存储颜色和对应的含义
-    _color_meanings = {
-        'green':_('Translated'),
-        'yellow': _('Non-aligned'),
-        'gray': _('Untranslated'),
-        # transparent一闪而过，不需要国际化
-        'transparent': 'Non-selected',
-        # cache的paragraph中目前无red状态，之后可以加上
-        # 'red': 'error'
-    }
-
-    def __init__(self, color_str):
-        if color_str in self._color_meanings:
-            self._value = color_str
-        else:
-            raise ValueError(f"未知的颜色: {color_str}")
-
-    def __str__(self):
-        return self._value
-
-    @property
-    def meaning(self):
-        return self._color_meanings[self._value]
-
-class CircularStatusWidget(QWidget):
-
-    def __init__(self, color=Color('transparent')):
-        super().__init__()
-        self.set_color(color)
-        self._init_ui()
-        
-    def set_color(self, color):
-        self.color = color
-        self.setToolTip(color.meaning)
-        self.update()
-        
-    def _init_ui(self):
-        diameter = 22
-        self.setFixedSize(diameter, diameter)
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setBrush(QColor(str(self.color)))
-        painter.setPen(Qt.PenStyle.NoPen)
-        painter.drawEllipse(self.rect())
 
 
 class EditorWorker(QObject):
@@ -321,17 +272,6 @@ class CreateTranslationProject(QDialog):
         self.done(0)
         self.start_translation.emit(self.ebook)
 
-circular_status_widget = CircularStatusWidget();
-
-def layout_circluar_status(widget):
-    newSelf = QWidget();
-    newSelf.status_widget = widget
-    layout = QHBoxLayout()
-    # 添加伸展元素以将 CircularStatusWidget 推向右侧
-    layout.addStretch()  
-    layout.addWidget(newSelf.status_widget)
-    newSelf.setLayout(layout)
-    return newSelf
 
 class AdvancedTranslation(QDialog):
     paragraph_sig = pyqtSignal(object)
@@ -350,6 +290,7 @@ class AdvancedTranslation(QDialog):
         self.ebook = ebook
         self.config = get_config()
         self.alert = AlertMessage(self)
+        self.status = TranslationStatus(self)
         # self.error = JobError(self)
         self.current_engine = get_engine_class()
         self.cache = None
@@ -383,9 +324,7 @@ class AdvancedTranslation(QDialog):
         self.stack = QStackedWidget()
         self.stack.addWidget(self.waiting)
         layout.addWidget(self.stack)
-        layout.addWidget(layout_circluar_status(circular_status_widget))
         layout.addWidget(layout_info())
-
 
         def working_status():
             self.on_working = True
@@ -609,31 +548,28 @@ class AdvancedTranslation(QDialog):
             return (item_count, char_count)
         all_item_count, all_char_count = get_paragraph_count(True)
 
-        def update_circular_status():
-            selected_items = self.table.get_selected_items()
-            if not selected_items:
-                circular_status_widget.set_color(Color('transparent'))
+        def update_translation_status(paragraph):
+            if not paragraph.translation:
+                if paragraph.error is not None:
+                    self.status.set_color(StatusColor('red'), paragraph.error)
+                else:
+                    self.status.set_color(StatusColor('gray'))
+            elif not paragraph.aligned and self.merge_enabled:
+                self.status.set_color(StatusColor('yellow'))
             else:
-                p = selected_items[0]
-                if not p.translation:
-                    circular_status_widget.set_color(Color('gray'))
-                elif not p.aligned:
-                    circular_status_widget.set_color(Color('yellow'))
-                elif p.translation:
-                    circular_status_widget.set_color(Color('green'))
+                self.status.set_color(StatusColor('green'))
+        self.paragraph_sig.connect(update_translation_status)
 
         def item_selection_changed():
-            update_circular_status()
             item_count, char_count = get_paragraph_count(False)
             total = '%s/%s' % (item_count, all_item_count)
             parts = '%s/%s' % (char_count, all_char_count)
             paragraph_count.setText(
                 _('Total items: {}').format(total) + ' · '
                 + _('Character count: {}').format(parts))
-        
         item_selection_changed()
         self.table.itemSelectionChanged.connect(item_selection_changed)
-        self.table.row.connect(update_circular_status)
+
         if self.merge_enabled:
             non_aligned_paragraph_count.setVisible(True)
 
@@ -936,15 +872,15 @@ class AdvancedTranslation(QDialog):
             lambda item: auto_open_close_splitter())
 
         control = QWidget()
-        control.setVisible(False)
         control_layout = QHBoxLayout(control)
         control_layout.setContentsMargins(0, 0, 0, 0)
 
         save_status = QLabel()
         save_button = QPushButton(_('Save'))
 
-        control_layout.addWidget(save_status)
+        control_layout.addWidget(self.status)
         control_layout.addStretch(1)
+        control_layout.addWidget(save_status)
         control_layout.addWidget(save_button)
 
         layout.addWidget(splitter)
@@ -981,14 +917,13 @@ class AdvancedTranslation(QDialog):
             if self.on_working and self.table.selected_count() > 1:
                 return
             save_button.setDisabled(False)
-            paragraph = self.table.current_paragraph()
-            translation = translation_text.toPlainText()
-            control.setVisible(
-                bool(translation) and translation != paragraph.translation)
+            # paragraph = self.table.current_paragraph()
+            # translation = translation_text.toPlainText()
+            # control.setVisible(
+            #     bool(translation) and translation != paragraph.translation)
         translation_text.textChanged.connect(modify_translation)
 
         def save_translation():
-            save_button.setDisabled(True)
             paragraph = self.table.current_paragraph()
             translation = translation_text.toPlainText()
             paragraph.translation = translation
@@ -996,9 +931,11 @@ class AdvancedTranslation(QDialog):
             paragraph.target_lang = self.ebook.target_lang
             self.table.row.emit(paragraph.row)
             self.cache.update_paragraph(paragraph)
-            self.editor_worker.start[str, object].emit(
-                _('Your changes have been saved.'),
-                lambda: control.setVisible(False))
+            # self.editor_worker.start[str, object].emit(
+            #     _('Your changes have been saved.'),
+            #     lambda: control.setVisible(False))
+            self.editor_worker.start[str].emit(
+                _('Your changes have been saved.'))
             translation_text.setFocus(Qt.OtherFocusReason)
         self.editor_worker.show.connect(save_status.setText)
         save_button.clicked.connect(save_translation)

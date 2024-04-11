@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-08 23:03+0800\n"
+"POT-Creation-Date: 2024-04-11 22:35+0800\n"
 "PO-Revision-Date: 2024-03-23 15:12+0300\n"
 "Last-Translator: DogancanYr <EMAIL@ADDRESS>\n"
 "Language-Team: Turkish <LL@li.org>\n"
@@ -281,6 +281,12 @@ msgstr "Ayar kaydedildi."
 
 msgid "Ebook Specific"
 msgstr "E-kitaba Özel"
+
+msgid "Failed translation"
+msgstr ""
+
+msgid "Not selected"
+msgstr ""
 
 msgid "Donate"
 msgstr "Bağış yap"

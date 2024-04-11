@@ -217,7 +217,7 @@ class Translation:
             self.log(_('Original: {}').format(original), True)
             self.log(sep('┈'), True)
             self.log(_('Error: {}').format(paragraph.error.strip()), True)
-            paragraph.error = None
+            # paragraph.error = None
 
     def handle(self, paragraphs=[]):
         start_time = time.time()
