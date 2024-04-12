@@ -350,7 +350,7 @@ class TranslationSetting(QDialog):
         keys_layout = QVBoxLayout(self.keys_group)
         self.api_keys = QPlainTextEdit()
         self.api_keys.setFixedHeight(100)
-        auto_change = QLabel('%s %s' % (_('Tip:'), _(
+        auto_change = QLabel('%s %s' % (_('Tip: '), _(
             'API keys will auto-switch if the previous one is unavailable.')))
         auto_change.setVisible(False)
         keys_layout.addWidget(self.api_keys)
@@ -982,6 +982,23 @@ class TranslationSetting(QDialog):
             self.glossary_path.setText(path[0])
         glossary_choose.clicked.connect(choose_glossary_file)
 
+        # Priority element
+        priority_group = QGroupBox(_('Priority Element'))
+        priority_layout = QVBoxLayout(priority_group)
+        self.priority_rules = QPlainTextEdit()
+        self.priority_rules.setPlaceholderText(
+            '%s %s' % (_('e.g.,'), 'section, #content, div.portion'))
+        self.priority_rules.setMinimumHeight(100)
+        self.priority_rules.insertPlainText(
+            '\n'.join(self.config.get('priority_rules')))
+        priority_layout.addWidget(QLabel(
+            _('CSS selectors for priority elements. One rule per line:')))
+        priority_layout.addWidget(self.priority_rules)
+        priority_layout.addWidget(QLabel('%s%s' % (
+            _('Tip: '),
+            _('Stop further extraction once elements match these rules.'))))
+        layout.addWidget(priority_group)
+
         # Filter Content
         filter_group = QGroupBox(_('Ignore Paragraph'))
         filter_layout = QVBoxLayout(filter_group)
@@ -1020,6 +1037,9 @@ class TranslationSetting(QDialog):
         filter_layout.addWidget(self._divider())
         filter_layout.addWidget(tip)
         filter_layout.addWidget(self.filter_rules)
+        filter_layout.addWidget(QLabel('%s%s' % (
+            _('Tip: '),
+            _('Do not translate elements that contain these keywords.'))))
         layout.addWidget(filter_group)
 
         scope_map = dict(enumerate(['text', 'html']))
@@ -1063,18 +1083,22 @@ class TranslationSetting(QDialog):
             mode_btn_group.buttonClicked[int]
         mode_btn_click.connect(choose_filter_mode)
 
-        # Filter element
+        # Ignore element
         element_group = QGroupBox(_('Ignore Element'))
         element_layout = QVBoxLayout(element_group)
-        self.element_rules = QPlainTextEdit()
-        self.element_rules.setPlaceholderText(
+        self.ignore_rules = QPlainTextEdit()
+        self.ignore_rules.setPlaceholderText(
             '%s %s' % (_('e.g.,'), 'table, table#report, table.list'))
-        self.element_rules.setMinimumHeight(100)
-        self.element_rules.insertPlainText(
-            '\n'.join(self.config.get('element_rules')))
+        self.ignore_rules.setMinimumHeight(100)
+        self.ignore_rules.insertPlainText(
+            '\n'.join(self.config.get(
+                'ignore_rules', self.config.get('element_rules'))))
         element_layout.addWidget(QLabel(
             _('CSS selectors to exclude elements. One rule per line:')))
-        element_layout.addWidget(self.element_rules)
+        element_layout.addWidget(self.ignore_rules)
+        element_layout.addWidget(QLabel('%s%s' % (
+            _('Tip: '),
+            _('Do not translation elements that matches these rules.'))))
         layout.addWidget(element_group)
 
         # Reserve element
@@ -1089,6 +1113,9 @@ class TranslationSetting(QDialog):
         reserve_layout.addWidget(QLabel(
             _('CSS selectors to reserve elements. One rule per line:')))
         reserve_layout.addWidget(self.reserve_rules)
+        reserve_layout.addWidget(QLabel('%s%s' % (
+            _('Tip: '),
+            _('Keep elements that match these rules for extraction.'))))
         layout.addWidget(reserve_group)
 
         # Ebook Metadata
@@ -1268,6 +1295,18 @@ class TranslationSetting(QDialog):
                 return False
             self.config.update(glossary_path=glossary_path)
 
+        # Priority rules
+        rule_content = self.priority_rules.toPlainText()
+        priority_rules = [r for r in rule_content.split('\n') if r.strip()]
+        for rule in priority_rules:
+            if css(rule) is None:
+                self.alert.pop(
+                    _('{} is not a valid CSS seletor.')
+                    .format(rule), 'warning')
+                return False
+        self.config.delete('priority_rules')
+        priority_rules and self.config.update(priority_rules=priority_rules)
+
         # Filter rules
         rule_content = self.filter_rules.toPlainText()
         filter_rules = [r for r in rule_content.split('\n') if r.strip()]
@@ -1282,16 +1321,17 @@ class TranslationSetting(QDialog):
         filter_rules and self.config.update(filter_rules=filter_rules)
 
         # Element rules
-        rule_content = self.element_rules.toPlainText()
-        element_rules = [r for r in rule_content.split('\n') if r.strip()]
-        for rule in element_rules:
+        rule_content = self.ignore_rules.toPlainText()
+        ignore_rules = [r for r in rule_content.split('\n') if r.strip()]
+        for rule in ignore_rules:
             if css(rule) is None:
                 self.alert.pop(
                     _('{} is not a valid CSS seletor.')
                     .format(rule), 'warning')
                 return False
         self.config.delete('element_rules')
-        element_rules and self.config.update(element_rules=element_rules)
+        self.config.delete('ignore_rules')
+        ignore_rules and self.config.update(ignore_rules=ignore_rules)
 
         # Reserve rules
         rule_content = self.reserve_rules.toPlainText()

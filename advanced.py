@@ -50,7 +50,7 @@ class EditorWorker(QObject):
     @pyqtSlot(str, object)
     def show_message(self, message, callback=None):
         self.show.emit(message)
-        time.sleep(1)
+        time.sleep(0.1)
         self.show.emit('')
         callback and callback()
         self.finished.emit()
@@ -61,19 +61,33 @@ class PreparationWorker(QObject):
     progress = pyqtSignal(int)
     progress_message = pyqtSignal(str)
     progress_detail = pyqtSignal(str)
+    close = pyqtSignal(int)
     finished = pyqtSignal(str)
 
     def __init__(self, engine_class, ebook):
         QObject.__init__(self)
-        self.ebook = ebook
         self.engine_class = engine_class
+        self.ebook = ebook
+
+        self.on_working = False
+        self.canceled = False
+
         self.start.connect(self.prepare_ebook_data)
 
     def clean_cache(self, cache):
         cache.is_fresh() and cache.destroy()
+        self.on_working = False
+        self.close.emit(1)
+
+    def set_canceled(self, canceled):
+        self.canceled = canceled
+
+    # def cancel(self):
+    #     return self.thread().isInterruptionRequested()
 
     @pyqtSlot()
     def prepare_ebook_data(self):
+        self.on_working = True
         input_path = self.ebook.get_input_path()
         element_handler = get_element_handler(
             self.engine_class.placeholder, self.engine_class.separator)
@@ -110,10 +124,13 @@ class PreparationWorker(QObject):
                 self.progress.emit(100)
                 self.clean_cache(cache)
                 return
+            if self.canceled:
+                self.clean_cache(cache)
+                return
             self.progress.emit(30)
             b = time.time()
             self.progress_detail.emit('extracting timing: %s' % (b - a))
-            if self.cancel():
+            if self.canceled:
                 self.clean_cache(cache)
                 return
             # --------------------------
@@ -122,7 +139,7 @@ class PreparationWorker(QObject):
             self.progress.emit(80)
             c = time.time()
             self.progress_detail.emit('filtering timing: %s' % (c - b))
-            if self.cancel():
+            if self.canceled:
                 self.clean_cache(cache)
                 return
             # --------------------------
@@ -131,7 +148,7 @@ class PreparationWorker(QObject):
             self.progress.emit(100)
             d = time.time()
             self.progress_detail.emit('cache timing: %s' % (d - c))
-            if self.cancel():
+            if self.canceled:
                 self.clean_cache(cache)
                 return
         else:
@@ -140,13 +157,12 @@ class PreparationWorker(QObject):
             time.sleep(0.1)
 
         self.finished.emit(cache_id)
-
-    def cancel(self):
-        return self.thread().isInterruptionRequested()
+        self.on_working = False
 
 
 class TranslationWorker(QObject):
     start = pyqtSignal()
+    close = pyqtSignal(int)
     finished = pyqtSignal()
     translate = pyqtSignal(list, bool)
     logging = pyqtSignal(str, bool)
@@ -160,7 +176,9 @@ class TranslationWorker(QObject):
         self.target_lang = ebook.target_lang
         self.engine_class = engine_class
 
+        self.on_working = False
         self.canceled = False
+        self.need_close = False
         self.translate.connect(self.translate_paragraphs)
         # self.finished.connect(lambda: self.set_canceled(False))
 
@@ -179,9 +197,13 @@ class TranslationWorker(QObject):
     def cancel_request(self):
         return self.canceled
 
+    def set_need_close(self, need_close):
+        self.need_close = need_close
+
     @pyqtSlot(list, bool)
     def translate_paragraphs(self, paragraphs=[], fresh=False):
         """:fresh: retranslate all paragraphs."""
+        self.on_working = True
         self.start.emit()
         translator = get_translator(self.engine_class)
         translator.set_source_lang(self.source_lang)
@@ -194,7 +216,11 @@ class TranslationWorker(QObject):
         translation.set_callback(self.callback.emit)
         translation.set_cancel_request(self.cancel_request)
         translation.handle(paragraphs)
+        self.on_working = False
         self.finished.emit()
+        if self.need_close:
+            time.sleep(1)
+            self.close.emit(0)
 
 
 class CreateTranslationProject(QDialog):
@@ -289,13 +315,11 @@ class AdvancedTranslation(QDialog):
         self.ebook = ebook
         self.config = get_config()
         self.alert = AlertMessage(self)
-        self.status = TranslationStatus(self)
         # self.error = JobError(self)
         self.current_engine = get_engine_class()
         self.cache = None
         self.merge_enabled = False
 
-        self.on_working = False
         self.prgress_step = 0
         self.translate_all = False
 
@@ -305,12 +329,14 @@ class AdvancedTranslation(QDialog):
         self.editor_thread.start()
 
         self.trans_worker = TranslationWorker(self.current_engine, self.ebook)
+        self.trans_worker.close.connect(self.done)
         self.trans_worker.moveToThread(self.trans_thread)
         self.trans_thread.finished.connect(self.trans_worker.deleteLater)
         self.trans_thread.start()
 
         self.preparation_worker = PreparationWorker(
             self.current_engine, self.ebook)
+        self.preparation_worker.close.connect(self.done)
         self.preparation_worker.moveToThread(self.preparation_thread)
         self.preparation_thread.finished.connect(
             self.preparation_worker.deleteLater)
@@ -326,7 +352,6 @@ class AdvancedTranslation(QDialog):
         layout.addWidget(layout_info())
 
         def working_status():
-            self.on_working = True
             self.logging_text.clear()
             self.errors_text.clear()
         self.trans_worker.start.connect(working_status)
@@ -349,7 +374,6 @@ class AdvancedTranslation(QDialog):
                     self.alert.pop(_('Translation completed.'))
             self.trans_worker.set_canceled(False)
             self.translate_all = False
-            self.on_working = False
         self.trans_worker.finished.connect(working_finished)
 
         # self.trans_worker.error.connect(
@@ -370,6 +394,7 @@ class AdvancedTranslation(QDialog):
             self.panel = self.layout_panel()
             self.stack.addWidget(self.panel)
             self.stack.setCurrentWidget(self.panel)
+            self.table.setFocus(Qt.OtherFocusReason)
         self.preparation_worker.finished.connect(prepare_table_layout)
         self.preparation_worker.start.emit()
 
@@ -392,6 +417,7 @@ class AdvancedTranslation(QDialog):
         cover.setPixmap(cover_image)
 
         title = QLabel()
+        title.setMaximumWidth(cover_image.width())
         title.setText(title.fontMetrics().elidedText(
             self.ebook.title, Qt.ElideRight, title.width()))
 
@@ -449,7 +475,6 @@ class AdvancedTranslation(QDialog):
             lambda: tabs.setCurrentIndex(
                 errors_index if self.errors_text.toPlainText()
                 else review_index))
-
         splitter = QSplitter()
         splitter.addWidget(self.layout_table())
         splitter.addWidget(tabs)
@@ -547,18 +572,6 @@ class AdvancedTranslation(QDialog):
             return (item_count, char_count)
         all_item_count, all_char_count = get_paragraph_count(True)
 
-        def update_translation_status(paragraph):
-            if not paragraph.translation:
-                if paragraph.error is not None:
-                    self.status.set_color(StatusColor('red'), paragraph.error)
-                else:
-                    self.status.set_color(StatusColor('gray'))
-            elif not paragraph.aligned and self.merge_enabled:
-                self.status.set_color(StatusColor('yellow'))
-            else:
-                self.status.set_color(StatusColor('green'))
-        self.paragraph_sig.connect(update_translation_status)
-
         def item_selection_changed():
             item_count, char_count = get_paragraph_count(False)
             total = '%s/%s' % (item_count, all_item_count)
@@ -638,11 +651,15 @@ class AdvancedTranslation(QDialog):
         stop_button = QPushButton(_('Stop'))
         stop_layout.addWidget(stop_button)
 
-        def terminate_translation():
-            if self.terminate_translation():
-                stop_button.setDisabled(True)
-                stop_button.setText(_('Stopping...'))
-        stop_button.clicked.connect(terminate_translation)
+        def stop_translation():
+            action = self.alert.ask(
+                _('Are you sure you want to stop the translation progress?'))
+            if action != 'yes':
+                return
+            stop_button.setDisabled(True)
+            stop_button.setText(_('Stopping...'))
+            self.trans_worker.set_canceled(True)
+        stop_button.clicked.connect(stop_translation)
 
         def terminate_finished():
             stop_button.setDisabled(False)
@@ -846,7 +863,7 @@ class AdvancedTranslation(QDialog):
         default_flag = translation_text.textInteractionFlags()
 
         def disable_translation_text():
-            if self.on_working:
+            if self.trans_worker.on_working:
                 translation_text.setTextInteractionFlags(Qt.TextEditable)
                 end = getattr(QTextCursor.MoveOperation, 'End', None) \
                     or QTextCursor.End
@@ -877,7 +894,9 @@ class AdvancedTranslation(QDialog):
         save_status = QLabel()
         save_button = QPushButton(_('Save'))
 
-        control_layout.addWidget(self.status)
+        status_indicator = TranslationStatus()
+
+        control_layout.addWidget(status_indicator)
         control_layout.addStretch(1)
         control_layout.addWidget(save_status)
         control_layout.addWidget(save_button)
@@ -885,8 +904,21 @@ class AdvancedTranslation(QDialog):
         layout.addWidget(splitter)
         layout.addWidget(control)
 
+        def update_translation_status(paragraph):
+            if not paragraph.translation:
+                if paragraph.error is not None:
+                    status_indicator.set_color(
+                        StatusColor('red'), paragraph.error)
+                else:
+                    status_indicator.set_color(StatusColor('gray'))
+            elif not paragraph.aligned and self.merge_enabled:
+                status_indicator.set_color(StatusColor('yellow'))
+            else:
+                status_indicator.set_color(StatusColor('green'))
+        self.paragraph_sig.connect(update_translation_status)
+
         def change_selected_item():
-            if self.on_working:
+            if self.trans_worker.on_working:
                 return
             paragraph = self.table.current_paragraph()
             if paragraph is None:
@@ -913,7 +945,8 @@ class AdvancedTranslation(QDialog):
         self.trans_worker.streaming.connect(streaming_translation)
 
         def modify_translation():
-            if self.on_working and self.table.selected_count() > 1:
+            if self.trans_worker.on_working and \
+                    self.table.selected_count() > 1:
                 return
             save_button.setDisabled(False)
             # paragraph = self.table.current_paragraph()
@@ -1000,19 +1033,36 @@ class AdvancedTranslation(QDialog):
         source.eventFilter = MethodType(eventFilter, source)
         target.installEventFilter(source)
 
-    def terminate_translation(self):
-        if self.on_working:
+    def terminate_preparework(self):
+        if self.preparation_worker.on_working:
+            if self.preparation_worker.canceled:
+                return False
             action = self.alert.ask(
-                _('Are you sure you want to stop the translation progress?'))
+                _('Are you sure you want to cancel the preparation progress?'))
             if action != 'yes':
                 return False
-        self.trans_worker.set_canceled(True)
+            self.preparation_worker.set_canceled(True)
+            self.preparation_worker.progress_message.emit('Canceling...')
+            return False
+        return True
+
+    def terminate_translation(self):
+        if self.trans_worker.on_working:
+            action = self.alert.ask(
+                _('Are you sure you want to cancel the translation progress?'))
+            if action != 'yes':
+                return False
+            self.trans_worker.set_need_close(True)
+            self.trans_worker.set_canceled(True)
+            return False
         return True
 
     def done(self, result):
+        if not self.terminate_preparework():
+            return
         if not self.terminate_translation():
             return
-        self.preparation_thread.requestInterruption()
+        # self.preparation_thread.requestInterruption()
         self.preparation_thread.quit()
         self.preparation_thread.wait()
         self.trans_thread.quit()

@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-12 03:10+0800\n"
+"POT-Creation-Date: 2024-04-12 23:49+0800\n"
 "PO-Revision-Date: 2023-10-01 15:35-0400\n"
 "Last-Translator: <a href=\"https://www.mobileread.com/forums/member.php?"
 "u=90932\">PoP</a>\n"
@@ -109,6 +109,9 @@ msgstr "Traduire la sélection"
 msgid "Stop"
 msgstr "Arrêt"
 
+msgid "Are you sure you want to stop the translation progress?"
+msgstr "Êtes-vous certain de vouloir arrêter la traduction?"
+
 msgid "Stopping..."
 msgstr "Arrêtant..."
 
@@ -166,8 +169,11 @@ msgstr "Registre d'erreur"
 msgid "Are you sure you want to translate all {:n} paragraphs?"
 msgstr "Êtes-vous certain de vouloir traduire tous les {:n} paragraphes?"
 
-msgid "Are you sure you want to stop the translation progress?"
-msgstr "Êtes-vous certain de vouloir arrêter la traduction?"
+msgid "Are you sure you want to cancel the preparation progress?"
+msgstr ""
+
+msgid "Are you sure you want to cancel the translation progress?"
+msgstr ""
 
 msgid "Output Format"
 msgstr "Format de sortie"
@@ -581,8 +587,8 @@ msgstr "Personnalisé"
 msgid "Usage Tip"
 msgstr ""
 
-msgid "Tip:"
-msgstr "Indice:"
+msgid "Tip: "
+msgstr "Indice: "
 
 msgid "API keys will auto-switch if the previous one is unavailable."
 msgstr ""
@@ -693,6 +699,15 @@ msgstr "Glossaire de traduction"
 msgid "Choose a glossary file"
 msgstr "Choisissez un fichier glossaire"
 
+msgid "Priority Element"
+msgstr ""
+
+msgid "CSS selectors for priority elements. One rule per line:"
+msgstr ""
+
+msgid "Stop further extraction once elements match these rules."
+msgstr ""
+
 msgid "Ignore Paragraph"
 msgstr "Ignorer paragraphe"
 
@@ -717,6 +732,9 @@ msgstr "Normal (sensible à la casse)"
 msgid "Regular Expression"
 msgstr "Expression régulière"
 
+msgid "Do not translate elements that contain these keywords."
+msgstr ""
+
 msgid "Exclude paragraph by keyword. One keyword per line:"
 msgstr "Exclure le paragraphe par mot-clé. Un mot-clé par ligne:"
 
@@ -735,10 +753,16 @@ msgstr "Ignorer l'élément"
 msgid "CSS selectors to exclude elements. One rule per line:"
 msgstr "Sélecteurs CSS pour exclure des éléments. Une règle par ligne:"
 
+msgid "Do not translation elements that matches these rules."
+msgstr ""
+
 msgid "Reserve Element"
 msgstr ""
 
 msgid "CSS selectors to reserve elements. One rule per line:"
+msgstr ""
+
+msgid "Keep elements that match these rules for extraction."
 msgstr ""
 
 msgid "Ebook Metadata"
@@ -780,11 +804,11 @@ msgstr "Valeur de couleur n'est pas valide."
 msgid "The specified glossary file does not exist."
 msgstr "Le fichier de glossaire spécifié n'existe pas."
 
-msgid "{} is not a valid regular expression."
-msgstr "{} n'est pas une expression régulière valide."
-
 msgid "{} is not a valid CSS seletor."
 msgstr "{} n'es pas un selecteur CSS valide."
+
+msgid "{} is not a valid regular expression."
+msgstr "{} n'est pas une expression régulière valide."
 
 msgid "Translate Book"
 msgstr "Traduire un livre"

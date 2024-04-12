@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-12 03:10+0800\n"
+"POT-Creation-Date: 2024-04-12 23:49+0800\n"
 "PO-Revision-Date: 2024-03-23 15:12+0300\n"
 "Last-Translator: DogancanYr <EMAIL@ADDRESS>\n"
 "Language-Team: Turkish <LL@li.org>\n"
@@ -108,6 +108,9 @@ msgstr "Seçilenleri Çevir"
 msgid "Stop"
 msgstr "Dur"
 
+msgid "Are you sure you want to stop the translation progress?"
+msgstr "Çeviri ilerlemesini durdurmak istediğinizden emin misiniz?"
+
 msgid "Stopping..."
 msgstr "Duruyor..."
 
@@ -167,8 +170,11 @@ msgstr "Hata günlüğü"
 msgid "Are you sure you want to translate all {:n} paragraphs?"
 msgstr "Tüm {:n} paragrafı çevirmek istediğinizden emin misiniz?"
 
-msgid "Are you sure you want to stop the translation progress?"
-msgstr "Çeviri ilerlemesini durdurmak istediğinizden emin misiniz?"
+msgid "Are you sure you want to cancel the preparation progress?"
+msgstr ""
+
+msgid "Are you sure you want to cancel the translation progress?"
+msgstr ""
 
 msgid "Output Format"
 msgstr "Çıktı Formatı"
@@ -585,8 +591,8 @@ msgstr "Özel"
 msgid "Usage Tip"
 msgstr "Kullanım İpucu"
 
-msgid "Tip:"
-msgstr "İpucu:"
+msgid "Tip: "
+msgstr "İpucu: "
 
 msgid "API keys will auto-switch if the previous one is unavailable."
 msgstr ""
@@ -698,6 +704,15 @@ msgstr "Çeviri Sözlüğü"
 msgid "Choose a glossary file"
 msgstr "Bir sözlük dosyası seç"
 
+msgid "Priority Element"
+msgstr ""
+
+msgid "CSS selectors for priority elements. One rule per line:"
+msgstr ""
+
+msgid "Stop further extraction once elements match these rules."
+msgstr ""
+
 msgid "Ignore Paragraph"
 msgstr "Paragrafı Yoksay"
 
@@ -722,6 +737,9 @@ msgstr "Normal (büyük/küçük harfe duyarlı)"
 msgid "Regular Expression"
 msgstr "Normal İfade"
 
+msgid "Do not translate elements that contain these keywords."
+msgstr ""
+
 msgid "Exclude paragraph by keyword. One keyword per line:"
 msgstr "Paragrafı anahtar kelimeye göre hariç tut. "
 
@@ -737,10 +755,16 @@ msgstr "Öğeyi Yoksay"
 msgid "CSS selectors to exclude elements. One rule per line:"
 msgstr "Öğeleri dışlamak için CSS seçicileri. "
 
+msgid "Do not translation elements that matches these rules."
+msgstr ""
+
 msgid "Reserve Element"
 msgstr ""
 
 msgid "CSS selectors to reserve elements. One rule per line:"
+msgstr ""
+
+msgid "Keep elements that match these rules for extraction."
 msgstr ""
 
 msgid "Ebook Metadata"
@@ -782,11 +806,11 @@ msgstr "Geçersiz renk değeri."
 msgid "The specified glossary file does not exist."
 msgstr "Belirtilen sözlük dosyası mevcut değil."
 
-msgid "{} is not a valid regular expression."
-msgstr "{} geçerli bir normal ifade değil."
-
 msgid "{} is not a valid CSS seletor."
 msgstr "{} geçerli bir CSS seçici değil."
+
+msgid "{} is not a valid regular expression."
+msgstr "{} geçerli bir normal ifade değil."
 
 msgid "Translate Book"
 msgstr "Kitabı Çevir"
