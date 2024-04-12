@@ -50,7 +50,7 @@ class EditorWorker(QObject):
     @pyqtSlot(str, object)
     def show_message(self, message, callback=None):
         self.show.emit(message)
-        time.sleep(0.1)
+        time.sleep(1)
         self.show.emit('')
         callback and callback()
         self.finished.emit()
@@ -219,7 +219,7 @@ class TranslationWorker(QObject):
         self.on_working = False
         self.finished.emit()
         if self.need_close:
-            time.sleep(1)
+            time.sleep(0.5)
             self.close.emit(0)
 
 
@@ -904,7 +904,10 @@ class AdvancedTranslation(QDialog):
         layout.addWidget(splitter)
         layout.addWidget(control)
 
-        def update_translation_status(paragraph):
+        def update_translation_status(row):
+            paragraph = self.table.paragraph(row)
+            if paragraph is None:
+                return
             if not paragraph.translation:
                 if paragraph.error is not None:
                     status_indicator.set_color(
@@ -915,7 +918,7 @@ class AdvancedTranslation(QDialog):
                 status_indicator.set_color(StatusColor('yellow'))
             else:
                 status_indicator.set_color(StatusColor('green'))
-        self.paragraph_sig.connect(update_translation_status)
+        self.table.row.connect(update_translation_status)
 
         def change_selected_item():
             if self.trans_worker.on_working:
@@ -924,6 +927,7 @@ class AdvancedTranslation(QDialog):
             if paragraph is None:
                 return
             self.paragraph_sig.emit(paragraph)
+            self.table.row.emit(paragraph.row)
         self.table.itemSelectionChanged.connect(change_selected_item)
         self.table.setCurrentItem(self.table.item(0, 0))
         change_selected_item()

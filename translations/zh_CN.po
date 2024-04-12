@@ -752,7 +752,7 @@ msgid "CSS selectors to reserve elements. One rule per line:"
 msgstr "用来保留元素的 CSS 选择器。一行一条规则："
 
 msgid "Keep elements that match these rules for extraction."
-msgstr "保留抽取元素中匹配这些规则的元素。"
+msgstr "保留已抽取元素中匹配这些规则的元素。"
 
 msgid "Ebook Metadata"
 msgstr "电子书元数据"
