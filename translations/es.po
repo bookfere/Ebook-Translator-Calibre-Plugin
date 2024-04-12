@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-12 03:10+0800\n"
+"POT-Creation-Date: 2024-04-12 23:49+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -109,6 +109,9 @@ msgstr ""
 msgid "Stop"
 msgstr ""
 
+msgid "Are you sure you want to stop the translation progress?"
+msgstr ""
+
 msgid "Stopping..."
 msgstr ""
 
@@ -166,7 +169,10 @@ msgstr ""
 msgid "Are you sure you want to translate all {:n} paragraphs?"
 msgstr ""
 
-msgid "Are you sure you want to stop the translation progress?"
+msgid "Are you sure you want to cancel the preparation progress?"
+msgstr ""
+
+msgid "Are you sure you want to cancel the translation progress?"
 msgstr ""
 
 msgid "Output Format"
@@ -572,7 +578,7 @@ msgstr "Personalizado"
 msgid "Usage Tip"
 msgstr ""
 
-msgid "Tip:"
+msgid "Tip: "
 msgstr ""
 
 msgid "API keys will auto-switch if the previous one is unavailable."
@@ -683,6 +689,15 @@ msgstr "Glosario de traducción"
 msgid "Choose a glossary file"
 msgstr "Elija un archivo de glosario"
 
+msgid "Priority Element"
+msgstr ""
+
+msgid "CSS selectors for priority elements. One rule per line:"
+msgstr ""
+
+msgid "Stop further extraction once elements match these rules."
+msgstr ""
+
 msgid "Ignore Paragraph"
 msgstr "Ignorar párrafo"
 
@@ -707,6 +722,9 @@ msgstr "Normal (sensible a mayúsculas y minúsculas)"
 msgid "Regular Expression"
 msgstr "Expresión regular"
 
+msgid "Do not translate elements that contain these keywords."
+msgstr ""
+
 msgid "Exclude paragraph by keyword. One keyword per line:"
 msgstr "Excluir párrafo por palabra clave. Una palabra clave por línea.:"
 
@@ -724,10 +742,16 @@ msgstr ""
 msgid "CSS selectors to exclude elements. One rule per line:"
 msgstr ""
 
+msgid "Do not translation elements that matches these rules."
+msgstr ""
+
 msgid "Reserve Element"
 msgstr ""
 
 msgid "CSS selectors to reserve elements. One rule per line:"
+msgstr ""
+
+msgid "Keep elements that match these rules for extraction."
 msgstr ""
 
 msgid "Ebook Metadata"
@@ -769,11 +793,11 @@ msgstr "Valor de color no válido."
 msgid "The specified glossary file does not exist."
 msgstr "El archivo de glosario especificado no existe."
 
-msgid "{} is not a valid regular expression."
-msgstr "{} no es una expresión regular válida."
-
 msgid "{} is not a valid CSS seletor."
 msgstr ""
+
+msgid "{} is not a valid regular expression."
+msgstr "{} no es una expresión regular válida."
 
 msgid "Translate Book"
 msgstr "Traducir libro"

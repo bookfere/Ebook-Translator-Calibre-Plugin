@@ -22,11 +22,11 @@ def get_name(element):
 
 
 class Element:
-    def __init__(self, element, page_id=None):
+    def __init__(self, element, page_id=None, ignored=False):
         self.element = element
         self.page_id = page_id
+        self.ignored = ignored
 
-        self.ignored = False
         self.placeholder = None
         self.reserve_elements = []
         self.original = []
@@ -426,27 +426,34 @@ class PageElement(Element):
 
 
 class Extraction:
-    priority_elements = (
-        'p', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote')
-    default_filter_rules = (
-        r'^[-\d\s\.\'\\"‘’“”,=~!@#$%^&º*|≈<>?/`—…+:–_(){}[\]]+$',)
-
     def __init__(
-            self, pages, rule_mode, filter_scope, filter_rules, element_rules):
+            self, pages, priority_rules, rule_mode, filter_scope, filter_rules,
+            ignore_rules):
         self.pages = pages
+        self.priority_rules = priority_rules
         self.rule_mode = rule_mode
         self.filter_scope = filter_scope
         self.filter_rules = filter_rules
-        self.element_rules = element_rules
+        self.ignore_rules = ignore_rules
 
+        self.priority_patterns = []
         self.filter_patterns = []
-        self.element_patterns = []
+        self.ignore_patterns = []
 
+        self.load_priority_patterns()
         self.load_filter_patterns()
-        self.load_element_patterns()
+        self.load_ignore_patterns()
+
+    def load_priority_patterns(self):
+        default_selectors = [
+            'p', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote']
+        self.priority_patterns = css_to_xpath(
+            default_selectors + self.priority_rules)
 
     def load_filter_patterns(self):
-        patterns = [re.compile(rule) for rule in self.default_filter_rules]
+        default_filter_rules = (
+            r'^[-\d\s\.\'\\"‘’“”,=~!@#$%^&º*|≈<>?/`—…+:–_(){}[\]]+$',)
+        patterns = [re.compile(rule) for rule in default_filter_rules]
         for rule in self.filter_rules:
             if self.rule_mode == 'normal':
                 rule = re.compile(re.escape(rule), re.I)
@@ -457,10 +464,10 @@ class Extraction:
             patterns.append(rule)
         self.filter_patterns = patterns
 
-    def load_element_patterns(self):
+    def load_ignore_patterns(self):
         default_selectors = ['pre', 'code']
-        self.element_patterns = css_to_xpath(
-            default_selectors + self.element_rules)
+        self.ignore_patterns = css_to_xpath(
+            default_selectors + self.ignore_rules)
 
     def get_sorted_pages(self):
         pages = []
@@ -478,8 +485,14 @@ class Extraction:
             elements.extend(self.extract_elements(page.id, body, []))
         return filter(self.filter_content, elements)
 
+    def is_priority(self, element):
+        for pattern in self.priority_patterns:
+            if element.xpath(pattern, namespaces=ns):
+                return True
+        return False
+
     def need_ignore(self, element):
-        for pattern in self.element_patterns:
+        for pattern in self.ignore_patterns:
             if element.xpath(pattern, namespaces=ns):
                 return True
         return False
@@ -492,13 +505,15 @@ class Extraction:
             return []
         for element in root.findall('./*'):
             if self.need_ignore(element):
+                elements.append(PageElement(element, page_id, True))
                 continue
             element_has_content = False
-            if element.text is not None and trim(element.text) != '':
+            if self.is_priority(element) or (
+                    element.text is not None and trim(element.text) != ''):
                 element_has_content = True
             else:
                 children = element.findall('./*')
-                if children and get_name(element) in self.priority_elements:
+                if children and self.is_priority(element):
                     element_has_content = True
                 else:
                     for child in children:
@@ -506,15 +521,13 @@ class Extraction:
                             element_has_content = True
                             break
             if element_has_content:
-                page_element = PageElement(element, page_id)
-                page_element.set_ignored(self.need_ignore(element))
-                elements.append(page_element)
+                elements.append(PageElement(
+                    element, page_id, self.need_ignore(element)))
             else:
                 self.extract_elements(page_id, element, elements)
         # Return root if all children have no content
-        page_element = PageElement(root, page_id)
-        page_element.set_ignored(self.need_ignore(root))
-        return elements if elements else [page_element]
+        return elements if elements else [
+            PageElement(root, page_id, self.need_ignore(root))]
 
     def filter_content(self, element):
         # Ignore the element contains empty content
@@ -749,12 +762,14 @@ def get_toc_elements(nodes, elements=[]):
 
 def get_page_elements(pages):
     config = get_config()
+    priority_rules = config.get('priority_rules')
     rule_mode = config.get('rule_mode')
     filter_scope = config.get('filter_scope')
     filter_rules = config.get('filter_rules', [])
-    element_rules = config.get('element_rules', [])
+    ignore_rules = config.get('ignore_rules', config.get('element_rules', []))
     extraction = Extraction(
-        pages, rule_mode, filter_scope, filter_rules, element_rules)
+        pages, priority_rules, rule_mode, filter_scope, filter_rules,
+        ignore_rules)
     return extraction.get_elements()
 
 
@@ -773,6 +788,7 @@ def get_element_handler(placeholder, separator):
         handler.set_column_gap((gap_type, column_gap.get(gap_type)))
     handler.set_original_color(config.get('original_color'))
     handler.set_translation_color(config.get('translation_color'))
-    handler.load_remove_rules(config.get('element_rules', []))
+    handler.load_remove_rules(
+        config.get('ignore_rules', config.get('element_rules', [])))
     handler.load_reserve_rules(config.get('reserve_rules', []))
     return handler

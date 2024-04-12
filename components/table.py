@@ -155,7 +155,7 @@ class AdvancedTranslationTable(QTableWidget):
             item.setToolTip(tip)
 
     def contextMenuEvent(self, event):
-        if self.parent.on_working:
+        if self.parent.trans_worker.on_working:
             return
         menu = QMenu()
         menu.addAction(

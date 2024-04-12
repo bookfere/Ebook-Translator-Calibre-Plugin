@@ -102,11 +102,11 @@ class MockedElement(Element):
 class TestElement(unittest.TestCase):
     def setUp(self):
         self._element = Mock()
-        self.element = MockedElement(self._element, 'toc.ncx')
+        self.element = MockedElement(self._element)
 
     def test_create_element(self):
         self.assertIs(self._element, self.element.element)
-        self.assertEqual('toc.ncx', self.element.page_id)
+        self.assertIsNone(self.element.page_id)
         self.assertFalse(self.element.ignored)
         self.assertIsNone(self.element.placeholder)
         self.assertEqual([], self.element.reserve_elements)
@@ -118,6 +118,11 @@ class TestElement(unittest.TestCase):
         self.assertIsNone(self.element.translation_color)
         self.assertIsNone(self.element.remove_pattern)
         self.assertIsNone(self.element.reserve_pattern)
+
+    def test_create_element_with_ignored(self):
+        element = MockedElement(self._element, 'toc.ncx', True)
+        self.assertEqual('toc.ncx', element.page_id)
+        self.assertTrue(element.ignored)
 
     def test_set_ignored(self):
         self.element.set_ignored(True)
@@ -739,28 +744,23 @@ class TestExtraction(unittest.TestCase):
             id="c", media_type='image/svg+xml', href='test.svg',
             data=etree.XML(b'<svg xmlns="http://www.w3.org/2000/svg"></svg>'))
 
-        self.extraction = Extraction(
-            [self.page_3, self.page_2, self.page_1], 'normal', 'text', [], [])
+        pages = [self.page_3, self.page_2, self.page_1]
+        self.extraction = Extraction(pages, [], 'normal', 'text', [], [])
 
     def test_create_extraction(self):
-        self.assertEqual(
-            ('p', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote'),
-            Extraction.priority_elements)
-        self.assertEqual(
-            (r'^[-\d\s\.\'\\"‘’“”,=~!@#$%^&º*|≈<>?/`—…+:–_(){}[\]]+$',),
-            Extraction.default_filter_rules)
         self.assertIsInstance(self.extraction, Extraction)
         self.assertEqual(
             [self.page_3, self.page_2, self.page_1], self.extraction.pages)
         self.assertEqual('normal', self.extraction.rule_mode)
         self.assertEqual('text', self.extraction.filter_scope)
         self.assertEqual([], self.extraction.filter_rules)
-        self.assertEqual([], self.extraction.element_rules)
+        self.assertEqual([], self.extraction.ignore_rules)
+        default_rule = r'^[-\d\s\.\'\\"‘’“”,=~!@#$%^&º*|≈<>?/`—…+:–_(){}[\]]+$'
         self.assertEqual(
-            [re.compile(Extraction.default_filter_rules[0])],
+            [re.compile(default_rule)],
             self.extraction.filter_patterns)
         self.assertEqual(
-            ['self::x:pre', 'self::x:code'], self.extraction.element_patterns)
+            ['self::x:pre', 'self::x:code'], self.extraction.ignore_patterns)
 
     def test_get_sorted_pages(self):
         self.assertEqual(
@@ -769,7 +769,7 @@ class TestExtraction(unittest.TestCase):
     def test_get_elements(self):
         self.extraction.rule_mode = 'normal'
         self.extraction.filter_rules = []
-        self.extraction.element_rules = []
+        self.extraction.ignore_rules = []
 
         elements = self.extraction.get_elements()
         self.assertIsInstance(elements, filter)
@@ -782,6 +782,15 @@ class TestExtraction(unittest.TestCase):
         self.assertEqual('div', get_name(elements[1].get_name()))
         self.assertEqual('def', elements[1].get_content())
 
+    def test_load_priority_patterns(self):
+        self.extraction.load_priority_patterns()
+        self.assertEqual(9, len(self.extraction.priority_patterns))
+
+        self.extraction.priority_rules = [
+            'table', 'table.list', 'invalid:class']
+        self.extraction.load_priority_patterns()
+        self.assertEqual(11, len(self.extraction.priority_patterns))
+
     def test_load_filter_patterns(self):
         self.extraction.load_filter_patterns()
         self.assertEqual(1, len(self.extraction.filter_patterns))
@@ -790,20 +799,39 @@ class TestExtraction(unittest.TestCase):
         self.extraction.load_filter_patterns()
         self.assertEqual(3, len(self.extraction.filter_patterns))
 
-    def test_load_element_patterns(self):
-        self.extraction.load_element_patterns()
-        self.assertEqual(2, len(self.extraction.element_patterns))
+    def test_load_ignore_patterns(self):
+        self.extraction.load_ignore_patterns()
+        self.assertEqual(2, len(self.extraction.ignore_patterns))
 
-        self.extraction.element_rules = [
+        self.extraction.ignore_rules = [
             'table', 'table.list', 'invalid:class']
-        self.extraction.load_element_patterns()
-        self.assertEqual(4, len(self.extraction.element_patterns))
+        self.extraction.load_ignore_patterns()
+        self.assertEqual(4, len(self.extraction.ignore_patterns))
+
+    def test_is_priority(self):
+        self.extraction.priority_rules = ['.test']
+        self.extraction.load_priority_patterns()
+
+        items = ['<p xmlns="http://www.w3.org/1999/xhtml">abc</p>',
+                 '<pre xmlns="http://www.w3.org/1999/xhtml">abc</pre>',
+                 '<div xmlns="http://www.w3.org/1999/xhtml" class="test">'
+                 'abc</div>']
+
+        for item in items:
+            with self.subTest(item=item):
+                self.assertTrue(self.extraction.is_priority(etree.XML(item)))
+
+        items = ['<sub xmlns="http://www.w3.org/1999/xhtml">abc</sub>',
+                 '<div xmlns="http://www.w3.org/1999/xhtml" id="a">abc</div>']
+
+        for item in items:
+            with self.subTest(item=item):
+                self.assertFalse(self.extraction.is_priority(etree.XML(item)))
 
     def test_need_ignore(self):
-        self.extraction.element_rules = ['table', 'p.a']
-        self.extraction.load_element_patterns()
+        self.extraction.ignore_rules = ['table', 'p.a']
+        self.extraction.load_ignore_patterns()
 
-        self.extraction.rules = []
         items = ['<pre xmlns="http://www.w3.org/1999/xhtml">abc</pre>',
                  '<code xmlns="http://www.w3.org/1999/xhtml">abc</code>',
                  '<table xmlns="http://www.w3.org/1999/xhtml">abc</table>',
@@ -843,9 +871,11 @@ class TestExtraction(unittest.TestCase):
 </html>""")
         root = xhtml.find('.//x:body', namespaces=ns)
         elements = self.extraction.extract_elements('p1', root, [])
-        self.assertEqual(8, len(elements))
+        self.assertEqual(9, len(elements))
         self.assertEqual('h2', elements[0].get_name())
         self.assertFalse(elements[0].ignored)
+        self.assertEqual('pre', elements[-2].get_name())
+        self.assertTrue(elements[-2].ignored)
         self.assertEqual('p', elements[-1].get_name())
         self.assertFalse(elements[-1].ignored)
 
@@ -870,8 +900,8 @@ class TestExtraction(unittest.TestCase):
 <body class="test"><p>a</p></body>
 </html>""")
         root = xhtml.find('.//x:body', namespaces=ns)
-        self.extraction.element_rules = ['.test']
-        self.extraction.load_element_patterns()
+        self.extraction.ignore_rules = ['.test']
+        self.extraction.load_ignore_patterns()
 
         self.assertEqual(
             [], self.extraction.extract_elements('test', root, []))
@@ -889,15 +919,15 @@ class TestExtraction(unittest.TestCase):
 </body>
 </html>""")
         root = xhtml.find('.//x:body', namespaces=ns)
-        self.extraction.element_rules = ['.test', '#test']
-        self.extraction.load_element_patterns()
+        self.extraction.ignore_rules = ['.test', '#test']
+        self.extraction.load_ignore_patterns()
 
         elements = self.extraction.extract_elements('test', root, [])
-        self.assertEqual(2, len(elements))
+        self.assertEqual(4, len(elements))
         self.assertEqual(
             xhtml.find('.//x:div[1]/x:p', namespaces=ns), elements[0].element)
         self.assertEqual(
-            xhtml.find('.//x:div[3]/x:p', namespaces=ns), elements[1].element)
+            xhtml.find('.//x:div[3]/x:p', namespaces=ns), elements[2].element)
 
     def test_filter_content(self):
         def elements(markups):
