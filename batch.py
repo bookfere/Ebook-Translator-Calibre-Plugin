@@ -62,37 +62,42 @@ class BatchTranslation(QDialog):
         table = QTableWidget()
         table.setAlternatingRowColors(True)
         table.setFocusPolicy(Qt.NoFocus)
-        table.setSelectionMode(QTableWidget.NoSelection)
-        # table.SelectionBehavior(QTableWidget.SelectRows)
+        # table.setSelectionMode(QTableWidget.NoSelection)
+        table.setEditTriggers(QTableWidget.NoEditTriggers)
+        table.setSelectionBehavior(QTableWidget.SelectRows)
         table.setRowCount(len(self.ebooks))
-        table.setColumnCount(5)
-        table.setHorizontalHeaderLabels([
+
+        headers = (
             _('Title'), _('Encoding'), _('Input Format'), _('Output Format'),
-            _('Source Language'), _('Target Language')])
+            _('Source Language'), _('Target Language'))
+        table.setColumnCount(len(headers))
+        table.setHorizontalHeaderLabels(headers)
 
         header = table.horizontalHeader()
-        stretch = getattr(QHeaderView.ResizeMode, 'Stretch', None) or \
-            QHeaderView.Stretch
+        stretch = getattr(QHeaderView.ResizeMode, 'Stretch', None) \
+            or QHeaderView.Stretch
         header.setSectionResizeMode(0, stretch)
-        # table.verticalHeader().setMinimumSectionSize(100)
+        # table.verticalHeader().setMinimumSectionSize(36)
 
         translation_engine = get_engine_class()
         for row, ebook in enumerate(self.ebooks):
             ebook_title = QTableWidgetItem(ebook.title)
-            ebook_title.setFlags(Qt.ItemIsEnabled)
             table.setItem(row, 0, ebook_title)
 
             if ebook.input_format in extra_formats.keys():
                 input_encoding = QComboBox()
+                input_encoding.wheelEvent = lambda event: None
+                table.setCellWidget(row, 1, self._cell_widget(input_encoding))
                 input_encoding.addItems(encoding_list)
                 input_encoding.currentTextChanged.connect(
                     lambda encoding, row=row: self.ebooks[row]
                     .set_encoding(encoding))
+                input_encoding.currentTextChanged.connect(
+                    lambda encoding: input_encoding.setToolTip(encoding))
             else:
-                input_encoding = QLabel(_('Default'))
-                input_encoding.setDisabled(True)
-                input_encoding.setAlignment(Qt.AlignCenter)
-            table.setCellWidget(row, 1, self._cell_widget(input_encoding))
+                input_encoding = QTableWidgetItem(_('Default'))
+                input_encoding.setTextAlignment(Qt.AlignCenter)
+                table.setItem(row, 1, input_encoding)
 
             input_fmt = InputFormat(ebook.files.keys())
             table.setCellWidget(row, 2, self._cell_widget(input_fmt))
@@ -100,8 +105,8 @@ class BatchTranslation(QDialog):
             output_format = OutputFormat()
             table.setCellWidget(row, 3, self._cell_widget(output_format))
 
-            exist_format = output_format.findText(ebook.input_format)
-            if ebook.is_extra_format() and exist_format:
+            existed_format = output_format.findText(ebook.input_format)
+            if ebook.is_extra_format() and existed_format:
                 output_format.addItem(ebook.input_format)
 
             def change_input_format(format, row=row):
@@ -111,11 +116,13 @@ class BatchTranslation(QDialog):
                     output_format.lock_format(format)
                 else:
                     output_format.unlock_format()
+                input_fmt.setToolTip(format)
             change_input_format(input_fmt.currentText(), row)
             input_fmt.currentTextChanged.connect(change_input_format)
 
             def change_output_format(format, row=row):
                 self.ebooks[row].set_output_format(format)
+                output_format.setToolTip(format)
             change_output_format(output_format.currentText(), row)
             output_format.currentTextChanged.connect(change_output_format)
 
@@ -125,6 +132,7 @@ class BatchTranslation(QDialog):
 
             def change_source_lang(lang, row=row):
                 self.ebooks[row].set_source_lang(lang)
+                source_lang.setToolTip(lang)
             change_source_lang(source_lang.currentText(), row)
             source_lang.currentTextChanged.connect(change_source_lang)
 
@@ -142,6 +150,7 @@ class BatchTranslation(QDialog):
                 ebook.set_target_lang(lang)
                 ebook.set_lang_code(
                     translation_engine.get_iso639_target_code(lang))
+                target_lang.setToolTip(lang)
             change_target_lang(target_lang.currentText(), row)
             target_lang.currentTextChanged.connect(change_target_lang)
 
@@ -149,8 +158,9 @@ class BatchTranslation(QDialog):
                 translation_engine.lang_codes.get('target'),
                 translation_engine.config.get('target_lang'))
 
-        table.resizeRowsToContents()
-        # table.resizeColumnsToContents()
+            table.resizeRowsToContents()
+            table.resizeColumnsToContents()
+
         layout.addWidget(table)
 
         start_button = QPushButton(_('Translate'))
