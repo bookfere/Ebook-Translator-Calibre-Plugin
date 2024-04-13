@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-13 10:33+0800\n"
+"POT-Creation-Date: 2024-04-13 18:31+0800\n"
 "PO-Revision-Date: 2023-04-25 15:36+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -285,6 +285,12 @@ msgstr "引擎名稱已經被使用。"
 msgid "The setting has been saved."
 msgstr "設定已儲存。"
 
+msgid "Feedback"
+msgstr "回饋"
+
+msgid "Donate"
+msgstr "捐助"
+
 msgid "Ebook Specific"
 msgstr ""
 
@@ -293,12 +299,6 @@ msgstr ""
 
 msgid "Not selected"
 msgstr ""
-
-msgid "Donate"
-msgstr "捐助"
-
-msgid "Feedback"
-msgstr "回饋"
 
 msgid "Auto detect"
 msgstr "自動偵測"
@@ -699,6 +699,15 @@ msgstr ""
 msgid "Stop further extraction once elements match these rules."
 msgstr ""
 
+msgid "Ignore Element"
+msgstr ""
+
+msgid "CSS selectors to exclude elements. One rule per line:"
+msgstr ""
+
+msgid "Do not translation elements that matches these rules."
+msgstr ""
+
 msgid "Ignore Paragraph"
 msgstr "忽略段落"
 
@@ -723,7 +732,7 @@ msgstr "一般 (區分大小寫)"
 msgid "Regular Expression"
 msgstr "規則運算式"
 
-msgid "Do not translate elements that contain these keywords."
+msgid "Do not translate extracted elements that contain these rules."
 msgstr ""
 
 msgid "Exclude paragraph by keyword. One keyword per line:"
@@ -734,15 +743,6 @@ msgstr "依關鍵字排除段落 (區分大小寫)。每行一條關鍵字："
 
 msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
 msgstr "依規則運算式模式排除段落。每行一條模式："
-
-msgid "Ignore Element"
-msgstr ""
-
-msgid "CSS selectors to exclude elements. One rule per line:"
-msgstr ""
-
-msgid "Do not translation elements that matches these rules."
-msgstr ""
 
 msgid "Reserve Element"
 msgstr ""

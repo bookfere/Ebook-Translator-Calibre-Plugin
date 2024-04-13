@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-13 10:33+0800\n"
+"POT-Creation-Date: 2024-04-13 18:31+0800\n"
 "PO-Revision-Date: 2024-03-23 15:12+0300\n"
 "Last-Translator: DogancanYr <EMAIL@ADDRESS>\n"
 "Language-Team: Turkish <LL@li.org>\n"
@@ -288,6 +288,12 @@ msgstr "Motor adı zaten kullanılıyor."
 msgid "The setting has been saved."
 msgstr "Ayar kaydedildi."
 
+msgid "Feedback"
+msgstr "Geri bildirim"
+
+msgid "Donate"
+msgstr "Bağış yap"
+
 msgid "Ebook Specific"
 msgstr "E-kitaba Özel"
 
@@ -296,12 +302,6 @@ msgstr ""
 
 msgid "Not selected"
 msgstr ""
-
-msgid "Donate"
-msgstr "Bağış yap"
-
-msgid "Feedback"
-msgstr "Geri bildirim"
 
 msgid "Auto detect"
 msgstr "Otomatik algılama"
@@ -716,6 +716,15 @@ msgstr ""
 msgid "Stop further extraction once elements match these rules."
 msgstr ""
 
+msgid "Ignore Element"
+msgstr "Öğeyi Yoksay"
+
+msgid "CSS selectors to exclude elements. One rule per line:"
+msgstr "Öğeleri dışlamak için CSS seçicileri. "
+
+msgid "Do not translation elements that matches these rules."
+msgstr ""
+
 msgid "Ignore Paragraph"
 msgstr "Paragrafı Yoksay"
 
@@ -740,7 +749,7 @@ msgstr "Normal (büyük/küçük harfe duyarlı)"
 msgid "Regular Expression"
 msgstr "Normal İfade"
 
-msgid "Do not translate elements that contain these keywords."
+msgid "Do not translate extracted elements that contain these rules."
 msgstr ""
 
 msgid "Exclude paragraph by keyword. One keyword per line:"
@@ -751,15 +760,6 @@ msgstr "Paragrafı büyük/küçük harfe duyarlı anahtar sözcükle hariç tut
 
 msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
 msgstr "Paragrafı normal ifade düzeniyle hariç tut. "
-
-msgid "Ignore Element"
-msgstr "Öğeyi Yoksay"
-
-msgid "CSS selectors to exclude elements. One rule per line:"
-msgstr "Öğeleri dışlamak için CSS seçicileri. "
-
-msgid "Do not translation elements that matches these rules."
-msgstr ""
 
 msgid "Reserve Element"
 msgstr ""

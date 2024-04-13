@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-13 10:33+0800\n"
+"POT-Creation-Date: 2024-04-13 18:31+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: none\n"
@@ -288,6 +288,12 @@ msgstr "O nome do mecanismo já está em uso."
 msgid "The setting has been saved."
 msgstr "As alterações foram salvas."
 
+msgid "Feedback"
+msgstr "Opinião"
+
+msgid "Donate"
+msgstr "Doar"
+
 msgid "Ebook Specific"
 msgstr "Ebook Específico"
 
@@ -296,12 +302,6 @@ msgstr ""
 
 msgid "Not selected"
 msgstr ""
-
-msgid "Donate"
-msgstr "Doar"
-
-msgid "Feedback"
-msgstr "Opinião"
 
 msgid "Auto detect"
 msgstr "Auto detectar"
@@ -714,6 +714,15 @@ msgstr ""
 msgid "Stop further extraction once elements match these rules."
 msgstr ""
 
+msgid "Ignore Element"
+msgstr "Ignorar Elemento"
+
+msgid "CSS selectors to exclude elements. One rule per line:"
+msgstr "Seletores CSS para excluir elementos. Uma regra por linha:"
+
+msgid "Do not translation elements that matches these rules."
+msgstr ""
+
 msgid "Ignore Paragraph"
 msgstr "Ignorar Parágrafo"
 
@@ -738,7 +747,7 @@ msgstr "Normal (diferencia maiúsculas de minúsculas)"
 msgid "Regular Expression"
 msgstr "Expressão Regular"
 
-msgid "Do not translate elements that contain these keywords."
+msgid "Do not translate extracted elements that contain these rules."
 msgstr ""
 
 msgid "Exclude paragraph by keyword. One keyword per line:"
@@ -752,15 +761,6 @@ msgstr ""
 msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
 msgstr ""
 "Excluir parágrafo por padrão de expressão regular. Um padrão por linha:"
-
-msgid "Ignore Element"
-msgstr "Ignorar Elemento"
-
-msgid "CSS selectors to exclude elements. One rule per line:"
-msgstr "Seletores CSS para excluir elementos. Uma regra por linha:"
-
-msgid "Do not translation elements that matches these rules."
-msgstr ""
 
 msgid "Reserve Element"
 msgstr ""

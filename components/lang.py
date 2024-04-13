@@ -3,9 +3,9 @@ from calibre.utils.localization import get_lang, lang_as_iso639_1
 
 
 try:
-    from qt.core import pyqtSignal, pyqtSlot, QComboBox
+    from qt.core import pyqtSignal, pyqtSlot, QComboBox, QVBoxLayout
 except ImportError:
-    from PyQt5.Qt import pyqtSignal, pyqtSlot, QComboBox
+    from PyQt5.Qt import pyqtSignal, pyqtSlot, QComboBox, QVBoxLayout
 
 load_translations()
 
