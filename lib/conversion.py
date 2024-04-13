@@ -332,13 +332,13 @@ class ConversionWorker:
                 kwargs = {'args': ['ebook-viewer', output_path]}
                 payload('ebook-viewer', kwargs=kwargs)
 
-        self.gui.proceed_question(
-            callback,
-            self.gui.job_manager.launch_gui_app,
-            job.log_path,
-            _('Ebook Translation Log'),
-            _('Translation Completed'),
-            _('The translation of "{}" was completed. '
-              'Do you want to open the book?').format(ebook_title),
-            log_is_file=True,
-            icon=self.icon)
+        if self.config.get('show_notification', True):
+            self.gui.proceed_question(
+                callback,
+                self.gui.job_manager.launch_gui_app,
+                job.log_path,
+                _('Ebook Translation Log'),
+                _('Translation Completed'),
+                _('The translation of "{}" was completed. '
+                'Do you want to open the book?').format(ebook_title),
+                log_is_file=True, icon=self.icon, auto_hide_after=5)

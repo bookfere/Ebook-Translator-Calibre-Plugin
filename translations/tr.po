@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-12 23:49+0800\n"
+"POT-Creation-Date: 2024-04-13 10:33+0800\n"
 "PO-Revision-Date: 2024-03-23 15:12+0300\n"
 "Last-Translator: DogancanYr <EMAIL@ADDRESS>\n"
 "Language-Team: Turkish <LL@li.org>\n"
@@ -578,6 +578,9 @@ msgstr "İş Günlüğü"
 
 msgid "Show translation"
 msgstr "Çeviriyi göster"
+
+msgid "Notification"
+msgstr ""
 
 msgid "Search Paths"
 msgstr "Arama Yolları"
