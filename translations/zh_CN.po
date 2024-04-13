@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-12 23:49+0800\n"
+"POT-Creation-Date: 2024-04-13 10:33+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -567,6 +567,9 @@ msgstr "任务日志"
 
 msgid "Show translation"
 msgstr "显示译文"
+
+msgid "Notification"
+msgstr "通知"
 
 msgid "Search Paths"
 msgstr "搜索路径"

@@ -53,6 +53,7 @@ class EbookTranslatorGui(InterfaceAction):
         menu.addAction(_('Batch Mode'), self.show_batch_translation)
         menu.addSeparator()
         menu.addAction(_('Cache'), self.show_cache)
+        menu.addSeparator()
         menu.addAction(_('Setting'), self.show_setting)
         menu.addAction(_('About'), self.show_about)
 

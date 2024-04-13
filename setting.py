@@ -295,11 +295,22 @@ class TranslationSetting(QDialog):
         log_layout.addStretch(1)
         misc_layout.addWidget(log_group, 1)
 
+        # Notification
+        notice_group = QGroupBox(_('Notification'))
+        notice_layout = QHBoxLayout(notice_group)
+        notice = QCheckBox(_('Enable'))
+        notice_layout.addWidget(notice)
+        misc_layout.addWidget(notice_group, 1)
+
         layout.addWidget(misc_widget)
 
-        log_translation.setChecked(self.config.get('log_translation'))
+        log_translation.setChecked(self.config.get('log_translation', True))
         log_translation.toggled.connect(
             lambda checked: self.config.update(log_translation=checked))
+
+        notice.setChecked(self.config.get('show_notification', True))
+        notice.toggled.connect(
+            lambda checked: self.config.update(show_notification=checked))
 
         # Search path
         path_group = QGroupBox(_('Search Paths'))

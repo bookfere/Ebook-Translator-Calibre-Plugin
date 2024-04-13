@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-12 23:49+0800\n"
+"POT-Creation-Date: 2024-04-13 10:33+0800\n"
 "PO-Revision-Date: 2023-10-01 15:35-0400\n"
 "Last-Translator: <a href=\"https://www.mobileread.com/forums/member.php?"
 "u=90932\">PoP</a>\n"
@@ -574,6 +574,9 @@ msgstr "Registre de travail"
 
 msgid "Show translation"
 msgstr "Montrer la traduction"
+
+msgid "Notification"
+msgstr ""
 
 msgid "Search Paths"
 msgstr ""

@@ -78,10 +78,10 @@ class BatchTranslation(QDialog):
                     .set_encoding(encoding))
             else:
                 input_encoding = QLabel(_('Default'))
-            table.setCellWidget(row, 2, input_encoding)
+            table.setCellWidget(row, 1, input_encoding)
 
             input_fmt = InputFormat(ebook.files.keys())
-            table.setCellWidget(row, 1, input_fmt)
+            table.setCellWidget(row, 2, input_fmt)
 
             output_format = OutputFormat()
             table.setCellWidget(row, 3, output_format)
