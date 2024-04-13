@@ -14,7 +14,7 @@ from .engines.custom import CustomTranslate
 
 from . import EbookTranslator
 from .components import (
-    EngineList, layout_info, SourceLang, TargetLang, InputFormat, OutputFormat,
+    EngineList, Footer, SourceLang, TargetLang, InputFormat, OutputFormat,
     AlertMessage, AdvancedTranslationTable, StatusColor, TranslationStatus)
 
 
@@ -315,6 +315,7 @@ class AdvancedTranslation(QDialog):
         self.ebook = ebook
         self.config = get_config()
         self.alert = AlertMessage(self)
+        self.footer = Footer()
         # self.error = JobError(self)
         self.current_engine = get_engine_class()
         self.cache = None
@@ -349,7 +350,7 @@ class AdvancedTranslation(QDialog):
         self.stack = QStackedWidget()
         self.stack.addWidget(self.waiting)
         layout.addWidget(self.stack)
-        layout.addWidget(layout_info())
+        layout.addWidget(self.footer)
 
         def working_status():
             self.logging_text.clear()
@@ -562,6 +563,7 @@ class AdvancedTranslation(QDialog):
         counter_layout.addWidget(paragraph_count)
         counter_layout.addWidget(non_aligned_paragraph_count)
         counter_layout.addStretch(1)
+        self.footer.layout().insertWidget(0, counter)
 
         def get_paragraph_count(select_all=True):
             item_count = char_count = 0
@@ -597,7 +599,6 @@ class AdvancedTranslation(QDialog):
         layout.addWidget(filter_widget)
         layout.addWidget(self.table, 1)
         layout.addWidget(progress_bar)
-        layout.addWidget(counter)
         layout.addWidget(self.layout_table_control())
 
         def working_start():
@@ -893,6 +894,7 @@ class AdvancedTranslation(QDialog):
 
         save_status = QLabel()
         save_button = QPushButton(_('Save'))
+        save_button.setDisabled(True)
 
         status_indicator = TranslationStatus()
 
@@ -915,7 +917,8 @@ class AdvancedTranslation(QDialog):
                 else:
                     status_indicator.set_color(StatusColor('gray'))
             elif not paragraph.aligned and self.merge_enabled:
-                status_indicator.set_color(StatusColor('yellow'))
+                status_indicator.set_color(
+                    StatusColor('yellow'), )
             else:
                 status_indicator.set_color(StatusColor('green'))
         self.table.row.connect(update_translation_status)
@@ -952,11 +955,9 @@ class AdvancedTranslation(QDialog):
             if self.trans_worker.on_working and \
                     self.table.selected_count() > 1:
                 return
-            save_button.setDisabled(False)
-            # paragraph = self.table.current_paragraph()
-            # translation = translation_text.toPlainText()
-            # control.setVisible(
-            #     bool(translation) and translation != paragraph.translation)
+            paragraph = self.table.current_paragraph()
+            translation = translation_text.toPlainText()
+            save_button.setDisabled(translation == paragraph.translation)
         translation_text.textChanged.connect(modify_translation)
 
         def save_translation():
@@ -967,11 +968,9 @@ class AdvancedTranslation(QDialog):
             paragraph.target_lang = self.ebook.target_lang
             self.table.row.emit(paragraph.row)
             self.cache.update_paragraph(paragraph)
-            # self.editor_worker.start[str, object].emit(
-            #     _('Your changes have been saved.'),
-            #     lambda: control.setVisible(False))
-            self.editor_worker.start[str].emit(
-                _('Your changes have been saved.'))
+            self.editor_worker.start[str, object].emit(
+                _('Your changes have been saved.'),
+                lambda: save_button.setDisabled(True))
             translation_text.setFocus(Qt.OtherFocusReason)
         self.editor_worker.show.connect(save_status.setText)
         save_button.clicked.connect(save_translation)

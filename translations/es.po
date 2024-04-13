@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-13 10:33+0800\n"
+"POT-Creation-Date: 2024-04-13 18:31+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -287,6 +287,12 @@ msgstr "El nombre del motor ya está en uso."
 msgid "The setting has been saved."
 msgstr "La configuración ha sido guardada."
 
+msgid "Feedback"
+msgstr "Comentario"
+
+msgid "Donate"
+msgstr "Donar"
+
 msgid "Ebook Specific"
 msgstr ""
 
@@ -295,12 +301,6 @@ msgstr ""
 
 msgid "Not selected"
 msgstr ""
-
-msgid "Donate"
-msgstr "Donar"
-
-msgid "Feedback"
-msgstr "Comentario"
 
 msgid "Auto detect"
 msgstr "Detección automática"
@@ -701,6 +701,15 @@ msgstr ""
 msgid "Stop further extraction once elements match these rules."
 msgstr ""
 
+msgid "Ignore Element"
+msgstr ""
+
+msgid "CSS selectors to exclude elements. One rule per line:"
+msgstr ""
+
+msgid "Do not translation elements that matches these rules."
+msgstr ""
+
 msgid "Ignore Paragraph"
 msgstr "Ignorar párrafo"
 
@@ -725,7 +734,7 @@ msgstr "Normal (sensible a mayúsculas y minúsculas)"
 msgid "Regular Expression"
 msgstr "Expresión regular"
 
-msgid "Do not translate elements that contain these keywords."
+msgid "Do not translate extracted elements that contain these rules."
 msgstr ""
 
 msgid "Exclude paragraph by keyword. One keyword per line:"
@@ -738,15 +747,6 @@ msgstr ""
 
 msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
 msgstr "Excluir párrafo por patrón de expresión regular. Un patrón por línea:"
-
-msgid "Ignore Element"
-msgstr ""
-
-msgid "CSS selectors to exclude elements. One rule per line:"
-msgstr ""
-
-msgid "Do not translation elements that matches these rules."
-msgstr ""
 
 msgid "Reserve Element"
 msgstr ""

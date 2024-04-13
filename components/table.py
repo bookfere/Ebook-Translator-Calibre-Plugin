@@ -62,8 +62,10 @@ class AdvancedTranslationTable(QTableWidget):
             original.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
             original.setData(Qt.UserRole, paragraph)
             engine_name = QTableWidgetItem(paragraph.engine_name)
+            engine_name.setToolTip(paragraph.engine_name)
             engine_name.setTextAlignment(Qt.AlignCenter)
             traget_lang = QTableWidgetItem(paragraph.target_lang)
+            traget_lang.setToolTip(paragraph.target_lang)
             traget_lang.setTextAlignment(Qt.AlignCenter)
             status = QTableWidgetItem()
             status.setTextAlignment(Qt.AlignCenter)
@@ -152,7 +154,7 @@ class AdvancedTranslationTable(QTableWidget):
         for column in range(self.columnCount()):
             item = self.item(row, column)
             item.setBackground(background)
-            item.setToolTip(tip)
+        item.setToolTip(tip)
 
     def contextMenuEvent(self, event):
         if self.parent.trans_worker.on_working:

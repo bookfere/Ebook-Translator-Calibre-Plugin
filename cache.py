@@ -5,7 +5,7 @@ import os.path
 from .lib.utils import open_path
 from .lib.cache import default_cache_path, TranslationCache
 from .lib.config import get_config
-from .components import layout_info, AlertMessage
+from .components import Footer, AlertMessage
 
 try:
     from qt.core import (
@@ -30,13 +30,17 @@ class CacheManager(QDialog):
         self.gui = parent
         self.config = get_config()
         self.alert = AlertMessage(self)
+        self.footer = Footer()
         self.default_path = default_cache_path()
+
+        self.cache_size = QLabel()
+        self.footer.layout().insertWidget(0, self.cache_size)
 
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.control_widget())
         self.layout.addWidget(self.table_widget())
         self.layout.addWidget(self.enable_widget())
-        self.layout.addWidget(layout_info())
+        self.layout.addWidget(self.footer)
 
         self.cache_list.selected_rows.connect(
             lambda rows: self.delete_button.setDisabled(len(rows) < 1))
@@ -86,15 +90,14 @@ class CacheManager(QDialog):
         widget = QWidget()
         layout = QHBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
-        self.cache_size = QLabel()
+
         self.clear_button = QPushButton(_('Clear All'))
         self.clear_button.setDisabled(True)
         self.delete_button = QPushButton(_('Delete'))
         self.delete_button.setDisabled(True)
 
-        layout.addWidget(self.cache_size)
-        layout.addStretch(1)
         layout.addWidget(self.clear_button)
+        layout.addStretch(1)
         layout.addWidget(self.delete_button)
 
         return widget

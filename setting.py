@@ -11,7 +11,7 @@ from .engines import (
     ClaudeTranslate)
 from .engines.custom import CustomTranslate
 from .components import (
-    layout_info, AlertMessage, TargetLang, SourceLang, EngineList,
+    Footer, AlertMessage, TargetLang, SourceLang, EngineList,
     EngineTester, ManageCustomEngine, InputFormat, OutputFormat)
 
 try:
@@ -78,7 +78,7 @@ class TranslationSetting(QDialog):
         self.save_config.connect(save_setting)
 
         layout.addWidget(self.tabs)
-        layout.addWidget(layout_info())
+        layout.addWidget(Footer())
 
     def layout_scroll_area(func):
         def scroll_widget(self):
@@ -1010,6 +1010,24 @@ class TranslationSetting(QDialog):
             _('Stop further extraction once elements match these rules.'))))
         layout.addWidget(priority_group)
 
+        # Ignore element
+        element_group = QGroupBox(_('Ignore Element'))
+        element_layout = QVBoxLayout(element_group)
+        self.ignore_rules = QPlainTextEdit()
+        self.ignore_rules.setPlaceholderText(
+            '%s %s' % (_('e.g.,'), 'table, table#report, table.list'))
+        self.ignore_rules.setMinimumHeight(100)
+        self.ignore_rules.insertPlainText(
+            '\n'.join(self.config.get(
+                'ignore_rules', self.config.get('element_rules'))))
+        element_layout.addWidget(QLabel(
+            _('CSS selectors to exclude elements. One rule per line:')))
+        element_layout.addWidget(self.ignore_rules)
+        element_layout.addWidget(QLabel('%s%s' % (
+            _('Tip: '),
+            _('Do not translation elements that matches these rules.'))))
+        layout.addWidget(element_group)
+
         # Filter Content
         filter_group = QGroupBox(_('Ignore Paragraph'))
         filter_layout = QVBoxLayout(filter_group)
@@ -1049,8 +1067,8 @@ class TranslationSetting(QDialog):
         filter_layout.addWidget(tip)
         filter_layout.addWidget(self.filter_rules)
         filter_layout.addWidget(QLabel('%s%s' % (
-            _('Tip: '),
-            _('Do not translate elements that contain these keywords.'))))
+            _('Tip: '), _('Do not translate extracted elements that contain '
+            'these rules.'))))
         layout.addWidget(filter_group)
 
         scope_map = dict(enumerate(['text', 'html']))
@@ -1093,24 +1111,6 @@ class TranslationSetting(QDialog):
         mode_btn_click = getattr(mode_btn_group, 'idClicked', None) or \
             mode_btn_group.buttonClicked[int]
         mode_btn_click.connect(choose_filter_mode)
-
-        # Ignore element
-        element_group = QGroupBox(_('Ignore Element'))
-        element_layout = QVBoxLayout(element_group)
-        self.ignore_rules = QPlainTextEdit()
-        self.ignore_rules.setPlaceholderText(
-            '%s %s' % (_('e.g.,'), 'table, table#report, table.list'))
-        self.ignore_rules.setMinimumHeight(100)
-        self.ignore_rules.insertPlainText(
-            '\n'.join(self.config.get(
-                'ignore_rules', self.config.get('element_rules'))))
-        element_layout.addWidget(QLabel(
-            _('CSS selectors to exclude elements. One rule per line:')))
-        element_layout.addWidget(self.ignore_rules)
-        element_layout.addWidget(QLabel('%s%s' % (
-            _('Tip: '),
-            _('Do not translation elements that matches these rules.'))))
-        layout.addWidget(element_group)
 
         # Reserve element
         reserve_group = QGroupBox(_('Reserve Element'))

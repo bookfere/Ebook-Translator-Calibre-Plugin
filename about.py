@@ -5,7 +5,7 @@ from calibre.library.comments import markdown
 from calibre.utils.localization import get_lang
 
 from . import EbookTranslator
-from .components import layout_info
+from .components import Footer
 
 
 try:
@@ -62,7 +62,7 @@ class AboutDialog(QDialog):
 
         layout.addWidget(brand, 1)
         layout.addWidget(description, 2)
-        layout.addWidget(layout_info())
+        layout.addWidget(Footer())
 
     def get_readme(self):
         default = 'README.md'

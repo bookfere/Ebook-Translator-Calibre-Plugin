@@ -7,18 +7,18 @@ from .lib.conversion import extra_formats
 from .lib.encodings import encoding_list
 from .engines.custom import CustomTranslate
 from .components import (
-    layout_info, AlertMessage, SourceLang, TargetLang, InputFormat,
+    Footer, AlertMessage, SourceLang, TargetLang, InputFormat,
     OutputFormat)
 
 
 try:
     from qt.core import (
         QDialog, QWidget, QPushButton, QHeaderView, QVBoxLayout, QTableWidget,
-        QTableWidgetItem, Qt, QComboBox, QLabel)
+        QTableWidgetItem, Qt, QComboBox, QLabel, QSizePolicy, QHBoxLayout)
 except ImportError:
     from PyQt5.Qt import (
         QDialog, QWidget, QPushButton, QHeaderView, QVBoxLayout, QTableWidget,
-        QTableWidgetItem, Qt, QComboBox, QLabel)
+        QTableWidgetItem, Qt, QComboBox, QLabel, QSizePolicy, QHBoxLayout)
 
 load_translations()
 
@@ -42,7 +42,17 @@ class BatchTranslation(QDialog):
     def main_layout(self):
         layout = QVBoxLayout(self)
         layout.addWidget(self.layout_translate())
-        layout.addWidget(layout_info())
+        layout.addWidget(Footer())
+
+    def _cell_widget(self, _widget):
+        widget = QWidget()
+        layout = QHBoxLayout(widget)
+        layout.setContentsMargins(5, 5, 5, 5)
+        # _widget.setFixedSize(_widget.sizeHint())
+        _widget.setFixedHeight(_widget.sizeHint().height())
+        layout.addWidget(_widget, 1)
+        # layout.setAlignment(_widget, Qt.AlignCenter)
+        return widget
 
     def layout_translate(self):
         widget = QWidget()
@@ -50,7 +60,10 @@ class BatchTranslation(QDialog):
         layout.setContentsMargins(0, 0, 0, 0)
 
         table = QTableWidget()
-        table.setStyleSheet('QComboBox{border:0;}')
+        table.setAlternatingRowColors(True)
+        table.setFocusPolicy(Qt.NoFocus)
+        table.setSelectionMode(QTableWidget.NoSelection)
+        # table.SelectionBehavior(QTableWidget.SelectRows)
         table.setRowCount(len(self.ebooks))
         table.setColumnCount(5)
         table.setHorizontalHeaderLabels([
@@ -61,13 +74,12 @@ class BatchTranslation(QDialog):
         stretch = getattr(QHeaderView.ResizeMode, 'Stretch', None) or \
             QHeaderView.Stretch
         header.setSectionResizeMode(0, stretch)
+        # table.verticalHeader().setMinimumSectionSize(100)
 
         translation_engine = get_engine_class()
-
         for row, ebook in enumerate(self.ebooks):
             ebook_title = QTableWidgetItem(ebook.title)
             ebook_title.setFlags(Qt.ItemIsEnabled)
-            ebook_title.setSizeHint(table.sizeHint())
             table.setItem(row, 0, ebook_title)
 
             if ebook.input_format in extra_formats.keys():
@@ -78,13 +90,15 @@ class BatchTranslation(QDialog):
                     .set_encoding(encoding))
             else:
                 input_encoding = QLabel(_('Default'))
-            table.setCellWidget(row, 1, input_encoding)
+                input_encoding.setDisabled(True)
+                input_encoding.setAlignment(Qt.AlignCenter)
+            table.setCellWidget(row, 1, self._cell_widget(input_encoding))
 
             input_fmt = InputFormat(ebook.files.keys())
-            table.setCellWidget(row, 2, input_fmt)
+            table.setCellWidget(row, 2, self._cell_widget(input_fmt))
 
             output_format = OutputFormat()
-            table.setCellWidget(row, 3, output_format)
+            table.setCellWidget(row, 3, self._cell_widget(output_format))
 
             exist_format = output_format.findText(ebook.input_format)
             if ebook.is_extra_format() and exist_format:
@@ -106,7 +120,7 @@ class BatchTranslation(QDialog):
             output_format.currentTextChanged.connect(change_output_format)
 
             source_lang = SourceLang(book_lang=ebook.source_lang)
-            table.setCellWidget(row, 4, source_lang)
+            table.setCellWidget(row, 4, self._cell_widget(source_lang))
             self.source_langs.append(source_lang)
 
             def change_source_lang(lang, row=row):
@@ -120,7 +134,7 @@ class BatchTranslation(QDialog):
                 not issubclass(translation_engine, CustomTranslate))
 
             target_lang = TargetLang()
-            table.setCellWidget(row, 5, target_lang)
+            table.setCellWidget(row, 5, self._cell_widget(target_lang))
             self.target_langs.append(target_lang)
 
             def change_target_lang(lang, row=row):
@@ -135,6 +149,8 @@ class BatchTranslation(QDialog):
                 translation_engine.lang_codes.get('target'),
                 translation_engine.config.get('target_lang'))
 
+        table.resizeRowsToContents()
+        # table.resizeColumnsToContents()
         layout.addWidget(table)
 
         start_button = QPushButton(_('Translate'))

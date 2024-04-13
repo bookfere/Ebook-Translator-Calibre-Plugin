@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-13 10:33+0800\n"
+"POT-Creation-Date: 2024-04-13 18:31+0800\n"
 "PO-Revision-Date: 2023-10-01 15:35-0400\n"
 "Last-Translator: <a href=\"https://www.mobileread.com/forums/member.php?"
 "u=90932\">PoP</a>\n"
@@ -291,6 +291,12 @@ msgstr "Le nom du moteur est déjà utilisé."
 msgid "The setting has been saved."
 msgstr "Le réglage a été enregistré."
 
+msgid "Feedback"
+msgstr "Commentaires"
+
+msgid "Donate"
+msgstr "Donner"
+
 msgid "Ebook Specific"
 msgstr "Spécifique à un ebook"
 
@@ -299,12 +305,6 @@ msgstr ""
 
 msgid "Not selected"
 msgstr ""
-
-msgid "Donate"
-msgstr "Donner"
-
-msgid "Feedback"
-msgstr "Commentaires"
 
 msgid "Auto detect"
 msgstr "Détection automatique"
@@ -711,6 +711,15 @@ msgstr ""
 msgid "Stop further extraction once elements match these rules."
 msgstr ""
 
+msgid "Ignore Element"
+msgstr "Ignorer l'élément"
+
+msgid "CSS selectors to exclude elements. One rule per line:"
+msgstr "Sélecteurs CSS pour exclure des éléments. Une règle par ligne:"
+
+msgid "Do not translation elements that matches these rules."
+msgstr ""
+
 msgid "Ignore Paragraph"
 msgstr "Ignorer paragraphe"
 
@@ -735,7 +744,7 @@ msgstr "Normal (sensible à la casse)"
 msgid "Regular Expression"
 msgstr "Expression régulière"
 
-msgid "Do not translate elements that contain these keywords."
+msgid "Do not translate extracted elements that contain these rules."
 msgstr ""
 
 msgid "Exclude paragraph by keyword. One keyword per line:"
@@ -749,15 +758,6 @@ msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
 msgstr ""
 "Exclure le paragraphe par patron d'expression régulière. Un mot-clé par "
 "ligne:"
-
-msgid "Ignore Element"
-msgstr "Ignorer l'élément"
-
-msgid "CSS selectors to exclude elements. One rule per line:"
-msgstr "Sélecteurs CSS pour exclure des éléments. Une règle par ligne:"
-
-msgid "Do not translation elements that matches these rules."
-msgstr ""
 
 msgid "Reserve Element"
 msgstr ""
