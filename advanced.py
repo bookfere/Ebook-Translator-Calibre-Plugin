@@ -851,28 +851,28 @@ class AdvancedTranslation(QDialog):
             translation_text.ensureCursorVisible)
 
         def refresh_translation(paragraph):
-            translation_text.clear()
             raw_text.setPlainText(paragraph.raw.strip())
             original_text.setPlainText(paragraph.original.strip())
             translation_text.setPlainText(paragraph.translation)
         self.paragraph_sig.connect(refresh_translation)
+
         self.trans_worker.start.connect(
-            lambda: translation_text.setReadOnly(False))
+            lambda: translation_text.setReadOnly(True))
         self.trans_worker.finished.connect(
             lambda: translation_text.setReadOnly(False))
 
-        default_flag = translation_text.textInteractionFlags()
+        # default_flag = translation_text.textInteractionFlags()
 
-        def disable_translation_text():
-            if self.trans_worker.on_working:
-                translation_text.setTextInteractionFlags(Qt.TextEditable)
-                end = getattr(QTextCursor.MoveOperation, 'End', None) \
-                    or QTextCursor.End
-                translation_text.moveCursor(end)
-            else:
-                translation_text.setTextInteractionFlags(default_flag)
-        translation_text.cursorPositionChanged.connect(
-            disable_translation_text)
+        # def disable_translation_text():
+        #     if self.trans_worker.on_working:
+        #         translation_text.setTextInteractionFlags(Qt.TextEditable)
+        #         end = getattr(QTextCursor.MoveOperation, 'End', None) \
+        #             or QTextCursor.End
+        #         translation_text.moveCursor(end)
+        #     else:
+        #         translation_text.setTextInteractionFlags(default_flag)
+        # translation_text.cursorPositionChanged.connect(
+        #     disable_translation_text)
 
         def auto_open_close_splitter():
             if splitter.sizes()[0] > 0:
@@ -931,9 +931,9 @@ class AdvancedTranslation(QDialog):
                 return
             self.paragraph_sig.emit(paragraph)
             self.table.row.emit(paragraph.row)
-        self.table.itemSelectionChanged.connect(change_selected_item)
         self.table.setCurrentItem(self.table.item(0, 0))
         change_selected_item()
+        self.table.itemSelectionChanged.connect(change_selected_item)
 
         def translation_callback(paragraph):
             self.table.row.emit(paragraph.row)
@@ -956,11 +956,13 @@ class AdvancedTranslation(QDialog):
                     self.table.selected_count() > 1:
                 return
             paragraph = self.table.current_paragraph()
-            translation = translation_text.toPlainText()
-            save_button.setDisabled(translation == paragraph.translation)
+            if paragraph is not None:
+                translation = translation_text.toPlainText()
+                save_button.setDisabled(translation == paragraph.translation)
         translation_text.textChanged.connect(modify_translation)
 
         def save_translation():
+            save_button.setDisabled(True)
             paragraph = self.table.current_paragraph()
             translation = translation_text.toPlainText()
             paragraph.translation = translation
@@ -968,9 +970,8 @@ class AdvancedTranslation(QDialog):
             paragraph.target_lang = self.ebook.target_lang
             self.table.row.emit(paragraph.row)
             self.cache.update_paragraph(paragraph)
-            self.editor_worker.start[str, object].emit(
-                _('Your changes have been saved.'),
-                lambda: save_button.setDisabled(True))
+            self.editor_worker.start[str].emit(
+                _('Your changes have been saved.'))
             translation_text.setFocus(Qt.OtherFocusReason)
         self.editor_worker.show.connect(save_status.setText)
         save_button.clicked.connect(save_translation)

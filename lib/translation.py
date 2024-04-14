@@ -262,7 +262,7 @@ class Translation:
         if self.batch and self.need_stop():
             raise Exception(_('Translation failed.'))
         consuming = round((time.time() - start_time) / 60, 2)
-        self.log('Time consuming: %s minutes' % consuming)
+        self.log(_('Time consuming: {} minutes').format(consuming))
         self.log(_('Translation completed.'))
         self.progress(1, _('Outputting ebook file...'))
 

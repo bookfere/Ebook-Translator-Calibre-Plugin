@@ -325,12 +325,11 @@ class PageElement(Element):
             self._safe_remove(self.element)
             return
 
-        # TODO: Needs to be optimized for various situations.
         # Add translation for line breaks.
         line_break_tag = '{%s}br' % ns['x']
-        original_br_list = list(self.element.iterchildren(line_break_tag))
+        original_br_list = list(self.element.iterdescendants(line_break_tag))
         translation_br_list = list(new_element.iterchildren(line_break_tag))
-        if len(original_br_list) == len(translation_br_list) >= 5:
+        if len(original_br_list) == len(translation_br_list) > 0:
             tail = None
             for index, br in enumerate(original_br_list):
                 new_br = etree.SubElement(self.element, 'br')
@@ -344,12 +343,18 @@ class PageElement(Element):
                     new_br.tail = new_element.text if index == 0 else tail
                     tail = translation_br.tail
                     if br == original_br_list[-1]:
-                        new_br = etree.SubElement(self.element, 'br')
-                        self.element.append(new_br)
+                        last_br = etree.SubElement(self.element, 'br')
+                        while new_br.getnext() is not None:
+                            new_br = new_br.getnext()
+                        if new_br is None:
+                            new_br.getparent().append(last_br)
+                        else:
+                            new_br.addnext(last_br)
+                            new_br.tail = last_br.tail
                         translation_br = translation_br_list[-1]
                         for sibling in translation_br.itersiblings():
-                            new_br.addnext(sibling)
-                        new_br.tail = translation_br.tail
+                            last_br.addnext(sibling)
+                        last_br.tail = translation_br.tail
                 else:
                     for sibling in translation_br.itersiblings():
                         if get_name(sibling) == 'br':
