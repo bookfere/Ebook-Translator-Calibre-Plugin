@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-13 18:31+0800\n"
+"POT-Creation-Date: 2024-04-13 21:55+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: none\n"
@@ -513,6 +513,9 @@ msgstr "Não há conteúdo para ser traduzido."
 
 msgid "Translation failed."
 msgstr "Tradução falhou."
+
+msgid "Time consuming: {} minutes"
+msgstr ""
 
 msgid "Outputting ebook file..."
 msgstr ""

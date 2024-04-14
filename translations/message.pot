@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-13 18:31+0800\n"
+"POT-Creation-Date: 2024-04-13 21:55+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -47,15 +47,15 @@ msgstr ""
 msgid "Start"
 msgstr ""
 
-#: advanced.py:250 batch.py:70 setting.py:186
+#: advanced.py:250 batch.py:71 setting.py:186
 msgid "Input Format"
 msgstr ""
 
-#: advanced.py:261 advanced.py:714 batch.py:71 setting.py:380
+#: advanced.py:261 advanced.py:714 batch.py:72 setting.py:380
 msgid "Target Language"
 msgstr ""
 
-#: advanced.py:277 batch.py:70
+#: advanced.py:277 batch.py:71
 msgid "Encoding"
 msgstr ""
 
@@ -161,7 +161,7 @@ msgstr ""
 msgid "Translation Engine"
 msgstr ""
 
-#: advanced.py:708 batch.py:71 setting.py:379
+#: advanced.py:708 batch.py:72 setting.py:379
 msgid "Source Language"
 msgstr ""
 
@@ -224,27 +224,27 @@ msgstr ""
 msgid "Are you sure you want to cancel the translation progress?"
 msgstr ""
 
-#: batch.py:70 setting.py:187
+#: batch.py:71 setting.py:187
 msgid "Output Format"
 msgstr ""
 
-#: batch.py:70 cache.py:205
+#: batch.py:71 cache.py:205
 msgid "Title"
 msgstr ""
 
-#: batch.py:92
+#: batch.py:98
 msgid "Default"
 msgstr ""
 
-#: batch.py:156 components/engine.py:138 components/table.py:164
+#: batch.py:166 components/engine.py:138 components/table.py:164
 msgid "Translate"
 msgstr ""
 
-#: batch.py:167 lib/cache.py:126
+#: batch.py:177 lib/cache.py:126
 msgid "Unknown"
 msgstr ""
 
-#: batch.py:176 cache.py:133 setting.py:1187
+#: batch.py:186 cache.py:133 setting.py:1187
 msgid "The specified path does not exist."
 msgstr ""
 
@@ -666,6 +666,10 @@ msgstr ""
 
 #: lib/translation.py:263
 msgid "Translation failed."
+msgstr ""
+
+#: lib/translation.py:265
+msgid "Time consuming: {} minutes"
 msgstr ""
 
 #: lib/translation.py:267

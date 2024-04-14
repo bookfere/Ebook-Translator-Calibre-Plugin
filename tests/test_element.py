@@ -402,9 +402,10 @@ class TestPageElement(unittest.TestCase):
             r'a bB c d e f g h i App\Http k[1]l', self.element.get_text())
 
     def test_get_content(self):
-        content = ('{{id_00000}} a {{id_00001}} b c {{id_00002}} d e '
-                   '{{id_00003}} f g {{id_00004}} h {{id_00005}} i '
-                   '{{id_00006}} {{id_00007}} k{{id_00008}}{{id_00009}}l')
+        content = (
+            '{{id_00000}} a {{id_00001}} b c {{id_00002}} d e '
+            '{{id_00003}} f g {{id_00004}} h {{id_00005}} i '
+            '{{id_00006}} {{id_00007}} k{{id_00008}}{{id_00009}}l')
         self.assertEqual(content, self.element.get_content())
         self.assertEqual(10, len(self.element.reserve_elements))
 
@@ -496,20 +497,22 @@ class TestPageElement(unittest.TestCase):
     def test_add_translation_with_placeholder(self):
         self.element.set_placeholder(Base.placeholder)
         self.element.get_content()
-        translation = ('{{id_00000}} Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa '
-                       '{{id_00001}} Bbbbbbbbbbbbbbb C {{id_00002}} D E '
-                       '{{id_00003}} F G {{id_00004}} H \n\n{{id_00005}} I '
-                       '{{id_00006}} {{id_00007}} K{ { id _ 0 00 08 } }'
-                       '{{id_00009}}L')
+        translation = (
+            '{{id_00000}} Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa '
+            '{{id_00001}} Bbbbbbbbbbbbbbb C {{id_00002}} D E '
+            '{{id_00003}} F G {{id_00004}} H \n\n{{id_00005}} I '
+            '{{id_00006}} {{id_00007}} K{ { id _ 0 00 08 } }'
+            '{{id_00009}}L')
         self.element.add_translation(translation)
 
-        translation = ('<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
-                       '<img src="icon.jpg"/> Aaaaa <img src="w1.jpg"/> '
-                       'Bbbbb C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
-                       'F G <img src="w2.jpg"/> H <br/><br/>'
-                       r'<img alt="{\D}" src="w3.jpg"/> I '
-                       r'<img src="w3.jpg"/> <code>App\Http</code> '
-                       'K<sup>[1]</sup><br/>L</p>')
+        translation = (
+            '<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
+            '<img src="icon.jpg"/> Aaaaa <img src="w1.jpg"/> '
+            'Bbbbb C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
+            'F G <img src="w2.jpg"/> H <br/><br/>'
+            r'<img alt="{\D}" src="w3.jpg"/> I '
+            r'<img src="w3.jpg"/> <code>App\Http</code> '
+            'K<sup>[1]</sup><br/>L</p>')
         elements = self.xhtml.findall('.//x:p', namespaces=ns)
         self.assertEqual(2, len(elements))
         self.assertEqual(translation, get_string(elements[1]))
@@ -520,22 +523,28 @@ class TestPageElement(unittest.TestCase):
     def test_add_translation_with_markup(self):
         self.element.placeholder = DeeplFreeTranslate.placeholder
         self.element.get_content()
-        translation = ('<m id=00000 /> A <m id=00001 /> B C <m id=00002 /> D '
-                       'E <m id=00003 /> F G <m id=00004 /> H <m id=00005 /> '
-                       'I <m id=00006 /> <m id=00007 /> K<m id=00008 />'
-                       '<m id=00009 />L')
+        translation = (
+            '<m id=00000 /> A <m id=00001 /> B C <m id=00002 /> D '
+            'E <m id=00003 /> F G <m id=00004 /> H <m id=00005 /> '
+            'I <m id=00006 /> <m id=00007 /> K<m id=00008 />'
+            '<m id=00009 />L')
         self.element.add_translation(translation)
 
-        translation = ('<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
-                       '<img src="icon.jpg"/> A <img src="w1.jpg"/> '
-                       'B C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
-                       'F G <img src="w2.jpg"/> H '
-                       r'<img alt="{\D}" src="w3.jpg"/> I '
-                       r'<img src="w3.jpg"/> <code>App\Http</code> '
-                       'K<sup>[1]</sup><br/>L</p>')
         elements = self.xhtml.findall('.//x:p', namespaces=ns)
-        self.assertEqual(2, len(elements))
-        self.assertEqual(translation, get_string(elements[1]))
+        self.assertEqual(1, len(elements))
+        self.assertEqual(
+            '<p xmlns="http://www.w3.org/1999/xhtml" class="abc"> '
+            '<img src="icon.jpg"/> a <img src="w1.jpg"/> '
+            '<ruby>b<rt>B</rt></ruby> c <span><img src="w2.jpg"/> d</span> '
+            '<span>e <img src="w2.jpg"/></span> f <span>g '
+            r'<img src="w2.jpg"/> h</span> <img alt="{\D}" src="w3.jpg"/> i '
+            r'<img src="w3.jpg"/> <code>App\Http</code> k<sup>[1]</sup><br/>'
+            '<img src="icon.jpg"/> A <img src="w1.jpg"/> B C '
+            '<img src="w2.jpg"/> D E <img src="w2.jpg"/> F G '
+            r'<img src="w2.jpg"/> H <img alt="{\D}" src="w3.jpg"/> I '
+            r'<img src="w3.jpg"/> <code>App\Http</code> K<sup>[1]</sup><br/>l '
+            '<br/>L</p>',
+            get_string(elements[0]))
 
     def test_add_translation_below(self):
         self.element.position = 'next'
@@ -648,7 +657,7 @@ class TestPageElement(unittest.TestCase):
         <p>
             a<sup>[1]</sup> <span>b</span> c<sup>[2]</sup><br />
             <em>d</em> e <img src="/test.jpg" /><br />
-            f <strong>g</strong><br/>h<br/>i<br/>j
+            <span>f <strong>g</strong><br/>h<br/>i<br/>j <i>k</i></span>
         </p>
     </body>
 </html>""")
@@ -660,15 +669,15 @@ class TestPageElement(unittest.TestCase):
         element.get_content()
         element.add_translation(
             'A{{id_00000}} B C{{id_00001}}{{id_00002}} D E {{id_00003}}'
-            '{{id_00004}} F G{{id_00005}}H{{id_00006}}I{{id_00007}}J ')
+            '{{id_00004}} F G{{id_00005}}H{{id_00006}}I{{id_00007}}J K')
         translation = (
             '<html xmlns="http://www.w3.org/1999/xhtml" lang="en"> <head>'
             '<title>Test Document</title></head> <body> '
             '<p> a<sup>[1]</sup> <span>b</span> c<sup>[2]</sup><br/>'
             'A<sup>[1]</sup> B C<sup>[2]</sup><br/> <em>d</em> e '
-            '<img src="/test.jpg"/><br/> D E <img src="/test.jpg"/><br/>'
-            ' f <strong>g</strong><br/> F G<br/>h<br/>H<br/>i<br/>I<br/>j '
-            '<br/>J</p> </body> </html>')
+            '<img src="/test.jpg"/><br/> D E <img src="/test.jpg"/><br/> '
+            '<span>f <strong>g</strong><br/> F G<br/>h<br/>H<br/>i<br/>I<br/>'
+            'j <i>k</i><br/>J K</span> </p> </body> </html>')
         self.assertEqual(translation, get_string(xhtml))
 
     def test_add_translation_line_break_above(self):
@@ -680,7 +689,7 @@ class TestPageElement(unittest.TestCase):
         <p>
             a<sup>[1]</sup> <span>b</span> c<sup>[2]</sup><br />
             <em>d</em> e <img src="/test.jpg" /><br />
-            f <strong>g</strong><br/>h<br/>i<br/>j
+            f <strong>g</strong><br/>h<br/>i<br/>j <i>k</i>
         </p>
     </body>
 </html>""")
@@ -692,7 +701,7 @@ class TestPageElement(unittest.TestCase):
         element.get_content()
         element.add_translation(
             'A{{id_00000}} B C{{id_00001}}{{id_00002}} D E {{id_00003}}'
-            '{{id_00004}} F G{{id_00005}}H{{id_00006}}I{{id_00007}}J')
+            '{{id_00004}} F G{{id_00005}}H{{id_00006}}I{{id_00007}}J K')
         translation = (
             '<html xmlns="http://www.w3.org/1999/xhtml" lang="en"> <head>'
             '<title>Test Document</title></head> <body> '
@@ -700,7 +709,7 @@ class TestPageElement(unittest.TestCase):
             ' a<sup>[1]</sup> <span>b</span> c<sup>[2]</sup><br/>'
             ' D E <img src="/test.jpg"/><br/> <em>d</em> e '
             '<img src="/test.jpg"/><br/> F G<br/> f <strong>g</strong><br/>'
-            'H<br/>h<br/>I<br/>i<br/>J<br/>j </p> </body> </html>')
+            'H<br/>h<br/>I<br/>i<br/>J K<br/>j <i>k</i> </p> </body> </html>')
         self.assertEqual(translation, get_string(xhtml))
 
     def test_add_translation_attr(self):
@@ -812,17 +821,19 @@ class TestExtraction(unittest.TestCase):
         self.extraction.priority_rules = ['.test']
         self.extraction.load_priority_patterns()
 
-        items = ['<p xmlns="http://www.w3.org/1999/xhtml">abc</p>',
-                 '<pre xmlns="http://www.w3.org/1999/xhtml">abc</pre>',
-                 '<div xmlns="http://www.w3.org/1999/xhtml" class="test">'
-                 'abc</div>']
+        items = [
+            '<p xmlns="http://www.w3.org/1999/xhtml">abc</p>',
+            '<pre xmlns="http://www.w3.org/1999/xhtml">abc</pre>',
+            '<div xmlns="http://www.w3.org/1999/xhtml" class="test">'
+            'abc</div>']
 
         for item in items:
             with self.subTest(item=item):
                 self.assertTrue(self.extraction.is_priority(etree.XML(item)))
 
-        items = ['<sub xmlns="http://www.w3.org/1999/xhtml">abc</sub>',
-                 '<div xmlns="http://www.w3.org/1999/xhtml" id="a">abc</div>']
+        items = [
+            '<sub xmlns="http://www.w3.org/1999/xhtml">abc</sub>',
+            '<div xmlns="http://www.w3.org/1999/xhtml" id="a">abc</div>']
 
         for item in items:
             with self.subTest(item=item):
@@ -832,17 +843,19 @@ class TestExtraction(unittest.TestCase):
         self.extraction.ignore_rules = ['table', 'p.a']
         self.extraction.load_ignore_patterns()
 
-        items = ['<pre xmlns="http://www.w3.org/1999/xhtml">abc</pre>',
-                 '<code xmlns="http://www.w3.org/1999/xhtml">abc</code>',
-                 '<table xmlns="http://www.w3.org/1999/xhtml">abc</table>',
-                 '<p xmlns="http://www.w3.org/1999/xhtml" class="a">abc</p>']
+        items = [
+            '<pre xmlns="http://www.w3.org/1999/xhtml">abc</pre>',
+            '<code xmlns="http://www.w3.org/1999/xhtml">abc</code>',
+            '<table xmlns="http://www.w3.org/1999/xhtml">abc</table>',
+            '<p xmlns="http://www.w3.org/1999/xhtml" class="a">abc</p>']
 
         for item in items:
             with self.subTest(item=item):
                 self.assertTrue(self.extraction.need_ignore(etree.XML(item)))
 
-        items = ['<p xmlns="http://www.w3.org/1999/xhtml">abc</p>',
-                 '<p xmlns="http://www.w3.org/1999/xhtml" id="a">abc</p>']
+        items = [
+            '<p xmlns="http://www.w3.org/1999/xhtml">abc</p>',
+            '<p xmlns="http://www.w3.org/1999/xhtml" id="a">abc</p>']
 
         for item in items:
             with self.subTest(item=item):
@@ -935,17 +948,19 @@ class TestExtraction(unittest.TestCase):
                 PageElement(etree.XML(markup), 'test') for markup in markups]
 
         # normal - text
-        markups = ['<p>\xa0</p>', '<p>\u3000</p>', '<p>\u200b</p>',
-                   '<p></p>', '<p> </p>', '<p><img src="/abc.jpg" /></p>',
-                   '<p><span>  </span><span>  </span></p>']
+        markups = [
+            '<p>\xa0</p>', '<p>\u3000</p>', '<p>\u200b</p>',
+            '<p></p>', '<p> </p>', '<p><img src="/abc.jpg" /></p>',
+            '<p><span>  </span><span>  </span></p>']
         for element in elements(markups):
             with self.subTest(element=element):
                 self.assertFalse(self.extraction.filter_content(element))
 
         self.extraction.filter_rules = ['a', 'b', 'c']
         self.extraction.load_filter_patterns()
-        markups = ['<p>xxxaxxx</p>', '<p>xxxbxxx</p>', '<p>xxxcxxx</p>',
-                   '<p>2 &lt;= 2</p>', '<p>”.—…‘’</p>']
+        markups = [
+            '<p>xxxaxxx</p>', '<p>xxxbxxx</p>', '<p>xxxcxxx</p>',
+            '<p>2 &lt;= 2</p>', '<p>”.—…‘’</p>']
         for element in elements(markups):
             with self.subTest(element=element):
                 self.assertTrue(self.extraction.filter_content(element))
@@ -978,8 +993,9 @@ class TestExtraction(unittest.TestCase):
         self.extraction.rule_mode = 'regex'
         self.extraction.filter_rules = ['a', 'f', 'h']
         self.extraction.load_filter_patterns()
-        markups = ['<p>5.</p>', '<p>5-5.</p>', '<p>5-5_5.</p>',
-                   '<p>abc</p>', '<p>def</p>', '<p>ghi</p>']
+        markups = [
+            '<p>5.</p>', '<p>5-5.</p>', '<p>5-5_5.</p>', '<p>abc</p>',
+            '<p>def</p>', '<p>ghi</p>']
         for element in elements(markups):
             with self.subTest(element=element):
                 self.extraction.filter_content(element)
@@ -990,16 +1006,17 @@ class TestExtraction(unittest.TestCase):
         self.extraction.filter_scope = 'html'
         self.extraction.filter_rules = ['^<pre>', '</code>$', 'class="c"']
         self.extraction.load_filter_patterns()
-        markups = ['<p>\xa0</p>', '<p>\u3000</p>', '<p>\u200b</p>',
-                   '<p></p>', '<p> </p>', '<p><img src="/abc.jpg" /></p>',
-                   '<p><span>  </span><span>  </span></p>']
+        markups = [
+            '<p>\xa0</p>', '<p>\u3000</p>', '<p>\u200b</p>',
+            '<p></p>', '<p> </p>', '<p><img src="/abc.jpg" /></p>',
+            '<p><span>  </span><span>  </span></p>']
         for element in elements(markups):
             with self.subTest(element=element):
                 self.assertFalse(self.extraction.filter_content(element))
 
-        markups = ['<pre>a</pre>', '<code>b</code>', '<p class="c">c</p>',
-                   '<p>2 &lt;= 2</p>', '<p><span>123</span></p>',
-                   '<p>”.—…‘’</p>']
+        markups = [
+            '<pre>a</pre>', '<code>b</code>', '<p class="c">c</p>',
+            '<p>2 &lt;= 2</p>', '<p><span>123</span></p>', '<p>”.—…‘’</p>']
         for element in elements(markups):
             with self.subTest(element=element):
                 self.assertTrue(self.extraction.filter_content(element))
@@ -1117,15 +1134,18 @@ class TestElementHandler(unittest.TestCase):
     def test_add_translations(self):
         self.handler.prepare_original(self.elements)
         translations = [
-            Paragraph(0, 'm1', '<p id="x">x</p>', 'x', False, '{"id": "x"}',
-                      'p1', None, 'ENGINE', 'LANG'),
-            Paragraph(1, 'm1', '<p id="a">a</p>', 'a', False, '{"id": "a"}',
-                      'p1', 'A', 'ENGINE', 'LANG'),
-            Paragraph(2, 'm2', '<p id="b">b</p>', 'b', False, '{"id": "b"}',
-                      'p1', 'B', 'ENGINE', 'LANG'),
-            Paragraph(3, 'm3', '<p id="c">c</p>', 'c', False,
-                      '{"id": "c", "class": "c"}', 'p1', 'C', 'ENGINE',
-                      'LANG')]
+            Paragraph(
+                0, 'm1', '<p id="x">x</p>', 'x', False, '{"id": "x"}', 'p1',
+                None, 'ENGINE', 'LANG'),
+            Paragraph(
+                1, 'm1', '<p id="a">a</p>', 'a', False, '{"id": "a"}', 'p1',
+                'A', 'ENGINE', 'LANG'),
+            Paragraph(
+                2, 'm2', '<p id="b">b</p>', 'b', False, '{"id": "b"}', 'p1',
+                'B', 'ENGINE', 'LANG'),
+            Paragraph(
+                3, 'm3', '<p id="c">c</p>', 'c', False,
+                '{"id": "c", "class": "c"}', 'p1', 'C', 'ENGINE', 'LANG')]
 
         self.handler.add_translations(translations)
 

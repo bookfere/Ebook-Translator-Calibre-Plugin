@@ -58,14 +58,12 @@ class AdvancedTranslationTable(QTableWidget):
             vheader.setTextAlignment(Qt.AlignCenter)
             self.setVerticalHeaderItem(row, vheader)
 
-            original = QTableWidgetItem(paragraph.original.replace('\n', ' '))
+            original = QTableWidgetItem()
             original.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
             original.setData(Qt.UserRole, paragraph)
-            engine_name = QTableWidgetItem(paragraph.engine_name)
-            engine_name.setToolTip(paragraph.engine_name)
+            engine_name = QTableWidgetItem()
             engine_name.setTextAlignment(Qt.AlignCenter)
-            traget_lang = QTableWidgetItem(paragraph.target_lang)
-            traget_lang.setToolTip(paragraph.target_lang)
+            traget_lang = QTableWidgetItem()
             traget_lang.setTextAlignment(Qt.AlignCenter)
             status = QTableWidgetItem()
             status.setTextAlignment(Qt.AlignCenter)
@@ -73,6 +71,7 @@ class AdvancedTranslationTable(QTableWidget):
             self.setItem(row, 1, engine_name)
             self.setItem(row, 2, traget_lang)
             self.setItem(row, 3, status)
+
             self.track_row_data(row)
 
         header = self.horizontalHeader()
@@ -82,8 +81,13 @@ class AdvancedTranslationTable(QTableWidget):
         header.setSectionResizeMode(0, stretch)
 
     def track_row_data(self, row):
-        items = ['--', '--', _('Untranslated')]
         paragraph = self.paragraph(row)
+        original = paragraph.original.replace('\n', ' ')
+        engine_name = paragraph.engine_name
+        target_lang = paragraph.target_lang
+        items = [
+            original, engine_name or '--', target_lang or '--',
+            _('Untranslated')]
         if paragraph.translation:
             before_aligned = paragraph.aligned
             self.parent.merge_enabled and self.check_line_alignment(paragraph)
@@ -92,12 +96,13 @@ class AdvancedTranslationTable(QTableWidget):
                 self.non_aligned_count += 1
             elif not before_aligned and paragraph.aligned:
                 self.non_aligned_count -= 1
-            items = [
-                paragraph.engine_name, paragraph.target_lang, _('Translated')]
+            items = [original, engine_name, target_lang, _('Translated')]
         else:
             self.check_translation_error(paragraph)
-        for column, text in enumerate(items, 1):
-            self.item(row, column).setText(text)
+        for column, text in enumerate(items):
+            item = self.item(row, column)
+            item.setText(text)
+            item.setToolTip(text)
 
     def _is_light_theme(self):
         return self.palette().color(QPalette.Window).lightness() > 127
