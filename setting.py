@@ -1025,7 +1025,7 @@ class TranslationSetting(QDialog):
         element_layout.addWidget(self.ignore_rules)
         element_layout.addWidget(QLabel('%s%s' % (
             _('Tip: '),
-            _('Do not translation elements that matches these rules.'))))
+            _('Do not translate elements that matches these rules.'))))
         layout.addWidget(element_group)
 
         # Filter Content

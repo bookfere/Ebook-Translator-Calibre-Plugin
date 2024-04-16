@@ -373,7 +373,7 @@ class TestPageElement(unittest.TestCase):
             <span>g <img src="w2.jpg"/> h</span>
             <img alt="{\D}" src="w3.jpg"/> i
             <img src="w3.jpg"/>
-            <code>App\Http</code> k<sup>[1]</sup><br/>l
+            <code>App\Http</code> k<sup>[1]</sup> l
         </p>
     </body>
 </html>""")
@@ -394,20 +394,20 @@ class TestPageElement(unittest.TestCase):
             '<ruby>b<rt>B</rt></ruby> c <span><img src="w2.jpg"/> d</span> '
             '<span>e <img src="w2.jpg"/></span> f <span>g <img src="w2.jpg"/> '
             r'h</span> <img alt="{\D}" src="w3.jpg"/> i <img src="w3.jpg"/> '
-            r'<code>App\Http</code> k<sup>[1]</sup><br/>l </p>')
+            r'<code>App\Http</code> k<sup>[1]</sup> l </p>')
         self.assertEqual(text, self.element.get_raw())
 
     def test_get_text(self):
         self.assertEqual(
-            r'a bB c d e f g h i App\Http k[1]l', self.element.get_text())
+            r'a bB c d e f g h i App\Http k[1] l', self.element.get_text())
 
     def test_get_content(self):
         content = (
             '{{id_00000}} a {{id_00001}} b c {{id_00002}} d e '
             '{{id_00003}} f g {{id_00004}} h {{id_00005}} i '
-            '{{id_00006}} {{id_00007}} k{{id_00008}}{{id_00009}}l')
+            '{{id_00006}} {{id_00007}} k{{id_00008}} l')
         self.assertEqual(content, self.element.get_content())
-        self.assertEqual(10, len(self.element.reserve_elements))
+        self.assertEqual(9, len(self.element.reserve_elements))
 
         for element in self.element.reserve_elements:
             with self.subTest(element=element):
@@ -500,19 +500,18 @@ class TestPageElement(unittest.TestCase):
         translation = (
             '{{id_00000}} Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa '
             '{{id_00001}} Bbbbbbbbbbbbbbb C {{id_00002}} D E '
-            '{{id_00003}} F G {{id_00004}} H \n\n{{id_00005}} I '
-            '{{id_00006}} {{id_00007}} K{ { id _ 0 00 08 } }'
-            '{{id_00009}}L')
+            '{{id_00003}} F G {{id_00004}} H {{id_00005}} I '
+            '{{id_00006}} {{id_00007}} K{ { id _ 0 00 08 } } L')
         self.element.add_translation(translation)
 
         translation = (
             '<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
             '<img src="icon.jpg"/> Aaaaa <img src="w1.jpg"/> '
             'Bbbbb C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
-            'F G <img src="w2.jpg"/> H <br/><br/>'
+            'F G <img src="w2.jpg"/> H '
             r'<img alt="{\D}" src="w3.jpg"/> I '
             r'<img src="w3.jpg"/> <code>App\Http</code> '
-            'K<sup>[1]</sup><br/>L</p>')
+            'K<sup>[1]</sup> L</p>')
         elements = self.xhtml.findall('.//x:p', namespaces=ns)
         self.assertEqual(2, len(elements))
         self.assertEqual(translation, get_string(elements[1]))
@@ -524,27 +523,46 @@ class TestPageElement(unittest.TestCase):
         self.element.placeholder = DeeplFreeTranslate.placeholder
         self.element.get_content()
         translation = (
-            '<m id=00000 /> A <m id=00001 /> B C <m id=00002 /> D '
+            '<m id=00000 /> Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa '
+            '<m id=00001 /> Bbbbbbbbbbbbbbb C <m id=00002 /> D '
             'E <m id=00003 /> F G <m id=00004 /> H <m id=00005 /> '
-            'I <m id=00006 /> <m id=00007 /> K<m id=00008 />'
-            '<m id=00009 />L')
+            'I <m id=00006 /> <m id=00007 /> K<m id=00008 /> L')
         self.element.add_translation(translation)
 
+        translation = (
+            '<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
+            '<img src="icon.jpg"/> Aaaaa <img src="w1.jpg"/> '
+            'Bbbbb C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
+            'F G <img src="w2.jpg"/> H '
+            r'<img alt="{\D}" src="w3.jpg"/> I '
+            r'<img src="w3.jpg"/> <code>App\Http</code> '
+            'K<sup>[1]</sup> L</p>')
         elements = self.xhtml.findall('.//x:p', namespaces=ns)
-        self.assertEqual(1, len(elements))
+        self.assertEqual(2, len(elements))
+        self.assertEqual(translation, get_string(elements[1]))
+        self.assertIsNone(elements[1].get('lang'))
+        self.assertIsNone(elements[1].get('style'))
+        self.assertEqual('abc', elements[1].get('class'))
+
+    def test_add_translation_with_linefeeds(self):
+        """Convert linefeeds to line breaks if those linefeeds were added to
+        the translation intentionally."""
+        xhtml = etree.XML(rb"""<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head><title>Test Document</title></head>
+    <body><p>a b c</p></body>
+</html>""")
+        element = PageElement(xhtml.find('.//x:p', namespaces=ns), 'p1')
+        element.set_placeholder(Base.placeholder)
+        element.get_content()
+        element.add_translation('A\n\nB\nC')
+
+        elements = xhtml.findall('.//x:p', namespaces=ns)
+        self.assertEqual(2, len(elements))
         self.assertEqual(
-            '<p xmlns="http://www.w3.org/1999/xhtml" class="abc"> '
-            '<img src="icon.jpg"/> a <img src="w1.jpg"/> '
-            '<ruby>b<rt>B</rt></ruby> c <span><img src="w2.jpg"/> d</span> '
-            '<span>e <img src="w2.jpg"/></span> f <span>g '
-            r'<img src="w2.jpg"/> h</span> <img alt="{\D}" src="w3.jpg"/> i '
-            r'<img src="w3.jpg"/> <code>App\Http</code> k<sup>[1]</sup><br/>'
-            '<img src="icon.jpg"/> A <img src="w1.jpg"/> B C '
-            '<img src="w2.jpg"/> D E <img src="w2.jpg"/> F G '
-            r'<img src="w2.jpg"/> H <img alt="{\D}" src="w3.jpg"/> I '
-            r'<img src="w3.jpg"/> <code>App\Http</code> K<sup>[1]</sup><br/>l '
-            '<br/>L</p>',
-            get_string(elements[0]))
+            '<p xmlns="http://www.w3.org/1999/xhtml">A<br/><br/>B<br/>C</p>',
+            get_string(elements[1]))
 
     def test_add_translation_below(self):
         self.element.position = 'next'
@@ -655,9 +673,10 @@ class TestPageElement(unittest.TestCase):
     <head><title>Test Document</title></head>
     <body>
         <p>
-            a<sup>[1]</sup> <span>b</span> c<sup>[2]</sup><br />
-            <em>d</em> e <img src="/test.jpg" /><br />
-            <span>f <strong>g</strong><br/>h<br/>i<br/>j <i>k</i></span>
+            a<sup>[1]</sup> <span>b</span> c<sup>[2]</sup><br/>
+            <em>d</em> e <img src="/test.jpg" /><br/><br/>
+            <span>f <strong>g</strong><br/>h<br/>i<br/>j <i>k</i> l</span>
+            m <br/>
         </p>
     </body>
 </html>""")
@@ -669,15 +688,20 @@ class TestPageElement(unittest.TestCase):
         element.get_content()
         element.add_translation(
             'A{{id_00000}} B C{{id_00001}}{{id_00002}} D E {{id_00003}}'
-            '{{id_00004}} F G{{id_00005}}H{{id_00006}}I{{id_00007}}J K')
+            '{{id_00004}}{{id_00005}} F G{{id_00006}}H{{id_00007}}I'
+            '{{id_00008}}J K L M{{id_00009}}')
+
         translation = (
             '<html xmlns="http://www.w3.org/1999/xhtml" lang="en"> <head>'
             '<title>Test Document</title></head> <body> '
             '<p> a<sup>[1]</sup> <span>b</span> c<sup>[2]</sup><br/>'
-            'A<sup>[1]</sup> B C<sup>[2]</sup><br/> <em>d</em> e '
-            '<img src="/test.jpg"/><br/> D E <img src="/test.jpg"/><br/> '
-            '<span>f <strong>g</strong><br/> F G<br/>h<br/>H<br/>i<br/>I<br/>'
-            'j <i>k</i><br/>J K</span> </p> </body> </html>')
+            '<span>A<sup>[1]</sup> B C<sup>[2]</sup></span><br/>'
+            ' <em>d</em> e <img src="/test.jpg"/><br/>'
+            '<span> D E <img src="/test.jpg"/></span><br/><br/> '
+            '<span>f <strong>g</strong><br/><span> F G</span><br/>'
+            'h<br/><span>H</span><br/>i<br/><span>I</span><br/>'
+            'j <i>k</i> l</span> m <br/><span>J K L M</span><br/> </p> '
+            '</body> </html>')
         self.assertEqual(translation, get_string(xhtml))
 
     def test_add_translation_line_break_above(self):
@@ -687,9 +711,9 @@ class TestPageElement(unittest.TestCase):
     <head><title>Test Document</title></head>
     <body>
         <p>
-            a<sup>[1]</sup> <span>b</span> c<sup>[2]</sup><br />
-            <em>d</em> e <img src="/test.jpg" /><br />
-            f <strong>g</strong><br/>h<br/>i<br/>j <i>k</i>
+            a<sup>[1]</sup> <span>b</span> c<sup>[2]</sup><br/>
+            <em>d</em> e <img src="/test.jpg" /> f<br/><br/>
+            g <strong>h</strong><br/>i<br/>j<br/>k <i>l</i><br/>
         </p>
     </body>
 </html>""")
@@ -700,16 +724,20 @@ class TestPageElement(unittest.TestCase):
         element.position = 'above'
         element.get_content()
         element.add_translation(
-            'A{{id_00000}} B C{{id_00001}}{{id_00002}} D E {{id_00003}}'
-            '{{id_00004}} F G{{id_00005}}H{{id_00006}}I{{id_00007}}J K')
+            'A{{id_00000}} B C{{id_00001}}{{id_00002}} D E {{id_00003}} F'
+            '{{id_00004}}{{id_00005}} G H{{id_00006}}I{{id_00007}}J'
+            '{{id_00008}}K L{{id_00009}}')
+
         translation = (
             '<html xmlns="http://www.w3.org/1999/xhtml" lang="en"> <head>'
             '<title>Test Document</title></head> <body> '
-            '<p>A<sup>[1]</sup> B C<sup>[2]</sup><br/>'
+            '<p><span>A<sup>[1]</sup> B C<sup>[2]</sup></span><br/>'
             ' a<sup>[1]</sup> <span>b</span> c<sup>[2]</sup><br/>'
-            ' D E <img src="/test.jpg"/><br/> <em>d</em> e '
-            '<img src="/test.jpg"/><br/> F G<br/> f <strong>g</strong><br/>'
-            'H<br/>h<br/>I<br/>i<br/>J K<br/>j <i>k</i> </p> </body> </html>')
+            '<span> D E <img src="/test.jpg"/> F</span><br/> <em>d</em> e '
+            '<img src="/test.jpg"/> f<br/><br/><span> G H</span><br/>'
+            ' g <strong>h</strong><br/><span>I</span><br/>'
+            'i<br/><span>J</span><br/>j<br/><span>K L</span><br/>'
+            'k <i>l</i><br/> </p> </body> </html>')
         self.assertEqual(translation, get_string(xhtml))
 
     def test_add_translation_attr(self):
