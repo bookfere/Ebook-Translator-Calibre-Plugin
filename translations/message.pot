@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-13 21:55+0800\n"
+"POT-Creation-Date: 2024-04-15 12:45+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -96,11 +96,11 @@ msgid "Non-aligned"
 msgstr ""
 
 #: advanced.py:498 advanced.py:804 components/indicator.py:13
-#: components/table.py:96
+#: components/table.py:99
 msgid "Translated"
 msgstr ""
 
-#: advanced.py:499 components/indicator.py:15 components/table.py:85
+#: advanced.py:499 components/indicator.py:15 components/table.py:90
 msgid "Untranslated"
 msgstr ""
 
@@ -121,7 +121,7 @@ msgid "Non-aligned items: {}"
 msgstr ""
 
 #: advanced.py:625 cache.py:96 cache.py:185 components/engine.py:201
-#: components/table.py:166
+#: components/table.py:171
 msgid "Delete"
 msgstr ""
 
@@ -200,27 +200,27 @@ msgstr ""
 msgid "Save"
 msgstr ""
 
-#: advanced.py:972
+#: advanced.py:974
 msgid "Your changes have been saved."
 msgstr ""
 
-#: advanced.py:985
+#: advanced.py:986
 msgid "Translation log"
 msgstr ""
 
-#: advanced.py:996
+#: advanced.py:997
 msgid "Error log"
 msgstr ""
 
-#: advanced.py:1016
+#: advanced.py:1017
 msgid "Are you sure you want to translate all {:n} paragraphs?"
 msgstr ""
 
-#: advanced.py:1044
+#: advanced.py:1045
 msgid "Are you sure you want to cancel the preparation progress?"
 msgstr ""
 
-#: advanced.py:1055
+#: advanced.py:1056
 msgid "Are you sure you want to cancel the translation progress?"
 msgstr ""
 
@@ -236,7 +236,7 @@ msgstr ""
 msgid "Default"
 msgstr ""
 
-#: batch.py:166 components/engine.py:138 components/table.py:164
+#: batch.py:166 components/engine.py:138 components/table.py:169
 msgid "Translate"
 msgstr ""
 
@@ -435,21 +435,21 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: components/table.py:143
+#: components/table.py:148
 msgid ""
 "The number of lines differs between the original text and the translated "
 "text."
 msgstr ""
 
-#: components/table.py:171
+#: components/table.py:176
 msgid "Select the whole chapter"
 msgstr ""
 
-#: components/table.py:177
+#: components/table.py:182
 msgid "Select similar paragraphs: {}=\"{}\""
 msgstr ""
 
-#: components/table.py:256
+#: components/table.py:261
 msgid "Retain at least one row."
 msgstr ""
 
@@ -947,7 +947,7 @@ msgid "CSS selectors to exclude elements. One rule per line:"
 msgstr ""
 
 #: setting.py:1028
-msgid "Do not translation elements that matches these rules."
+msgid "Do not translate elements that matches these rules."
 msgstr ""
 
 #: setting.py:1032

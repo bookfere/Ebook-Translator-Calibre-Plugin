@@ -236,7 +236,7 @@ class PageElement(Element):
         # Condense consecutive letters to a maximum of four.
         return re.sub(r'((\w)\2{3})\2*', r'\1', translation)
 
-    def _create_new_element(self, name, content, excluding_tags=[]):
+    def _create_new_element(self, name, content='', excluding_attrs=[]):
         # new_element = self.element.makeelement(
         #     get_name(self.element), nsmap={'xhtml': ns['x']})
         # new_element.text = trim(translation)
@@ -245,7 +245,7 @@ class PageElement(Element):
         # Preserve all attributes from the original element.
         for name, value in self.element.items():
             if (name == 'id' and self.position != 'only') or \
-                    name in excluding_tags:
+                    name in excluding_attrs:
                 continue
             if name == 'dir':
                 value = 'auto'
@@ -286,7 +286,7 @@ class PageElement(Element):
                 self.element.addnext(new_element)
                 self._safe_remove(self.element)
             new_element = self._create_new_element(
-                'span', translation, excluding_tags=['class'])
+                'span', translation, excluding_attrs=['class'])
             if self.position in ['left', 'above']:
                 if self.element.text is not None:
                     if self.position == 'above':
@@ -329,48 +329,10 @@ class PageElement(Element):
         line_break_tag = '{%s}br' % ns['x']
         original_br_list = list(self.element.iterdescendants(line_break_tag))
         translation_br_list = list(new_element.iterchildren(line_break_tag))
-        if len(original_br_list) == len(translation_br_list) > 0:
-            tail = None
-            for index, br in enumerate(original_br_list):
-                new_br = etree.SubElement(self.element, 'br')
-                translation_br = translation_br_list[index]
-                br.addprevious(new_br)
-                if self.position == 'below':
-                    for sibling in translation_br.itersiblings(preceding=True):
-                        if get_name(sibling) == 'br':
-                            break
-                        new_br.addnext(sibling)
-                    new_br.tail = new_element.text if index == 0 else tail
-                    tail = translation_br.tail
-                    if br == original_br_list[-1]:
-                        last_br = etree.SubElement(self.element, 'br')
-                        while new_br.getnext() is not None:
-                            new_br = new_br.getnext()
-                        if new_br is None:
-                            new_br.getparent().append(last_br)
-                        else:
-                            new_br.addnext(last_br)
-                            new_br.tail = last_br.tail
-                        translation_br = translation_br_list[-1]
-                        for sibling in translation_br.itersiblings():
-                            last_br.addnext(sibling)
-                        last_br.tail = translation_br.tail
-                else:
-                    for sibling in translation_br.itersiblings():
-                        if get_name(sibling) == 'br':
-                            break
-                        new_br.addnext(sibling)
-                    new_br.tail = translation_br.tail
-                    if br == original_br_list[-1]:
-                        new_br = etree.SubElement(self.element, 'br')
-                        new_br.tail = self.element.text
-                        self.element.text = new_element.text
-                        self.element.insert(0, new_br)
-                        translation_br = translation_br_list[0]
-                        sblings = list(
-                            translation_br.itersiblings(preceding=True))
-                        for sibling in reversed(sblings):
-                            new_br.addprevious(sibling)
+        if (len(original_br_list) == len(translation_br_list) > 0) and \
+                self.position in ('below', 'above'):
+            self._add_translation_for_line_breaks(
+                new_element, original_br_list, translation_br_list)
             return
 
         parent_element = self.element.getparent()
@@ -394,6 +356,66 @@ class PageElement(Element):
                 if self.element.tail is not None:
                     new_element.tail = self.element.tail
                 self.element.tail = ' '
+
+    def _add_translation_for_line_breaks(
+            self, new_element, original_br_list, translation_br_list):
+        tail = None
+        for index, br in enumerate(original_br_list):
+            translation_br = translation_br_list[index]
+            wrapper = self._create_new_element('span')
+            if self.position == 'below':
+                # Get preceding siblings in reverse document order.
+                for sibling in translation_br.itersiblings(preceding=True):
+                    if get_name(sibling) == 'br':
+                        break
+                    wrapper.insert(0, sibling)
+                wrapper.text = new_element.text if index == 0 else tail
+                tail = translation_br.tail
+                if not wrapper.text and len(list(wrapper)) < 1:
+                    continue
+                new_br = etree.SubElement(self.element, 'br')
+                br.addprevious(new_br)
+                new_br.addnext(wrapper)
+                # Handle the last br element in the translation simultaneously.
+                if br == original_br_list[-1]:
+                    if br.getnext() is None and (
+                            br.tail is None or br.tail.strip() == ''):
+                        continue
+                    last_br = etree.SubElement(self.element, 'br')
+                    while br.getnext() is not None:
+                        br = br.getnext()
+                    if br is None:
+                        br.getparent().append(last_br)
+                    else:
+                        br.addnext(last_br)
+                    wrapper = self._create_new_element('span')
+                    translation_br = translation_br_list[-1]
+                    for sibling in translation_br.itersiblings():
+                        wrapper.addnext(sibling)
+                    wrapper.text = translation_br.tail
+                    last_br.addnext(wrapper)
+            else:
+                for sibling in translation_br.itersiblings():
+                    if get_name(sibling) == 'br':
+                        break
+                    wrapper.insert(0, sibling)
+                wrapper.text = translation_br.tail
+                if wrapper.text or len(list(wrapper)) > 0:
+                    new_br = etree.SubElement(self.element, 'br')
+                    br.addprevious(new_br)
+                    new_br.addnext(wrapper)
+                if br == original_br_list[-1]:
+                    new_br = etree.SubElement(self.element, 'br')
+                    new_br.tail = self.element.text
+                    self.element.text = None
+                    self.element.insert(0, new_br)
+                    wrapper = self._create_new_element('span')
+                    wrapper.text = new_element.text
+                    translation_br = translation_br_list[0]
+                    for sibling in translation_br.itersiblings(
+                            preceding=True):
+                        wrapper.insert(0, sibling)
+                    new_br.addprevious(wrapper)
 
     def _create_table(self, translation=None):
         # table = self.element.makeelement('table', attrib={'width': '100%'})
