@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-15 12:45+0800\n"
+"POT-Creation-Date: 2024-04-17 21:48+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -51,7 +51,7 @@ msgstr ""
 msgid "Input Format"
 msgstr ""
 
-#: advanced.py:261 advanced.py:714 batch.py:72 setting.py:380
+#: advanced.py:261 advanced.py:727 batch.py:72 setting.py:380
 msgid "Target Language"
 msgstr ""
 
@@ -95,7 +95,7 @@ msgstr ""
 msgid "Non-aligned"
 msgstr ""
 
-#: advanced.py:498 advanced.py:804 components/indicator.py:13
+#: advanced.py:498 advanced.py:817 components/indicator.py:13
 #: components/table.py:99
 msgid "Translated"
 msgstr ""
@@ -105,122 +105,134 @@ msgid "Untranslated"
 msgstr ""
 
 #: advanced.py:502
+msgid "Original Text"
+msgstr ""
+
+#: advanced.py:503
+msgid "Original Code"
+msgstr ""
+
+#: advanced.py:504
+msgid "Translation Text"
+msgstr ""
+
+#: advanced.py:507
 msgid "keyword for filtering"
 msgstr ""
 
-#: advanced.py:582
+#: advanced.py:595
 msgid "Total items: {}"
 msgstr ""
 
-#: advanced.py:583 lib/translation.py:240
+#: advanced.py:596 lib/translation.py:240
 msgid "Character count: {}"
 msgstr ""
 
-#: advanced.py:592
+#: advanced.py:605
 msgid "Non-aligned items: {}"
 msgstr ""
 
-#: advanced.py:625 cache.py:96 cache.py:185 components/engine.py:201
+#: advanced.py:638 cache.py:96 cache.py:185 components/engine.py:201
 #: components/table.py:171
 msgid "Delete"
 msgstr ""
 
-#: advanced.py:626
+#: advanced.py:639
 msgid "Translate All"
 msgstr ""
 
-#: advanced.py:627
+#: advanced.py:640
 msgid "Translate Selected"
 msgstr ""
 
-#: advanced.py:652 advanced.py:667
+#: advanced.py:665 advanced.py:680
 msgid "Stop"
 msgstr ""
 
-#: advanced.py:657
+#: advanced.py:670
 msgid "Are you sure you want to stop the translation progress?"
 msgstr ""
 
-#: advanced.py:661
+#: advanced.py:674
 msgid "Stopping..."
 msgstr ""
 
-#: advanced.py:692
+#: advanced.py:705
 msgid "Cache Status"
 msgstr ""
 
-#: advanced.py:695
+#: advanced.py:708
 msgid "Disabled"
 msgstr ""
 
-#: advanced.py:695
+#: advanced.py:708
 msgid "Enabled"
 msgstr ""
 
-#: advanced.py:702 setting.py:339
+#: advanced.py:715 setting.py:339
 msgid "Translation Engine"
 msgstr ""
 
-#: advanced.py:708 batch.py:72 setting.py:379
+#: advanced.py:721 batch.py:72 setting.py:379
 msgid "Source Language"
 msgstr ""
 
-#: advanced.py:720
+#: advanced.py:733
 msgid "Custom Ebook Title"
 msgstr ""
 
-#: advanced.py:725
+#: advanced.py:738
 msgid "By default, title metadata will be translated."
 msgstr ""
 
-#: advanced.py:754
+#: advanced.py:767
 msgid "Output Ebook"
 msgstr ""
 
-#: advanced.py:756
+#: advanced.py:769
 msgid "Output"
 msgstr ""
 
-#: advanced.py:805
+#: advanced.py:818
 msgid "The ebook has not been translated yet."
 msgstr ""
 
-#: advanced.py:809
+#: advanced.py:822
 msgid ""
 "The number of lines in some translation units differs between the original "
 "text and the translated text. Are you sure you want to output without "
 "checking alignment?"
 msgstr ""
 
-#: advanced.py:844
+#: advanced.py:857
 msgid "No translation yet"
 msgstr ""
 
-#: advanced.py:896 components/engine.py:207 setting.py:98
+#: advanced.py:909 components/engine.py:207 setting.py:98
 msgid "Save"
 msgstr ""
 
-#: advanced.py:974
+#: advanced.py:987
 msgid "Your changes have been saved."
 msgstr ""
 
-#: advanced.py:986
+#: advanced.py:999
 msgid "Translation log"
 msgstr ""
 
-#: advanced.py:997
+#: advanced.py:1010
 msgid "Error log"
 msgstr ""
 
-#: advanced.py:1017
+#: advanced.py:1030
 msgid "Are you sure you want to translate all {:n} paragraphs?"
 msgstr ""
 
-#: advanced.py:1045
+#: advanced.py:1058
 msgid "Are you sure you want to cancel the preparation progress?"
 msgstr ""
 
-#: advanced.py:1056
+#: advanced.py:1069
 msgid "Are you sure you want to cancel the translation progress?"
 msgstr ""
 
@@ -449,7 +461,7 @@ msgstr ""
 msgid "Select similar paragraphs: {}=\"{}\""
 msgstr ""
 
-#: components/table.py:261
+#: components/table.py:268
 msgid "Retain at least one row."
 msgstr ""
 

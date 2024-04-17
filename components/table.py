@@ -243,7 +243,7 @@ class AdvancedTranslationTable(QTableWidget):
         for row in range(self.rowCount()):
             self.showRow(row)
 
-    def show_by_text(self, text):
+    def show_by_text(self, text, content_type):
         if not text:
             return
         paragraphs = []
@@ -251,7 +251,14 @@ class AdvancedTranslationTable(QTableWidget):
             if self.isRowHidden(row):
                 continue
             paragraph = self.paragraph(row)
-            if text.lower() not in paragraph.original.lower():
+            if content_type == 'original_code':
+                content = paragraph.raw.lower()
+            elif content_type == 'translation_text':
+                content = '' if paragraph.translation is None else \
+                    paragraph.translation.lower()
+            else:
+                content = paragraph.original.lower()
+            if text.lower() not in content:
                 paragraphs.append(paragraph)
         self.hide_by_paragraphs(paragraphs)
 

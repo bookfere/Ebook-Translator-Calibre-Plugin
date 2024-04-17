@@ -498,6 +498,11 @@ class AdvancedTranslation(QDialog):
         categories.addItem(_('Translated'), 'translated')
         categories.addItem(_('Untranslated'), 'untranslated')
 
+        content_types = QComboBox()
+        content_types.addItem(_('Original Text'), 'original_text')
+        content_types.addItem(_('Original Code'), 'original_code')
+        content_types.addItem(_('Translation Text'), 'translation_text')
+
         search_input = QLineEdit()
         search_input.setPlaceholderText(_('keyword for filtering'))
 
@@ -515,12 +520,19 @@ class AdvancedTranslation(QDialog):
 
         def filter_by_category(index):
             filter_table_items(index)
-            self.table.show_by_text(search_input.text())
+            self.table.show_by_text(
+                search_input.text(), content_types.currentData())
         categories.currentIndexChanged.connect(filter_by_category)
+
+        def filter_by_content_type(index):
+            filter_table_items(categories.currentIndex())
+            self.table.show_by_text(
+                search_input.text(), content_types.itemData(index))
+        content_types.currentIndexChanged.connect(filter_by_content_type)
 
         def filter_by_keyword(text):
             filter_table_items(categories.currentIndex())
-            self.table.show_by_text(text)
+            self.table.show_by_text(text, content_types.currentData())
         search_input.textChanged.connect(filter_by_keyword)
 
         # def reset_filter():
@@ -530,6 +542,7 @@ class AdvancedTranslation(QDialog):
         # self.trans_worker.finished.connect(reset_filter)
 
         layout.addWidget(categories)
+        layout.addWidget(content_types)
         layout.addWidget(search_input)
 
         return widget
