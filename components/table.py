@@ -166,7 +166,7 @@ class AdvancedTranslationTable(QTableWidget):
         menu.addAction(
             _('Translate'), self.parent.translate_selected_paragraph)
         menu.addSeparator()
-        menu.addAction(_('Delete'), self.delete_by_rows)
+        menu.addAction(_('Delete'), self.delete_selected_rows)
         menu.addSeparator()
 
         if not self.parent.merge_enabled:
@@ -186,7 +186,7 @@ class AdvancedTranslationTable(QTableWidget):
 
     def keyPressEvent(self, event):
         if event.key() in (Qt.Key_Backspace, Qt.Key_Backtab, Qt.Key_Delete):
-            self.delete_by_rows()
+            self.delete_selected_rows()
         QTableWidget.keyPressEvent(self, event)
 
     def paragraph(self, row):
@@ -194,8 +194,7 @@ class AdvancedTranslationTable(QTableWidget):
         return item.data(Qt.UserRole)
 
     def current_paragraph(self):
-        # return self.paragraph(self.currentRow())
-        items = self.get_selected_items()
+        items = self.get_selected_paragraphs()
         return items[0] if len(items) > 0 else None
 
     def non_aligned_paragraphs(self):
@@ -220,12 +219,13 @@ class AdvancedTranslationTable(QTableWidget):
     def selected_count(self):
         return len(self.get_selected_rows())
 
-    def get_selected_items(self, ignore_done=False, select_all=False):
+    def get_selected_paragraphs(self, ignore_done=False, select_all=False):
         items = []
         rows = range(self.rowCount()) if select_all else \
             self.get_selected_rows()
         for row in rows:
             paragraph = self.paragraph(row)
+            paragraph.row = row
             if self.isRowHidden(row):
                 continue
             if ignore_done and paragraph.translation:
@@ -260,23 +260,23 @@ class AdvancedTranslationTable(QTableWidget):
                 paragraphs.append(paragraph)
         self.hide_by_paragraphs(paragraphs)
 
-    def delete_by_rows(self, rows=[]):
-        rows = rows or self.get_selected_rows()
-        if self.rowCount() == len(rows):
-            return self.alert.pop(_('Retain at least one row.'), 'warning')
-        if len(rows) < 1:
+    def delete_selected_rows(self):
+        paragraphs = self.get_selected_paragraphs()
+        if len(paragraphs) < 1:
             return
+        if self.rowCount() == len(paragraphs):
+            return self.alert.pop(_('Retain at least one row.'), 'warning')
         self.setCurrentItem(
-            self.item(rows[-1] + 1, 0) or self.item(rows[0] - 1, 0))
-        paragraphs = []
-        for row in reversed(rows):
-            paragraphs.append(self.paragraph(row))
-            self.removeRow(row)
+            self.item(paragraphs[-1].row + 1, 0) or
+            self.item(paragraphs[0].row - 1, 0) or
+            self.item(paragraphs[-1].row - 1, 0))
+        for paragraph in reversed(paragraphs):
+            self.removeRow(paragraph.row)
         self.parent.cache.ignore_paragraphs(paragraphs)
 
     def select_by_attribute(self, name, value):
         rows = []
-        paragraphs = self.get_selected_items(False, True)
+        paragraphs = self.get_selected_paragraphs(False, True)
         for paragraph in paragraphs:
             attributes = paragraph.get_attributes()
             if attributes.get(name) == value:
@@ -287,7 +287,7 @@ class AdvancedTranslationTable(QTableWidget):
 
     def select_by_page(self, page):
         rows = []
-        paragraphs = self.get_selected_items(False, True)
+        paragraphs = self.get_selected_paragraphs(False, True)
         for paragraph in paragraphs:
             if paragraph.page == page:
                 rows.append(paragraph.row)
