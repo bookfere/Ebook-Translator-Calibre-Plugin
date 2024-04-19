@@ -39,8 +39,8 @@ msgstr "E-kitap içeriği filtreleniyor..."
 msgid "Preparing user interface..."
 msgstr "Kullanıcı arayüzü hazırlanıyor..."
 
-msgid "Start"
-msgstr "Başlat"
+msgid "&Start"
+msgstr "&Başlat"
 
 msgid "Input Format"
 msgstr "Giriş Formatı"
@@ -164,8 +164,8 @@ msgstr ""
 msgid "No translation yet"
 msgstr "Henüz çeviri yok"
 
-msgid "Save"
-msgstr "Kaydet"
+msgid "&Save"
+msgstr "&Kaydet"
 
 msgid "Your changes have been saved."
 msgstr "Değişiklikleriniz kaydedildi."

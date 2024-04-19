@@ -40,8 +40,8 @@ msgstr "Filtrant le contenu du ebook..."
 msgid "Preparing user interface..."
 msgstr "Préparant l'interface usager..."
 
-msgid "Start"
-msgstr "Début"
+msgid "&Start"
+msgstr "&Début"
 
 msgid "Input Format"
 msgstr "Format d'entrée"
@@ -163,8 +163,8 @@ msgstr ""
 msgid "No translation yet"
 msgstr "Pas de traduction encore"
 
-msgid "Save"
-msgstr "Enregistrer"
+msgid "&Save"
+msgstr "&Enregistrer"
 
 msgid "Your changes have been saved."
 msgstr "Vos modifications ont été sauvegardées."

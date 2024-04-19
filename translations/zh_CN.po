@@ -37,8 +37,8 @@ msgstr "过滤电子书内容..."
 msgid "Preparing user interface..."
 msgstr "准备用户界面..."
 
-msgid "Start"
-msgstr "开始"
+msgid "&Start"
+msgstr "开始(&S)"
 
 msgid "Input Format"
 msgstr "输入格式"
@@ -160,8 +160,8 @@ msgstr "某些译文与原文行数不一致。确认不进行检查直接输出
 msgid "No translation yet"
 msgstr "尚未翻译"
 
-msgid "Save"
-msgstr "保存"
+msgid "&Save"
+msgstr "保存(&S)"
 
 msgid "Your changes have been saved."
 msgstr "更改已保存。"

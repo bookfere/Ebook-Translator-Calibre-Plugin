@@ -95,7 +95,7 @@ class TranslationSetting(QDialog):
             scroll_area.setWidget(func(self))
             layout.addWidget(scroll_area, 1)
 
-            save_button = QPushButton(_('Save'))
+            save_button = QPushButton(_('&Save'))
             layout.addWidget(save_button)
 
             save_button.clicked.connect(
