@@ -44,7 +44,7 @@ msgid "Preparing user interface..."
 msgstr ""
 
 #: advanced.py:236
-msgid "Start"
+msgid "&Start"
 msgstr ""
 
 #: advanced.py:250 batch.py:71 setting.py:186
@@ -209,7 +209,7 @@ msgid "No translation yet"
 msgstr ""
 
 #: advanced.py:909 components/engine.py:207 setting.py:98
-msgid "Save"
+msgid "&Save"
 msgstr ""
 
 #: advanced.py:987
