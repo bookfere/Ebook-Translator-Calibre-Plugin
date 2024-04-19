@@ -365,7 +365,7 @@ class AdvancedTranslation(QDialog):
 
         def working_finished():
             if self.translate_all and not self.trans_worker.cancel_request():
-                failures = len(self.table.get_selected_items(True, True))
+                failures = len(self.table.get_selected_paragraphs(True, True))
                 if failures > 0:
                     message = _(
                         'Failed to translate {} paragraph(s), '
@@ -585,7 +585,8 @@ class AdvancedTranslation(QDialog):
 
         def get_paragraph_count(select_all=True):
             item_count = char_count = 0
-            paragraphs = self.table.get_selected_items(select_all=select_all)
+            paragraphs = self.table.get_selected_paragraphs(
+                select_all=select_all)
             for paragraph in paragraphs:
                 item_count += 1
                 char_count += len(paragraph.original)
@@ -645,7 +646,7 @@ class AdvancedTranslation(QDialog):
         translate_all = QPushButton('  %s  ' % _('Translate All'))
         translate_selected = QPushButton('  %s  ' % _('Translate Selected'))
 
-        delete_button.clicked.connect(self.table.delete_by_rows)
+        delete_button.clicked.connect(self.table.delete_selected_rows)
         translate_all.clicked.connect(self.translate_all_paragraphs)
         translate_selected.clicked.connect(self.translate_selected_paragraph)
 
@@ -872,7 +873,8 @@ class AdvancedTranslation(QDialog):
         def refresh_translation(paragraph):
             raw_text.setPlainText(paragraph.raw.strip())
             original_text.setPlainText(paragraph.original.strip())
-            translation_text.setPlainText(paragraph.translation)
+            if paragraph.translation:
+                translation_text.setPlainText(paragraph.translation)
         self.paragraph_sig.connect(refresh_translation)
 
         self.trans_worker.start.connect(
@@ -1028,10 +1030,10 @@ class AdvancedTranslation(QDialog):
         """Translate the untranslated paragraphs when at least one is selected.
         Otherwise, retranslate all paragraphs regardless of prior translation.
         """
-        paragraphs = self.table.get_selected_items(True, True)
+        paragraphs = self.table.get_selected_paragraphs(True, True)
         is_fresh = len(paragraphs) < 1
         if is_fresh:
-            paragraphs = self.table.get_selected_items(False, True)
+            paragraphs = self.table.get_selected_paragraphs(False, True)
         self.prgress_step = self.get_progress_step(len(paragraphs))
         if not self.translate_all:
             message = _(
@@ -1042,7 +1044,7 @@ class AdvancedTranslation(QDialog):
         self.trans_worker.translate.emit(paragraphs, is_fresh)
 
     def translate_selected_paragraph(self):
-        paragraphs = self.table.get_selected_items()
+        paragraphs = self.table.get_selected_paragraphs()
         # Consider selecting all paragraphs as translating all.
         if len(paragraphs) == self.table.rowCount():
             self.translate_all_paragraphs()
