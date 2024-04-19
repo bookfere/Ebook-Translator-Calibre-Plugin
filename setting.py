@@ -11,8 +11,8 @@ from .engines import (
     ClaudeTranslate)
 from .engines.custom import CustomTranslate
 from .components import (
-    Footer, AlertMessage, TargetLang, SourceLang, EngineList,
-    EngineTester, ManageCustomEngine, InputFormat, OutputFormat)
+    Footer, AlertMessage, TargetLang, SourceLang, EngineList, EngineTester,
+    ManageCustomEngine, InputFormat, OutputFormat, set_shortcut)
 
 try:
     from qt.core import (
@@ -98,8 +98,11 @@ class TranslationSetting(QDialog):
             save_button = QPushButton(_('Save'))
             layout.addWidget(save_button)
 
-            save_button.clicked.connect(
-                lambda: self.save_config.emit(self.tabs.currentIndex()))
+            def save_current_config():
+                self.save_config.emit(self.tabs.currentIndex())
+            save_button.clicked.connect(save_current_config)
+            set_shortcut(
+                save_button, 'save', save_current_config,save_button.text())
 
             return widget
         return scroll_widget

@@ -10,6 +10,7 @@ from ..engines import builtin_engines, GoogleFreeTranslate
 
 from .lang import SourceLang, TargetLang
 from .alert import AlertMessage
+from .shortcut import set_shortcut
 
 
 try:
@@ -314,6 +315,7 @@ class ManageCustomEngine(QDialog):
         custom_restore.clicked.connect(restore_data)
         custom_verify.clicked.connect(verify_data)
         custom_save.clicked.connect(save_data)
+        set_shortcut(custom_save, 'save', save_data, custom_save.text())
 
     def done(self, result):
         QDialog.done(self, result)
