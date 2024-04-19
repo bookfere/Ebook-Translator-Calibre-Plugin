@@ -15,7 +15,8 @@ from .engines.custom import CustomTranslate
 from . import EbookTranslator
 from .components import (
     EngineList, Footer, SourceLang, TargetLang, InputFormat, OutputFormat,
-    AlertMessage, AdvancedTranslationTable, StatusColor, TranslationStatus)
+    AlertMessage, AdvancedTranslationTable, StatusColor, TranslationStatus,
+    set_shortcut)
 
 
 try:
@@ -49,6 +50,7 @@ class EditorWorker(QObject):
     @pyqtSlot(str)
     @pyqtSlot(str, object)
     def show_message(self, message, callback=None):
+        time.sleep(0.01)
         self.show.emit(message)
         time.sleep(1)
         self.show.emit('')
@@ -505,6 +507,9 @@ class AdvancedTranslation(QDialog):
 
         search_input = QLineEdit()
         search_input.setPlaceholderText(_('keyword for filtering'))
+        set_shortcut(
+            search_input, 'search', search_input.setFocus,
+            search_input.placeholderText())
 
         def filter_table_items(index):
             self.table.show_all_rows()
@@ -636,6 +641,7 @@ class AdvancedTranslation(QDialog):
         action_layout.setContentsMargins(0, 0, 0, 0)
 
         delete_button = QPushButton(_('Delete'))
+        delete_button.setToolTip(delete_button.text() + ' [Del]')
         translate_all = QPushButton('  %s  ' % _('Translate All'))
         translate_selected = QPushButton('  %s  ' % _('Translate Selected'))
 
@@ -974,6 +980,8 @@ class AdvancedTranslation(QDialog):
                 save_button.setDisabled(translation == paragraph.translation)
         translation_text.textChanged.connect(modify_translation)
 
+        self.editor_worker.show.connect(save_status.setText)
+
         def save_translation():
             save_button.setDisabled(True)
             paragraph = self.table.current_paragraph()
@@ -983,11 +991,11 @@ class AdvancedTranslation(QDialog):
             paragraph.target_lang = self.ebook.target_lang
             self.table.row.emit(paragraph.row)
             self.cache.update_paragraph(paragraph)
+            translation_text.setFocus(Qt.OtherFocusReason)
             self.editor_worker.start[str].emit(
                 _('Your changes have been saved.'))
-            translation_text.setFocus(Qt.OtherFocusReason)
-        self.editor_worker.show.connect(save_status.setText)
         save_button.clicked.connect(save_translation)
+        set_shortcut(save_button, 'save', save_translation, save_button.text())
 
         return widget
 

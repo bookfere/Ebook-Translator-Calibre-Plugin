@@ -85,9 +85,7 @@ class AdvancedTranslationTable(QTableWidget):
         original = paragraph.original.replace('\n', ' ')
         engine_name = paragraph.engine_name
         target_lang = paragraph.target_lang
-        items = [
-            original, engine_name or '--', target_lang or '--',
-            _('Untranslated')]
+        items = [original, '--', '--', _('Untranslated')]
         if paragraph.translation:
             before_aligned = paragraph.aligned
             self.parent.merge_enabled and self.check_line_alignment(paragraph)

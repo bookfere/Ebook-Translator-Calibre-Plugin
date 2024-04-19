@@ -6,3 +6,4 @@ from .alert import AlertMessage
 from .table import AdvancedTranslationTable
 from .mode import ModeSelection
 from .indicator import StatusColor, TranslationStatus
+from .shortcut import set_shortcut
