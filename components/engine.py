@@ -205,7 +205,7 @@ class ManageCustomEngine(QDialog):
         custom_clear = QPushButton(_('Clear'))
         custom_restore = QPushButton(_('Restore'))
         custom_verify = QPushButton(_('Verify'))
-        custom_save = QPushButton(_('Save'))
+        custom_save = QPushButton(_('&Save'))
         layout.addWidget(custom_list, 0, 0, 1, 3)
         layout.addWidget(custom_add, 0, 3)
         layout.addWidget(custom_del, 0, 4)
