@@ -235,7 +235,7 @@ class CreateTranslationProject(QDialog):
         layout = QVBoxLayout(self)
         self.choose_format = self.layout_format()
 
-        self.start_button = QPushButton(_('Start'))
+        self.start_button = QPushButton(_('&Start'))
         # self.start_button.setStyleSheet(
         #     'padding:0;height:48;font-size:20px;color:royalblue;'
         #     'text-transform:uppercase;')
@@ -914,7 +914,7 @@ class AdvancedTranslation(QDialog):
         control_layout.setContentsMargins(0, 0, 0, 0)
 
         save_status = QLabel()
-        save_button = QPushButton(_('Save'))
+        save_button = QPushButton(_('&Save'))
         save_button.setDisabled(True)
 
         status_indicator = TranslationStatus()

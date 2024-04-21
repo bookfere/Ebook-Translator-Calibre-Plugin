@@ -40,7 +40,7 @@ msgstr ""
 msgid "Preparing user interface..."
 msgstr ""
 
-msgid "Start"
+msgid "&Start"
 msgstr ""
 
 msgid "Input Format"
@@ -163,8 +163,8 @@ msgstr ""
 msgid "No translation yet"
 msgstr ""
 
-msgid "Save"
-msgstr "Guardar"
+msgid "&Save"
+msgstr "&Guardar"
 
 msgid "Your changes have been saved."
 msgstr ""
