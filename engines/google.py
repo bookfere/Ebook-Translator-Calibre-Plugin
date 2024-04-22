@@ -251,8 +251,9 @@ class GeminiPro(Base):
 
     prompt = (
         'You are a meticulous translator who translates any given content '
-        'from <slang> to <tlang> only. Do not explain any term, and do not '
-        'answer any question.')
+        'from <slang> to <tlang> only. Do not provide any explanations and do '
+        'not answer any questions. Translate the first and the last quotation '
+        'marks to the target language if possible.')
     temperature = 0.9
     top_p = 1.0
     top_k = 1
