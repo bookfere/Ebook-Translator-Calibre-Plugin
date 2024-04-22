@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch, Mock, call
 
+from ..lib.utils import dummy
 from ..lib.translation import Glossary, ProgressBar, Translation
 from ..lib.exception import TranslationCanceled
 from ..engines.base import Base
@@ -79,11 +80,111 @@ class TestTranslation(unittest.TestCase):
         self.glossary = Mock()
         self.paragraph = Mock()
         self.streaming = Mock()
+        self.cancel_request = Mock()
         self.translation = Translation(self.translator, self.glossary)
 
-    def test_translate_paragraph_exception(self):
-        self.translation.set_cancel_request(lambda: True)
+    def test_created_translation(self):
+        self.assertIs(self.translation.translator, self.translator)
+        self.assertIs(self.translation.glossary, self.glossary)
 
+        self.assertFalse(self.translation.fresh)
+        self.assertFalse(self.translation.batch)
+        self.assertIs(dummy, self.translation.progress)
+        self.assertIs(dummy, self.translation.log)
+        self.assertIs(dummy, self.translation.streaming)
+        self.assertIs(dummy, self.translation.callback)
+        self.assertIs(dummy, self.translation.cancel_request)
+
+        self.assertEqual(0, self.translation.total)
+        self.assertIsInstance(self.translation.progress_bar, ProgressBar)
+        self.assertEqual(0, self.translation.abort_count)
+
+    def test_set_fresh(self):
+        self.assertFalse(self.translation.fresh)
+        self.translation.set_fresh(True)
+        self.assertTrue(self.translation.fresh)
+
+    def test_set_batch(self):
+        self.assertFalse(self.translation.batch)
+        self.translation.set_batch(True)
+        self.assertTrue(self.translation.batch)
+
+    def test_set_progress(self):
+        self.assertIs(dummy, self.translation.progress)
+        mock_progress = Mock()
+        self.translation.set_progress(mock_progress)
+        self.assertIs(mock_progress, self.translation.progress)
+
+    def test_set_log(self):
+        self.assertIs(dummy, self.translation.log)
+        mock_log = Mock()
+        self.translation.set_logging(mock_log)
+        self.assertIs(mock_log, self.translation.log)
+
+    def test_set_streaming(self):
+        self.assertIs(dummy, self.translation.streaming)
+        self.translation.set_streaming(self.streaming)
+        self.assertIs(self.streaming, self.translation.streaming)
+
+    def test_set_callback(self):
+        self.assertIs(dummy, self.translation.callback)
+        mock_callback = Mock()
+        self.translation.set_callback(mock_callback)
+        self.assertIs(mock_callback, self.translation.callback)
+
+    def test_cancel_request(self):
+        self.assertIs(dummy, self.translation.cancel_request)
+        self.translation.set_cancel_request(self.cancel_request)
+        self.assertIs(self.cancel_request, self.translation.cancel_request)
+
+    def test_need_stop(self):
+        self.translator.max_error_count = 0
+        self.assertFalse(self.translation.need_stop())
+
+        self.translator.max_error_count = 1
+        self.translation.abort_count = 1
+        self.assertTrue(self.translation.need_stop())
+
+        self.translator.max_error_count = 1
+        self.translation.abort_count = 2
+        self.assertTrue(self.translation.need_stop())
+
+    def test_translate_paragraph_first_cancel(self):
+        self.translation.cancel_request = self.cancel_request
+        self.cancel_request.return_value = True
+        self.assertRaises(
+            TranslationCanceled,
+            self.translation.translate_paragraph,
+            self.paragraph)
+        self.assertEqual(1, self.cancel_request.call_count)
+
+    def test_translate_paragraph_second_cancel(self):
+        self.paragraph.translation = None
+        self.translation.cancel_request = self.cancel_request
+        self.cancel_request.side_effect = [False, True]
+        self.assertRaises(
+            TranslationCanceled,
+            self.translation.translate_paragraph,
+            self.paragraph)
+        self.assertEqual(2, self.cancel_request.call_count)
+
+    def test_translate_paragraph_third_cancel(self):
+        self.paragraph.translation = None
+        self.translation.cancel_request = self.cancel_request
+        self.cancel_request.side_effect = [False, False, True]
+        self.translation.translator.translate.side_effect = Exception
+        self.assertRaises(
+            TranslationCanceled,
+            self.translation.translate_paragraph,
+            self.paragraph)
+        self.assertEqual(3, self.cancel_request.call_count)
+
+    def test_translate_paragraph_need_cancel(self):
+        self.paragraph.translation = None
+        self.translation.cancel_request = self.cancel_request
+        self.cancel_request.return_value = False
+        self.translation.translator.translate.side_effect = Exception
+        self.translation.need_stop = lambda: True
         self.assertRaises(
             TranslationCanceled,
             self.translation.translate_paragraph,
