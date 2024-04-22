@@ -337,8 +337,7 @@ class ConversionWorker:
                 callback,
                 self.gui.job_manager.launch_gui_app,
                 job.log_path,
-                _('Ebook Translation Log'),
-                _('Translation Completed'),
-                _('The translation of "{}" was completed. '
-                'Do you want to open the book?').format(ebook_title),
+                _('Ebook Translation Log'), _('Translation Completed'),
+                _('The translation of "{}" was completed. Do you want to '
+                  'open the book?').format(ebook_title),
                 log_is_file=True, icon=self.icon, auto_hide_after=5)
