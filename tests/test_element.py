@@ -408,12 +408,26 @@ class TestPageElement(unittest.TestCase):
             '{{id_00006}} {{id_00007}} k{{id_00008}} l')
         self.assertEqual(content, self.element.get_content())
         self.assertEqual(9, len(self.element.reserve_elements))
+        self.assertEqual(
+            '<img src="icon.jpg"></img>', self.element.reserve_elements[0])
+        self.assertEqual(
+            '<img src="w1.jpg"></img>', self.element.reserve_elements[1])
+        self.assertEqual(
+            '<img src="w2.jpg"></img>', self.element.reserve_elements[2])
+        self.assertEqual(
+            '<img src="w2.jpg"></img>', self.element.reserve_elements[3])
+        self.assertEqual(
+            '<img src="w2.jpg"></img>', self.element.reserve_elements[4])
+        self.assertEqual(
+            '<img alt="{\D}" src="w3.jpg"></img>',
+            self.element.reserve_elements[5])
+        self.assertEqual(
+            '<img src="w3.jpg"></img>', self.element.reserve_elements[6])
+        self.assertEqual(
+            '<code>App\Http</code>', self.element.reserve_elements[7])
+        self.assertEqual('<sup>[1]</sup>', self.element.reserve_elements[8])
 
-        for element in self.element.reserve_elements:
-            with self.subTest(element=element):
-                self.assertIsNone(element.tail)
-
-    def test_get_content_with_sup_sub(self):
+    def test_get_content_with_sub_sup(self):
         xhtml = etree.XML(rb"""<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
@@ -433,10 +447,10 @@ class TestPageElement(unittest.TestCase):
         content = (
             'a{{id_00000}} b{{id_00001}} x cx {{id_00002}} d{{id_00003}} x')
         self.assertEqual(content, element.get_content())
-        self.assertEqual('a', get_name(element.reserve_elements[0]))
-        self.assertEqual('sup', get_name(element.reserve_elements[1]))
-        self.assertEqual('sup', get_name(element.reserve_elements[2]))
-        self.assertEqual('sup', get_name(element.reserve_elements[3]))
+        self.assertEqual('<a><sup>[1]</sup></a>', element.reserve_elements[0])
+        self.assertEqual('<sup>[1]</sup>', element.reserve_elements[1])
+        self.assertEqual('<sup>[2]</sup>', element.reserve_elements[2])
+        self.assertEqual('<sup>[3]</sup>', element.reserve_elements[3])
 
     def test_get_attributes(self):
         self.assertEqual('{"class": "abc"}', self.element.get_attributes())
@@ -505,7 +519,7 @@ class TestPageElement(unittest.TestCase):
         self.element.add_translation(translation)
 
         translation = (
-            '<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
+            '<p xmlns="http://www.w3.org/1999/xhtml" class="abc" dir="auto">'
             '<img src="icon.jpg"/> Aaaaa <img src="w1.jpg"/> '
             'Bbbbb C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
             'F G <img src="w2.jpg"/> H '
@@ -530,7 +544,7 @@ class TestPageElement(unittest.TestCase):
         self.element.add_translation(translation)
 
         translation = (
-            '<p xmlns="http://www.w3.org/1999/xhtml" class="abc">'
+            '<p xmlns="http://www.w3.org/1999/xhtml" class="abc" dir="auto">'
             '<img src="icon.jpg"/> Aaaaa <img src="w1.jpg"/> '
             'Bbbbb C <img src="w2.jpg"/> D E <img src="w2.jpg"/> '
             'F G <img src="w2.jpg"/> H '
@@ -561,7 +575,8 @@ class TestPageElement(unittest.TestCase):
         elements = xhtml.findall('.//x:p', namespaces=ns)
         self.assertEqual(2, len(elements))
         self.assertEqual(
-            '<p xmlns="http://www.w3.org/1999/xhtml">A<br/><br/>B<br/>C</p>',
+            '<p xmlns="http://www.w3.org/1999/xhtml" dir="auto">'
+            'A<br/><br/>B<br/>C</p>',
             get_string(elements[1]))
 
     def test_add_translation_below(self):
@@ -672,35 +687,53 @@ class TestPageElement(unittest.TestCase):
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head><title>Test Document</title></head>
     <body>
-        <p>
-            a<sup>[1]</sup> <span>b</span> c<sup>[2]</sup><br/>
-            <em>d</em> e <img src="/test.jpg" /><br/><br/>
-            <span>f <strong>g</strong><br/>h<br/>i<br/>j <i>k</i> l</span>
-            m <br/>
-        </p>
+        <p>a<br/></p>
+        <p>a<br/>b</p>
+        <p>a<br/><br/><br/>b</p>
+        <p>a<br/>b<br/></p>
+        <p>a<br/>b<br/><br/><br/></p>
+        <p><br/>a<br/>b</p>
+        <p><br/><br/><br/>a<br/>b</p>
+        <p>a<br/><span>b<br/>c<br/><img src="test.jpg"/>d</span>e</p>
     </body>
 </html>""")
-
-        element = PageElement(xhtml.find('.//x:p', namespaces=ns), 'p1')
-        element.reserve_pattern = create_xpath(('sup', 'img', 'br'))
-        element.placeholder = Base.placeholder
-        element.position = 'below'
-        element.get_content()
-        element.add_translation(
-            'A{{id_00000}} B C{{id_00001}}{{id_00002}} D E {{id_00003}}'
-            '{{id_00004}}{{id_00005}} F G{{id_00006}}H{{id_00007}}I'
-            '{{id_00008}}J K L M{{id_00009}}')
+        translations = [
+            'A{{id_00000}}',
+            'A{{id_00000}}B',
+            'A{{id_00000}}{{id_00001}}{{id_00002}}B',
+            'A{{id_00000}}B{{id_00001}}',
+            'A{{id_00000}}B{{id_00001}}{{id_00002}}{{id_00003}}',
+            '{{id_00000}}A{{id_00001}}B',
+            '{{id_00000}}{{id_00001}}{{id_00002}}A{{id_00003}}B',
+            'A{{id_00000}}B{{id_00001}}C{{id_00002}}{{id_00003}}D E']
+        for element in xhtml.findall('.//x:p', namespaces=ns):
+            element = PageElement(element, 'p1')
+            element.reserve_pattern = create_xpath(('sup', 'img', 'br'))
+            element.placeholder = Base.placeholder
+            element.position = 'below'
+            element.get_content()
+            element.add_translation(translations.pop(0))
 
         translation = (
-            '<html xmlns="http://www.w3.org/1999/xhtml" lang="en"> <head>'
-            '<title>Test Document</title></head> <body> '
-            '<p> a<sup>[1]</sup> <span>b</span> c<sup>[2]</sup><br/>'
-            '<span>A<sup>[1]</sup> B C<sup>[2]</sup></span><br/>'
-            ' <em>d</em> e <img src="/test.jpg"/><br/>'
-            '<span> D E <img src="/test.jpg"/></span><br/><br/> '
-            '<span>f <strong>g</strong><br/><span> F G</span><br/>'
-            'h<br/><span>H</span><br/>i<br/><span>I</span><br/>'
-            'j <i>k</i> l</span> m <br/><span>J K L M</span><br/> </p> '
+            '<html xmlns="http://www.w3.org/1999/xhtml" lang="en"> '
+            '<head><title>Test Document</title></head> <body> '
+            '<p>a<br/><span dir="auto">A</span><br/></p> '
+            '<p>a<br/><span dir="auto">A</span><br/>'
+            'b<br/><span dir="auto">B</span></p> '
+            '<p>a<br/><span dir="auto">A</span><br/><br/><br/>'
+            'b<br/><span dir="auto">B</span></p> '
+            '<p>a<br/><span dir="auto">A</span><br/>b<br/>'
+            '<span dir="auto">B</span><br/></p> '
+            '<p>a<br/><span dir="auto">A</span><br/>b<br/>'
+            '<span dir="auto">B</span><br/><br/><br/></p> '
+            '<p><br/>a<br/><span dir="auto">A</span><br/>b<br/>'
+            '<span dir="auto">B</span></p> '
+            '<p><br/><br/><br/>a<br/><span dir="auto">A</span><br/>b<br/>'
+            '<span dir="auto">B</span></p> '
+            '<p>a<br/><span dir="auto">A</span><br/><span>b<br/>'
+            '<span dir="auto">B</span><br/>c<br/>'
+            '<span dir="auto">C</span><br/><img src="test.jpg"/>d</span>e<br/>'
+            '<span dir="auto"><img src="test.jpg"/>D E</span></p> '
             '</body> </html>')
         self.assertEqual(translation, get_string(xhtml))
 
@@ -710,34 +743,55 @@ class TestPageElement(unittest.TestCase):
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head><title>Test Document</title></head>
     <body>
-        <p>
-            a<sup>[1]</sup> <span>b</span> c<sup>[2]</sup><br/>
-            <em>d</em> e <img src="/test.jpg" /> f<br/><br/>
-            g <strong>h</strong><br/>i<br/>j<br/>k <i>l</i><br/>
-        </p>
+        <p>a<br/></p>
+        <p>a<br/>b</p>
+        <p>a<br/><br/><br/>b</p>
+        <p>a<br/>b<br/></p>
+        <p>a<br/>b<br/><br/><br/></p>
+        <p><br/>a<br/>b</p>
+        <p><br/><br/><br/>a<br/>b</p>
+        <p>a<img src="test.jpg"/><br/><span>b<br/>c<br/>d</span>e</p>
     </body>
 </html>""")
-
-        element = PageElement(xhtml.find('.//x:p', namespaces=ns), 'p1')
-        element.reserve_pattern = create_xpath(('sup', 'img', 'br'))
-        element.placeholder = Base.placeholder
-        element.position = 'above'
-        element.get_content()
-        element.add_translation(
-            'A{{id_00000}} B C{{id_00001}}{{id_00002}} D E {{id_00003}} F'
-            '{{id_00004}}{{id_00005}} G H{{id_00006}}I{{id_00007}}J'
-            '{{id_00008}}K L{{id_00009}}')
+        translations = [
+            'A{{id_00000}}',
+            'A{{id_00000}}B',
+            'A{{id_00000}}{{id_00001}}{{id_00002}}B',
+            'A{{id_00000}}B{{id_00001}}',
+            'A{{id_00000}}B{{id_00001}}{{id_00002}}{{id_00003}}',
+            '{{id_00000}}A{{id_00001}}B',
+            '{{id_00000}}{{id_00001}}{{id_00002}}A{{id_00003}}B',
+            'A{{id_00000}}{{id_00001}}B{{id_00002}}C{{id_00003}}D E'
+        ]
+        for element in xhtml.findall('.//x:p', namespaces=ns):
+            element = PageElement(element, 'p1')
+            element.reserve_pattern = create_xpath(('sup', 'img', 'br'))
+            element.placeholder = Base.placeholder
+            element.position = 'above'
+            element.get_content()
+            element.add_translation(translations.pop(0))
 
         translation = (
-            '<html xmlns="http://www.w3.org/1999/xhtml" lang="en"> <head>'
-            '<title>Test Document</title></head> <body> '
-            '<p><span>A<sup>[1]</sup> B C<sup>[2]</sup></span><br/>'
-            ' a<sup>[1]</sup> <span>b</span> c<sup>[2]</sup><br/>'
-            '<span> D E <img src="/test.jpg"/> F</span><br/> <em>d</em> e '
-            '<img src="/test.jpg"/> f<br/><br/><span> G H</span><br/>'
-            ' g <strong>h</strong><br/><span>I</span><br/>'
-            'i<br/><span>J</span><br/>j<br/><span>K L</span><br/>'
-            'k <i>l</i><br/> </p> </body> </html>')
+            '<html xmlns="http://www.w3.org/1999/xhtml" lang="en"> '
+            '<head><title>Test Document</title></head> <body> '
+            '<p><span dir="auto">A</span><br/>a<br/></p> '
+            '<p><span dir="auto">A</span><br/>a<br/>'
+            '<span dir="auto">B</span><br/>b</p> '
+            '<p><span dir="auto">A</span><br/>a<br/><br/><br/>'
+            '<span dir="auto">B</span><br/>b</p> '
+            '<p><span dir="auto">A</span><br/>a<br/>'
+            '<span dir="auto">B</span><br/>b<br/></p> '
+            '<p><span dir="auto">A</span><br/>a<br/>'
+            '<span dir="auto">B</span><br/>b<br/><br/><br/></p> '
+            '<p><br/><span dir="auto">A</span><br/>a<br/>'
+            '<span dir="auto">B</span><br/>b</p> '
+            '<p><br/><br/><br/><span dir="auto">A</span><br/>a<br/>'
+            '<span dir="auto">B</span><br/>b</p> '
+            '<p><span dir="auto">A<img src="test.jpg"/></span><br/>'
+            'a<img src="test.jpg"/><br/><span dir="auto">B</span><br/>'
+            '<span>b<br/><span dir="auto">C</span><br/>c<br/>'
+            '<span dir="auto">D E</span><br/>d</span>e</p> '
+            '</body> </html>')
         self.assertEqual(translation, get_string(xhtml))
 
     def test_add_translation_attr(self):
@@ -1426,7 +1480,8 @@ class TestElementHandlerMerge(unittest.TestCase):
         self.assertEqual('b', elements[1].text)
         self.assertEqual('c', elements[3].text)
         self.assertEqual(
-            '<p class="c">A B<br/><br/>C</p>', get_string(elements[4], True))
+            '<p class="c" dir="auto">A B<br/><br/>C</p>',
+            get_string(elements[4], True))
 
     def test_add_translations_merge_separator_multiple(self):
         self.handler.merge_length = 2
@@ -1466,7 +1521,8 @@ class TestElementHandlerMerge(unittest.TestCase):
 
         self.assertEqual('c', elements[3].text)
         self.assertEqual(
-            '<p class="c">A B<br/><br/>C</p>', get_string(elements[4], True))
+            '<p class="c" dir="auto">A B<br/><br/>C</p>',
+            get_string(elements[4], True))
 
     def test_add_translations_merge_placeholder_missing_newline(self):
         self.handler.separator = Base.separator
@@ -1484,7 +1540,8 @@ class TestElementHandlerMerge(unittest.TestCase):
 
         self.assertEqual('c', elements[3].text)
         self.assertEqual(
-            '<p class="c">A B<br/><br/>C</p>', get_string(elements[4], True))
+            '<p class="c" dir="auto">A B<br/><br/>C</p>',
+            get_string(elements[4], True))
 
     def test_add_translations_merge_palceholder_only(self):
         self.handler.position = 'only'
@@ -1532,7 +1589,7 @@ class TestElementHandlerMerge(unittest.TestCase):
         elements = self.xhtml.findall('./x:body/*', namespaces=ns)
         self.assertEqual(5, len(elements))
         self.assertEqual(
-            '<p id="c" class="c">A B<br/><br/>C</p>',
+            '<p id="c" class="c" dir="auto">A B<br/><br/>C</p>',
             get_string(elements[-2], True))
 
     def test_add_translations_merge_separator_only_missing_id(self):
@@ -1549,5 +1606,5 @@ class TestElementHandlerMerge(unittest.TestCase):
 
         self.assertEqual(5, len(elements))
         self.assertEqual(
-            '<p id="c" class="c">A B<br/><br/>C</p>',
+            '<p id="c" class="c" dir="auto">A B<br/><br/>C</p>',
             get_string(elements[-2], True))
