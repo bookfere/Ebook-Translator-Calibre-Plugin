@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-17 21:48+0800\n"
+"POT-Creation-Date: 2024-05-01 22:21+0800\n"
 "PO-Revision-Date: 2024-03-23 15:12+0300\n"
 "Last-Translator: DogancanYr <EMAIL@ADDRESS>\n"
 "Language-Team: Turkish <LL@li.org>\n"
@@ -50,6 +50,18 @@ msgstr "Hedef Dil"
 
 msgid "Encoding"
 msgstr "Kodlama"
+
+msgid "Target Directionality"
+msgstr ""
+
+msgid "Auto"
+msgstr ""
+
+msgid "Left to Right"
+msgstr ""
+
+msgid "Right to Left"
+msgstr ""
 
 msgid "Failed to translate {} paragraph(s), Would you like to retry?"
 msgstr "{} paragrafın çevirisi başarısız oldu, Tekrar denemek ister misiniz?"

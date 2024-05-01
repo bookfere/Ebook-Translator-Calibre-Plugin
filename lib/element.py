@@ -33,6 +33,7 @@ class Element:
         self.column_gap = None
 
         self.position = None
+        self.target_direction = None
         self.translation_lang = None
         self.original_color = None
         self.translation_color = None
@@ -54,6 +55,9 @@ class Element:
 
     def set_position(self, position):
         self.position = position
+
+    def set_target_direction(self, direction):
+        self.target_direction = direction
 
     def set_translation_lang(self, lang):
         self.translation_lang = lang
@@ -249,7 +253,7 @@ class PageElement(Element):
                         name in excluding_attrs:
                     continue
                 new_element.set(name, value)
-        new_element.set('dir', 'auto')
+        new_element.set('dir', self.target_direction or 'auto')
         if self.translation_lang is not None:
             new_element.set('lang', self.translation_lang)
         if self.translation_color is not None:
@@ -578,11 +582,13 @@ class Extraction:
 
 
 class ElementHandler:
-    def __init__(self, placeholder, separator, position, merge_length=0):
+    def __init__(self, placeholder, separator, position):
         self.placeholder = placeholder
         self.separator = separator
         self.position = position
-        self.merge_length = merge_length
+
+        self.merge_length = 0
+        self.target_direction = None
 
         self.translation_lang = None
         self.original_color = None
@@ -595,8 +601,14 @@ class ElementHandler:
         self.elements = {}
         self.originals = []
 
+    def set_merge_length(self, length):
+        self.merge_length = length
+
     def get_merge_length(self):
         return self.merge_length
+
+    def set_target_direction(self, direction):
+        self.target_direction = direction
 
     def set_translation_lang(self, lang):
         self.translation_lang = lang
@@ -628,6 +640,7 @@ class ElementHandler:
         for oid, element in enumerate(elements):
             element.set_placeholder(self.placeholder)
             element.set_position(self.position)
+            element.set_target_direction(self.target_direction)
             element.set_translation_lang(self.translation_lang)
             element.set_original_color(self.original_color)
             element.set_translation_color(self.translation_color)
@@ -679,6 +692,7 @@ class ElementHandlerMerge(ElementHandler):
                 continue
             element.set_placeholder(self.placeholder)
             element.set_position(self.position)
+            element.set_target_direction(self.target_direction)
             element.set_translation_lang(self.translation_lang)
             element.set_original_color(self.original_color)
             element.set_translation_color(self.translation_color)
@@ -802,15 +816,16 @@ def get_page_elements(pages):
     return extraction.get_elements()
 
 
-def get_element_handler(placeholder, separator):
+def get_element_handler(placeholder, separator, direction):
     config = get_config()
     position_alias = {'before': 'above', 'after': 'below'}
     position = config.get('translation_position', 'below')
     position = position_alias.get(position) or position
     handler = ElementHandler(placeholder, separator, position)
     if config.get('merge_enabled'):
-        handler = ElementHandlerMerge(
-            placeholder, separator, position, config.get('merge_length'))
+        handler = ElementHandlerMerge(placeholder, separator, position)
+        handler.set_merge_length(config.get('merge_length'))
+    handler.set_target_direction(direction)
     column_gap = config.get('column_gap')
     gap_type = column_gap.get('_type')
     if gap_type is not None and gap_type in column_gap.keys():

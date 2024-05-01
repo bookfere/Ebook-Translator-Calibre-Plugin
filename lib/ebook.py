@@ -15,6 +15,7 @@ class Ebooks:
             self.title = title
             self.custom_title = None
             self.encoding = 'utf-8'
+            self.target_direction = 'auto'
 
         def set_input_format(self, format):
             self.input_format = format
@@ -36,6 +37,9 @@ class Ebooks:
 
         def set_encoding(self, encoding):
             self.encoding = encoding
+
+        def set_target_direction(self, direction):
+            self.target_direction = direction
 
         def get_input_path(self):
             return self.files.get(self.input_format)

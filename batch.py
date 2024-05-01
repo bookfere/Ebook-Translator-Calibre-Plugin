@@ -49,7 +49,7 @@ class BatchTranslation(QDialog):
         layout = QHBoxLayout(widget)
         layout.setContentsMargins(5, 5, 5, 5)
         # _widget.setFixedSize(_widget.sizeHint())
-        _widget.setFixedHeight(_widget.sizeHint().height())
+        # _widget.setFixedHeight(_widget.sizeHint().height())
         layout.addWidget(_widget, 1)
         # layout.setAlignment(_widget, Qt.AlignCenter)
         return widget
@@ -69,7 +69,8 @@ class BatchTranslation(QDialog):
 
         headers = (
             _('Title'), _('Encoding'), _('Input Format'), _('Output Format'),
-            _('Source Language'), _('Target Language'))
+            _('Source Language'), _('Target Language'),
+            _('Target Directionality'))
         table.setColumnCount(len(headers))
         table.setHorizontalHeaderLabels(headers)
 
@@ -77,7 +78,7 @@ class BatchTranslation(QDialog):
         stretch = getattr(QHeaderView.ResizeMode, 'Stretch', None) \
             or QHeaderView.Stretch
         header.setSectionResizeMode(0, stretch)
-        # table.verticalHeader().setMinimumSectionSize(36)
+        table.verticalHeader().setMaximumSectionSize(36)
 
         translation_engine = get_engine_class()
         for row, ebook in enumerate(self.ebooks):
@@ -94,10 +95,26 @@ class BatchTranslation(QDialog):
                     .set_encoding(encoding))
                 input_encoding.currentTextChanged.connect(
                     lambda encoding: input_encoding.setToolTip(encoding))
+                # Target directionality
+                target_direction = QTableWidgetItem(_('Default'))
+                target_direction.setTextAlignment(Qt.AlignCenter)
+                table.setItem(row, 6, target_direction)
             else:
                 input_encoding = QTableWidgetItem(_('Default'))
                 input_encoding.setTextAlignment(Qt.AlignCenter)
                 table.setItem(row, 1, input_encoding)
+                # Target directionality
+                direction_list = QComboBox()
+                direction_list.wheelEvent = lambda event: None
+                direction_list.addItem(_('Auto'), 'auto')
+                direction_list.addItem(_('Left to Right'), 'ltr')
+                direction_list.addItem(_('Right to Left'), 'rtl')
+                direction_list.currentIndexChanged.connect(
+                    lambda index, row=row: self.ebooks[row]
+                    .set_target_direction(direction_list.itemData(index)))
+                direction_list.currentTextChanged.connect(
+                    lambda direction: direction_list.setToolTip(direction))
+                table.setCellWidget(row, 6, self._cell_widget(direction_list))
 
             input_fmt = InputFormat(ebook.files.keys())
             table.setCellWidget(row, 2, self._cell_widget(input_fmt))

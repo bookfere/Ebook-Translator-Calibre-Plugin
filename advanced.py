@@ -92,7 +92,8 @@ class PreparationWorker(QObject):
         self.on_working = True
         input_path = self.ebook.get_input_path()
         element_handler = get_element_handler(
-            self.engine_class.placeholder, self.engine_class.separator)
+            self.engine_class.placeholder, self.engine_class.separator,
+            self.ebook.target_direction)
         merge_length = str(element_handler.get_merge_length())
         encoding = ''
         if self.ebook.encoding.lower() != 'utf-8':
@@ -254,6 +255,7 @@ class CreateTranslationProject(QDialog):
         input_format = InputFormat(self.ebook.files.keys())
         input_format.setFixedWidth(150)
         input_layout.addWidget(input_format)
+        layout.addWidget(input_group)
 
         def change_input_format(format):
             self.ebook.set_input_format(format)
@@ -265,6 +267,7 @@ class CreateTranslationProject(QDialog):
         target_lang = TargetLang()
         target_lang.setFixedWidth(150)
         target_layout.addWidget(target_lang)
+        layout.addWidget(target_group)
 
         engine_class = get_engine_class()
         target_lang.refresh.emit(
@@ -276,21 +279,31 @@ class CreateTranslationProject(QDialog):
         change_target_format(target_lang.currentText())
         target_lang.currentTextChanged.connect(change_target_format)
 
-        encoding_group = QGroupBox(_('Encoding'))
-        encoding_layout = QVBoxLayout(encoding_group)
-        encoding_select = QComboBox()
-        encoding_select.addItems(encoding_list)
-        encoding_layout.addWidget(encoding_select)
-        encoding_group.setVisible(
-            self.ebook.input_format in extra_formats.keys())
+        if self.ebook.input_format in extra_formats.keys():
+            encoding_group = QGroupBox(_('Encoding'))
+            encoding_layout = QVBoxLayout(encoding_group)
+            encoding_select = QComboBox()
+            encoding_select.addItems(encoding_list)
+            encoding_layout.addWidget(encoding_select)
+            layout.addWidget(encoding_group)
 
-        def change_encoding(encoding):
-            self.ebook.set_encoding(encoding)
-        encoding_select.currentTextChanged.connect(change_encoding)
+            def change_encoding(encoding):
+                self.ebook.set_encoding(encoding)
+            encoding_select.currentTextChanged.connect(change_encoding)
+        else:
+            direction_group = QGroupBox(_('Target Directionality'))
+            direction_layout = QVBoxLayout(direction_group)
+            direction_list = QComboBox()
+            direction_list.addItem(_('Auto'), 'auto')
+            direction_list.addItem(_('Left to Right'), 'ltr')
+            direction_list.addItem(_('Right to Left'), 'rtl')
+            direction_layout.addWidget(direction_list)
+            layout.addWidget(direction_group)
 
-        layout.addWidget(input_group)
-        layout.addWidget(target_group)
-        layout.addWidget(encoding_group)
+            def change_direction(index):
+                direction = direction_list.itemData(index)
+                self.ebook.set_target_direction(direction)
+            direction_list.currentIndexChanged.connect(change_direction)
 
         return widget
 
@@ -771,20 +784,19 @@ class AdvancedTranslation(QDialog):
         #         'Calibre Library.'))
         # ebook_title.textChanged.connect(self.ebook.set_custom_title)
 
-        save_group = QGroupBox(_('Output Ebook'))
-        save_layout = QHBoxLayout(save_group)
-        save_ebook = QPushButton(_('Output'))
+        output_group = QGroupBox(_('Output Ebook'))
+        output_layout = QHBoxLayout(output_group)
+        output_button = QPushButton(_('Output'))
         output_format = OutputFormat()
-        # save_layout.addWidget(QLabel(_('Format')))
-        save_layout.addWidget(output_format)
-        save_layout.addWidget(save_ebook)
+        output_layout.addWidget(output_format)
+        output_layout.addWidget(output_button)
 
         layout.addWidget(cache_group)
         layout.addWidget(engine_group)
         layout.addWidget(source_group)
         layout.addWidget(target_group)
         layout.addWidget(title_group, 1)
-        layout.addWidget(save_group)
+        layout.addWidget(output_group)
 
         source_lang.currentTextChanged.connect(
             self.trans_worker.set_source_lang)
@@ -836,7 +848,7 @@ class AdvancedTranslation(QDialog):
             self.ebook.set_lang_code(lang_code)
             self.worker.translate_ebook(self.ebook, cache_only=True)
             self.done(1)
-        save_ebook.clicked.connect(output_ebook)
+        output_button.clicked.connect(output_ebook)
 
         def working_start():
             self.translate_all and widget.setVisible(False)

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-04-17 21:48+0800\n"
+"POT-Creation-Date: 2024-05-01 22:21+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: none\n"
@@ -24,14 +24,14 @@ msgid ""
 "A Calibre plugin to translate ebook into a specified language (optionally "
 "keeping the original content)."
 msgstr ""
-"Um plugin do Calibre para traduzir ebook para um idioma específico "
+"Um plugin do Calibre para traduzir ebooks para um idioma específico "
 "(opcionalmente mantendo o conteúdo original)."
 
 msgid "Extracting ebook content..."
 msgstr "Extraindo o conteúdo do ebook..."
 
 msgid "Failed to extract ebook content"
-msgstr ""
+msgstr "Falha ao extrair o conteúdo do ebook"
 
 msgid "Filtering ebook content..."
 msgstr "Filtrando conteúdo do ebook..."
@@ -49,6 +49,18 @@ msgid "Target Language"
 msgstr "Idioma de Destino"
 
 msgid "Encoding"
+msgstr "Codificação"
+
+msgid "Target Directionality"
+msgstr ""
+
+msgid "Auto"
+msgstr ""
+
+msgid "Left to Right"
+msgstr ""
+
+msgid "Right to Left"
 msgstr ""
 
 msgid "Failed to translate {} paragraph(s), Would you like to retry?"
@@ -73,10 +85,10 @@ msgid "Errors"
 msgstr "Erros"
 
 msgid "All"
-msgstr ""
+msgstr "Todos"
 
 msgid "Non-aligned"
-msgstr ""
+msgstr "Não alinhado"
 
 msgid "Translated"
 msgstr "Traduzido"
@@ -85,16 +97,16 @@ msgid "Untranslated"
 msgstr "Não traduzido"
 
 msgid "Original Text"
-msgstr ""
+msgstr "Texto Original"
 
 msgid "Original Code"
-msgstr ""
+msgstr "Código Original"
 
 msgid "Translation Text"
-msgstr ""
+msgstr "Texto de Tradução"
 
 msgid "keyword for filtering"
-msgstr ""
+msgstr "Palavra-chave para filtragem"
 
 msgid "Total items: {}"
 msgstr "Total de itens: {}"
@@ -103,7 +115,7 @@ msgid "Character count: {}"
 msgstr "Contador de caracteres: {}"
 
 msgid "Non-aligned items: {}"
-msgstr ""
+msgstr "Itens não alinhados: {}"
 
 msgid "Delete"
 msgstr "Deletar"
@@ -139,10 +151,10 @@ msgid "Source Language"
 msgstr "Idioma de Origem"
 
 msgid "Custom Ebook Title"
-msgstr ""
+msgstr "Título do e-book personalizado"
 
 msgid "By default, title metadata will be translated."
-msgstr ""
+msgstr "Por padrão, os metadados do título serão traduzidos."
 
 msgid "Output Ebook"
 msgstr "Ebook de Saída"
@@ -151,13 +163,16 @@ msgid "Output"
 msgstr "Saída"
 
 msgid "The ebook has not been translated yet."
-msgstr ""
+msgstr "O e-book ainda não foi traduzido."
 
 msgid ""
 "The number of lines in some translation units differs between the original "
 "text and the translated text. Are you sure you want to output without "
 "checking alignment?"
 msgstr ""
+"O número de linhas em algumas unidades de tradução difere entre o texto "
+"originale o texto traduzido. Tem certeza de que deseja continuar sem "
+"verificar o alinhamento?"
 
 msgid "No translation yet"
 msgstr "Ainda não há tradução"
@@ -178,10 +193,10 @@ msgid "Are you sure you want to translate all {:n} paragraphs?"
 msgstr "Você tem certeza de que deseja traduzir todos os {:n} parágrafos?"
 
 msgid "Are you sure you want to cancel the preparation progress?"
-msgstr ""
+msgstr "Tem certeza de que deseja cancelar o andamento da preparação?"
 
 msgid "Are you sure you want to cancel the translation progress?"
-msgstr ""
+msgstr "Tem certeza de que deseja cancelar o andamento da tradução?"
 
 msgid "Output Format"
 msgstr "Formato de Saída"
@@ -190,7 +205,7 @@ msgid "Title"
 msgstr "Título"
 
 msgid "Default"
-msgstr ""
+msgstr "Padrão"
 
 msgid "Translate"
 msgstr "Traduzir"
@@ -205,7 +220,7 @@ msgid "Choose a path to store cache files."
 msgstr "Escolha um caminho para armazenar os arquivos cache"
 
 msgid "Move"
-msgstr ""
+msgstr "Mover"
 
 msgid "Reset"
 msgstr "Reinicar"
@@ -217,7 +232,7 @@ msgid "Cache Path"
 msgstr "Caminho cache"
 
 msgid "Clear All"
-msgstr ""
+msgstr "Limpar Tudo"
 
 msgid ""
 "All cache(s) will be moved to the default path. Are you sure to proceed?"
@@ -256,7 +271,7 @@ msgid "Filename"
 msgstr "Nome do arquivo"
 
 msgid "Last Modification Time"
-msgstr ""
+msgstr "Hora da última modificação"
 
 msgid "Size (MB)"
 msgstr "Tamanho (MB)"
@@ -307,10 +322,10 @@ msgid "Ebook Specific"
 msgstr "Ebook Específico"
 
 msgid "Failed translation"
-msgstr ""
+msgstr "Falha na tradução"
 
 msgid "Not selected"
-msgstr ""
+msgstr "Não selecionado"
 
 msgid "Auto detect"
 msgstr "Auto detectar"
@@ -338,7 +353,7 @@ msgid ""
 "This mode allows users to translate multiple ebooks at once, streamlining "
 "the translation process and saving time."
 msgstr ""
-"Este modo permite os usuários traduzir múltiplos ebooks de uma só vez, "
+"Este modo permite ao usuário traduzir vários ebooks de uma só vez, "
 "simplificando o processo de tradução e economizando tempo."
 
 msgid "Original"
@@ -350,7 +365,7 @@ msgstr "Status"
 msgid ""
 "The number of lines differs between the original text and the translated "
 "text."
-msgstr ""
+msgstr "O número de linhas difere entre o texto original e o traduzido texto."
 
 msgid "Select the whole chapter"
 msgstr "Selecionar o capítulo todo"
@@ -455,10 +470,10 @@ msgid "The translation of the subtitles file was completed."
 msgstr "A tradução dos arquivos de legendas foi finalizada."
 
 msgid "Starting to output PGN file..."
-msgstr ""
+msgstr "Iniciando a saída do arquivo PGN..."
 
 msgid "The translation of the PGN file was completed."
-msgstr ""
+msgstr "A tradução do arquivo PGN foi concluída."
 
 msgid "[{} > {}] Translating \"{}\""
 msgstr "[{} > {}] Traduzindo \"{}\""
@@ -494,13 +509,13 @@ msgid "Original: {}"
 msgstr "Original: {}"
 
 msgid "Status: Failed {} times / Sleeping for {} seconds"
-msgstr ""
+msgstr "Status: falhou {} vezes / suspenso por {} segundos"
 
 msgid "Error: {}"
 msgstr "Erro: {}"
 
 msgid "Row: {}"
-msgstr ""
+msgstr "Linha: {}"
 
 msgid "Translating: {}/{}"
 msgstr "Traduzindo: {}/{}"
@@ -515,7 +530,7 @@ msgid "Start to translate ebook content"
 msgstr "Iniciar tradução do conteúdo do ebook"
 
 msgid "Item count: {}"
-msgstr ""
+msgstr "Contagem de itens: {}"
 
 msgid "There is no content need to translate."
 msgstr "Não há conteúdo para ser traduzido."
@@ -524,10 +539,10 @@ msgid "Translation failed."
 msgstr "Tradução falhou."
 
 msgid "Time consuming: {} minutes"
-msgstr ""
+msgstr "Tempo gasto: {} minutos"
 
 msgid "Outputting ebook file..."
-msgstr ""
+msgstr "Gerando arquivo de e-book..."
 
 msgid "General"
 msgstr "Geral"
@@ -590,7 +605,7 @@ msgid "Show translation"
 msgstr "Mostrar tradução"
 
 msgid "Notification"
-msgstr ""
+msgstr "Notificação"
 
 msgid "Search Paths"
 msgstr "Procurar Caminhos"
@@ -631,16 +646,16 @@ msgid "Timeout (seconds)"
 msgstr "Tempo esgotado (segundos)"
 
 msgid "Abort Translation"
-msgstr ""
+msgstr "Abortar Tradução"
 
 msgid "Max errors"
-msgstr ""
+msgstr "Erros máximos"
 
 msgid "The number of consecutive errors to abort translation."
-msgstr ""
+msgstr "O número de erros consecutivos para abortar a tradução."
 
 msgid "Tune Gemini"
-msgstr ""
+msgstr "Ajuste do Gemini"
 
 msgid "Prompt"
 msgstr "Prompt"
@@ -664,46 +679,46 @@ msgid "Tune ChatGPT"
 msgstr "Ajustar ChatGPT"
 
 msgid "Tune Claude"
-msgstr ""
+msgstr "Ajustar Claude"
 
 msgid "The model depends on your Azure project."
-msgstr ""
+msgstr "O modelo depende do seu projeto do Azure."
 
 msgid "Below original"
-msgstr ""
+msgstr "Abaixo do original"
 
 msgid "Above original"
-msgstr ""
+msgstr "Acima do original"
 
 msgid "Beta"
-msgstr ""
+msgstr "Beta"
 
 msgid "Right to original"
-msgstr ""
+msgstr "Lado direito do original"
 
 msgid "Left to original"
-msgstr ""
+msgstr "Lado esquerdo do original"
 
 msgid "With no original"
 msgstr "Adicionar sem o original"
 
 msgid "Translation"
-msgstr ""
+msgstr "Tradução"
 
 msgid "Column Gap"
-msgstr ""
+msgstr "Lacuna da coluna"
 
 msgid "Percentage"
-msgstr ""
+msgstr "Porcentagem"
 
 msgid "Space count"
-msgstr ""
+msgstr "Contagem de espaço"
 
 msgid "Translation Position"
 msgstr "Posição da Tradução"
 
 msgid "Original Text Color"
-msgstr ""
+msgstr "Cor do texto original"
 
 msgid "e.g.,"
 msgstr "por exemplo,"
@@ -718,13 +733,15 @@ msgid "Choose a glossary file"
 msgstr "Escolha um arquivo de Vocabulário"
 
 msgid "Priority Element"
-msgstr ""
+msgstr "Elemento Prioritário"
 
 msgid "CSS selectors for priority elements. One rule per line:"
-msgstr ""
+msgstr "Seletores CSS para elementos prioritários. Uma regra por linha:"
 
 msgid "Stop further extraction once elements match these rules."
 msgstr ""
+"Interrompa a extração adicional quando os elementos corresponderem a essas "
+"regras."
 
 msgid "Ignore Element"
 msgstr "Ignorar Elemento"
@@ -733,7 +750,7 @@ msgid "CSS selectors to exclude elements. One rule per line:"
 msgstr "Seletores CSS para excluir elementos. Uma regra por linha:"
 
 msgid "Do not translate elements that matches these rules."
-msgstr ""
+msgstr "Não traduza elementos que correspondam a estas regras."
 
 msgid "Ignore Paragraph"
 msgstr "Ignorar Parágrafo"
@@ -760,7 +777,7 @@ msgid "Regular Expression"
 msgstr "Expressão Regular"
 
 msgid "Do not translate extracted elements that contain these rules."
-msgstr ""
+msgstr "Não traduza elementos extraídos que contenham essas regras."
 
 msgid "Exclude paragraph by keyword. One keyword per line:"
 msgstr "Exclua parágrafo por palavra-chave. Uma palavra-chave por linha:"
@@ -775,19 +792,19 @@ msgstr ""
 "Excluir parágrafo por padrão de expressão regular. Um padrão por linha:"
 
 msgid "Reserve Element"
-msgstr ""
+msgstr "Elemento Reserva"
 
 msgid "CSS selectors to reserve elements. One rule per line:"
-msgstr ""
+msgstr "Seletores CSS para reservar elementos. Uma regra por linha:"
 
 msgid "Keep elements that match these rules for extraction."
-msgstr ""
+msgstr "Mantenha os elementos que correspondam a estas regras para extração."
 
 msgid "Ebook Metadata"
 msgstr "Metadados dos ebooks"
 
 msgid "Append target language to title metadata"
-msgstr ""
+msgstr "Anexar idioma de destino aos metadados do título"
 
 msgid "Set target language code to language metadata"
 msgstr "Defina idioma de destino como metadados"
@@ -796,13 +813,13 @@ msgid "Subjects of ebook (one subject per line)"
 msgstr "Assuntos do e-book (um assunto por linha)"
 
 msgid "Language Mark"
-msgstr ""
+msgstr "Marca de idioma"
 
 msgid "Language Code"
-msgstr ""
+msgstr "Código do idioma"
 
 msgid "Append Subjects"
-msgstr ""
+msgstr "Anexar assuntos"
 
 msgid "Proxy host or port is incorrect."
 msgstr "O host ou porta proxy está incorreto."

@@ -102,8 +102,8 @@ class EbookTranslatorGui(InterfaceAction):
                 _('Please choose at least one book.'), 'warning')
         worker = ConversionWorker(self.gui, self.icon)
         window = BatchTranslation(self.gui, worker, ebooks)
-        window.setMinimumWidth(800)
-        window.setMinimumHeight(520)
+        window.setMinimumWidth(1000)
+        window.setMinimumHeight(600)
         window.setWindowTitle(
             '%s - %s' % (_('Batch Mode'), self.title))
         window.setWindowIcon(self.icon)
