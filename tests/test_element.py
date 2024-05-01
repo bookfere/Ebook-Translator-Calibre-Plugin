@@ -140,6 +140,10 @@ class TestElement(unittest.TestCase):
         self.element.set_position('left')
         self.assertEqual('left', self.element.position)
 
+    def test_set_target_direction(self):
+        self.element.set_target_direction('ltr')
+        self.assertEqual('ltr', self.element.target_direction)
+
     def test_set_translation_lang(self):
         self.element.set_translation_lang('zh')
         self.assertEqual('zh', self.element.translation_lang)
@@ -798,6 +802,7 @@ class TestPageElement(unittest.TestCase):
         self.element.translation_lang = 'zh'
         self.element.original_color = 'green'
         self.element.translation_color = 'red'
+        self.element.target_direction = 'rtl'
         self.element.add_translation('test')
 
         elements = self.xhtml.findall('.//x:p', namespaces=ns)
@@ -805,6 +810,7 @@ class TestPageElement(unittest.TestCase):
         self.assertEqual('zh', elements[1].get('lang'))
         self.assertEqual('color:green', self.element.element.get('style'))
         self.assertEqual('color:red', elements[1].get('style'))
+        self.assertEqual('rtl', elements[1].get('dir'))
 
 
 class TestExtraction(unittest.TestCase):
@@ -1134,6 +1140,7 @@ class TestElementHandler(unittest.TestCase):
         self.assertEqual(Base.separator, self.handler.separator)
         self.assertEqual('below', self.handler.position)
         self.assertEqual(0, self.handler.merge_length)
+        self.assertIsNone(self.handler.target_direction)
         self.assertIsNone(self.handler.translation_lang)
         self.assertIsNone(self.handler.original_color)
         self.assertIsNone(self.handler.translation_color)
@@ -1145,6 +1152,10 @@ class TestElementHandler(unittest.TestCase):
 
     def test_get_merge_length(self):
         self.assertEqual(0, self.handler.merge_length)
+
+    def test_set_target_direction(self):
+        self.handler.set_target_direction('ltr')
+        self.assertEqual('ltr', self.handler.target_direction)
 
     def test_set_translation_lang(self):
         self.handler.set_translation_lang('zh')
@@ -1236,16 +1247,20 @@ class TestElementHandler(unittest.TestCase):
         self.assertEqual(8, len(elements))
         self.assertEqual('a', elements[0].text)
         self.assertEqual('A', elements[1].text)
+        self.assertEqual('auto', elements[1].get('dir'))
         self.assertEqual('b', elements[2].text)
         self.assertEqual('B', elements[3].text)
+        self.assertEqual('auto', elements[3].get('dir'))
 
         self.assertEqual('c', elements[5].text)
         self.assertEqual('C', elements[6].text)
+        self.assertEqual('auto', elements[6].get('dir'))
 
         self.assertIsNone(elements[6].get('id'))
         self.assertEqual('c', elements[6].get('class'))
 
     def test_add_translations_with_partial_translation(self):
+        self.handler.target_direction = 'rtl'
         self.handler.prepare_original(self.elements)
         translations = [
             Paragraph(1, 'm1', '<p id="a">a</p>', 'a', False, '{"id": "a"}',
@@ -1261,10 +1276,12 @@ class TestElementHandler(unittest.TestCase):
         self.assertEqual(7, len(elements))
         self.assertEqual('a', elements[0].text)
         self.assertEqual('A', elements[1].text)
+        self.assertEqual('rtl', elements[1].get('dir'))
         self.assertEqual('b', elements[2].text)
 
         self.assertEqual('c', elements[4].text)
         self.assertEqual('C', elements[5].text)
+        self.assertEqual('rtl', elements[5].get('dir'))
 
         self.assertIsNone(elements[5].get('id'))
         self.assertEqual('c', elements[5].get('class'))
@@ -1314,7 +1331,8 @@ class TestElementHandlerMerge(unittest.TestCase):
         self.elements[-1].set_ignored(True)
         self.elements[-3].set_ignored(True)
         self.handler = ElementHandlerMerge(
-            Base.placeholder, Base.separator, 'below', 1000)
+            Base.placeholder, Base.separator, 'below')
+        self.handler.set_merge_length(1000)
 
     def test_create_element_handler_merge(self):
         self.assertIsInstance(self.handler, ElementHandler)
@@ -1440,14 +1458,18 @@ class TestElementHandlerMerge(unittest.TestCase):
         self.assertEqual(8, len(elements))
         self.assertEqual('a', elements[0].text)
         self.assertEqual('A', elements[1].text)
+        self.assertEqual('auto', elements[1].get('dir'))
         self.assertEqual('b', elements[2].text)
         self.assertEqual('B', elements[3].text)
+        self.assertEqual('auto', elements[3].get('dir'))
 
         self.assertEqual('c', elements[5].text)
         self.assertEqual('C', elements[6].text)
+        self.assertEqual('auto', elements[6].get('dir'))
 
     def test_add_translations_merge_cached_placeholder(self):
         self.handler.separator = Base.separator
+        self.handler.target_direction = 'rtl'
         self.handler.prepare_original(self.elements)
         self.handler.add_translations([Paragraph(
             0, 'm1', '<p id="a">a</p><p id="b">b</p><p id="c">c</p>',
@@ -1459,11 +1481,14 @@ class TestElementHandlerMerge(unittest.TestCase):
         self.assertEqual(8, len(elements))
         self.assertEqual('a', elements[0].text)
         self.assertEqual('A', elements[1].text)
+        self.assertEqual('rtl', elements[1].get('dir'))
         self.assertEqual('b', elements[2].text)
         self.assertEqual('B', elements[3].text)
+        self.assertEqual('rtl', elements[3].get('dir'))
 
         self.assertEqual('c', elements[5].text)
         self.assertEqual('C', elements[6].text)
+        self.assertEqual('rtl', elements[6].get('dir'))
 
     def test_add_translations_merge_separator(self):
         self.handler.separator = Base.separator
