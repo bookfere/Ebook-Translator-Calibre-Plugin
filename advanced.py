@@ -524,6 +524,9 @@ class AdvancedTranslation(QDialog):
             search_input, 'search', search_input.setFocus,
             search_input.placeholderText())
 
+        reset_button = QPushButton(_('Reset'))
+        reset_button.setVisible(False)
+
         def filter_table_items(index):
             self.table.show_all_rows()
             category = categories.itemData(index)
@@ -537,21 +540,31 @@ class AdvancedTranslation(QDialog):
                     self.table.translated_paragraphs())
 
         def filter_by_category(index):
+            reset_button.setVisible(index != 0)
             filter_table_items(index)
             self.table.show_by_text(
                 search_input.text(), content_types.currentData())
         categories.currentIndexChanged.connect(filter_by_category)
 
         def filter_by_content_type(index):
+            reset_button.setVisible(index != 0)
             filter_table_items(categories.currentIndex())
             self.table.show_by_text(
                 search_input.text(), content_types.itemData(index))
         content_types.currentIndexChanged.connect(filter_by_content_type)
 
         def filter_by_keyword(text):
+            reset_button.setVisible(text != '')
             filter_table_items(categories.currentIndex())
             self.table.show_by_text(text, content_types.currentData())
         search_input.textChanged.connect(filter_by_keyword)
+
+        def reset_filter_criteria():
+            categories.setCurrentIndex(0)
+            content_types.setCurrentIndex(0)
+            search_input.clear()
+            reset_button.setVisible(False)
+        reset_button.clicked.connect(reset_filter_criteria)
 
         # def reset_filter():
         #     filter_table_items(categories.currentIndex())
@@ -562,6 +575,7 @@ class AdvancedTranslation(QDialog):
         layout.addWidget(categories)
         layout.addWidget(content_types)
         layout.addWidget(search_input)
+        layout.addWidget(reset_button)
 
         return widget
 
@@ -885,8 +899,7 @@ class AdvancedTranslation(QDialog):
         def refresh_translation(paragraph):
             raw_text.setPlainText(paragraph.raw.strip())
             original_text.setPlainText(paragraph.original.strip())
-            if paragraph.translation:
-                translation_text.setPlainText(paragraph.translation)
+            translation_text.setPlainText(paragraph.translation)
         self.paragraph_sig.connect(refresh_translation)
 
         self.trans_worker.start.connect(
@@ -991,7 +1004,8 @@ class AdvancedTranslation(QDialog):
             paragraph = self.table.current_paragraph()
             if paragraph is not None:
                 translation = translation_text.toPlainText()
-                save_button.setDisabled(translation == paragraph.translation)
+                save_button.setDisabled(
+                    translation == (paragraph.translation or ''))
         translation_text.textChanged.connect(modify_translation)
 
         self.editor_worker.show.connect(save_status.setText)
