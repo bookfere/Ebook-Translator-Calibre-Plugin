@@ -264,7 +264,7 @@ class Translation:
         consuming = round((time.time() - start_time) / 60, 2)
         self.log(_('Time consuming: {} minutes').format(consuming))
         self.log(_('Translation completed.'))
-        self.progress(1, _('Outputting ebook file...'))
+        self.progress(1, _('Translation completed.'))
 
 
 def get_engine_class(engine_name=None):

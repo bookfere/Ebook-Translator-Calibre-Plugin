@@ -7,7 +7,8 @@ from calibre import sanitize_file_name
 from calibre.gui2 import Dispatcher
 from calibre.utils.logging import Log, Stream
 from calibre.constants import DEBUG, __version__
-from calibre.ebooks.conversion.plumber import Plumber
+from calibre.ebooks.conversion.plumber import (
+    Plumber, CompositeProgressReporter)
 from calibre.ptempfile import PersistentTemporaryFile
 from calibre.ebooks.metadata.meta import get_metadata, set_metadata
 
@@ -55,6 +56,8 @@ def convert_book(
     elements = []
 
     def convert(self, oeb, output_path, input_plugin, opts, log):
+        backup_progress = self.report_progress.global_min
+        self.report_progress = CompositeProgressReporter(0, 1, notification)
         log.info('Translating ebook content... (this will take a while)')
         log.info(debug_info)
         translation.set_progress(self.report_progress)
@@ -73,6 +76,10 @@ def convert_book(
         log(sep())
         log(_('Start to convert ebook format...'))
         log(sep())
+
+        self.report_progress = CompositeProgressReporter(
+            backup_progress, 1, notification)
+        self.report_progress(0., _('Outputting ebook file...'))
         _convert(oeb, output_path, input_plugin, opts, log)
 
     plumber.output_plugin.convert = MethodType(convert, plumber.output_plugin)
@@ -339,4 +346,4 @@ class ConversionWorker:
                 _('Ebook Translation Log'), _('Translation Completed'),
                 _('The translation of "{}" was completed. Do you want to '
                   'open the book?').format(ebook_title),
-                log_is_file=True, icon=self.icon, auto_hide_after=5)
+                log_is_file=True, icon=self.icon, auto_hide_after=10)
