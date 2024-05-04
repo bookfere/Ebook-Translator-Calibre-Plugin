@@ -590,7 +590,10 @@ class TestPageElement(unittest.TestCase):
         self.element.add_translation('test')
 
         original, translation = self.xhtml.findall('.//x:p', namespaces=ns)
-        self.assertEqual('color:red', original.get('style'))
+        for element in original:
+            with self.subTest(element=element):
+                if get_name(element) != 'img':
+                    self.assertEqual('color:red', element.get('style'))
         self.assertEqual('color:blue', translation.get('style'))
         self.assertIn('>test<', get_string(translation))
 
