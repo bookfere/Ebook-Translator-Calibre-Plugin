@@ -436,6 +436,7 @@ class AdvancedTranslation(QDialog):
         title.setMaximumWidth(cover_image.width())
         title.setText(title.fontMetrics().elidedText(
             self.ebook.title, Qt.ElideRight, title.width()))
+        title.setToolTip(self.ebook.title)
 
         progress_bar = QProgressBar()
         progress_bar.setFormat('')

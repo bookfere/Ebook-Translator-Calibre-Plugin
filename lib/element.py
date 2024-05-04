@@ -263,7 +263,9 @@ class PageElement(Element):
     def add_translation(self, translation=None):
         # self.element.tail = None  # Make sure the element has no tail
         if self.original_color is not None:
-            self.element.set('style', 'color:%s' % self.original_color)
+            for element in self.element.iter():
+                if element.text is not None or len(list(element)) > 0:
+                    element.set('style', 'color:%s' % self.original_color)
         if translation is None:
             if self.position in ('left', 'right'):
                 self.element.addnext(self._create_table())
