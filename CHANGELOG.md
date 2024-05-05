@@ -1,3 +1,25 @@
+## v2.3.4
+
+Added features and fixed bugs as follows:
+
+1. feat: Added filtering feature to Advanced mode.
+2. feat: Supports reserving elements using CSS selectors.
+3. feat: Supports setting priority elements for extraction.
+4. feat: Added translation status indicator. Credit to @Andy-AO.
+5. feat: Added non-aligned items counter in Advanced mode. Credit to @Andy-AO.
+6. feat: Marks failed translations with red color.
+7. feat: Shows last modification time for caches on cache manager.
+8. feat: Supports disabling and auto-hiding notifications.
+9. feat: Added keyboard shortcut and mnemonics features.
+10. feat: Allows users to choose the text direction for translation.
+11. feat: Separated translation progress from conversion progress.
+12. fix: Fixed bug preventing setting original text color.
+13. fix: Fixed bug when adding translation for line breaks.
+14. fix: Fixed bug causing error when deleting rows.
+15. fix: Properly shows item status after saving edits.
+
+---
+
 ## v2.3.3
 
 Added features and fixed bugs as follows:

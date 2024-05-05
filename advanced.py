@@ -888,6 +888,12 @@ class AdvancedTranslation(QDialog):
         original_text = QPlainTextEdit()
         original_text.setReadOnly(True)
         translation_text = QPlainTextEdit()
+        if self.ebook.target_direction == 'rtl':
+            translation_text.setLayoutDirection(Qt.RightToLeft)
+            document = translation_text.document()
+            option = document.defaultTextOption()
+            option.setAlignment(Qt.AlignRight)
+            document.setDefaultTextOption(option)
         translation_text.setPlaceholderText(_('No translation yet'))
         splitter.addWidget(raw_text)
         splitter.addWidget(original_text)
