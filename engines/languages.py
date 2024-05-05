@@ -179,6 +179,7 @@ gemini = {
 
 deepl = {
     'source': {
+        'Arabic': 'AR',
         'Bulgarian': 'BG',
         'Czech': 'CS',
         'Danish': 'DA',
@@ -210,6 +211,7 @@ deepl = {
         'Chinese': 'ZH'
     },
     'target': {
+        'Arabic': 'AR',
         'Bulgarian': 'BG',
         'Czech': 'CS',
         'Danish': 'DA',
