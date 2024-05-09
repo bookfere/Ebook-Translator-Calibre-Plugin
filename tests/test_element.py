@@ -428,7 +428,7 @@ class TestPageElement(unittest.TestCase):
         self.assertEqual(
             '<img src="w3.jpg"></img>', self.element.reserve_elements[6])
         self.assertEqual(
-            '<code>App\Http</code>', self.element.reserve_elements[7])
+            '<code>App\\Http</code>', self.element.reserve_elements[7])
         self.assertEqual('<sup>[1]</sup>', self.element.reserve_elements[8])
 
     def test_get_content_with_sub_sup(self):
@@ -581,6 +581,28 @@ class TestPageElement(unittest.TestCase):
         self.assertEqual(
             '<p xmlns="http://www.w3.org/1999/xhtml" dir="auto">'
             'A<br/><br/>B<br/>C</p>',
+            get_string(elements[1]))
+
+    def test_add_translation_with_extra_namespace(self):
+        xhtml = etree.XML(rb"""<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+xmlns:epub="http://www.idpf.org/2007/ops" lang="en">
+    <head><title>Test Document</title></head>
+    <body><p>a<code><span epub:type="pagebreak"/>b</code></p></body>
+</html>""")
+        element = PageElement(xhtml.find('.//x:p', namespaces=ns), 'p1')
+        element.reserve_pattern = create_xpath(('code',))
+        element.set_placeholder(Base.placeholder)
+        element.get_content()
+        element.add_translation('A{{id_00000}}')
+
+        elements = xhtml.findall('.//x:p', namespaces=ns)
+        self.assertEqual(2, len(elements))
+        self.assertEqual(
+            '<p xmlns="http://www.w3.org/1999/xhtml" '
+            'xmlns:epub="http://www.idpf.org/2007/ops" '
+            'dir="auto">A<code><span epub:type="pagebreak"/>b</code></p>',
             get_string(elements[1]))
 
     def test_add_translation_below(self):
