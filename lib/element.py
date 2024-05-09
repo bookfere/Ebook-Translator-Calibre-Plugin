@@ -241,11 +241,11 @@ class PageElement(Element):
 
     def _create_new_element(
             self, name, content='', copy_attrs=True, excluding_attrs=[]):
-        # new_element = self.element.makeelement(
-        #     get_name(self.element), nsmap={'xhtml': ns['x']})
-        # new_element.text = trim(translation)
-        new_element = etree.XML('<{0} xmlns="{1}">{2}</{0}>'.format(
-            name, ns['x'], trim(content)))
+        namespaces = ' '.join(
+            'xmlns%s="%s"' % ('' if name is None else ':' + name, value)
+            for name, value in self.element.nsmap.items())
+        new_element = etree.XML('<{0} {1}>{2}</{0}>'.format(
+            name, namespaces, trim(content)))
         # Preserve all attributes from the original element.
         if copy_attrs:
             for name, value in self.element.items():
