@@ -1136,6 +1136,8 @@ class TranslationSetting(QDialog):
         metadata_group = QGroupBox(_('Ebook Metadata'))
         metadata_layout = QFormLayout(metadata_group)
         self.set_form_layout_policy(metadata_layout)
+        self.metadata_translation = QCheckBox(
+            _('Translate all of the metadata information'))
         self.metadata_lang_mark = QCheckBox(
             _('Append target language to title metadata'))
         self.metadata_lang_code = QCheckBox(
@@ -1143,17 +1145,20 @@ class TranslationSetting(QDialog):
         self.metadata_subject = QPlainTextEdit()
         self.metadata_subject.setPlaceholderText(
             _('Subjects of ebook (one subject per line)'))
+        metadata_layout.addRow(
+            _('Metadata Translation'), self.metadata_translation)
         metadata_layout.addRow(_('Language Mark'), self.metadata_lang_mark)
         metadata_layout.addRow(_('Language Code'), self.metadata_lang_code)
         metadata_layout.addRow(_('Append Subjects'), self.metadata_subject)
         layout.addWidget(metadata_group)
 
+        self.metadata_translation.setChecked(
+            self.config.get('ebook_metadata.metadata_translation', False))
         self.metadata_lang_mark.setChecked(
             self.config.get('ebook_metadata.lang_mark', False))
-        self.metadata_lang_code.setChecked(
-            self.config.get(
-                'ebook_metadata.lang_code',
-                self.config.get('ebook_metadata.language', False)))  # old key
+        self.metadata_lang_code.setChecked(self.config.get(
+            'ebook_metadata.lang_code',
+            self.config.get('ebook_metadata.language', False)))  # old key
         self.metadata_subject.setPlainText(
             '\n'.join(self.config.get('ebook_metadata.subjects', [])))
 
@@ -1362,6 +1367,8 @@ class TranslationSetting(QDialog):
         # Ebook metadata
         ebook_metadata = self.config.get('ebook_metadata').copy()
         ebook_metadata.clear()
+        ebook_metadata.update(
+            metadata_translation=self.metadata_translation.isChecked())
         ebook_metadata.update(lang_mark=self.metadata_lang_mark.isChecked())
         ebook_metadata.update(lang_code=self.metadata_lang_code.isChecked())
         subject_content = self.metadata_subject.toPlainText().strip()

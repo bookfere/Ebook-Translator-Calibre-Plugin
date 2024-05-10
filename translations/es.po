@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-05-01 22:21+0800\n"
+"POT-Creation-Date: 2024-05-10 21:15+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -107,6 +107,9 @@ msgid "Translation Text"
 msgstr ""
 
 msgid "keyword for filtering"
+msgstr ""
+
+msgid "Reset"
 msgstr ""
 
 msgid "Total items: {}"
@@ -218,9 +221,6 @@ msgid "Choose a path to store cache files."
 msgstr ""
 
 msgid "Move"
-msgstr ""
-
-msgid "Reset"
 msgstr ""
 
 msgid "Reveal"
@@ -449,6 +449,9 @@ msgstr "Youdao"
 msgid "Start to convert ebook format..."
 msgstr "Comienza a convertir el formato de libro electrónico..."
 
+msgid "Outputting ebook file..."
+msgstr ""
+
 msgid "Starting to output subtitles file..."
 msgstr ""
 
@@ -525,9 +528,6 @@ msgid "Translation failed."
 msgstr ""
 
 msgid "Time consuming: {} minutes"
-msgstr ""
-
-msgid "Outputting ebook file..."
 msgstr ""
 
 msgid "General"
@@ -784,6 +784,9 @@ msgstr ""
 msgid "Ebook Metadata"
 msgstr ""
 
+msgid "Translate all of the metadata information"
+msgstr ""
+
 msgid "Append target language to title metadata"
 msgstr ""
 
@@ -791,6 +794,9 @@ msgid "Set target language code to language metadata"
 msgstr ""
 
 msgid "Subjects of ebook (one subject per line)"
+msgstr ""
+
+msgid "Metadata Translation"
 msgstr ""
 
 msgid "Language Mark"

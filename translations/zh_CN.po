@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-05-01 22:21+0800\n"
+"POT-Creation-Date: 2024-05-10 21:15+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -105,6 +105,9 @@ msgstr "译文文本"
 
 msgid "keyword for filtering"
 msgstr "筛选关键词"
+
+msgid "Reset"
+msgstr "重置"
 
 msgid "Total items: {}"
 msgstr "全部条目：{}"
@@ -216,9 +219,6 @@ msgstr "选择一个用来存放缓存文件的路径。"
 
 msgid "Move"
 msgstr "移动"
-
-msgid "Reset"
-msgstr "重置"
 
 msgid "Reveal"
 msgstr "打开"
@@ -451,6 +451,9 @@ msgstr "有道"
 msgid "Start to convert ebook format..."
 msgstr "开始转换电子书格式……"
 
+msgid "Outputting ebook file..."
+msgstr "正在输出电子书文件……"
+
 msgid "Starting to output subtitles file..."
 msgstr "开始输出字幕文件……"
 
@@ -528,9 +531,6 @@ msgstr "翻译已失败。"
 
 msgid "Time consuming: {} minutes"
 msgstr "耗时：{} 分钟"
-
-msgid "Outputting ebook file..."
-msgstr "正在输出电子书文件……"
 
 msgid "General"
 msgstr "通用"
@@ -784,6 +784,9 @@ msgstr "保留已抽取元素中匹配这些规则的元素。"
 msgid "Ebook Metadata"
 msgstr "电子书元数据"
 
+msgid "Translate all of the metadata information"
+msgstr "翻译所有源数据信息"
+
 msgid "Append target language to title metadata"
 msgstr "将目标语言附加到书名元数据中"
 
@@ -792,6 +795,9 @@ msgstr "将语言元数据设置为目标语言代码"
 
 msgid "Subjects of ebook (one subject per line)"
 msgstr "电子书主题（每行一个主题）"
+
+msgid "Metadata Translation"
+msgstr "翻译元数据"
 
 msgid "Language Mark"
 msgstr "语言标记"
