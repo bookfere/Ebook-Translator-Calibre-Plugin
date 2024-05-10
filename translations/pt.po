@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-05-01 22:21+0800\n"
+"POT-Creation-Date: 2024-05-10 21:15+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: none\n"
@@ -107,6 +107,9 @@ msgstr "Texto de Tradução"
 
 msgid "keyword for filtering"
 msgstr "Palavra-chave para filtragem"
+
+msgid "Reset"
+msgstr "Reinicar"
 
 msgid "Total items: {}"
 msgstr "Total de itens: {}"
@@ -221,9 +224,6 @@ msgstr "Escolha um caminho para armazenar os arquivos cache"
 
 msgid "Move"
 msgstr "Mover"
-
-msgid "Reset"
-msgstr "Reinicar"
 
 msgid "Reveal"
 msgstr "Revelar"
@@ -463,6 +463,9 @@ msgstr "Youdao"
 msgid "Start to convert ebook format..."
 msgstr "Iniciar conversão de formato de ebook..."
 
+msgid "Outputting ebook file..."
+msgstr "Gerando arquivo de e-book..."
+
 msgid "Starting to output subtitles file..."
 msgstr "Iniciando a criação dos arquivos de legendas"
 
@@ -540,9 +543,6 @@ msgstr "Tradução falhou."
 
 msgid "Time consuming: {} minutes"
 msgstr "Tempo gasto: {} minutos"
-
-msgid "Outputting ebook file..."
-msgstr "Gerando arquivo de e-book..."
 
 msgid "General"
 msgstr "Geral"
@@ -803,6 +803,9 @@ msgstr "Mantenha os elementos que correspondam a estas regras para extração."
 msgid "Ebook Metadata"
 msgstr "Metadados dos ebooks"
 
+msgid "Translate all of the metadata information"
+msgstr ""
+
 msgid "Append target language to title metadata"
 msgstr "Anexar idioma de destino aos metadados do título"
 
@@ -811,6 +814,9 @@ msgstr "Defina idioma de destino como metadados"
 
 msgid "Subjects of ebook (one subject per line)"
 msgstr "Assuntos do e-book (um assunto por linha)"
+
+msgid "Metadata Translation"
+msgstr ""
 
 msgid "Language Mark"
 msgstr "Marca de idioma"

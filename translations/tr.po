@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-05-01 22:21+0800\n"
+"POT-Creation-Date: 2024-05-10 21:15+0800\n"
 "PO-Revision-Date: 2024-03-23 15:12+0300\n"
 "Last-Translator: DogancanYr <EMAIL@ADDRESS>\n"
 "Language-Team: Turkish <LL@li.org>\n"
@@ -107,6 +107,9 @@ msgstr ""
 
 msgid "keyword for filtering"
 msgstr ""
+
+msgid "Reset"
+msgstr "Sıfırla"
 
 msgid "Total items: {}"
 msgstr "Toplam öğe: {}"
@@ -220,9 +223,6 @@ msgstr "Önbellek dosyalarını depolamak için bir yol seçin."
 
 msgid "Move"
 msgstr ""
-
-msgid "Reset"
-msgstr "Sıfırla"
 
 msgid "Reveal"
 msgstr "Açıkla"
@@ -462,6 +462,9 @@ msgstr "Youdao"
 msgid "Start to convert ebook format..."
 msgstr "E-kitap formatını dönüştürmeye başla..."
 
+msgid "Outputting ebook file..."
+msgstr ""
+
 msgid "Starting to output subtitles file..."
 msgstr "Altyazı dosyasının çıktısı alınmaya başlanıyor..."
 
@@ -538,9 +541,6 @@ msgid "Translation failed."
 msgstr "Çeviri başarısız oldu."
 
 msgid "Time consuming: {} minutes"
-msgstr ""
-
-msgid "Outputting ebook file..."
 msgstr ""
 
 msgid "General"
@@ -797,6 +797,9 @@ msgstr ""
 msgid "Ebook Metadata"
 msgstr "E-kitap Meta Verisi"
 
+msgid "Translate all of the metadata information"
+msgstr ""
+
 msgid "Append target language to title metadata"
 msgstr "Hedef dili başlık meta verilerine ekle"
 
@@ -805,6 +808,9 @@ msgstr "Hedef dil kodunu dil meta verilerine ayarla"
 
 msgid "Subjects of ebook (one subject per line)"
 msgstr "E-kitabın konuları (her satıra bir konu)"
+
+msgid "Metadata Translation"
+msgstr ""
 
 msgid "Language Mark"
 msgstr "Dil İşareti"

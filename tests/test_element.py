@@ -17,6 +17,9 @@ from ..engines import DeeplFreeTranslate
 from ..engines.base import Base
 
 
+module_name = 'calibre_plugins.ebook_translator.lib.element'
+
+
 class TestFunction(unittest.TestCase):
     def test_get_string(self):
         markup = '<div xmlns="http://www.w3.org/1999/xhtml">' \
@@ -66,7 +69,9 @@ class TestFunction(unittest.TestCase):
         elements = get_toc_elements(toc, [])
         self.assertEqual(3, len(elements))
 
-    def test_get_metadata_elements(self):
+    @patch(module_name + '.get_config')
+    def test_get_metadata_elements(self, mock_get_config):
+        mock_get_config.return_value.get.return_value = False
         metadata = Mock(Metadata)
         item_1 = Mock(Metadata.Item, content='a')
         item_2 = Mock(Metadata.Item, content='b')
@@ -78,9 +83,13 @@ class TestFunction(unittest.TestCase):
 
         elements = get_metadata_elements(metadata)
 
+        mock_get_config().get.assert_called_once_with(
+            'ebook_metadata.metadata_translation', False)
         self.assertEqual(2, len(elements))
         self.assertIs(item_1, elements[0].element)
+        self.assertTrue(elements[0].ignored)
         self.assertIs(item_2, elements[1].element)
+        self.assertTrue(elements[1].ignored)
 
 
 class MockedElement(Element):
@@ -316,6 +325,11 @@ class TestMetadataElement(unittest.TestCase):
 
     def test_add_translation_same_content(self):
         self.element.add_translation('a')
+        self.assertEqual('a', self.element.element.content)
+
+    def test_add_translation_with_ignored(self):
+        self.element.ignored = True
+        self.element.add_translation('A')
         self.assertEqual('a', self.element.element.content)
 
 

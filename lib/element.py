@@ -159,7 +159,8 @@ class MetadataElement(Element):
         return self.element.content
 
     def add_translation(self, translation=None):
-        if translation is not None and translation != self.get_content():
+        if translation is not None and translation != self.get_content() \
+                and not self.ignored:
             if self.position == 'only':
                 self.element.content = translation
             elif self.position in ['above', 'left']:
@@ -780,6 +781,9 @@ def get_pgn_elements(path, encoding):
 
 
 def get_metadata_elements(metadata):
+    config = get_config()
+    enable_translation = config.get(
+        'ebook_metadata.metadata_translation', False)
     elements = []
     names = (
         'title', 'creator', 'publisher', 'rights', 'subject', 'contributor',
@@ -792,7 +796,9 @@ def get_metadata_elements(metadata):
         for item in items:
             if pattern.search(item.content) is None:
                 continue
-            elements.append(MetadataElement(item, 'content.opf'))
+            element = MetadataElement(
+                item, page_id='content.opf', ignored=not enable_translation)
+            elements.append(element)
     return elements
 
 

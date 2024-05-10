@@ -218,13 +218,6 @@ class Translation:
             if paragraph.is_cache:
                 message = _('Translation (Cached): {}')
             self.log(message.format(paragraph.translation.strip()))
-        # else:
-        #     self.log(sep(), True)
-        #     self.log(_('Row: {}').format(row))
-        #     self.log(_('Original: {}').format(original), True)
-        #     self.log(sep('┈'), True)
-        #     self.log(_('Error: {}').format(paragraph.error.strip()), True)
-        #     # paragraph.error = None
 
     def handle(self, paragraphs=[]):
         start_time = time.time()
