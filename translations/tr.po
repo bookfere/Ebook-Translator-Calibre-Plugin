@@ -3,13 +3,12 @@
 # This file is distributed under the same license as the Ebook Translator Calibre Plugin package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
 "POT-Creation-Date: 2024-05-10 21:15+0800\n"
-"PO-Revision-Date: 2024-03-23 15:12+0300\n"
+"PO-Revision-Date: 2024-05-15 16:21+0300\n"
 "Last-Translator: DogancanYr <EMAIL@ADDRESS>\n"
 "Language-Team: Turkish <LL@li.org>\n"
 "Language: tr\n"
@@ -52,16 +51,16 @@ msgid "Encoding"
 msgstr "Kodlama"
 
 msgid "Target Directionality"
-msgstr ""
+msgstr "Hedef Yönü"
 
 msgid "Auto"
-msgstr ""
+msgstr "Otomatik"
 
 msgid "Left to Right"
-msgstr ""
+msgstr "Soldan Sağa"
 
 msgid "Right to Left"
-msgstr ""
+msgstr "Sağdan Sola"
 
 msgid "Failed to translate {} paragraph(s), Would you like to retry?"
 msgstr "{} paragrafın çevirisi başarısız oldu, Tekrar denemek ister misiniz?"
@@ -85,28 +84,28 @@ msgid "Errors"
 msgstr "Hatalar"
 
 msgid "All"
-msgstr ""
+msgstr "Hepsi"
 
 msgid "Non-aligned"
-msgstr ""
+msgstr "Bağlantısız"
 
 msgid "Translated"
 msgstr "Çeviri"
 
 msgid "Untranslated"
-msgstr "çevrilmemiş"
+msgstr "Çevrilmemiş"
 
 msgid "Original Text"
-msgstr ""
+msgstr "Çevrilmemiş"
 
 msgid "Original Code"
-msgstr ""
+msgstr "Orijinal Kod"
 
 msgid "Translation Text"
-msgstr ""
+msgstr "Çeviri Metni"
 
 msgid "keyword for filtering"
-msgstr ""
+msgstr "filtreleme için anahtar kelime"
 
 msgid "Reset"
 msgstr "Sıfırla"
@@ -118,7 +117,7 @@ msgid "Character count: {}"
 msgstr "Karakter sayısı: {}"
 
 msgid "Non-aligned items: {}"
-msgstr ""
+msgstr "Hizalanmamış öğeler: {}"
 
 msgid "Delete"
 msgstr "Sil"
@@ -195,10 +194,10 @@ msgid "Are you sure you want to translate all {:n} paragraphs?"
 msgstr "Tüm {:n} paragrafı çevirmek istediğinizden emin misiniz?"
 
 msgid "Are you sure you want to cancel the preparation progress?"
-msgstr ""
+msgstr "Hazırlık sürecini iptal etmek istediğinizden emin misiniz?"
 
 msgid "Are you sure you want to cancel the translation progress?"
-msgstr ""
+msgstr "Çeviri ilerlemesini iptal etmek istediğinizden emin misiniz?"
 
 msgid "Output Format"
 msgstr "Çıktı Formatı"
@@ -207,7 +206,7 @@ msgid "Title"
 msgstr "Başlık"
 
 msgid "Default"
-msgstr ""
+msgstr "Varsayılan"
 
 msgid "Translate"
 msgstr "Çevir"
@@ -222,7 +221,7 @@ msgid "Choose a path to store cache files."
 msgstr "Önbellek dosyalarını depolamak için bir yol seçin."
 
 msgid "Move"
-msgstr ""
+msgstr "Taşı"
 
 msgid "Reveal"
 msgstr "Açıkla"
@@ -268,7 +267,7 @@ msgid "Filename"
 msgstr "Dosya adı"
 
 msgid "Last Modification Time"
-msgstr ""
+msgstr "Son Değiştirme Zamanı"
 
 msgid "Size (MB)"
 msgstr "Boyut (MB)"
@@ -319,16 +318,16 @@ msgid "Ebook Specific"
 msgstr "E-kitaba Özel"
 
 msgid "Failed translation"
-msgstr ""
+msgstr "Çeviri başarısız"
 
 msgid "Not selected"
-msgstr ""
+msgstr "Seçili değil"
 
 msgid "Auto detect"
-msgstr "Otomatik algılama"
+msgstr "Otomatik algıla"
 
 msgid "Choose a translation mode for clicking the icon button."
-msgstr "Simge düğmesine tıklamak için bir çeviri modu seçin."
+msgstr "Araç çubuğu düğmesine tıklandığında çalışacak mod"
 
 msgid "Advanced Mode"
 msgstr "Gelişmiş Mod"
@@ -463,7 +462,7 @@ msgid "Start to convert ebook format..."
 msgstr "E-kitap formatını dönüştürmeye başla..."
 
 msgid "Outputting ebook file..."
-msgstr ""
+msgstr "E-kitap dosyası çıktısı alınıyor..."
 
 msgid "Starting to output subtitles file..."
 msgstr "Altyazı dosyasının çıktısı alınmaya başlanıyor..."
@@ -517,7 +516,7 @@ msgid "Error: {}"
 msgstr "Hata: {}"
 
 msgid "Row: {}"
-msgstr ""
+msgstr "Satır: {}"
 
 msgid "Translating: {}/{}"
 msgstr "Çeviriliyor: {}/{}"
@@ -541,7 +540,7 @@ msgid "Translation failed."
 msgstr "Çeviri başarısız oldu."
 
 msgid "Time consuming: {} minutes"
-msgstr ""
+msgstr "Harcanan zaman: {} dakika"
 
 msgid "General"
 msgstr "Genel"
@@ -571,7 +570,7 @@ msgid "(Beta)"
 msgstr "(Beta)"
 
 msgid "Merge to Translate"
-msgstr "Çevirmek için Birleştir"
+msgstr "Çevirmek için birleştir"
 
 msgid "Enable"
 msgstr "Etkinleştir"
@@ -589,7 +588,7 @@ msgid "Port"
 msgstr "Port"
 
 msgid "Test"
-msgstr "Deneme"
+msgstr "Test et"
 
 msgid "Cache"
 msgstr "Önbellek"
@@ -604,7 +603,7 @@ msgid "Show translation"
 msgstr "Çeviriyi göster"
 
 msgid "Notification"
-msgstr ""
+msgstr "Bildirim"
 
 msgid "Search Paths"
 msgstr "Arama Yolları"
@@ -684,22 +683,22 @@ msgid "The model depends on your Azure project."
 msgstr "Model, Azure projenize bağlıdır."
 
 msgid "Below original"
-msgstr "Orijinalin altında"
+msgstr "Çeviri altta"
 
 msgid "Above original"
-msgstr "Orijinalin üstünde"
+msgstr "Çeviri üstte"
 
 msgid "Beta"
 msgstr "Beta"
 
 msgid "Right to original"
-msgstr "Orijinal hakkı"
+msgstr "Çeviri sağda"
 
 msgid "Left to original"
-msgstr "Orijinale sola"
+msgstr "Çeviri solda"
 
 msgid "With no original"
-msgstr "Orijinali yok"
+msgstr "Sadece çeviri"
 
 msgid "Translation"
 msgstr "Çeviri"
@@ -732,13 +731,14 @@ msgid "Choose a glossary file"
 msgstr "Bir sözlük dosyası seç"
 
 msgid "Priority Element"
-msgstr ""
+msgstr "Öncelikli Unsur"
 
 msgid "CSS selectors for priority elements. One rule per line:"
-msgstr ""
+msgstr "Öncelikli öğeler için CSS seçicileri. Satır başına bir kural:"
 
 msgid "Stop further extraction once elements match these rules."
 msgstr ""
+"Öğeler bu kurallarla eşleştiğinde daha fazla çıkarma işlemini durdurun."
 
 msgid "Ignore Element"
 msgstr "Öğeyi Yoksay"
@@ -747,13 +747,13 @@ msgid "CSS selectors to exclude elements. One rule per line:"
 msgstr "Öğeleri dışlamak için CSS seçicileri. "
 
 msgid "Do not translate elements that matches these rules."
-msgstr ""
+msgstr "Bu kurallarla eşleşen öğeleri çevirmeyin."
 
 msgid "Ignore Paragraph"
 msgstr "Paragrafı Yoksay"
 
 msgid "Scope"
-msgstr "Kapsam"
+msgstr "Kapsama"
 
 msgid "Text only"
 msgstr "Yalnızca metin"
@@ -774,7 +774,7 @@ msgid "Regular Expression"
 msgstr "Normal İfade"
 
 msgid "Do not translate extracted elements that contain these rules."
-msgstr ""
+msgstr "Bu kuralları içeren ayıklanmış öğeleri çevirmeyin."
 
 msgid "Exclude paragraph by keyword. One keyword per line:"
 msgstr "Paragrafı anahtar kelimeye göre hariç tut. "
@@ -786,19 +786,19 @@ msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
 msgstr "Paragrafı normal ifade düzeniyle hariç tut. "
 
 msgid "Reserve Element"
-msgstr ""
+msgstr "Yedek Unsur"
 
 msgid "CSS selectors to reserve elements. One rule per line:"
-msgstr ""
+msgstr "Öğeleri ayırmak için CSS seçicileri. Satır başına bir kural:"
 
 msgid "Keep elements that match these rules for extraction."
-msgstr ""
+msgstr "Bu kurallarla eşleşen öğeleri ayıklama için saklayın."
 
 msgid "Ebook Metadata"
 msgstr "E-kitap Meta Verisi"
 
 msgid "Translate all of the metadata information"
-msgstr ""
+msgstr "Tüm meta veri bilgilerini çevirin"
 
 msgid "Append target language to title metadata"
 msgstr "Hedef dili başlık meta verilerine ekle"
@@ -810,7 +810,7 @@ msgid "Subjects of ebook (one subject per line)"
 msgstr "E-kitabın konuları (her satıra bir konu)"
 
 msgid "Metadata Translation"
-msgstr ""
+msgstr "Meta Veri Çevirisi"
 
 msgid "Language Mark"
 msgstr "Dil İşareti"
