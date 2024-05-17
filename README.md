@@ -41,7 +41,7 @@ __Plugin Homepage__: [https://translator.bookfere.com](https://translator.bookfe
 * [MobileRead](https://www.mobileread.com/forums/showthread.php?t=353052)
 * [Release](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/releases)
 * [Contributing](CONTRIBUTING.md)
-* [Donate](https://www.paypal.com/paypalme/bookfere)
+* [Donate](https://www.paypal.com/paypalme/jinengge)
 
 ---
 

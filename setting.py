@@ -491,7 +491,7 @@ class TranslationSetting(QDialog):
         chatgpt_model_layout.addWidget(chatgpt_model_custom)
         chatgpt_layout.addRow(_('Model'), chatgpt_model)
 
-        self.disable_wheel_event(chatgpt_model)
+        self.disable_wheel_event(chatgpt_model_select)
 
         sampling_widget = QWidget()
         sampling_layout = QHBoxLayout(sampling_widget)
