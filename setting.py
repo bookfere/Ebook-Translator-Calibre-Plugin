@@ -8,7 +8,7 @@ from .lib.translation import get_engine_class
 
 from .engines import (
     builtin_engines, GeminiPro, ChatgptTranslate, AzureChatgptTranslate,
-    ClaudeTranslate)
+    ClaudeTranslate, PapagoTranslate)
 from .engines.custom import CustomTranslate
 from .components import (
     Footer, AlertMessage, TargetLang, SourceLang, EngineList, EngineTester,
@@ -536,6 +536,22 @@ class TranslationSetting(QDialog):
 
         layout.addWidget(chatgpt_group)
 
+        # Papago Setting
+        papago_group = QGroupBox()
+        papago_group.setTitle(_('Papago Client'))
+        papago_group.setVisible(False)
+        papago_layout = QFormLayout(papago_group)
+        self.set_form_layout_policy(papago_layout)
+
+        self.papago_client_id = QLineEdit()
+        self.papago_client_secret = QLineEdit()
+        self.papago_glossary_key = QLineEdit()
+        papago_layout.addRow(_('Client Id'), self.papago_client_id)
+        papago_layout.addRow(_('Client Secret'), self.papago_client_secret)
+        papago_layout.addRow(_('Glossary Key'), self.papago_glossary_key)
+
+        layout.addWidget(papago_group)
+
         def show_gemini_preferences():
             if not issubclass(self.current_engine, GeminiPro):
                 gemini_group.setVisible(False)
@@ -654,6 +670,21 @@ class TranslationSetting(QDialog):
                 lambda checked: config.update(stream=checked))
             chatgpt_group.setVisible(True)
 
+        def show_papago_preferences():
+            is_papago = issubclass(self.current_engine, PapagoTranslate)
+            if not is_papago:
+                papago_group.setVisible(False)
+                return
+            config = self.current_engine.config
+            papago_group.setVisible(True)
+
+            self.papago_client_id.setText(
+                config.get('client_id', self.current_engine.client_id))
+            self.papago_client_secret.setText(
+                config.get('client_secret', self.current_engine.client_secret))
+            self.papago_glossary_key.setText(
+                config.get('glossary_key', self.current_engine.glossary_key))
+
         def choose_default_engine(index):
             engine_name = engine_list.itemData(index)
             self.config.update(translate_engine=engine_name)
@@ -710,6 +741,7 @@ class TranslationSetting(QDialog):
                     max_error_count=value))
             show_gemini_preferences()
             show_chatgpt_preferences()
+            show_papago_preferences()
         choose_default_engine(engine_list.findData(self.current_engine.name))
         engine_list.currentIndexChanged.connect(choose_default_engine)
 
@@ -1249,6 +1281,26 @@ class TranslationSetting(QDialog):
 
         if self.current_engine == GeminiPro:
             self.update_prompt(self.gemini_prompt, config)
+
+        # Papapo preference
+        if issubclass(self.current_engine, PapagoTranslate):
+            client_id = self.papago_client_id.text().strip()
+            if 'client_id' in config:
+                del config['client_id']
+            if client_id and client_id != self.current_engine.client_id:
+                config.update(client_id=client_id)
+
+            client_secret = self.papago_client_secret.text().strip()
+            if 'client_secret' in config:
+                del config['client_secret']
+            if client_secret and client_secret != self.current_engine.client_secret:
+                config.update(client_secret=client_secret)
+
+            glossary_key = self.papago_glossary_key.text().strip()
+            if 'glossary_key' in config:
+                del config['glossary_key']
+            if glossary_key and glossary_key != self.current_engine.glossary_key:
+                config.update(glossary_key=glossary_key)
 
         # Preferred Language
         source_lang = self.source_lang.currentText()
