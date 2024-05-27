@@ -681,3 +681,36 @@ baidu = {
     '祖鲁语': 'zul',
     '爪哇语': 'jav'
 }
+
+papago = {
+    'source': {
+        'German': 'de',
+        'English': 'en',
+        'Spanish': 'es',
+        'French': 'fr',
+        'Indonesian': 'id',
+        'Italian': 'it',
+        'Japanese': 'ja',
+        'Korean': 'ko',
+        'Russian': 'ru',
+        'Thai': 'th',
+        'Vietnamese': 'vi',
+        'Chinese Simplified': 'zh-CN',
+        'Chinese Traditional': 'zh-TW',
+    },
+    'target': {
+        'German': 'de',
+        'English': 'en',
+        'Spanish': 'es',
+        'French': 'fr',
+        'Indonesian': 'id',
+        'Italian': 'it',
+        'Japanese': 'ja',
+        'Korean': 'ko',
+        'Russian': 'ru',
+        'Thai': 'th',
+        'Vietnamese': 'vi',
+        'Chinese Simplified': 'zh-CN',
+        'Chinese Traditional': 'zh-TW',
+    }
+}
