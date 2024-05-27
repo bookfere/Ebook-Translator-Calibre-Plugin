@@ -7,11 +7,11 @@ from .deepl import DeeplTranslate, DeeplProTranslate, DeeplFreeTranslate
 from .youdao import YoudaoTranslate
 from .baidu import BaiduTranslate
 from .microsoft import MicrosoftEdgeTranslate, AzureChatgptTranslate
-
+from .papago import PapagoTranslate
 
 builtin_engines = (
     GoogleFreeTranslate, GoogleBasicTranslate, GoogleBasicTranslateADC,
     GoogleAdvancedTranslate, ChatgptTranslate, AzureChatgptTranslate,
     GeminiPro, ClaudeTranslate, DeeplTranslate, DeeplProTranslate,
     DeeplFreeTranslate, MicrosoftEdgeTranslate, YoudaoTranslate,
-    BaiduTranslate)
+    BaiduTranslate, PapagoTranslate)
