@@ -29,13 +29,14 @@ __Plugin Homepage__: [https://translator.bookfere.com](https://translator.bookfe
 
 ## Manual
 
+* [Tutorial](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/wiki#a-brief-tour)
 * [Installation](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/wiki/English#installation)
 * [Usage](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/wiki/English#usage)
 * [Settings](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin/wiki/English#settings)
 
 ---
 
-# Links
+## Links
 
 * [GitHub ](https://github.com/bookfere/Ebook-Translator-Calibre-Plugin)
 * [MobileRead](https://www.mobileread.com/forums/showthread.php?t=353052)
