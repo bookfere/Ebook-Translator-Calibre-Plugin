@@ -945,6 +945,11 @@ class AdvancedTranslation(QDialog):
         control_layout = QHBoxLayout(control)
         control_layout.setContentsMargins(0, 0, 0, 0)
 
+        self.trans_worker.start.connect(
+            lambda: control.setVisible(False))
+        self.trans_worker.finished.connect(
+            lambda: control.setVisible(True))
+
         save_status = QLabel()
         save_button = QPushButton(_('&Save'))
         save_button.setDisabled(True)

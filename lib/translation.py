@@ -273,8 +273,8 @@ def get_engine_class(engine_name=None):
         engine_class.set_engine_data(engine_data)
     else:
         engine_class = GoogleFreeTranslate
-    engine_config = config.get('engine_preferences.%s' % engine_class.name)
-    engine_class.set_config(engine_config or {})
+    engine_preferences = config.get('engine_preferences')
+    engine_class.set_config(engine_preferences.get(engine_class.name) or {})
     return engine_class
 
 
