@@ -1,3 +1,15 @@
+## v2.3.5
+
+Added features and fixed bugs as follows:
+
+1. feat: Added the option to enable/disable metadata translation.
+2. feat: Updated Turkish translation. Credit to @DogancanYr
+3. fix: Fixed the bug that caused output failure due to the lack of namespaces.
+4. fix: Fixed the bug that prevented retry failure translation.
+5. fix: Fixed the saved config display bug for the custom engine.
+
+---
+
 ## v2.3.4
 
 Added features and fixed bugs as follows:
