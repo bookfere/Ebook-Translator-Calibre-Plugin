@@ -164,7 +164,7 @@ class Translation:
                     error_messages.insert(1, _('Row: {}').format(row))
                 self.log('\n'.join(error_messages), True)
                 time.sleep(interval)
-            return self._translate_text(text, retry, interval)
+            return self._translate_text(row, text, retry, interval)
 
     def translate_paragraph(self, paragraph):
         if self.cancel_request():
