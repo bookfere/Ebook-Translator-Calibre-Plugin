@@ -33,9 +33,15 @@ class EngineList(QComboBox):
         self.refresh()
 
     def layout(self):
-        for engine in builtin_engines:
+        engines = sorted(builtin_engines, key=lambda item: not item.free)
+        for engine in engines:
+            previous_index = engines.index(engine) - 1
+            if not engine.free and engines[previous_index].free:
+                self.insertSeparator(previous_index + 1)
             self.addItem(_(engine.alias), engine.name)
         custom_engines = get_config().get('custom_engines')
+        if len(custom_engines) > 0:
+            self.insertSeparator(len(builtin_engines) + 1)
         for name in sorted(custom_engines.keys(), key=sorted_mixed_keys):
             self.addItem(name, name)
         self.default and self.setCurrentIndex(self.findData(self.default))

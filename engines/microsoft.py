@@ -2,6 +2,8 @@ import json
 import base64
 from datetime import datetime
 
+from ..lib.utils import request
+
 from .languages import microsoft
 from .base import Base
 from .openai import ChatgptTranslate
@@ -18,20 +20,11 @@ load_translations()
 class MicrosoftEdgeTranslate(Base):
     name = 'MicrosoftEdge(Free)'
     alias = 'Microsoft Edge (Free)'
+    free = True
     lang_codes = Base.load_lang_codes(microsoft)
     endpoint = 'https://api-edge.cognitive.microsofttranslator.com/translate'
     need_api_key = False
     access_info = None
-
-    def _normalized_endpoint(self):
-        query = {
-            'to': self._get_target_code(),
-            'api-version': '3.0',
-            'includeSentenceLength': True,
-        }
-        if not self._is_auto_lang():
-            query['from'] = self._get_source_code()
-        return '%s?%s' % (self.endpoint, urlencode(query))
 
     def _parse_jwt(self, token):
         parts = token.split(".")
@@ -50,22 +43,34 @@ class MicrosoftEdgeTranslate(Base):
     def _get_app_key(self):
         if not self.access_info or datetime.now() > self.access_info['Expire']:
             auth_url = 'https://edge.microsoft.com/translate/auth'
-            app_key = self.get_result(auth_url, method='GET')
+            response = request(auth_url, method='GET')
+            app_key = response.read().decode('utf-8').strip()
             self.access_info = self._parse_jwt(app_key)
         else:
             app_key = self.access_info['Token']
         return app_key
 
-    def translate(self, text):
-        headers = {
+    def get_endpoint(self):
+        query = {
+            'to': self._get_target_code(),
+            'api-version': '3.0',
+            'includeSentenceLength': True,
+        }
+        if not self._is_auto_lang():
+            query['from'] = self._get_source_code()
+        return '%s?%s' % (self.endpoint, urlencode(query))
+
+    def get_headers(self):
+        return {
             'Content-Type': 'application/json',
             'authorization': 'Bearer %s' % self._get_app_key()
         }
-        data = json.dumps([{'text': text}])
 
-        return self.get_result(
-            self._normalized_endpoint(), data, headers, method='POST',
-            callback=lambda r: json.loads(r)[0]['translations'][0]['text'])
+    def get_body(self, text):
+        return json.dumps([{'text': text}])
+
+    def get_result(self, response):
+        return json.loads(response)[0]['translations'][0]['text']
 
 
 class AzureChatgptTranslate(ChatgptTranslate):
@@ -75,17 +80,20 @@ class AzureChatgptTranslate(ChatgptTranslate):
         'https://{your-resource-name}.openai.azure.com/openai/deployments/'
         '{deployment-id}/chat/completions?api-version={api-version}')
 
-    def _get_headers(self):
+    def get_headers(self):
         return {
             'Content-Type': 'application/json',
             'api-key': self.api_key
         }
 
-    def _get_data(self, text):
-        return {
+    def get_body(self, text):
+        body = {
             'stream': self.stream,
             'messages': [
-                {'role': 'system', 'content': self._get_prompt()},
+                {'role': 'system', 'content': self.get_prompt()},
                 {'role': 'user', 'content': text}
             ]
         }
+        sampling_value = getattr(self, self.sampling)
+        body.update({self.sampling: sampling_value})
+        return json.dumps(body)

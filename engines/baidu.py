@@ -22,7 +22,10 @@ class BaiduTranslate(Base):
     api_key_pattern = r'^[^\s:\|]+?[:\|][^\s:\|]+$'
     api_key_errors = ['54004']
 
-    def translate(self, text):
+    def get_headers(self):
+        return {'Content-Type': 'application/x-www-form-urlencoded'}
+
+    def get_body(self, text):
         try:
             app_id, app_key = re.split(r'[:\|]', self.api_key)
         except Exception:
@@ -32,8 +35,7 @@ class BaiduTranslate(Base):
         sign_str = app_id + text + str(salt) + app_key
         sign = hashlib.md5(sign_str.encode('utf-8')).hexdigest()
 
-        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-        data = {
+        return {
             'appid': app_id,
             'q': text,
             'from': self._get_source_code(),
@@ -42,6 +44,5 @@ class BaiduTranslate(Base):
             'sign': sign
         }
 
-        return self.get_result(
-            self.endpoint, data, headers, method='POST',
-            callback=lambda r: json.loads(r)['trans_result'][0]['dst'])
+    def get_result(self, response):
+        return json.loads(response)['trans_result'][0]['dst']

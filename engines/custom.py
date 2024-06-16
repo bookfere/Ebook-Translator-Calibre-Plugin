@@ -95,32 +95,34 @@ class CustomTranslate(Base):
     @classmethod
     def set_engine_data(cls, data):
         cls.name = data.get('name')  # rename custom engine
-        cls.engine_data = data
+        cls.request = data.get('request')
+        cls.response = data.get('response')
         cls.lang_codes = cls.load_lang_codes(data.get('languages'))
 
-    def translate(self, text):
-        request = self.engine_data.get('request')
+    def __init__(self):
+        Base.__init__(self)
+        self.endpoint = self.request.get('url')
+        self.method = self.request.get('method') or 'GET'
 
-        endpoint = request.get('url')
-        method = request.get('method') or 'GET'
-        headers = request.get('headers') or {}
+    def get_headers(self):
+        return self.request.get('headers') or {}
 
-        data = request.get('data')
-        need_restore = isinstance(data, dict)
-        data = json.dumps(data)
+    def get_body(self, text):
+        body = self.request.get('data')
+        need_restore = isinstance(body, dict)
+        body = json.dumps(body)
         # The replacement may include UTF-8 characters that need to be encoded
         # to ensure pure Latin-1 (compliance with ISO-8859-1).
-        data = data.replace('<source>', self._get_source_code()) \
+        body = body.replace('<source>', self._get_source_code()) \
             .replace('<target>', self._get_target_code()) \
             .replace('<text>', json.dumps(text)[1:-1]).encode('utf-8')
+        headers = self.get_headers()
         is_json = headers and 'application/json' in headers.values()
         if need_restore and not is_json:
-            data = json.loads(data)
+            return json.loads(body)
+        return body
 
-        return self.get_result(
-            endpoint, data, headers, method=method, callback=self._parse)
-
-    def _parse(self, response):
+    def get_result(self, response):
         try:
             response = json.loads(response)
         except Exception:
@@ -128,8 +130,7 @@ class CustomTranslate(Base):
                 response = etree.fromstring(response)
             except Exception:
                 return response
-        result = eval(
-            self.engine_data.get('response'), {"response": response})
+        result = eval(self.response, {"response": response})
         if not is_str(result):
             raise Exception(_('Response was parsed incorrectly.'))
         return result

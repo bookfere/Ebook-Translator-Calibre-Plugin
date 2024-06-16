@@ -67,7 +67,7 @@ class ClaudeTranslate(Base):
                        '{{id_\\d+}} in the content are retained.')
         return prompt
 
-    def _get_headers(self):
+    def get_headers(self):
         return {
             'Content-Type': 'application/json',
             'anthropic-version': '2023-06-01',
@@ -75,8 +75,8 @@ class ClaudeTranslate(Base):
             'User-Agent': 'Ebook-Translator/%s' % EbookTranslator.__version__,
         }
 
-    def _get_data(self, text):
-        return {
+    def get_body(self, text):
+        body = {
             'stream': self.stream,
             'max_tokens': 4096,
             'model': self.model,
@@ -84,20 +84,15 @@ class ClaudeTranslate(Base):
             'system': self._get_prompt(),
             'messages': [{'role': 'user', 'content': text}]
         }
-
-    def translate(self, text):
-        data = self._get_data(text)
         sampling_value = getattr(self, self.sampling)
-        data.update({self.sampling: sampling_value})
+        body.update({self.sampling: sampling_value})
 
-        return self.get_result(
-            self.endpoint, json.dumps(data), self._get_headers(),
-            method='POST', stream=self.stream, callback=self._parse)
+        return json.dumps(body)
 
-    def _parse(self, data):
+    def get_result(self, response):
         if self.stream:
-            return self._parse_stream(data)
-        return json.loads(data)['content'][0]['text']
+            return self._parse_stream(response)
+        return json.loads(response)['content'][0]['text']
 
     def _parse_stream(self, data):
         while True:
