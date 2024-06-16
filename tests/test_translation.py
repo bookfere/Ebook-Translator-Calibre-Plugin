@@ -3,7 +3,7 @@ from unittest.mock import patch, Mock, call
 
 from ..lib.utils import dummy
 from ..lib.translation import Glossary, ProgressBar, Translation
-from ..lib.exception import TranslationCanceled
+from ..lib.exception import TranslationCanceled, TranslationFailed
 from ..engines.base import Base
 from ..engines.deepl import DeeplTranslate
 
@@ -81,6 +81,7 @@ class TestTranslation(unittest.TestCase):
         self.paragraph = Mock()
         self.streaming = Mock()
         self.cancel_request = Mock()
+        self.log = Mock()
         self.translation = Translation(self.translator, self.glossary)
 
     def test_created_translation(self):
@@ -149,7 +150,62 @@ class TestTranslation(unittest.TestCase):
         self.translation.abort_count = 2
         self.assertTrue(self.translation.need_stop())
 
-    def test_translate_paragraph_first_cancel(self):
+    def test_translate_text_first_cancel(self):
+        self.translation.cancel_request = self.cancel_request
+        self.cancel_request.return_value = True
+        self.assertRaises(
+            TranslationCanceled, self.translation.translate_text, 0, 'test')
+        self.assertEqual(1, self.cancel_request.call_count)
+
+    def test_translate_text_second_cancel(self):
+        self.translator.translate.side_effect = Exception
+        self.translation.cancel_request = self.cancel_request
+        self.cancel_request.side_effect = [False, True]
+        self.assertRaises(
+            TranslationCanceled, self.translation.translate_text, 0, 'test')
+        self.assertEqual(2, self.cancel_request.call_count)
+
+    def test_translate_text_need_cancel(self):
+        self.translation.translator.translate.side_effect = Exception
+        self.translation.cancel_request = self.cancel_request
+        self.cancel_request.return_value = False
+        self.translation.need_stop = lambda: True
+        self.assertRaises(
+            TranslationCanceled, self.translation.translate_text, 0, 'text')
+
+    @patch('calibre_plugins.ebook_translator.lib.translation.traceback_error')
+    @patch('calibre_plugins.ebook_translator.lib.translation.time')
+    def test_translate_text_retry_failed_translation(self, mock_time, mock_te):
+        mock_te.return_value = 'test error trackback'
+        self.translation.translator.translate.side_effect = Exception(
+            'network error')
+        self.translation.log = self.log
+        self.translation.cancel_request = lambda: False
+        self.translation.need_stop = lambda: False
+        self.translator.request_attempt = 5
+
+        with self.assertRaises(TranslationFailed) as cm:
+            self.translation.translate_text(0, 'text')
+
+        self.assertEqual(
+            str(cm.exception),
+            'Failed to retrieve data from translate engine API.\n'
+            'network error')
+        self.assertEqual(5, self.log.call_count)
+        log_text = (
+            '══════════════════════════════════════\n'
+            'Row: 0\n'
+            'Original: text\n'
+            '┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n'
+            'Status: Failed 1 times / Sleeping for 5 seconds\n'
+            '┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n'
+            'Error: test error trackback')
+        self.log.assert_any_call(log_text, True)
+        mock_time.sleep.assert_has_calls([
+            call(5), call(10), call(15), call(20), call(25)])
+        self.assertEqual(6, self.translation.abort_count)
+
+    def test_translate_paragraph_cancel(self):
         self.translation.cancel_request = self.cancel_request
         self.cancel_request.return_value = True
         self.assertRaises(
@@ -157,38 +213,6 @@ class TestTranslation(unittest.TestCase):
             self.translation.translate_paragraph,
             self.paragraph)
         self.assertEqual(1, self.cancel_request.call_count)
-
-    def test_translate_paragraph_second_cancel(self):
-        self.paragraph.translation = None
-        self.translation.cancel_request = self.cancel_request
-        self.cancel_request.side_effect = [False, True]
-        self.assertRaises(
-            TranslationCanceled,
-            self.translation.translate_paragraph,
-            self.paragraph)
-        self.assertEqual(2, self.cancel_request.call_count)
-
-    def test_translate_paragraph_third_cancel(self):
-        self.paragraph.translation = None
-        self.translation.cancel_request = self.cancel_request
-        self.cancel_request.side_effect = [False, False, True]
-        self.translation.translator.translate.side_effect = Exception
-        self.assertRaises(
-            TranslationCanceled,
-            self.translation.translate_paragraph,
-            self.paragraph)
-        self.assertEqual(3, self.cancel_request.call_count)
-
-    def test_translate_paragraph_need_cancel(self):
-        self.paragraph.translation = None
-        self.translation.cancel_request = self.cancel_request
-        self.cancel_request.return_value = False
-        self.translation.translator.translate.side_effect = Exception
-        self.translation.need_stop = lambda: True
-        self.assertRaises(
-            TranslationCanceled,
-            self.translation.translate_paragraph,
-            self.paragraph)
 
     def test_translate_paragraph_cached(self):
         self.paragraph.translation = '你好世界'

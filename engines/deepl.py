@@ -2,6 +2,8 @@ import json
 import time
 import random
 
+from ..lib.utils import request
+
 from .base import Base
 from .languages import deepl
 
@@ -13,10 +15,8 @@ class DeeplTranslate(Base):
     name = 'DeepL'
     alias = 'DeepL'
     lang_codes = Base.load_lang_codes(deepl)
-    endpoint = {
-        'translate': 'https://api-free.deepl.com/v2/translate',
-        'usage': 'https://api-free.deepl.com/v2/usage',
-    }
+    endpoint = 'https://api-free.deepl.com/v2/translate'
+    usage_endpoint = 'https://api-free.deepl.com/v2/usage'
     # api_key_hint = 'xxx-xxx-xxx:fx'
     placeholder = ('<m id={} />', r'<m\s+id={}\s+/>')
     api_key_errors = ['403', '456']
@@ -24,10 +24,10 @@ class DeeplTranslate(Base):
     def get_usage(self):
         # See: https://www.deepl.com/docs-api/general/get-usage/
         headers = {'Authorization': 'DeepL-Auth-Key %s' % self.api_key}
-        usage = self.get_result(
-            self.endpoint.get('usage'), headers=headers, silence=True,
-            callback=lambda r: json.loads(r))
-        if usage is None:
+        try:
+            response = request(self.usage_endpoint, headers=headers)
+            usage = json.loads(response.read().decode('utf-8').strip())
+        except Exception:
             return None
         total = usage.get('character_limit')
         used = usage.get('character_count')
@@ -35,34 +35,34 @@ class DeeplTranslate(Base):
 
         return _('{} total, {} used, {} left').format(total, used, left)
 
-    def translate(self, text):
-        headers = {'Authorization': 'DeepL-Auth-Key %s' % self.api_key}
+    def get_headers(self):
+        return {'Authorization': 'DeepL-Auth-Key %s' % self.api_key}
 
-        data = {
+    def get_body(self, text):
+        body = {
             'text': text,
             'target_lang': self._get_target_code()
         }
-
         if not self._is_auto_lang():
-            data.update(source_lang=self._get_source_code())
+            body.update(source_lang=self._get_source_code())
 
-        return self.get_result(
-            self.endpoint.get('translate'), data, headers, method='POST',
-            callback=lambda r: json.loads(r)['translations'][0]['text'])
+        return body
+
+    def get_result(self, response):
+        return json.loads(response)['translations'][0]['text']
 
 
 class DeeplProTranslate(DeeplTranslate):
     name = 'DeepL(Pro)'
     alias = 'DeepL (Pro)'
-    endpoint = {
-        'translate': 'https://api.deepl.com/v2/translate',
-        'usage': 'https://api.deepl.com/v2/usage',
-    }
+    endpoint = 'https://api.deepl.com/v2/translate'
+    usage_endpoint = 'https://api.deepl.com/v2/usage'
 
 
 class DeeplFreeTranslate(Base):
     name = 'DeepL(Free)'
     alias = 'DeepL (Free)'
+    free = True
     lang_codes = Base.load_lang_codes(deepl)
     endpoint = 'https://www2.deepl.com/jsonrpc?client=chrome-extension,1.5.1'
     need_api_key = False
@@ -70,20 +70,6 @@ class DeeplFreeTranslate(Base):
 
     concurrency_limit = 1
     request_interval = 1.0
-
-    headers = {
-        'Accept': '*/*',
-        'Accept-Encoding': 'gzip, deflate',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Authorization': 'None',
-        'Authority': 'www2.deepl.com',
-        'Content-Type': 'application/json; charset=utf-8',
-        'User-Agent': 'DeepLBrowserExtension/1.5.1 Mozilla/5.0 (Macintosh; '
-                      'Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, '
-                      'like Gecko) Chrome/114.0.0.0 Safari/537.36',
-        'Origin': 'chrome-extension://cofdbpoegempjloogbagkncekinflcnj',
-        'Referer': 'https://www.deepl.com/',
-    }
 
     def _vars(self, text):
         # t.forEach((e => r += (e.match(/[i]/g) || []).length)),
@@ -96,7 +82,22 @@ class DeeplFreeTranslate(Base):
             ts = ts - ts % count_i + count_i
         return uid, ts
 
-    def _data(self, text):
+    def get_headers(self):
+        return {
+            'Accept': '*/*',
+            'Accept-Encoding': 'gzip, deflate',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Authorization': 'None',
+            'Authority': 'www2.deepl.com',
+            'Content-Type': 'application/json; charset=utf-8',
+            'User-Agent': 'DeepLBrowserExtension/1.5.1 Mozilla/5.0 (Macintosh; '
+                        'Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, '
+                        'like Gecko) Chrome/114.0.0.0 Safari/537.36',
+            'Origin': 'chrome-extension://cofdbpoegempjloogbagkncekinflcnj',
+            'Referer': 'https://www.deepl.com/',
+        }
+
+    def get_body(self, text):
         regional_variant = {}
         target_lang = self._get_target_code()
         if '-' in target_lang:
@@ -106,7 +107,7 @@ class DeeplFreeTranslate(Base):
             target_lang = portions[0]
         uid, ts = self._vars(text)
 
-        data = json.dumps({
+        body = json.dumps({
             'jsonrpc': '2.0',
             'method': 'LMT_handle_texts',
             'params': {
@@ -126,10 +127,8 @@ class DeeplFreeTranslate(Base):
         # ? e.replace('"method":"', '"method" : "')
         # : e.replace('"method":"', '"method": "'))
         if (uid + 3) % 13 == 0 or (uid + 5) % 29 == 0:
-            return data.replace('"method":"', '"method" : "')
-        return data.replace('"method":"', '"method": "')
+            return body.replace('"method":"', '"method" : "')
+        return body.replace('"method":"', '"method": "')
 
-    def translate(self, text):
-        return self.get_result(
-            self.endpoint, self._data(text), self.headers, method='POST',
-            callback=lambda r: json.loads(r)['result']['texts'][0]['text'])
+    def get_result(self, response):
+        return json.loads(response)['result']['texts'][0]['text']

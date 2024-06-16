@@ -35,7 +35,10 @@ class YoudaoTranslate(Base):
         return text if size <= 20 else \
             text[0:10] + str(size) + text[size - 10:size]
 
-    def translate(self, text):
+    def get_headers(self):
+        return {'Content-Type': 'application/x-www-form-urlencoded'}
+
+    def get_body(self, text):
         try:
             app_key, app_secret = re.split(r'[:\|]', self.api_key)
         except Exception:
@@ -46,9 +49,7 @@ class YoudaoTranslate(Base):
         sign_str = app_key + self._truncate(text) + salt + curtime + app_secret
         sign = self._encrypt(sign_str)
 
-        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-
-        data = {
+        return {
             'from': self._get_source_code(),
             'to': self._get_target_code(),
             'signType': 'v3',
@@ -60,6 +61,5 @@ class YoudaoTranslate(Base):
             'vocabId': False,
         }
 
-        return self.get_result(
-            self.endpoint, data, headers, method='POST',
-            callback=lambda r: json.loads(r)['translation'][0])
+    def get_result(self, response):
+        return json.loads(response)['translation'][0]

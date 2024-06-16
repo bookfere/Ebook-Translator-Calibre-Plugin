@@ -1,22 +1,26 @@
-import ssl
 import os.path
 
-from mechanize import Browser, Request, HTTPError
-from calibre import get_proxies
+from mechanize import HTTPError
+
 from calibre.utils.localization import lang_as_iso639_1
 
-from ..lib.utils import traceback_error
+from ..lib.utils import traceback_error, request
+from ..lib.exception import UnexpectedResult, NoAvailableApiKey
 
 
 load_translations()
 
 
 class Base:
-    name = 'Unknown'
-    alias = 'Unknown'
+    name = None
+    alias = None
+    free = False
+
     lang_codes = {}
     config = {}
-    endpoint = 'https://example.com'
+    endpoint = None
+    method = 'POST'
+    stream = False
     need_api_key = True
     api_key_hint = _('API Keys')
     api_key_pattern = r'^[^\s]+$'
@@ -38,10 +42,9 @@ class Base:
         self.search_paths = []
 
         self.merge_enabled = False
-
         self.api_keys = self.config.get('api_keys', [])[:]
         self.bad_api_keys = []
-        self.api_key = self._get_api_key()
+        self.api_key = self.get_api_key()
 
         concurrency_limit = self.config.get('concurrency_limit')
         if concurrency_limit is not None:
@@ -88,16 +91,24 @@ class Base:
         return _('A correct key format "{}" is required.') \
             .format(cls.api_key_hint)
 
-    def change_api_key(self):
+    def disable_stream(self):
+        self.stream = False
+
+    def get_api_key(self):
+        if self.need_api_key and self.api_keys:
+            return self.api_keys.pop(0)
+        return None
+
+    def swap_api_key(self):
         """Change the API key if the previous one cannot be used."""
         if self.api_key not in self.bad_api_keys:
             self.bad_api_keys.append(self.api_key)
-            self.api_key = self._get_api_key()
+            self.api_key = self.get_api_key()
             if self.api_key is not None:
                 return True
         return False
 
-    def need_change_api_key(self, error_message):
+    def need_swap_api_key(self, error_message):
         if self.need_api_key and len(self.api_keys) > 0:
             for error in self.api_key_errors:
                 if error in error_message:
@@ -114,9 +125,6 @@ class Base:
             if os.path.isfile(path):
                 return path
         return None
-
-    def set_endpoint(self, endpoint):
-        self.endpoint = endpoint
 
     def set_merge_enabled(self, enable):
         self.merge_enabled = enable
@@ -157,62 +165,40 @@ class Base:
     def _is_auto_lang(self):
         return self._get_source_code() == 'auto'
 
-    def _get_api_key(self):
-        if self.need_api_key and self.api_keys:
-            return self.api_keys.pop(0)
-        return None
-
-    def get_browser(self):
-        br = Browser()
-        br.set_handle_robots(False)
-        # Do not verify SSL certificates
-        br.set_ca_data(
-            context=ssl._create_unverified_context(cert_reqs=ssl.CERT_NONE))
-
-        proxies = {}
-        if self.proxy_uri is not None:
-            proxies.update(http=self.proxy_uri, https=self.proxy_uri)
-        else:
-            http = get_proxies(False).get('http')
-            http and proxies.update(http=http, https=http)
-            https = get_proxies(False).get('https')
-            https and proxies.update(https=https)
-        proxies and br.set_proxies(proxies)
-
-        return br
-
-    def get_result(self, url, data=None, headers={}, method='GET',
-                   stream=False, silence=False, callback=None):
-        # Compatible with mechanize 0.3.0 on Calibre 3.21.
-        try:
-            request = Request(
-                url, data, headers=headers, timeout=self.request_timeout,
-                method=method)
-        except Exception:
-            request = Request(
-                url, data, headers=headers, timeout=self.request_timeout)
+    def translate(self, text):
         try:
             result = ''
-            br = self.get_browser()
-            br.open(request)
-            response = br.response()
-            if not stream:
+            response = request(
+                self.get_endpoint(), self.get_body(text), self.get_headers(),
+                self.method, self.request_timeout, self.proxy_uri)
+            if not self.stream:
                 response = result = response.read().decode('utf-8').strip()
-            return response if callback is None else callback(response)
+            return self.get_result(response)
         except Exception as e:
-            if silence:
-                return None
-            error = [traceback_error()]
+            # Combine the error messages for investigation.
+            error_message = traceback_error()
             if isinstance(e, HTTPError):
-                error.append(e.read().decode('utf-8'))
-            elif result:
-                error.append(result)
-            raise Exception(
+                error_message += '\n\n' + e.read().decode('utf-8')
+            elif result != '':
+                error_message += '\n\n' + result
+            # Swap a valid API key if necessary.
+            if self.need_swap_api_key(error_message) and self.swap_api_key():
+                return self.translate(text)
+            raise UnexpectedResult(
                 _('Can not parse returned response. Raw data: {}')
-                .format('\n\n' + '\n\n'.join(error)))
+                .format('\n\n' + error_message))
+
+    def get_endpoint(self):
+        return self.endpoint
+
+    def get_headers(self):
+        return {}
+
+    def get_body(self, text):
+        return None
+
+    def get_result(self, response):
+        return response
 
     def get_usage(self):
         return None
-
-    def translate(self, text):
-        raise NotImplementedError()

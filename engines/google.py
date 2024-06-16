@@ -23,12 +23,13 @@ load_translations()
 class GoogleFreeTranslate(Base):
     name = 'Google(Free)'
     alias = 'Google (Free)'
+    free = True
     lang_codes = Base.load_lang_codes(google)
     endpoint = 'https://translate.googleapis.com/translate_a/single'
     need_api_key = False
 
-    def translate(self, text):
-        headers = {
+    def get_headers(self):
+        return {
             'Accept': '*/*',
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept-Language': 'en-US,en;q=0.9',
@@ -38,7 +39,11 @@ class GoogleFreeTranslate(Base):
             ' Chrome/111.0.0.0 Safari/537.36',
         }
 
-        data = {
+    def get_body(self, text):
+        # The POST method is unstable, despite its ability to send more text.
+        # However, it can be used occasionally with an unacceptable length.
+        self.method = 'GET' if len(text) <= 1800 else 'POST'
+        return {
             'client': 'gtx',
             'sl': self._get_source_code(),
             'tl': self._get_target_code(),
@@ -47,18 +52,12 @@ class GoogleFreeTranslate(Base):
             'q': text,
         }
 
-        # The POST method is unstable, despite its ability to send more text.
-        # However, it can be used occasionally with an unacceptable length.
-        method = 'GET' if len(text) <= 1800 else 'POST'
-        return self.get_result(
-            self.endpoint, data, headers, method=method, callback=self._parse)
-
-    def _parse(self, data):
+    def get_result(self, response):
         # return ''.join(i[0] for i in json.loads(data)[0])
-        return ''.join(i['trans'] for i in json.loads(data)['sentences'])
+        return ''.join(i['trans'] for i in json.loads(response)['sentences'])
 
 
-class GoogleTranslate:
+class GoogleTranslateMixin:
     api_key_errors = ['429']
     api_key_cache = []
     gcloud = None
@@ -151,13 +150,24 @@ class GoogleTranslate:
         return new_api_key
 
 
-class GoogleBasicTranslateADC(GoogleTranslate, Base):
+class GoogleBasicTranslateADC(GoogleTranslateMixin, Base):
     name = 'Google(Basic)ADC'
     alias = 'Google (Basic) ADC'
     lang_codes = Base.load_lang_codes(google)
     endpoint = 'https://translation.googleapis.com/language/translate/v2'
     api_key_hint = 'API key'
     need_api_key = False
+
+    def _create_body(self, text):
+        body = {
+            'format': 'html',
+            'model': 'nmt',
+            'target': self._get_target_code(),
+            'q': text
+        }
+        if not self._is_auto_lang():
+            body.update(source=self._get_source_code())
+        return body
 
     def get_headers(self):
         return {
@@ -166,24 +176,10 @@ class GoogleBasicTranslateADC(GoogleTranslate, Base):
             'x-goog-user-project': self._get_project_id(),
         }
 
-    def get_data(self, data):
-        return json.dumps(data)
+    def get_body(self, text):
+        return json.dumps(self._create_body(text))
 
-    def translate(self, text):
-        data = {
-            'format': 'html',
-            'model': 'nmt',
-            'target': self._get_target_code(),
-            'q': text
-        }
-
-        if not self._is_auto_lang():
-            data.update(source=self._get_source_code())
-        return self.get_result(
-            self.endpoint, self.get_data(data), self.get_headers(),
-            method='POST', callback=self._parse)
-
-    def _parse(self, data):
+    def get_result(self, data):
         translations = json.loads(data)['data']['translations']
         return ''.join(i['translatedText'] for i in translations)
 
@@ -197,12 +193,13 @@ class GoogleBasicTranslate(GoogleBasicTranslateADC):
     def get_headers(self):
         return {'Content-Type': 'application/x-www-form-urlencoded'}
 
-    def get_data(self, data):
-        data.update(key=self.api_key)
-        return data
+    def get_body(self, text):
+        body = self._create_body(text)
+        body.update(key=self.api_key)
+        return body
 
 
-class GoogleAdvancedTranslate(GoogleTranslate, Base):
+class GoogleAdvancedTranslate(GoogleTranslateMixin, Base):
     name = 'Google(Advanced)'
     alias = 'Google (Advanced) ADC'
     lang_codes = Base.load_lang_codes(google)
@@ -210,30 +207,29 @@ class GoogleAdvancedTranslate(GoogleTranslate, Base):
     api_key_hint = 'PROJECT_ID'
     need_api_key = False
 
-    def translate(self, text):
-        project_id = self._get_project_id()
-        endpoint = self.endpoint.format('%s:translateText' % project_id)
-        headers = {
+    def get_endpoint(self):
+        return self.endpoint.format(
+            '%s:translateText' % self._get_project_id())
+
+    def get_headers(self):
+        return {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer %s' % self._get_credential(),
-            'x-goog-user-project': project_id,
+            'x-goog-user-project': self._get_project_id(),
         }
 
-        data = {
+    def get_body(self, text):
+        body = {
             'targetLanguageCode': self._get_target_code(),
             'contents': [text],
             'mimeType': 'text/plain',
         }
-
         if not self._is_auto_lang():
-            data.update(sourceLanguageCode=self._get_source_code())
+            body.update(sourceLanguageCode=self._get_source_code())
+        return json.dumps(body)
 
-        return self.get_result(
-            endpoint, json.dumps(data), headers, method='POST',
-            callback=self._parse)
-
-    def _parse(self, data):
-        translations = json.loads(data)['translations']
+    def get_result(self, response):
+        translations = json.loads(response)['translations']
         return ''.join(i['translatedText'] for i in translations)
 
 
@@ -241,8 +237,8 @@ class GeminiPro(Base):
     name = 'GeminiPro'
     alias = 'Gemini Pro'
     lang_codes = Base.load_lang_codes(gemini)
-    endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/' \
-        'gemini-pro:{}?key={}'
+    endpoint = 'https://generativelanguage.googleapis.com/v1/' \
+        'models/gemini-pro:{}?key={}'
     need_api_key = True
 
     concurrency_limit = 1
@@ -267,10 +263,6 @@ class GeminiPro(Base):
         self.top_p = self.config.get('top_p', self.top_p)
         self.stream = self.config.get('stream', self.stream)
 
-    def _endpoint(self):
-        method = 'streamGenerateContent' if self.stream else 'generateContent'
-        return self.endpoint.format(method, self.api_key)
-
     def _prompt(self, text):
         prompt = self.prompt.replace('<tlang>', self.target_lang)
         if self._is_auto_lang():
@@ -283,11 +275,15 @@ class GeminiPro(Base):
                 '{{id_\\d+}} in the content are retained.'
         return prompt + ' Start translating: ' + text
 
-    def _headers(self):
+    def get_endpoint(self):
+        method = 'streamGenerateContent' if self.stream else 'generateContent'
+        return self.endpoint.format(method, self.api_key)
+
+    def get_headers(self):
         return {'Content-Type': 'application/json'}
 
-    def _data(self, text):
-        return {
+    def get_body(self, text):
+        return json.dumps({
             "contents": [
                 {"role": "user", "parts": [{"text": self._prompt(text)}]},
             ],
@@ -316,19 +312,14 @@ class GeminiPro(Base):
                     "threshold": "BLOCK_NONE"
                 },
             ],
-        }
+        })
 
-    def translate(self, text):
-        return self.get_result(
-            self._endpoint(), json.dumps(self._data(text)), self._headers(),
-            method='POST', callback=self._parse)
-
-    def _parse(self, data):
+    def get_result(self, response):
         if self.stream:
             parts = []
-            for item in json.loads(data):
+            for item in json.loads(response.read()):
                 for part in item['candidates'][0]['content']['parts']:
                     parts.append(part)
         else:
-            parts = json.loads(data)['candidates'][0]['content']['parts']
+            parts = json.loads(response)['candidates'][0]['content']['parts']
         return ''.join([part['text'] for part in parts])

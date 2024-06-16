@@ -1,6 +1,11 @@
+import io
+import time
 import json
+import uuid
 
 from .. import EbookTranslator
+from ..lib.utils import request
+from ..lib.exception import UnsupportedModel
 
 from .base import Base
 from .languages import google
@@ -8,8 +13,10 @@ from .languages import google
 
 try:
     from http.client import IncompleteRead
+    from urllib.parse import urlsplit
 except ImportError:
     from httplib import IncompleteRead
+    from urlparse import urlsplit
 
 load_translations()
 
@@ -61,7 +68,7 @@ class ChatgptTranslate(Base):
         self.top_p = self.config.get('top_p', self.top_p)
         self.stream = self.config.get('stream', self.stream)
 
-    def _get_prompt(self):
+    def get_prompt(self):
         prompt = self.prompt.replace('<tlang>', self.target_lang)
         if self._is_auto_lang():
             prompt = prompt.replace('<slang>', 'detected language')
@@ -69,45 +76,40 @@ class ChatgptTranslate(Base):
             prompt = prompt.replace('<slang>', self.source_lang)
         # Recommend setting temperature to 0.5 for retaining the placeholder.
         if self.merge_enabled:
-            prompt += (' Ensure that placeholders matching the pattern'
-                       '{{id_\\d+}} in the content are retained.')
+            prompt += (
+                ' Ensure that placeholders matching the pattern {{id_\\d+}} '
+                'in the content are retained.')
         return prompt
 
-    def _get_headers(self):
+    def get_headers(self):
         return {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer %s' % self.api_key,
             'User-Agent': 'Ebook-Translator/%s' % EbookTranslator.__version__
         }
 
-    def _get_data(self, text):
-        return {
-            'stream': self.stream,
+    def get_body(self, text):
+        body = {
             'model': self.model,
             'messages': [
-                {'role': 'system', 'content': self._get_prompt()},
+                {'role': 'system', 'content': self.get_prompt()},
                 {'role': 'user', 'content': text}
             ],
         }
-
-    def translate(self, text):
-        data = self._get_data(text)
+        self.stream and body.update(stream=True)
         sampling_value = getattr(self, self.sampling)
-        data.update({self.sampling: sampling_value})
+        body.update({self.sampling: sampling_value})
+        return json.dumps(body)
 
-        return self.get_result(
-            self.endpoint, json.dumps(data), self._get_headers(),
-            method='POST', stream=self.stream, callback=self._parse)
-
-    def _parse(self, data):
+    def get_result(self, response):
         if self.stream:
-            return self._parse_stream(data)
-        return json.loads(data)['choices'][0]['message']['content']
+            return self._parse_stream(response)
+        return json.loads(response)['choices'][0]['message']['content']
 
-    def _parse_stream(self, data):
+    def _parse_stream(self, response):
         while True:
             try:
-                line = data.readline().decode('utf-8').strip()
+                line = response.readline().decode('utf-8').strip()
             except IncompleteRead:
                 continue
             except Exception as e:
@@ -121,3 +123,162 @@ class ChatgptTranslate(Base):
                 delta = json.loads(chunk)['choices'][0]['delta']
                 if 'content' in delta:
                     yield str(delta['content'])
+
+
+class ChatgptBatchTranslate:
+    """https://cookbook.openai.com/examples/batch_processing"""
+
+    supported_models = [
+        'gpt-4o',
+        'gpt-4-turbo',
+        'gpt-4',
+        'gpt-4-32k',
+        'gpt-3.5-turbo',
+        'gpt-3.5-turbo-16k',
+        'gpt-4-turbo-preview',
+        'gpt-4-vision-preview',
+        'gpt-4-turbo-2024-04-09',
+        'gpt-4-0314',
+        'gpt-4-32k-0314',
+        'gpt-4-32k-0613',
+        'gpt-3.5-turbo-0301',
+        'gpt-3.5-turbo-16k-0613',
+        'gpt-3.5-turbo-1106',
+        'gpt-3.5-turbo-0613',
+        'text-embedding-3-large',
+        'text-embedding-3-small',
+        'text-embedding-ada-002',
+    ]
+    boundary = uuid.uuid4().hex
+
+    def __init__(self, translator):
+        self.translator = translator
+        self.translator.stream = True
+
+        domain_name = '://'.join(
+            urlsplit(self.translator.endpoint, 'https')[:2])
+        self.file_endpoint = '%s/v1/files' % domain_name
+        self.batch_endpont = '%s/v1/batches' % domain_name
+
+    def _create_multipart_form_data(self, body):
+        """https://www.rfc-editor.org/rfc/rfc2046#section-5.1"""
+        data = []
+        data.append('--%s' % self.boundary)
+        data.append('Content-Disposition: form-data; name="purpose"')
+        data.append('')
+        data.append('batch')
+        data.append('--%s' % self.boundary)
+        data.append(
+            'Content-Disposition: form-data; name="file"; '
+            'filename="original.jsonl"')
+        data.append('Content-Type: application/json')
+        data.append('')
+        data.append(body)
+        data.append('--%s--' % self.boundary)
+        return '\r\n'.join(data).encode('utf-8')
+
+    def headers(self, extra_headers={}):
+        headers = self.translator.get_headers()
+        headers.update(extra_headers)
+        return headers
+
+    def upload(self, paragraphs):
+        # time.sleep(2)
+        # return 'test-file-id'
+
+        """Upload the original content and retrieve the file id.
+        https://platform.openai.com/docs/api-reference/files/create
+        """
+        if self.translator.model not in self.supported_models:
+            raise UnsupportedModel(
+                'The model "{}" does not support batch functionality.'
+                .format(self.translator.model))
+        body = io.StringIO()
+        for paragraph in paragraphs:
+            body.write(json.dumps({
+                "custom_id": paragraph.md5,
+                "method": "POST",
+                "url": "/v1/chat/completions",
+                "body": self.translator.get_body(paragraph.original)
+            }))
+            if paragraph != paragraphs[-1]:
+                body.write('\n')
+        content_type = 'multipart/form-data; boundary="%s"' % self.boundary
+        headers = self.headers({'Content-Type': content_type})
+        body = self._create_multipart_form_data(body.getvalue())
+        response = request(self.file_endpoint, body, headers, 'POST')
+        return json.loads(response).get('id')
+
+    def delete(self, file_id):
+        # time.sleep(2)
+        # return True
+
+        headers = self.translator.get_headers()
+        del headers['Content-Type']
+        response = request(
+            '%s/%s' % (self.file_endpoint, file_id), headers=headers,
+            method='DELETE')
+        return json.loads(response).get('deleted')
+
+    def retrieve(self, output_file_id):
+        # time.sleep(2)
+        # return {
+        #     '0ac5d998596c8a7b0517be70784654e8': 'AAAA',
+        #     'f3994e8e7c2ce9be789811df77f721de': 'BBBB',
+        #     'de03c04fb55cb9fbc24f6acbf4847ce7': 'CCCC',
+        # }
+
+        headers = self.translator.get_headers()
+        del headers['Content-Type']
+        response = request(
+            '%s/%s/content' % (self.batch_endpont, output_file_id),
+            headers=headers)
+
+        translations = {}
+        for line in io.BytesIO(response):
+            result = json.loads(line)
+            response = result['response']
+            if response.get('status_code') == 200:
+                content = response['body']['choices'][0]['message']['content']
+                translations[result.get('custom_id')] = content
+        return translations
+
+    def create(self, file_id):
+        # time.sleep(2)
+        # return 'test-batch-id'
+
+        headers = self.translator.get_headers()
+        body = json.dumps({
+            'input_file_id': file_id,
+            'endpoint': '/v1/chat/completions',
+            'completion_window': '24h',
+        })
+        response = request(self.batch_endpont, body, headers, 'POST')
+        return json.loads(response).get('id')
+
+    def check(self, batch_id):
+        # time.sleep(2)
+        # return {
+        #     'status': 'completed',
+        #     'output_file_id': 'xxxx',
+        #     'request_counts': {
+        #         'total': 100,
+        #         'completed': 95,
+        #         'failed': 5
+        #     },
+        # }
+
+        response = request(
+            '%s/%s' % (self.batch_endpont, batch_id),
+            headers=self.translator.get_headers())
+        return json.loads(response)
+
+    def cancel(self, batch_id):
+        # time.sleep(2)
+        # return True
+
+        headers = self.translator.get_headers()
+        response = request(
+            '%s/%s/cancel' % (self.batch_endpont, batch_id),
+            headers=headers, method='POST')
+        return json.loads(response).get('status') == 'cancelling'

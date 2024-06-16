@@ -1,16 +1,24 @@
 import re
 import sys
+import ssl
 import codecs
 import socket
 import hashlib
 import traceback
 from subprocess import Popen
 
+from calibre import get_proxies
+from mechanize import Browser, Request
+
 from ..lib.cssselect import GenericTranslator, SelectorError
 
 
 ns = {'x': 'http://www.w3.org/1999/xhtml'}
 is_test = 'unittest' in sys.modules
+
+
+def dummy(*args, **kwargs):
+    pass
 
 
 def sep(char='═', count=38):
@@ -129,11 +137,36 @@ def open_file(path, encoding='utf-8'):
 
 
 def traceback_error():
-    try:
+    if sys.version_info >= (3, 0, 0):
         return traceback.format_exc(chain=False).strip()
-    except Exception:
+    else:
         return traceback.format_exc().strip()
 
 
-def dummy(*args, **kwargs):
-    pass
+def request(
+        url, data=None, headers={}, method='GET', timeout=30, proxy_uri=None,
+        stream=False):
+    br = Browser()
+    br.set_handle_robots(False)
+    # Do not verify SSL certificates
+    br.set_ca_data(
+        context=ssl._create_unverified_context(cert_reqs=ssl.CERT_NONE))
+    # Set up proxy
+    proxies = {}
+    if proxy_uri is not None:
+        proxies.update(http=proxy_uri, https=proxy_uri)
+    else:
+        http = get_proxies(False).get('http')
+        http and proxies.update(http=http, https=http)
+        https = get_proxies(False).get('https')
+        https and proxies.update(https=https)
+    proxies and br.set_proxies(proxies)
+    # Compatible with mechanize 0.3.0 on Calibre 3.21.
+    try:
+        request = Request(
+            url, data, headers=headers, timeout=timeout, method=method)
+    except Exception:
+        request = Request(url, data, headers=headers, timeout=timeout)
+    br.open(request)
+
+    return br.response()
