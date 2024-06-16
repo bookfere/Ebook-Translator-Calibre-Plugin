@@ -16,9 +16,9 @@ load_translations()
 
 
 class Paragraph:
-    def __init__(self, id, md5, raw, original, ignored=False, attributes=None,
-                 page=None, translation=None, engine_name=None,
-                 target_lang=None):
+    def __init__(
+            self, id, md5, raw, original, ignored=False, attributes=None,
+            page=None, translation=None, engine_name=None, target_lang=None):
         self.id = id
         self.md5 = md5
         self.raw = raw
@@ -73,6 +73,7 @@ class TranslationCache:
         communication, and another one is used to cache translations, which
         avoids the need for retranslation.
         """
+        self.identity = identity
         self.persistence = persistence
         self.file_path = self._path(identity)
         # An interruption may occur, resulting in the cache size being less
@@ -150,6 +151,9 @@ class TranslationCache:
     def is_fresh(self):
         return self.fresh
 
+    def get_identity(self):
+        return self.identity
+
     def is_persistence(self):
         return self.persistence
 
@@ -168,6 +172,11 @@ class TranslationCache:
             'SELECT value FROM info WHERE key=?', (key,))
         result = resource.fetchone()
         return result[0] if result else None
+
+    def del_info(self, key):
+        self.cursor.execute(
+            'DELETE FROM info WHERE key=?', (key,))
+        self.connection.commit()
 
     def save(self, original_group):
         if self.is_fresh():

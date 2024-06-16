@@ -1,7 +1,11 @@
 import unittest
+from unittest.mock import patch
 from types import GeneratorType
 
-from ..lib.utils import uid, trim, chunk, group
+from ..lib.utils import uid, trim, chunk, group, open_file, request
+
+
+module_name = 'calibre_plugins.ebook_translator.lib.utils'
 
 
 class TestUtils(unittest.TestCase):
@@ -49,5 +53,73 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(
             [(1, 3), (5, 7), (9, 9)], group([1, 2, 3, 5, 6, 7, 9]))
 
-    def test_open_file(self):
-        pass
+    @patch(module_name + '.open')
+    def test_open_file(self, mock_open):
+        mock_open.return_value.__enter__.return_value.read.return_value = 'a'
+        self.assertEqual(open_file('/path/to/file'), 'a')
+        mock_open.assert_called_with(
+            '/path/to/file', 'r', encoding='utf-8', newline=None)
+
+    @patch(module_name + '.open')
+    def test_open_file_with_encoding(self, mock_open):
+        mock_open.return_value.__enter__.return_value.read.return_value = 'a'
+        self.assertEqual(open_file('/path/to/file', 'ascii'), 'a')
+        mock_open.assert_called_once_with(
+            '/path/to/file', 'r', encoding='ascii', newline=None)
+
+    @patch(module_name + '.codecs.open')
+    @patch(module_name + '.open')
+    def test_open_file_with_open_error(self, mock_open, mock_codecs_open):
+        mock_open.side_effect = TypeError
+        open_file('/path/to/file')
+        mock_open.assert_called_once_with(
+            '/path/to/file', 'r', encoding='utf-8', newline=None)
+        mock_codecs_open.assert_called_once_with('/path/to/file', 'rbU')
+
+    @patch(module_name + '.ssl')
+    @patch(module_name + '.Request')
+    @patch(module_name + '.Browser')
+    def test_request(self, mock_browser, mock_request, mock_ssl):
+        browser = mock_browser()
+
+        self.assertIs(
+            request('https://example.com/api', 'test data'),
+            browser.response())
+
+        browser.set_handle_robots.assert_called_once_with(False)
+        mock_ssl._create_unverified_context.assert_called_once_with(
+            cert_reqs=mock_ssl.CERT_NONE)
+        browser.set_ca_data.assert_called_once_with(
+            context=mock_ssl._create_unverified_context())
+        browser.set_proxies.assert_not_called()
+
+        mock_request.assert_called_once_with(
+            'https://example.com/api', 'test data', headers={}, timeout=30,
+            method='GET')
+        browser.open.assert_called_once_with(mock_request())
+
+    @patch(module_name + '.ssl')
+    @patch(module_name + '.Request')
+    @patch(module_name + '.Browser')
+    def test_request_with_proxy(self, mock_browser, mock_request, mock_ssl):
+        browser = mock_browser()
+
+        self.assertIs(
+            request(
+                'https://example.com/api', 'test data',
+                headers={'User-Agent': 'Test/Agent'}, method='POST',
+                timeout=30, proxy_uri='http://127.0.0.1:1234'),
+            browser.response())
+
+        browser.set_handle_robots.assert_called_once_with(False)
+        mock_ssl._create_unverified_context.assert_called_once_with(
+            cert_reqs=mock_ssl.CERT_NONE)
+        browser.set_ca_data.assert_called_once_with(
+            context=mock_ssl._create_unverified_context())
+        browser.set_proxies.assert_called_once_with({
+            'http': 'http://127.0.0.1:1234', 'https': 'http://127.0.0.1:1234'})
+
+        mock_request.assert_called_once_with(
+            'https://example.com/api', 'test data',
+            headers={'User-Agent': 'Test/Agent'}, timeout=30, method='POST')
+        browser.open.assert_called_once_with(mock_request())

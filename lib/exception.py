@@ -1,3 +1,7 @@
+class UnexpectedResult(Exception):
+    pass
+
+
 class ConversionFailed(Exception):
     pass
 
@@ -19,4 +23,8 @@ class BadApiKeyFormat(TranslationCanceled):
 
 
 class NoAvailableApiKey(TranslationCanceled):
+    pass
+
+
+class UnsupportedModel(Exception):
     pass

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-05-10 21:15+0800\n"
+"POT-Creation-Date: 2024-06-16 22:34+0800\n"
 "PO-Revision-Date: 2024-05-15 16:21+0300\n"
 "Last-Translator: DogancanYr <EMAIL@ADDRESS>\n"
 "Language-Team: Turkish <LL@li.org>\n"
@@ -43,6 +43,9 @@ msgstr "&Başlat"
 
 msgid "Input Format"
 msgstr "Giriş Formatı"
+
+msgid "Source Language"
+msgstr "Kaynak Dil"
 
 msgid "Target Language"
 msgstr "Hedef Dil"
@@ -122,6 +125,12 @@ msgstr "Hizalanmamış öğeler: {}"
 msgid "Delete"
 msgstr "Sil"
 
+msgid "Batch Translation"
+msgstr ""
+
+msgid "Beta"
+msgstr "Beta"
+
 msgid "Translate All"
 msgstr "Tümünü Çevir"
 
@@ -148,9 +157,6 @@ msgstr "Etkin"
 
 msgid "Translation Engine"
 msgstr "Çeviri Motoru"
-
-msgid "Source Language"
-msgstr "Kaynak Dil"
 
 msgid "Custom Ebook Title"
 msgstr "Özel E-Kitap Başlığı"
@@ -272,6 +278,55 @@ msgstr "Son Değiştirme Zamanı"
 msgid "Size (MB)"
 msgstr "Boyut (MB)"
 
+msgid "processing..."
+msgstr ""
+
+msgid "checking..."
+msgstr ""
+
+msgid "canceling..."
+msgstr ""
+
+msgid "applying..."
+msgstr ""
+
+msgid "ChatGPT Batch Translation"
+msgstr ""
+
+msgid "Create a new batch translation"
+msgstr ""
+
+msgid ""
+"All original content must be uploaded to OpenAI for batch translation, and "
+"you will need to wait up to 24 hours to continue the translation process.<a "
+"href=\"https://cookbook.openai.com/examples/batch_processing\">more details</"
+"a>"
+msgstr ""
+
+msgid "Refresh"
+msgstr ""
+
+msgid "Cancel Batch Translation"
+msgstr ""
+
+msgid "Apply"
+msgstr ""
+
+msgid "Batch translation details"
+msgstr ""
+
+msgid "Status"
+msgstr "Durum"
+
+msgid "Total"
+msgstr ""
+
+msgid "Completed"
+msgstr ""
+
+msgid "Failed"
+msgstr ""
+
 msgid "Translating..."
 msgstr "Çeviri yapılıyor..."
 
@@ -354,9 +409,6 @@ msgstr ""
 
 msgid "Original"
 msgstr "Orijinal"
-
-msgid "Status"
-msgstr "Durum"
 
 msgid ""
 "The number of lines differs between the original text and the translated "
@@ -496,12 +548,6 @@ msgstr "\"{}\" çevirisi tamamlandı. "
 
 msgid "Translation canceled."
 msgstr "Çeviri iptal edildi."
-
-msgid "No available API key."
-msgstr "Kullanılabilir API anahtarı yok."
-
-msgid "API key was Changed due to previous one unavailable."
-msgstr "API anahtarı öncekinin kullanılamaması nedeniyle değiştirildi."
 
 msgid "Failed to retrieve data from translate engine API."
 msgstr "Çeviri motoru API'sinden veri alınamadı."
@@ -688,9 +734,6 @@ msgstr "Çeviri altta"
 msgid "Above original"
 msgstr "Çeviri üstte"
 
-msgid "Beta"
-msgstr "Beta"
-
 msgid "Right to original"
 msgstr "Çeviri sağda"
 
@@ -874,3 +917,9 @@ msgstr "Önbellek Yöneticisi"
 
 msgid "Choose Translation Mode"
 msgstr "Çeviri Modunu Seçin"
+
+#~ msgid "No available API key."
+#~ msgstr "Kullanılabilir API anahtarı yok."
+
+#~ msgid "API key was Changed due to previous one unavailable."
+#~ msgstr "API anahtarı öncekinin kullanılamaması nedeniyle değiştirildi."

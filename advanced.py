@@ -10,13 +10,14 @@ from .lib.cache import Paragraph, get_cache
 from .lib.translation import get_engine_class, get_translator, get_translation
 from .lib.element import get_element_handler
 from .lib.conversion import extract_item, extra_formats
+from .engines.openai import ChatgptTranslate, ChatgptBatchTranslate
 from .engines.custom import CustomTranslate
 
 from . import EbookTranslator
 from .components import (
     EngineList, Footer, SourceLang, TargetLang, InputFormat, OutputFormat,
     AlertMessage, AdvancedTranslationTable, StatusColor, TranslationStatus,
-    set_shortcut)
+    set_shortcut, ChatgptBatchTranslationManager)
 
 
 try:
@@ -257,10 +258,12 @@ class CreateTranslationProject(QDialog):
         input_layout.addWidget(input_format)
         layout.addWidget(input_group)
 
-        def change_input_format(format):
-            self.ebook.set_input_format(format)
-        change_input_format(input_format.currentText())
-        input_format.currentTextChanged.connect(change_input_format)
+        source_group = QGroupBox(_('Source Language'))
+        source_layout = QVBoxLayout(source_group)
+        source_lang = SourceLang()
+        source_lang.setFixedWidth(150)
+        source_layout.addWidget(source_lang)
+        layout.addWidget(source_group)
 
         target_group = QGroupBox(_('Target Language'))
         target_layout = QVBoxLayout(target_group)
@@ -269,20 +272,11 @@ class CreateTranslationProject(QDialog):
         target_layout.addWidget(target_lang)
         layout.addWidget(target_group)
 
-        engine_class = get_engine_class()
-        target_lang.refresh.emit(
-            engine_class.lang_codes.get('target'),
-            engine_class.config.get('target_lang'))
-
-        def change_target_format(format):
-            self.ebook.set_target_lang(format)
-        change_target_format(target_lang.currentText())
-        target_lang.currentTextChanged.connect(change_target_format)
-
         if self.ebook.input_format in extra_formats.keys():
             encoding_group = QGroupBox(_('Encoding'))
             encoding_layout = QVBoxLayout(encoding_group)
             encoding_select = QComboBox()
+            encoding_select.setFixedWidth(150)
             encoding_select.addItems(encoding_list)
             encoding_layout.addWidget(encoding_select)
             layout.addWidget(encoding_group)
@@ -294,6 +288,7 @@ class CreateTranslationProject(QDialog):
             direction_group = QGroupBox(_('Target Directionality'))
             direction_layout = QVBoxLayout(direction_group)
             direction_list = QComboBox()
+            direction_list.setFixedWidth(150)
             direction_list.addItem(_('Auto'), 'auto')
             direction_list.addItem(_('Left to Right'), 'ltr')
             direction_list.addItem(_('Right to Left'), 'rtl')
@@ -304,6 +299,30 @@ class CreateTranslationProject(QDialog):
                 direction = direction_list.itemData(index)
                 self.ebook.set_target_direction(direction)
             direction_list.currentIndexChanged.connect(change_direction)
+
+        def change_input_format(format):
+            self.ebook.set_input_format(format)
+        change_input_format(input_format.currentText())
+        input_format.currentTextChanged.connect(change_input_format)
+
+        engine_class = get_engine_class()
+        source_lang.refresh.emit(
+            engine_class.lang_codes.get('source'),
+            engine_class.config.get('source_lang'),
+            not issubclass(engine_class, CustomTranslate))
+        target_lang.refresh.emit(
+            engine_class.lang_codes.get('target'),
+            engine_class.config.get('target_lang'))
+
+        def change_source_lang(lang):
+            self.ebook.set_source_lang(source_lang.currentText())
+        change_source_lang(source_lang.currentText())
+        source_lang.currentTextChanged.connect(change_source_lang)
+
+        def change_target_lang(lang):
+            self.ebook.set_target_lang(lang)
+        change_target_lang(target_lang.currentText())
+        target_lang.currentTextChanged.connect(change_target_lang)
 
         return widget
 
@@ -317,6 +336,7 @@ class AdvancedTranslation(QDialog):
     paragraph_sig = pyqtSignal(object)
     ebook_title = pyqtSignal()
     progress_bar = pyqtSignal()
+    batch_translation = pyqtSignal()
 
     preparation_thread = QThread()
     trans_thread = QThread()
@@ -671,6 +691,8 @@ class AdvancedTranslation(QDialog):
 
         delete_button = QPushButton(_('Delete'))
         delete_button.setToolTip(delete_button.text() + ' [Del]')
+        batch_translation = QPushButton(
+            ' %s (%s)' % (_('Batch Translation'), _('Beta')))
         translate_all = QPushButton('  %s  ' % _('Translate All'))
         translate_selected = QPushButton('  %s  ' % _('Translate Selected'))
 
@@ -678,18 +700,9 @@ class AdvancedTranslation(QDialog):
         translate_all.clicked.connect(self.translate_all_paragraphs)
         translate_selected.clicked.connect(self.translate_selected_paragraph)
 
-        delete_button.setDisabled(True)
-        translate_selected.setDisabled(True)
-
-        def item_selection_changed():
-            disabled = self.table.selected_count() < 1
-            delete_button.setDisabled(disabled)
-            translate_selected.setDisabled(disabled)
-        item_selection_changed()
-        self.table.itemSelectionChanged.connect(item_selection_changed)
-
         action_layout.addWidget(delete_button)
         action_layout.addStretch(1)
+        action_layout.addWidget(batch_translation)
         action_layout.addWidget(translate_all)
         action_layout.addWidget(translate_selected)
 
@@ -699,6 +712,32 @@ class AdvancedTranslation(QDialog):
         # stop_layout.addStretch(1)
         stop_button = QPushButton(_('Stop'))
         stop_layout.addWidget(stop_button)
+
+        delete_button.setDisabled(True)
+        translate_selected.setDisabled(True)
+
+        self.batch_translation.connect(
+            lambda: batch_translation.setVisible(
+                self.current_engine == ChatgptTranslate))
+        self.batch_translation.emit()
+
+        def start_batch_translation():
+            translator = get_translator(self.current_engine)
+            translator.set_source_lang(self.ebook.source_lang)
+            translator.set_target_lang(self.ebook.target_lang)
+            translator.disable_stream()
+            batch_translator = ChatgptBatchTranslate(translator)
+            batch = ChatgptBatchTranslationManager(
+                batch_translator, self.cache, self.table, self)
+            batch.exec_()
+        batch_translation.clicked.connect(start_batch_translation)
+
+        def item_selection_changed():
+            disabled = self.table.selected_count() < 1
+            delete_button.setDisabled(disabled)
+            translate_selected.setDisabled(disabled)
+        item_selection_changed()
+        self.table.itemSelectionChanged.connect(item_selection_changed)
 
         def stop_translation():
             action = self.alert.ask(
@@ -821,13 +860,11 @@ class AdvancedTranslation(QDialog):
         def refresh_languages():
             source_lang.refresh.emit(
                 self.current_engine.lang_codes.get('source'),
-                self.current_engine.config.get('source_lang'),
+                self.ebook.source_lang,
                 not isinstance(self.current_engine, CustomTranslate))
-            lang = self.current_engine.config.get('target_lang')
-            if target_lang.findText(self.ebook.target_lang):
-                lang = self.ebook.target_lang
             target_lang.refresh.emit(
-                self.current_engine.lang_codes.get('target'), lang)
+                self.current_engine.lang_codes.get('target'),
+                self.ebook.target_lang)
         refresh_languages()
         self.ebook.set_source_lang(source_lang.currentText())
 
@@ -835,6 +872,7 @@ class AdvancedTranslation(QDialog):
             engine_name = engine_list.itemData(index)
             self.current_engine = get_engine_class(engine_name)
             self.trans_worker.set_engine_class(self.current_engine)
+            self.batch_translation.emit()
             refresh_languages()
         engine_list.currentIndexChanged.connect(choose_engine)
 

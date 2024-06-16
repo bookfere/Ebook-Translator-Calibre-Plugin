@@ -10,8 +10,7 @@ from ..engines.custom import CustomTranslate
 
 from .utils import sep, trim, dummy, traceback_error
 from .config import get_config
-from .exception import (
-    TranslationFailed, TranslationCanceled, NoAvailableApiKey)
+from .exception import TranslationFailed, TranslationCanceled
 
 
 load_translations()
@@ -121,7 +120,7 @@ class Translation:
         return self.translator.max_error_count > 0 and \
             self.abort_count >= self.translator.max_error_count
 
-    def _translate_text(self, row, text, retry=0, interval=0):
+    def translate_text(self, row, text, retry=0, interval=0):
         """Translation engine service error code documentation:
         * https://cloud.google.com/apis/design/errors
         * https://www.deepl.com/docs-api/api-access/error-handling/
@@ -132,39 +131,31 @@ class Translation:
         if self.cancel_request():
             raise TranslationCanceled(_('Translation canceled.'))
         try:
-            text = self.glossary.replace(text)
             translation = self.translator.translate(text)
             self.abort_count = 0
             return translation
         except Exception as e:
             if self.cancel_request() or self.need_stop():
                 raise TranslationCanceled(_('Translation canceled.'))
-            # Try to retrieve an available API key.
-            if self.translator.need_change_api_key(str(e).lower()):
-                if not self.translator.change_api_key():
-                    raise NoAvailableApiKey(_('No available API key.'))
-                self.log(
-                    _('API key was Changed due to previous one unavailable.'))
-            else:
-                self.abort_count += 1
-                message = _(
-                    'Failed to retrieve data from translate engine API.')
-                if retry >= self.translator.request_attempt:
-                    raise TranslationFailed('{}\n{}'.format(message, str(e)))
-                retry += 1
-                interval += 5
-                # Logging any errors that occur during translation.
-                logged_text = text[:200] + '...' if len(text) > 200 else text
-                error_messages = [
-                    sep(), _('Original: {}').format(logged_text), sep('┈'),
-                    _('Status: Failed {} times / Sleeping for {} seconds')
-                    .format(retry, interval), sep('┈'), _('Error: {}')
-                    .format(traceback_error())]
-                if row >= 0:
-                    error_messages.insert(1, _('Row: {}').format(row))
-                self.log('\n'.join(error_messages), True)
-                time.sleep(interval)
-            return self._translate_text(row, text, retry, interval)
+            self.abort_count += 1
+            message = _(
+                'Failed to retrieve data from translate engine API.')
+            if retry >= self.translator.request_attempt:
+                raise TranslationFailed('{}\n{}'.format(message, str(e)))
+            retry += 1
+            interval += 5
+            # Logging any errors that occur during translation.
+            logged_text = text[:200] + '...' if len(text) > 200 else text
+            error_messages = [
+                sep(), _('Original: {}').format(logged_text), sep('┈'),
+                _('Status: Failed {} times / Sleeping for {} seconds')
+                .format(retry, interval), sep('┈'), _('Error: {}')
+                .format(traceback_error())]
+            if row >= 0:
+                error_messages.insert(1, _('Row: {}').format(row))
+            self.log('\n'.join(error_messages), True)
+            time.sleep(interval)
+            return self.translate_text(row, text, retry, interval)
 
     def translate_paragraph(self, paragraph):
         if self.cancel_request():
@@ -174,7 +165,8 @@ class Translation:
             return
         self.streaming('')
         self.streaming(_('Translating...'))
-        translation = self._translate_text(paragraph.row, paragraph.original)
+        text = self.glossary.replace(paragraph.original)
+        translation = self.translate_text(paragraph.row, text)
         # Process streaming text
         if isinstance(translation, GeneratorType):
             if self.total == 1:
@@ -195,7 +187,7 @@ class Translation:
         paragraph.translation = translation.strip()
         paragraph.engine_name = self.translator.name
         paragraph.target_lang = self.translator.get_target_lang()
-        paragraph.seperator = self.translator.separator
+        # paragraph.seperator = self.translator.separator
         paragraph.is_cache = False
 
     def process_translation(self, paragraph):
