@@ -7,7 +7,7 @@ from .lib.utils import css, is_proxy_availiable
 from .lib.translation import get_engine_class
 
 from .engines import (
-    builtin_engines, GeminiPro, ChatgptTranslate, AzureChatgptTranslate,
+    builtin_engines, GeminiPro, GeminiFlash, ChatgptTranslate, AzureChatgptTranslate,
     ClaudeTranslate)
 from .engines.custom import CustomTranslate
 from .components import (
@@ -537,7 +537,7 @@ class TranslationSetting(QDialog):
         layout.addWidget(chatgpt_group)
 
         def show_gemini_preferences():
-            if not issubclass(self.current_engine, GeminiPro):
+            if not issubclass(self.current_engine, (GeminiPro, GeminiFlash)):
                 gemini_group.setVisible(False)
                 return
             config = self.current_engine.config
@@ -1247,7 +1247,7 @@ class TranslationSetting(QDialog):
             if endpoint and endpoint != self.current_engine.endpoint:
                 config.update(endpoint=endpoint)
 
-        if self.current_engine == GeminiPro:
+        if self.current_engine == GeminiPro or self.current_engine == GeminiFlash:
             self.update_prompt(self.gemini_prompt, config)
 
         # Preferred Language
