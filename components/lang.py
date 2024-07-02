@@ -21,7 +21,7 @@ class SourceLang(QComboBox):
 
     @pyqtSlot(dict, str, bool)
     def set_codes(self, codes, preferred=None, auto_detect=True):
-        current = self.currentText()
+        # current = self.currentText()
         self.clear()
         self.book_lang = lang_as_iso639_1(self.book_lang)
         for lang in sorted(codes, key=ascii_text):
@@ -34,8 +34,8 @@ class SourceLang(QComboBox):
             self.insertItem(0, _('Auto detect'))
         if preferred and preferred in codes:
             self.setCurrentText(preferred)
-        elif current and current in codes:
-            self.setCurrentText(current)
+        # elif current and current in codes:
+        #     self.setCurrentText(current)
         else:
             self.setCurrentIndex(0)
 
