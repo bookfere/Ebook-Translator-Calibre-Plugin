@@ -26,7 +26,7 @@ class DeeplTranslate(Base):
         headers = {'Authorization': 'DeepL-Auth-Key %s' % self.api_key}
         try:
             response = request(self.usage_endpoint, headers=headers)
-            usage = json.loads(response.read().decode('utf-8').strip())
+            usage = json.loads(response)
         except Exception:
             return None
         total = usage.get('character_limit')

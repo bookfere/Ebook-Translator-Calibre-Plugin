@@ -43,8 +43,7 @@ class MicrosoftEdgeTranslate(Base):
     def _get_app_key(self):
         if not self.access_info or datetime.now() > self.access_info['Expire']:
             auth_url = 'https://edge.microsoft.com/translate/auth'
-            response = request(auth_url, method='GET')
-            app_key = response.read().decode('utf-8').strip()
+            app_key = request(auth_url, method='GET')
             self.access_info = self._parse_jwt(app_key)
         else:
             app_key = self.access_info['Token']

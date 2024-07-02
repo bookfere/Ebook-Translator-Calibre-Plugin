@@ -167,20 +167,17 @@ class Base:
 
     def translate(self, text):
         try:
-            result = ''
             response = request(
                 self.get_endpoint(), self.get_body(text), self.get_headers(),
-                self.method, self.request_timeout, self.proxy_uri)
-            if not self.stream:
-                response = result = response.read().decode('utf-8').strip()
+                self.method, self.request_timeout, self.proxy_uri, self.stream)
             return self.get_result(response)
         except Exception as e:
             # Combine the error messages for investigation.
             error_message = traceback_error()
             if isinstance(e, HTTPError):
                 error_message += '\n\n' + e.read().decode('utf-8')
-            elif result != '':
-                error_message += '\n\n' + result
+            elif not self.stream and 'response' in locals():
+                error_message += '\n\n' + response
             # Swap a valid API key if necessary.
             if self.need_swap_api_key(error_message) and self.swap_api_key():
                 return self.translate(text)
