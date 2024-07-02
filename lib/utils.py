@@ -168,5 +168,7 @@ def request(
     except Exception:
         request = Request(url, data, headers=headers, timeout=timeout)
     br.open(request)
-
-    return br.response()
+    response = br.response()
+    if stream:
+        return response
+    return response.read().decode('utf-8').strip()

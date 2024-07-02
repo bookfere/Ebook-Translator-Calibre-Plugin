@@ -84,6 +84,28 @@ class TestUtils(unittest.TestCase):
 
         self.assertIs(
             request('https://example.com/api', 'test data'),
+            browser.response().read().decode('utf-8').strip())
+
+        browser.set_handle_robots.assert_called_once_with(False)
+        mock_ssl._create_unverified_context.assert_called_once_with(
+            cert_reqs=mock_ssl.CERT_NONE)
+        browser.set_ca_data.assert_called_once_with(
+            context=mock_ssl._create_unverified_context())
+        browser.set_proxies.assert_not_called()
+
+        mock_request.assert_called_once_with(
+            'https://example.com/api', 'test data', headers={}, timeout=30,
+            method='GET')
+        browser.open.assert_called_once_with(mock_request())
+
+    @patch(module_name + '.ssl')
+    @patch(module_name + '.Request')
+    @patch(module_name + '.Browser')
+    def test_request_with_stream(self, mock_browser, mock_request, mock_ssl):
+        browser = mock_browser()
+
+        self.assertIs(
+            request('https://example.com/api', 'test data', stream=True),
             browser.response())
 
         browser.set_handle_robots.assert_called_once_with(False)
@@ -109,7 +131,7 @@ class TestUtils(unittest.TestCase):
                 'https://example.com/api', 'test data',
                 headers={'User-Agent': 'Test/Agent'}, method='POST',
                 timeout=30, proxy_uri='http://127.0.0.1:1234'),
-            browser.response())
+            browser.response().read().decode('utf-8').strip())
 
         browser.set_handle_robots.assert_called_once_with(False)
         mock_ssl._create_unverified_context.assert_called_once_with(

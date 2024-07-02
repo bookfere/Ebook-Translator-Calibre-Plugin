@@ -322,7 +322,6 @@ class PageElement(Element):
         text_elements = (
             'a', 'em', 'strong', 'small', 's', 'cite', 'q', 'time', 'samp',
             'i', 'b', 'u', 'mark', 'span', 'data', 'del', 'ins')
-
         is_text_element = element_name in text_elements
 
         # Add translation for left or right position.
@@ -345,17 +344,28 @@ class PageElement(Element):
         is_table_descendant = parent_element is not None and \
             get_name(parent_element) in group_elements
 
+        if self.position == 'only':
+            self.element.addnext(new_element)
+            self._safe_remove(self.element)
+            return
+
+        # new_element.tag = 'span'
         if self.position in ('left', 'above'):
             self.element.addprevious(new_element)
+            # # Added translation at the start of the element.
+            # new_element.tail = self.element.text
+            # self.element.text = None
+            # self.element.insert(0, etree.SubElement(self.element, 'br'))
+            # self.element.insert(0, new_element)
             if is_text_element and is_table_descendant:
                 new_element.addnext(etree.SubElement(self.element, 'br'))
             elif is_text_element:
                 new_element.tail = ' '
         else:
             self.element.addnext(new_element)
-            if self.position == 'only':
-                self._safe_remove(self.element)
-                return
+            # # Added translation at the end of the element.
+            # self.element.append(etree.SubElement(self.element, 'br'))
+            # self.element.append(new_element)
             if is_text_element and is_table_descendant:
                 self.element.addnext(etree.SubElement(self.element, 'br'))
             elif is_text_element:

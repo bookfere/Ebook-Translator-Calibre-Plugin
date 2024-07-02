@@ -184,8 +184,7 @@ class TestBase(unittest.TestCase):
     @patch(module_name + '.base.request')
     def test_translate(self, mock_request):
         self.translator.stream = False
-        mock_request.return_value.read.return_value.decode.return_value\
-            .strip.return_value = '{"text": "你好世界"}'
+        mock_request.return_value = '{"text": "你好世界"}'
 
         self.assertEqual(
             '{"text": "你好世界"}', self.translator.translate('Hello World'))
@@ -193,10 +192,7 @@ class TestBase(unittest.TestCase):
         mock_request.assert_called_once_with(
             'https://example.com/api', '{"text": "Hello World"}',
             {'Authorization': 'Bearer a', 'Content-Type': 'application/json'},
-            'POST', 10.0, None)
-        mock_request().assert_has_calls([
-            call.read(), call.read().decode('utf-8'),
-            call.read().decode().strip()])
+            'POST', 10.0, None, False)
 
     @patch(module_name + '.base.request')
     def test_translate_with_stream(self, mock_request):
@@ -209,7 +205,7 @@ class TestBase(unittest.TestCase):
         mock_request.assert_called_once_with(
             'https://example.com/api', '{"text": "Hello World"}',
             {'Authorization': 'Bearer a', 'Content-Type': 'application/json'},
-            'POST', 10.0, None)
+            'POST', 10.0, None, True)
 
     @patch(module_name + '.base.request')
     def test_translate_with_http_error(self, mock_request):
@@ -238,8 +234,7 @@ class TestBase(unittest.TestCase):
     @patch(module_name + '.base.request')
     def test_translate_with_http_parse_error(self, mock_request):
         self.translator.stream = False
-        mock_request.return_value.read.return_value.decode.return_value \
-            .strip.return_value = 'any unexpected result'
+        mock_request.return_value = 'any unexpected result'
 
         with patch.object(self.translator, 'get_result') as mock_get_result:
             with self.assertRaises(Exception) as cm:
@@ -353,27 +348,24 @@ class TestDeepl(unittest.TestCase):
 
     @patch(module_name + '.deepl.request')
     def test_get_usage(self, mock_request):
-        result = mock_request.return_value.read.return_value.decode \
-            .return_value.strip
-        result.return_value = '{"character_count": 30, "character_limit": 100}'
+        mock_request.return_value = \
+            '{"character_count": 30, "character_limit": 100}'
 
         self.assertEqual(
             _('{} total, {} used, {} left').format(100, 30, 70),
             self.translator.get_usage(),)
 
-        result.return_value = '<dummy info>'
+        mock_request.return_value = '<dummy info>'
         self.assertIsNone(self.translator.get_usage())
 
     @patch(module_name + '.base.request')
     def test_translate(self, mock_request):
-        result = mock_request.return_value.read.return_value.decode \
-            .return_value.strip
-        result.return_value = '{"translations":[{' \
+        mock_request.return_value = '{"translations":[{' \
             '"detected_source_language":"EN","text":"你好世界！"}]}'
 
         self.assertEqual('你好世界！', self.translator.translate('Hello World!'))
 
-        result.return_value = '<dummy info>'
+        mock_request.return_value = '<dummy info>'
         error = re.compile(
             _('Can not parse returned response. Raw data: {}')
             .format('\n\nTraceback.*\n\n<dummy info>'), re.S)
@@ -445,8 +437,7 @@ class TestChatgptTranslate(unittest.TestCase):
             'model': 'gpt-3.5-turbo',
             'messages': [
                 {'role': 'system', 'content': prompt},
-                {'role': 'user', 'content': 'Hello World!'}
-            ],
+                {'role': 'user', 'content': 'Hello World!'}],
             'stream': True,
             'temperature': 1.0})
         mock_et.__version__ = '1.0.0'
@@ -454,7 +445,6 @@ class TestChatgptTranslate(unittest.TestCase):
             'Content-Type': 'application/json',
             'Authorization': 'Bearer a',
             'User-Agent': 'Ebook-Translator/1.0.0'}
-
         template = b'data: {"choices":[{"delta":{"content":"%b"}}]}'
         mock_response = Mock()
         mock_response.readline.side_effect = [
@@ -463,14 +453,14 @@ class TestChatgptTranslate(unittest.TestCase):
         mock_request.return_value = mock_response
         result = self.translator.translate('Hello World!')
 
-        mock_request.assert_called_with(url, data, headers, 'POST', 30.0, None)
+        mock_request.assert_called_with(
+            url, data, headers, 'POST', 30.0, None, True)
         self.assertIsInstance(result, GeneratorType)
         self.assertEqual('你好世界！', ''.join(result))
 
     @patch(module_name + '.base.request')
     def test_translate_normal(self, mock_request):
-        result = mock_request.return_value.read.return_value.decode. \
-            return_value.strip.return_value = \
+        mock_request.return_value = \
             '{"choices": [{"message": {"content": "你好世界！"}}]}'
         self.translator.stream = False
         result = self.translator.translate('Hello World!')
@@ -793,7 +783,8 @@ class TestAzureChatgptTranslate(unittest.TestCase):
                'gpt-35-turbo/chat/completions?api-version=2023-05-15')
         self.translator.endpoint = url
         result = self.translator.translate('Hello World!')
-        mock_request.assert_called_with(url, data, headers, 'POST', 30.0, None)
+        mock_request.assert_called_with(
+            url, data, headers, 'POST', 30.0, None, True)
         self.assertIsInstance(result, GeneratorType)
         self.assertEqual('你好世界！', ''.join(result))
 
@@ -851,14 +842,14 @@ class TestClaudeTranslate(unittest.TestCase):
   }
 }
 """
-        mock_response = Mock()
-        mock_response.read.return_value = data_sample.encode()
-        mock_request.return_value = mock_response
+        mock_request.return_value = data_sample.encode()
         url = 'https://api.anthropic.com/v1/messages'
         self.translator.endpoint = url
         self.translator.stream = False
         result = self.translator.translate('Hello World!')
-        mock_request.assert_called_with(url, data, headers, 'POST', 30.0, None)
+
+        mock_request.assert_called_with(
+            url, data, headers, 'POST', 30.0, None, False)
         self.assertEqual('你好世界！', result)
 
     @patch(module_name + '.anthropic.EbookTranslator')
@@ -924,7 +915,8 @@ data: {"type":"message_stop"}
         url = 'https://api.anthropic.com/v1/messages'
         self.translator.endpoint = url
         result = self.translator.translate('Hello World!')
-        mock_request.assert_called_with(url, data, headers, 'POST', 30.0, None)
+        mock_request.assert_called_with(
+            url, data, headers, 'POST', 30.0, None, True)
         self.assertIsInstance(result, GeneratorType)
         self.assertEqual('你好世界！', ''.join(result))
 
@@ -1058,21 +1050,20 @@ class TestCustom(unittest.TestCase):
         translator = CustomTranslate()
         translator.set_source_lang('English')
         translator.set_target_lang('Chinese')
-        request = mock_request.return_value.read.return_value.decode
         # JSON response
-        request.return_value = '{"text": "你好世界"}'
+        mock_request.return_value = '{"text": "你好世界"}'
         self.assertEqual('你好世界', translator.translate('Hello "World"'))
         mock_request.assert_called_with(
             'https://example.api',
             b'{"source": "en", "target": "zh", "text": "Hello \\"World\\""}',
-            {'Content-Type': 'application/json'}, 'POST', 10.0, None)
+            {'Content-Type': 'application/json'}, 'POST', 10.0, None, False)
         # XML response
         translator.response = 'response.text'
-        request.return_value = '<test>你好世界</test>'
+        mock_request.return_value = '<test>你好世界</test>'
         self.assertEqual('你好世界', translator.translate('Hello World'))
         # Plain response
         translator.response = 'response'
-        request.return_value = '你好世界'
+        mock_request.return_value = '你好世界'
         self.assertEqual('你好世界', translator.translate('Hello World'))
 
     @patch(module_name + '.base.request')
@@ -1082,7 +1073,6 @@ class TestCustom(unittest.TestCase):
         del translator.request['headers']
         translator.set_source_lang('English')
         translator.set_target_lang('Chinese')
-        mock_request.return_value.read.return_value.decode \
-            .return_value = '{"text": "\\"你好\\"\\n世界"}'
+        mock_request.return_value = '{"text": "\\"你好\\"\\n世界"}'
         self.assertEqual(
             '\"你好\"\n世界', translator.translate('\"Hello\"\nWorld'))
