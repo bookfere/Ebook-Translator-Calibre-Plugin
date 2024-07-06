@@ -6,8 +6,6 @@ from ..lib.conversion import ConversionWorker
 from ..lib.ebook import Ebooks
 
 
-load_translations()
-
 module_name = 'calibre_plugins.ebook_translator.lib.conversion'
 
 
@@ -37,7 +35,7 @@ class TestConversionWorker(unittest.TestCase):
         with patch(module_name + '.DEBUG', False):
             self.worker.translate_done(self.job)
             self.gui.job_exception.assert_called_once_with(
-                self.job, dialog_title=_('Translation job failed'))
+                self.job, dialog_title='Translation job failed')
 
     @patch(module_name + '.os')
     @patch(module_name + '.open')
@@ -95,17 +93,16 @@ class TestConversionWorker(unittest.TestCase):
         self.worker.api.format_abspath.assert_called_once_with(89, 'epub')
 
         self.worker.gui.status_bar.show_message.assert_called_once_with(
-            'test description ' + _('completed'), 5000)
+            'test description completed', 5000)
         arguments = self.worker.gui.proceed_question.mock_calls[0].args
         self.assertIsInstance(arguments[0], Callable)
         self.assertIs(self.worker.gui.job_manager.launch_gui_app, arguments[1])
         self.assertEqual('/path/to/log', arguments[2])
-        self.assertEqual(_('Ebook Translation Log'), arguments[3])
-        self.assertEqual(_('Translation Completed'), arguments[4])
-        self.assertEqual(_(
-            'The translation of "{}" was completed. '
-            'Do you want to open the book?')
-            .format('test custom title [German]'),
+        self.assertEqual('Ebook Translation Log', arguments[3])
+        self.assertEqual('Translation Completed', arguments[4])
+        self.assertEqual(
+            'The translation of "test custom title [German]" was completed. '
+            'Do you want to open the book?',
             arguments[5])
 
         mock_payload = Mock()
@@ -161,17 +158,16 @@ class TestConversionWorker(unittest.TestCase):
             '/path/to/test.epub',
             '/path/to/test_ custom title_ [German].epub')
         self.worker.gui.status_bar.show_message.assert_called_once_with(
-            'test description ' + _('completed'), 5000)
+            'test description ' + 'completed', 5000)
         arguments = self.worker.gui.proceed_question.mock_calls[0].args
         self.assertIsInstance(arguments[0], Callable)
         self.assertIs(self.worker.gui.job_manager.launch_gui_app, arguments[1])
         self.assertEqual('/path/to/log', arguments[2])
-        self.assertEqual(_('Ebook Translation Log'), arguments[3])
-        self.assertEqual(_('Translation Completed'), arguments[4])
-        self.assertEqual(_(
-            'The translation of "{}" was completed. '
-            'Do you want to open the book?')
-            .format('test: custom title* [German]'),
+        self.assertEqual('Ebook Translation Log', arguments[3])
+        self.assertEqual('Translation Completed', arguments[4])
+        self.assertEqual(
+            'The translation of "test: custom title* [German]" was completed. '
+            'Do you want to open the book?',
             arguments[5])
 
         mock_payload = Mock()
@@ -225,19 +221,18 @@ class TestConversionWorker(unittest.TestCase):
             .assert_called_once_with(1)
         self.worker.api.format_abspath.assert_called_once_with(90, 'srt')
         self.worker.gui.status_bar.show_message.assert_called_once_with(
-            'test description ' + _('completed'), 5000)
+            'test description ' + 'completed', 5000)
         self.assertEqual('test custom title [German]', metadata.title)
 
         arguments = self.worker.gui.proceed_question.mock_calls[0].args
         self.assertIsInstance(arguments[0], Callable)
         self.assertIs(self.worker.gui.job_manager.launch_gui_app, arguments[1])
         self.assertEqual('C:\\path\\to\\log', arguments[2])
-        self.assertEqual(_('Ebook Translation Log'), arguments[3])
-        self.assertEqual(_('Translation Completed'), arguments[4])
-        self.assertEqual(_(
-            'The translation of "{}" was completed. '
-            'Do you want to open the book?')
-            .format('test custom title [German]'),
+        self.assertEqual('Ebook Translation Log', arguments[3])
+        self.assertEqual('Translation Completed', arguments[4])
+        self.assertEqual(
+            'The translation of "test custom title [German]" was completed. '
+            'Do you want to open the book?',
             arguments[5])
 
         mock_payload = Mock()
@@ -281,17 +276,16 @@ class TestConversionWorker(unittest.TestCase):
             '/path/to/test.srt',
             '/path/to/test_ custom title_ [German].srt')
         self.worker.gui.status_bar.show_message.assert_called_once_with(
-            'test description ' + _('completed'), 5000)
+            'test description ' + 'completed', 5000)
         arguments = self.worker.gui.proceed_question.mock_calls[0].args
         self.assertIsInstance(arguments[0], Callable)
         self.assertIs(self.worker.gui.job_manager.launch_gui_app, arguments[1])
         self.assertEqual('/path/to/log', arguments[2])
-        self.assertEqual(_('Ebook Translation Log'), arguments[3])
-        self.assertEqual(_('Translation Completed'), arguments[4])
-        self.assertEqual(_(
-            'The translation of "{}" was completed. '
-            'Do you want to open the book?')
-            .format('test: custom title* [German]'),
+        self.assertEqual('Ebook Translation Log', arguments[3])
+        self.assertEqual('Translation Completed', arguments[4])
+        self.assertEqual(
+            'The translation of "test: custom title* [German]" was completed. '
+            'Do you want to open the book?',
             arguments[5])
 
         mock_payload = Mock()

@@ -8,9 +8,6 @@ from ..engines.base import Base
 from ..engines.deepl import DeeplTranslate
 
 
-load_translations()
-
-
 class TestGlossary(unittest.TestCase):
     @patch('calibre_plugins.ebook_translator.lib.translation.open')
     def test_load_from_file(self, mock_open):
@@ -230,7 +227,7 @@ class TestTranslation(unittest.TestCase):
         self.translator.get_target_lang.return_value = 'zh'
         self.translation.translate_paragraph(self.paragraph)
 
-        self.streaming.assert_has_calls([call(''), call(_('Translating...'))])
+        self.streaming.assert_has_calls([call(''), call('Translating...')])
         self.glossary.restore.assert_called_with('你好世界')
 
         self.assertEqual('你好呀世界', self.paragraph.translation)
@@ -250,7 +247,7 @@ class TestTranslation(unittest.TestCase):
         self.translation.translate_paragraph(self.paragraph)
 
         self.streaming.assert_has_calls([
-            call(''), call(_('Translating...')), call(''), call('你'),
+            call(''), call('Translating...'), call(''), call('你'),
             call('好'), call('世'), call('界')])
         mock_time.sleep.assert_called_with(0.05)
 
@@ -263,7 +260,7 @@ class TestTranslation(unittest.TestCase):
         self.translation.total = 2
         self.translation.translate_paragraph(self.paragraph)
 
-        self.streaming.assert_has_calls([call(''), call(_('Translating...'))])
+        self.streaming.assert_has_calls([call(''), call('Translating...')])
         mock_time.sleep.assert_not_called()
 
         self.assertEqual('你好呀世界', self.paragraph.translation)

@@ -145,7 +145,7 @@ def traceback_error():
 
 def request(
         url, data=None, headers={}, method='GET', timeout=30, proxy_uri=None,
-        stream=False):
+        as_bytes=False, stream=False):
     br = Browser()
     br.set_handle_robots(False)
     # Do not verify SSL certificates
@@ -171,4 +171,6 @@ def request(
     response = br.response()
     if stream:
         return response
+    if as_bytes:
+        return response.read()
     return response.read().decode('utf-8').strip()
