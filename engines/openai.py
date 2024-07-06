@@ -153,12 +153,12 @@ class ChatgptBatchTranslate:
 
     def __init__(self, translator):
         self.translator = translator
-        self.translator.stream = True
+        self.translator.stream = False
 
         domain_name = '://'.join(
             urlsplit(self.translator.endpoint, 'https')[:2])
         self.file_endpoint = '%s/v1/files' % domain_name
-        self.batch_endpont = '%s/v1/batches' % domain_name
+        self.batch_endpoint = '%s/v1/batches' % domain_name
 
     def _create_multipart_form_data(self, body):
         """https://www.rfc-editor.org/rfc/rfc2046#section-5.1"""
@@ -195,12 +195,12 @@ class ChatgptBatchTranslate:
                 .format(self.translator.model))
         body = io.StringIO()
         for paragraph in paragraphs:
+            data = self.translator.get_body(paragraph.original)
             body.write(json.dumps({
                 "custom_id": paragraph.md5,
                 "method": "POST",
                 "url": "/v1/chat/completions",
-                "body": self.translator.get_body(paragraph.original)
-            }))
+                "body": json.loads(data)}))
             if paragraph != paragraphs[-1]:
                 body.write('\n')
         content_type = 'multipart/form-data; boundary="%s"' % self.boundary
@@ -231,8 +231,8 @@ class ChatgptBatchTranslate:
         headers = self.translator.get_headers()
         del headers['Content-Type']
         response = request(
-            '%s/%s/content' % (self.batch_endpont, output_file_id),
-            headers=headers)
+            '%s/%s/content' % (self.file_endpoint, output_file_id),
+            headers=headers, as_bytes=True)
 
         translations = {}
         for line in io.BytesIO(response):
@@ -251,13 +251,27 @@ class ChatgptBatchTranslate:
         body = json.dumps({
             'input_file_id': file_id,
             'endpoint': '/v1/chat/completions',
-            'completion_window': '24h',
-        })
-        response = request(self.batch_endpont, body, headers, 'POST')
+            'completion_window': '24h'})
+        response = request(self.batch_endpoint, body, headers, 'POST')
         return json.loads(response).get('id')
 
     def check(self, batch_id):
         # time.sleep(2)
+        # return {
+        #     'status': 'failed',
+        #     'output_file_id': 'xxxx',
+        #     'errors': {
+        #         'object': 'list',
+        #         'data': [
+        #             {
+        #                 'code': 'error-code',
+        #                 'message': 'error-message',
+        #                 'param': 'error-param',
+        #                 'line': 'error-line',
+        #             }
+        #         ]
+        #     },
+        # }
         # return {
         #     'status': 'completed',
         #     'output_file_id': 'xxxx',
@@ -269,7 +283,7 @@ class ChatgptBatchTranslate:
         # }
 
         response = request(
-            '%s/%s' % (self.batch_endpont, batch_id),
+            '%s/%s' % (self.batch_endpoint, batch_id),
             headers=self.translator.get_headers())
         return json.loads(response)
 
@@ -279,6 +293,7 @@ class ChatgptBatchTranslate:
 
         headers = self.translator.get_headers()
         response = request(
-            '%s/%s/cancel' % (self.batch_endpont, batch_id),
+            '%s/%s/cancel' % (self.batch_endpoint, batch_id),
             headers=headers, method='POST')
-        return json.loads(response).get('status') == 'cancelling'
+        return json.loads(response).get('status') in (
+            'cancelling', 'cancelled')

@@ -19,8 +19,6 @@ from ..engines.custom import (
     create_engine_template, load_engine_data, CustomTranslate)
 
 
-load_translations()
-
 module_name = 'calibre_plugins.ebook_translator.engines'
 
 
@@ -50,7 +48,7 @@ class TestBase(unittest.TestCase):
         self.assertEqual('POST', Base.method)
         self.assertFalse(Base.stream)
         self.assertTrue(Base.need_api_key)
-        self.assertEqual(_('API Keys'), Base.api_key_hint)
+        self.assertEqual('API Keys', Base.api_key_hint)
         self.assertEqual(r'^[^\s]+$', Base.api_key_pattern)
         self.assertEqual(['401'], Base.api_key_errors)
         self.assertEqual('\n\n', Base.separator)
@@ -352,7 +350,7 @@ class TestDeepl(unittest.TestCase):
             '{"character_count": 30, "character_limit": 100}'
 
         self.assertEqual(
-            _('{} total, {} used, {} left').format(100, 30, 70),
+            '100 total, 30 used, 70 left',
             self.translator.get_usage(),)
 
         mock_request.return_value = '<dummy info>'
@@ -367,8 +365,9 @@ class TestDeepl(unittest.TestCase):
 
         mock_request.return_value = '<dummy info>'
         error = re.compile(
-            _('Can not parse returned response. Raw data: {}')
-            .format('\n\nTraceback.*\n\n<dummy info>'), re.S)
+            'Can not parse returned response. Raw data: '
+            '\n\nTraceback.*\n\n<dummy info>',
+            re.S)
         with self.assertRaisesRegex(Exception, error):
             self.translator.translate('Hello World!')
 
@@ -403,7 +402,7 @@ class TestChatgptTranslate(unittest.TestCase):
             'temperature': 1.0}))
 
     def test_get_body_without_stream(self):
-        self.translator.disable_stream()
+        self.translator.stream = False
         self.assertEqual(
             self.translator.get_body('test content'),
             json.dumps({
@@ -470,15 +469,14 @@ class TestChatgptTranslate(unittest.TestCase):
 
 class TestChatgptBatchTranslate(unittest.TestCase):
     def setUp(self):
-        self.translator = Mock(ChatgptTranslate)
-        self.translator.endpoint = 'https://api.openai.com/test'
+        self.mock_translator = Mock(ChatgptTranslate)
+        self.mock_translator.endpoint = 'https://api.openai.com/test'
         self.mock_headers = {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer abc',
-            'User-Agent': 'Ebook-Translator/v1.0.0'
-        }
-        self.translator.get_headers.return_value = self.mock_headers
-        self.batch_translator = ChatgptBatchTranslate(self.translator)
+            'User-Agent': 'Ebook-Translator/v1.0.0'}
+        self.mock_translator.get_headers.return_value = self.mock_headers
+        self.batch_translator = ChatgptBatchTranslate(self.mock_translator)
 
     def test_class_object(self):
         self.assertEqual(ChatgptBatchTranslate.supported_models, [
@@ -505,16 +503,18 @@ class TestChatgptBatchTranslate(unittest.TestCase):
 
     def test_created_translator(self):
         self.assertIsInstance(self.batch_translator, ChatgptBatchTranslate)
+        self.assertIs(self.mock_translator, self.batch_translator.translator)
+        self.assertFalse(self.mock_translator.stream)
         self.assertEqual(
             self.batch_translator.file_endpoint,
             'https://api.openai.com/v1/files')
         self.assertEqual(
-            self.batch_translator.batch_endpont,
+            self.batch_translator.batch_endpoint,
             'https://api.openai.com/v1/batches')
 
     def test_upload_with_unsupported_model(self):
-        self.translator.model = 'fake-model'
-        self.translator.stream = True
+        self.mock_translator.model = 'fake-model'
+        self.mock_translator.stream = True
         with self.assertRaises(UnsupportedModel) as cm:
             self.batch_translator.upload([Mock(Paragraph)])
         self.assertEqual(
@@ -540,19 +540,17 @@ class TestChatgptBatchTranslate(unittest.TestCase):
         mock_paragraph_2 = Mock(Paragraph)
         mock_paragraph_2.md5 = 'def'
         mock_paragraph_2.original = 'test content 2'
-        self.translator.model = 'gpt-4o'
-        self.translator.api_key = 'abc'
+        self.mock_translator.model = 'gpt-4o'
+        self.mock_translator.api_key = 'abc'
 
         def mock_get_body(text):
-            return {
+            return json.dumps({
                 'model': 'gpt-3.5-turbo',
                 'messages': [
                     {'role': 'system', 'content': 'some prompt...'},
-                    {'role': 'user', 'content': text}
-                ],
-                'temperature': 1.0
-            }
-        self.translator.get_body.side_effect = mock_get_body
+                    {'role': 'user', 'content': text}],
+                'temperature': 1.0})
+        self.mock_translator.get_body.side_effect = mock_get_body
 
         file_id = self.batch_translator.upload(
             [mock_paragraph_1, mock_paragraph_2])
@@ -580,7 +578,8 @@ class TestChatgptBatchTranslate(unittest.TestCase):
             '"content": "test content 2"}], "temperature": 1.0}}\r\n'
             '--xxxxxxxxxx--').encode()
         mock_request.assert_called_once_with(
-            'https://api.openai.com/v1/files', mock_body, self.mock_headers, 'POST')
+            'https://api.openai.com/v1/files', mock_body, self.mock_headers,
+            'POST')
 
     @patch(module_name + '.openai.request')
     def test_delete(self, mock_request):
@@ -607,7 +606,7 @@ class TestChatgptBatchTranslate(unittest.TestCase):
             b'{"custom_id":"def","response":{"status_code":200,"body":{'
             b'"choices": [{"message": {"content": "B"}}]}}}')
         mock_request.return_value = line_1 + b'\n' + line_2
-        self.translator.get_headers.return_value = {
+        self.mock_translator.get_headers.return_value = {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer abc',
             'User-Agent': 'Ebook-Translator/v1.0.0'}
@@ -620,8 +619,8 @@ class TestChatgptBatchTranslate(unittest.TestCase):
             'Authorization': 'Bearer abc',
             'User-Agent': 'Ebook-Translator/v1.0.0'}
         mock_request.assert_called_once_with(
-            'https://api.openai.com/v1/batches/test-batch-id/content',
-            headers=headers)
+            'https://api.openai.com/v1/files/test-batch-id/content',
+            headers=headers, as_bytes=True)
 
     @patch(module_name + '.openai.request')
     def test_create(self, mock_request):
@@ -952,56 +951,51 @@ class TestFunction(unittest.TestCase):
 
     def test_load_engine_data(self):
         self.assertEqual(
-            (False, _('Engine data must be in valid JSON format.')),
+            (False, 'Engine data must be in valid JSON format.'),
             load_engine_data('<fake data>'))
         self.assertEqual(
-            (False, _('Invalid engine data.')),
-            load_engine_data('""'))
+            (False, 'Invalid engine data.'), load_engine_data('""'))
         self.assertEqual(
-            (False, _('Engine name is required.')),
-            load_engine_data('{}'))
+            (False, 'Engine name is required.'), load_engine_data('{}'))
         self.assertEqual(
-            (False, _(
-                'Engine name must be different from builtin engine name.')),
+            (False, 'Engine name must be different from builtin engine name.'),
             load_engine_data('{"name":"Google(Free)"}'))
         self.assertEqual(
-            (False, _('Language codes are required.')),
+            (False, 'Language codes are required.'),
             load_engine_data('{"name":"Test"}'))
         self.assertEqual(
-            (False, _('Language codes are required.')),
+            (False, 'Language codes are required.'),
             load_engine_data('{"name":"Test","langiages":{}}'))
         self.assertEqual(
-            (False, _('Source and target must be added in pair.')),
+            (False, 'Source and target must be added in pair.'),
             load_engine_data('{"name":"Test","languages":{"source":{}}}'))
         self.assertEqual(
-            (False, _('Source and target must be added in pair.')),
+            (False, 'Source and target must be added in pair.'),
             load_engine_data('{"name":"Test","languages":{"target":{}}}'))
         self.assertEqual(
-            (False, _('Request information is required.')),
+            (False, 'Request information is required.'),
             load_engine_data('{"name":"Test","languages":{"English":"EN"}}'))
         self.assertEqual(
-            (False, _('API URL is required.')),
-            load_engine_data(
+            (False, 'API URL is required.'), load_engine_data(
                 '{"name":"Test","languages":{"English":"EN"},'
                 '"request":{"test":null}}'))
         self.assertEqual(
-            (False, _('Placeholder <text> is required.')),
-            load_engine_data(
+            (False, 'Placeholder <text> is required.'), load_engine_data(
                 '{"name":"Test","languages":{"English":"EN"},'
                 '"request":{"url":"https://test.api","data":{}}}'))
         self.assertEqual(
-            (False, _('Request headers must be an JSON object.')),
+            (False, 'Request headers must be an JSON object.'),
             load_engine_data(
                 '{"name":"Test","languages":{"English":"EN"},'
                 '"request":{"url":"https://test.api","data":"<text>",'
                 '"headers":"abc"}}'))
         self.assertEqual(
-            (False, _('A appropriate Content-Type in headers is required.')),
+            (False, 'A appropriate Content-Type in headers is required.'),
             load_engine_data(
                 '{"name":"Test","languages":{"English":"EN"},'
                 '"request":{"url":"https://test.api","data":"<text>"}}'))
         self.assertEqual(
-            (False, _('Expression to parse response is required.')),
+            (False, 'Expression to parse response is required.'),
             load_engine_data(
                 '{"name":"Test","languages":{"English":"EN"},'
                 '"request":{"url":"https://test.api","data":"<text>",'

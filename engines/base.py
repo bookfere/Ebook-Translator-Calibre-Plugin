@@ -91,9 +91,6 @@ class Base:
         return _('A correct key format "{}" is required.') \
             .format(cls.api_key_hint)
 
-    def disable_stream(self):
-        self.stream = False
-
     def get_api_key(self):
         if self.need_api_key and self.api_keys:
             return self.api_keys.pop(0)

@@ -725,7 +725,6 @@ class AdvancedTranslation(QDialog):
             translator = get_translator(self.current_engine)
             translator.set_source_lang(self.ebook.source_lang)
             translator.set_target_lang(self.ebook.target_lang)
-            translator.disable_stream()
             batch_translator = ChatgptBatchTranslate(translator)
             batch = ChatgptBatchTranslationManager(
                 batch_translator, self.cache, self.table, self)

@@ -4,6 +4,8 @@ from calibre.utils.logging import Log
 
 from ..lib.utils import traceback_error
 
+from .alert import AlertMessage
+
 
 try:
     from qt.core import (
@@ -17,6 +19,7 @@ except ImportError:
         QThread, QHBoxLayout, QPlainTextEdit, QEvent)
 
 load_translations()
+
 log = Log()
 
 
@@ -25,7 +28,7 @@ def request(func):
     def wrapper(self):
         try:
             func(self)
-        except Exception as e:
+        except Exception:
             self.show_information.emit(
                 'Oops, an error occurred!', traceback_error())
             self.stack_index.emit(3)
@@ -105,8 +108,11 @@ class ChatgptBatchTranslationWorker(QObject):
     def cancel_batch(self):
         self.process_tip.emit(_('canceling...'))
         self.stack_index.emit(1)
-        self._batch_translator.cancel(self._batch_id)
-        self._batch_translator.delete(self._file_id)
+        self._batch_info = self._batch_translator.check(self._batch_id)
+        if self._batch_info.get('status') not in (
+                'cancelling', 'cancelled', 'completed', 'failed'):
+            self._batch_translator.cancel(self._batch_id)
+            self._batch_translator.delete(self._file_id)
         self.remove_batch.emit()
         self.finished.emit()
 
@@ -141,6 +147,8 @@ class ChatgptBatchTranslationManager(QDialog):
 
         self.cache = cache
         self.table = table
+
+        self.alert = AlertMessage(self)
 
         self.batch_worker = ChatgptBatchTranslationWorker(translator)
         self.batch_worker.moveToThread(self.batch_thread)
@@ -267,31 +275,40 @@ class ChatgptBatchTranslationManager(QDialog):
         self.batch_worker.enable_apply_button.connect(apply.setEnabled)
 
         refresh.clicked.connect(self.batch_worker.check.emit)
-        cancel.clicked.connect(self.batch_worker.cancel.emit)
         apply.clicked.connect(lambda: self.batch_worker.apply.emit())
+
+        def cancel_batch_translation():
+            action = self.alert.ask(
+                _('Are you sure you want to cancel the batch translation?'))
+            if action == 'yes':
+                self.batch_worker.cancel.emit()
+        cancel.clicked.connect(cancel_batch_translation)
 
         return widget
 
     def layout_data(self):
         status = QLabel()
-        total = QLabel()
-        completed = QLabel()
-        failed = QLabel()
+        detail = QPlainTextEdit()
+        detail.setReadOnly(True)
 
         def set_details_data(data):
-            status.setText(str(data.get('status') or 'n/a'))
-            request_counts = data.get('request_counts')
-            total.setText(str(request_counts.get('total') or 'n/a'))
-            completed.setText(str(request_counts.get('completed') or 'n/a'))
-            failed.setText(str(request_counts.get('failed') or 'n/a'))
+            detail.clear()
+            batch_status = data.get('status')
+            status.setText(str(batch_status))
+            if batch_status == 'completed':
+                request_counts = data.get('request_counts')
+                detail.appendPlainText(str(request_counts))
+            else:
+                error_info = data.get('errors')
+                detail.appendPlainText(str(error_info))
         self.batch_worker.trans_details.connect(set_details_data)
 
         widget = QGroupBox(_('Batch translation details'))
         layout = QFormLayout(widget)
         layout.addRow(_('Status'), status)
-        layout.addRow(_('Total'), total)
-        layout.addRow(_('Completed'), completed)
-        layout.addRow(_('Failed'), failed)
+        layout.addRow(_('Detail'), detail)
+
+        self.set_form_layout_policy(layout)
 
         return widget
 
@@ -318,3 +335,10 @@ class ChatgptBatchTranslationManager(QDialog):
     def done(self, reason):
         QDialog.done(self, reason)
         self.parent().raise_()
+
+    def set_form_layout_policy(self, layout):
+        field_policy = getattr(
+            QFormLayout.FieldGrowthPolicy, 'AllNonFixedFieldsGrow', None) \
+            or QFormLayout.AllNonFixedFieldsGrow
+        layout.setFieldGrowthPolicy(field_policy)
+        layout.setLabelAlignment(Qt.AlignRight)
