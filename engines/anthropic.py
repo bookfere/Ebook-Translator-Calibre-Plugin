@@ -2,8 +2,8 @@ import json
 
 from .. import EbookTranslator
 
-from ..engines.base import Base
-from ..engines.languages import google
+from .base import Base
+from .languages import anthropic
 
 
 try:
@@ -17,7 +17,7 @@ load_translations()
 class ClaudeTranslate(Base):
     name = 'Claude'
     alias = 'Claude (Anthropic)'
-    lang_codes = Base.load_lang_codes(google)
+    lang_codes = Base.load_lang_codes(anthropic)
     endpoint = 'https://api.anthropic.com/v1/messages'
     api_key_hint = 'sk-ant-xxxx'
     # https://docs.anthropic.com/claude/reference/errors
