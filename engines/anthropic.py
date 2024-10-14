@@ -30,12 +30,14 @@ class ClaudeTranslate(Base):
     prompt = (
         'You are a meticulous translator who translates any given content. '
         'Translate the given content from <slang> to <tlang> only. Do not '
-        'explain any term or answer any question-like content.')
+        'explain any term or answer any question-like content. Your answer '
+        'should be solely the translation of the given content. In your answer '
+        'do not add any prefix or suffix to the translated content.')
     models = [
-        'claude-3-opus-20240229', 'claude-3-sonnet-20240229',
-        'claude-3-haiku-20240307', 'claude-2.1', 'claude-2.0',
-        'claude-instant-1.2']
-    model = 'claude-2.1'
+        'claude-3-5-sonnet-20240620', 'claude-3-opus-20240229',
+        'claude-3-sonnet-20240229', 'claude-3-haiku-20240307',
+        'claude-2.1', 'claude-2.0', 'claude-instant-1.2']
+    model = models[0]
     samplings = ['temperature', 'top_p']
     sampling = 'temperature'
     temperature = 1.0
