@@ -1,6 +1,7 @@
 import os.path
 
 from mechanize import HTTPError
+from mechanize._response import response_seek_wrapper as Response
 
 from calibre.utils.localization import lang_as_iso639_1
 
@@ -191,7 +192,7 @@ class Base:
     def get_body(self, text):
         return None
 
-    def get_result(self, response):
+    def get_result(self, response: Response | bytes | str):
         return response
 
     def get_usage(self):
