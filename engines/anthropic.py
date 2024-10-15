@@ -1,6 +1,7 @@
 import json
 
 from .. import EbookTranslator
+from mechanize._response import response_seek_wrapper as Response
 
 from .base import Base
 from .languages import anthropic
@@ -44,6 +45,15 @@ class ClaudeTranslate(Base):
     top_p = 1.0
     top_k = 1
     stream = True
+    # event types for streaming listd here: https://docs.anthropic.com/en/api/messages-streaming
+    valid_event_types = ['ping',
+                         'error',
+                         'content_block_start',
+                         'content_block_delta',
+                         'content_block_stop',
+                         'message_start',
+                         'message_delta',
+                         'message_stop']
 
     def __init__(self):
         Base.__init__(self)
@@ -91,12 +101,15 @@ class ClaudeTranslate(Base):
 
         return json.dumps(body)
 
-    def get_result(self, response):
+    def get_result(self, response: Response | str) -> str:
         if self.stream:
             return self._parse_stream(response)
-        return json.loads(response)['content'][0]['text']
 
-    def _parse_stream(self, data):
+        response_json = json.loads(response)
+        response_content_text: str = response_json['content'][0]['text']
+        return response_content_text
+
+    def _parse_stream(self, data: Response) -> str:
         while True:
             try:
                 line = data.readline().decode('utf-8').strip()
@@ -106,9 +119,21 @@ class ClaudeTranslate(Base):
                 raise Exception(
                     _('Can not parse returned response. Raw data: {}')
                     .format(str(e)))
+
             if line.startswith('data:'):
-                chunk = json.loads(line.split('data: ')[1])
-                if chunk.get('type') == 'message_stop':
+                chunk: dict = json.loads(line.split('data: ')[1])
+                event_type: str = chunk['type']
+
+                if event_type not in self.valid_event_types:
+                    raise Exception(
+                        _('Invalid event type received: {}')
+                        .format(event_type))
+
+                if event_type == 'message_stop':
                     break
-                if chunk.get('type') == 'content_block_delta':
+                elif event_type == 'content_block_delta':
                     yield str(chunk.get('delta').get('text'))
+                elif event_type == 'error':
+                    raise Exception(
+                        _('Error received: {}')
+                        .format(chunk['error']['message']))
