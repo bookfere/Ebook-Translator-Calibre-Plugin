@@ -9,6 +9,8 @@ from subprocess import Popen
 
 from calibre import get_proxies
 from mechanize import Browser, Request
+from mechanize._response import response_seek_wrapper as Response
+
 
 from ..lib.cssselect import GenericTranslator, SelectorError
 
@@ -163,12 +165,12 @@ def request(
     proxies and br.set_proxies(proxies)
     # Compatible with mechanize 0.3.0 on Calibre 3.21.
     try:
-        request = Request(
+        _request = Request(
             url, data, headers=headers, timeout=timeout, method=method)
     except Exception:
-        request = Request(url, data, headers=headers, timeout=timeout)
-    br.open(request)
-    response = br.response()
+        _request = Request(url, data, headers=headers, timeout=timeout)
+    br.open(_request)
+    response: Response = br.response()
     if stream:
         return response
     if as_bytes:
