@@ -4,8 +4,8 @@ from .. import EbookTranslator
 from mechanize._response import response_seek_wrapper as Response
 
 from .base import Base
-from .languages import anthropic
-
+from .languages import anthropic as anthropic_languages
+from .prompt_extensions import anthropic as anthropic_prompt_extension
 
 try:
     from http.client import IncompleteRead
@@ -18,8 +18,9 @@ load_translations()
 class ClaudeTranslate(Base):
     name = 'Claude'
     alias = 'Claude (Anthropic)'
-    lang_codes = Base.load_lang_codes(anthropic)
+    lang_codes = Base.load_lang_codes(anthropic_languages)
     endpoint = 'https://api.anthropic.com/v1/messages'
+    api_version = '2023-06-01'
     api_key_hint = 'sk-ant-xxxx'
     # https://docs.anthropic.com/claude/reference/errors
     api_key_errors = ['401', 'permission_error']
@@ -45,7 +46,7 @@ class ClaudeTranslate(Base):
     top_p = 1.0
     top_k = 1
     stream = True
-    # event types for streaming listd here: https://docs.anthropic.com/en/api/messages-streaming
+    # event types for streaming are listed here: https://docs.anthropic.com/en/api/messages-streaming
     valid_event_types = ['ping',
                          'error',
                          'content_block_start',
@@ -73,6 +74,11 @@ class ClaudeTranslate(Base):
             prompt = prompt.replace('<slang>', 'detected language')
         else:
             prompt = prompt.replace('<slang>', self.source_lang)
+
+        prompt_extension = anthropic_prompt_extension.get(self.target_lang)
+        if prompt_extension is not None:
+            prompt += ' ' + prompt_extension
+
         # Recommend setting temperature to 0.5 for retaining the placeholder.
         if self.merge_enabled:
             prompt += (' Ensure that placeholders matching the pattern '
@@ -82,7 +88,7 @@ class ClaudeTranslate(Base):
     def get_headers(self):
         return {
             'Content-Type': 'application/json',
-            'anthropic-version': '2023-06-01',
+            'anthropic-version': self.api_version,
             'x-api-key': self.api_key,
             'User-Agent': 'Ebook-Translator/%s' % EbookTranslator.__version__,
         }
