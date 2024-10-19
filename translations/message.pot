@@ -1155,7 +1155,7 @@ msgid "The specified glossary file does not exist."
 msgstr ""
 
 #: setting.py:1323 setting.py:1348 setting.py:1361
-msgid "{} is not a valid CSS seletor."
+msgid "{} is not a valid CSS selector."
 msgstr ""
 
 #: setting.py:1336

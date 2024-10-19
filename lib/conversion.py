@@ -238,8 +238,8 @@ def convert_item(
     debug_info += '| Output Path: %s' % output_path
 
     handler = extra_formats.get(format)
-    convertor = convert_book if handler is None else handler.get('convertor')
-    convertor(input_path, output_path, translation, element_handler, cache,
+    converter = convert_book if handler is None else handler.get('converter')
+    converter(input_path, output_path, translation, element_handler, cache,
               debug_info, encoding, notification)
     cache.done()
 

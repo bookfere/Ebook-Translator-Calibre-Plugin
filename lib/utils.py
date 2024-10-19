@@ -27,9 +27,9 @@ def sep(char='═', count=38):
     return char * count
 
 
-def css(seletor):
+def css(selector):
     try:
-        return GenericTranslator().css_to_xpath(seletor, prefix='self::x:')
+        return GenericTranslator().css_to_xpath(selector, prefix='self::x:')
     except SelectorError:
         return None
 
@@ -103,7 +103,7 @@ def is_str(data):
     return type(data).__name__ in ('str', 'unicode')
 
 
-def is_proxy_availiable(host, port, timeout=1):
+def is_proxy_available(host, port, timeout=1):
     try:
         host = host.replace('http://', '')
         socket.create_connection((host, int(port)), timeout).close()

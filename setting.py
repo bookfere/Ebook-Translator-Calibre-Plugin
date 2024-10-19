@@ -3,7 +3,7 @@ import os
 import os.path
 
 from .lib.config import get_config
-from .lib.utils import css, is_proxy_availiable
+from .lib.utils import css, is_proxy_available
 from .lib.translation import get_engine_class
 
 from .engines import (
@@ -1172,7 +1172,7 @@ class TranslationSetting(QDialog):
         if not (self.is_valid_data(self.host_validator, host) and port):
             return self.alert.pop(
                 _('Proxy host or port is incorrect.'), level='warning')
-        if is_proxy_availiable(host, port):
+        if is_proxy_available(host, port):
             return self.alert.pop(_('The proxy is available.'))
         return self.alert.pop(_('The proxy is not available.'), 'error')
 
@@ -1320,7 +1320,7 @@ class TranslationSetting(QDialog):
         for rule in priority_rules:
             if css(rule) is None:
                 self.alert.pop(
-                    _('{} is not a valid CSS seletor.')
+                    _('{} is not a valid CSS selector.')
                     .format(rule), 'warning')
                 return False
         self.config.delete('priority_rules')
@@ -1345,7 +1345,7 @@ class TranslationSetting(QDialog):
         for rule in ignore_rules:
             if css(rule) is None:
                 self.alert.pop(
-                    _('{} is not a valid CSS seletor.')
+                    _('{} is not a valid CSS selector.')
                     .format(rule), 'warning')
                 return False
         self.config.delete('element_rules')
@@ -1358,7 +1358,7 @@ class TranslationSetting(QDialog):
         for rule in reserve_rules:
             if css(rule) is None:
                 self.alert.pop(
-                    _('{} is not a valid CSS seletor.')
+                    _('{} is not a valid CSS selector.')
                     .format(rule), 'warning')
                 return False
         self.config.delete('reserve_rules')

@@ -1019,7 +1019,7 @@ class TestExtraction(unittest.TestCase):
         self.assertEqual('p', elements[-1].get_name())
         self.assertFalse(elements[-1].ignored)
 
-    def test_extract_elements_root_wihout_elements(self):
+    def test_extract_elements_root_without_elements(self):
         xhtml = etree.XML(b"""<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
@@ -1607,7 +1607,7 @@ class TestElementHandlerMerge(unittest.TestCase):
             '<p class="c" dir="auto">A B<br/><br/>C</p>',
             get_string(elements[4], True))
 
-    def test_add_translations_merge_palceholder_only(self):
+    def test_add_translations_merge_placeholder_only(self):
         self.handler.position = 'only'
         self.handler.prepare_original(self.elements)
         self.handler.add_translations([Paragraph(
