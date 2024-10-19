@@ -78,7 +78,7 @@ Added features:
 7. Added a new UI language for French. Credit to @miiPoP
 8. Added a new UI language for Portuguese. Credit to Marcelo Duarte
 9. Added the context menu to cache manager for deleting caches.
-10. Added support for specifing a custom model for ChatGPT. #167
+10. Added support for specifying a custom model for ChatGPT. #167
 11. Added support to count item and character in Advanced mode. #130
 
 Enhanced features:

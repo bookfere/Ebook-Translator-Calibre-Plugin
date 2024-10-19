@@ -40,8 +40,8 @@ class Paragraph:
             return json.loads(self.attributes)
         return {}
 
-    def is_alignment(self, seperator):
-        pattern = re.compile(seperator)
+    def is_alignment(self, separator):
+        pattern = re.compile(separator)
         count_original = len(pattern.split(self.original.strip()))
         count_translation = len(pattern.split(self.translation.strip()))
         return count_original == count_translation
