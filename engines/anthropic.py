@@ -75,7 +75,7 @@ class ClaudeTranslate(Base):
             prompt = prompt.replace('<slang>', self.source_lang)
         # Recommend setting temperature to 0.5 for retaining the placeholder.
         if self.merge_enabled:
-            prompt += (' Ensure that placeholders matching the pattern'
+            prompt += (' Ensure that placeholders matching the pattern '
                        '{{id_\\d+}} in the content are retained.')
         return prompt
 
