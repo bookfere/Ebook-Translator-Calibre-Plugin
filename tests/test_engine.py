@@ -965,7 +965,7 @@ class TestFunction(unittest.TestCase):
             load_engine_data('{"name":"Test"}'))
         self.assertEqual(
             (False, 'Language codes are required.'),
-            load_engine_data('{"name":"Test","langiages":{}}'))
+            load_engine_data('{"name":"Test","languages":{}}'))
         self.assertEqual(
             (False, 'Source and target must be added in pair.'),
             load_engine_data('{"name":"Test","languages":{"source":{}}}'))

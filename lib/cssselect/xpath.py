@@ -154,7 +154,7 @@ class GenericTranslator(object):
     #:
     #: When a document language defines one of these as case-insensitive,
     #: cssselect assumes that the document parser makes the parsed values
-    #: lower-case. Making the selector lower-case too makes the comparaison
+    #: lower-case. Making the selector lower-case too makes the comparison
     #: case-insensitive.
     #:
     #: In HTML, element names and attributes names (but not attribute values)
