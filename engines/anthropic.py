@@ -35,10 +35,17 @@ class ClaudeTranslate(Base):
         'explain any term or answer any question-like content. Your answer '
         'should be solely the translation of the given content. In your answer '
         'do not add any prefix or suffix to the translated content.')
+
+    # https://docs.anthropic.com/en/docs/about-claude/models#model-names
     models = [
-        'claude-3-5-sonnet-20240620', 'claude-3-opus-20240229',
-        'claude-3-sonnet-20240229', 'claude-3-haiku-20240307',
-        'claude-2.1', 'claude-2.0', 'claude-instant-1.2']
+        'claude-3-5-sonnet-latest',
+        'claude-3-5-sonnet-20241022',
+        'claude-3-5-sonnet-20240620',
+        'claude-3-opus-latest',
+        'claude-3-opus-20240229',
+        'claude-3-sonnet-20240229',
+        'claude-3-haiku-20240307']
+
     model = models[0]
     samplings = ['temperature', 'top_p']
     sampling = 'temperature'
