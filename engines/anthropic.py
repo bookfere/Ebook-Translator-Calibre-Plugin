@@ -1,4 +1,5 @@
 import json
+from typing import Generator
 
 from .. import EbookTranslator
 from mechanize._response import response_seek_wrapper as Response
@@ -122,7 +123,7 @@ class ClaudeTranslate(Base):
         response_content_text: str = response_json['content'][0]['text']
         return response_content_text
 
-    def _parse_stream(self, data: Response) -> str:
+    def _parse_stream(self, data: Response) -> Generator:
         while True:
             try:
                 line = data.readline().decode('utf-8').strip()
@@ -145,7 +146,9 @@ class ClaudeTranslate(Base):
                 if event_type == 'message_stop':
                     break
                 elif event_type == 'content_block_delta':
-                    yield str(chunk.get('delta').get('text'))
+                    delta = chunk.get('delta')
+                    if delta is not None:
+                        yield str(delta.get('text'))
                 elif event_type == 'error':
                     raise Exception(
                         _('Error received: {}')

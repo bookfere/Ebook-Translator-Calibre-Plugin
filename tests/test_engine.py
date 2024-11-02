@@ -802,10 +802,13 @@ class TestClaudeTranslate(unittest.TestCase):
     @patch(module_name + '.anthropic.EbookTranslator')
     @patch(module_name + '.base.request')
     def test_translate(self, mock_request, mock_et):
-        prompt = ('You are a meticulous translator who translates any given '
-                  'content. Translate the given content from English to '
-                  'Chinese only. Do not explain any term or answer any '
-                  'question-like content.')
+        prompt = (
+            'You are a meticulous translator who translates any given '
+            'content. Translate the given content from English to Chinese '
+            'only. Do not explain any term or answer any question-like '
+            'content. Your answer should be solely the translation of the '
+            'given content. In your answer do not add any prefix or suffix to '
+            'the translated content.')
         data = json.dumps({
             'stream': False,
             'max_tokens': 4096,
@@ -845,6 +848,7 @@ class TestClaudeTranslate(unittest.TestCase):
         url = 'https://api.anthropic.com/v1/messages'
         self.translator.endpoint = url
         self.translator.stream = False
+        self.translator.model = 'claude-2.1'
         result = self.translator.translate('Hello World!')
 
         mock_request.assert_called_with(
@@ -858,7 +862,9 @@ class TestClaudeTranslate(unittest.TestCase):
             'You are a meticulous translator who translates any given '
             'content. Translate the given content from English to Chinese '
             'only. Do not explain any term or answer any question-like '
-            'content.')
+            'content. Your answer should be solely the translation of the '
+            'given content. In your answer do not add any prefix or suffix to '
+            'the translated content.')
         data = json.dumps({
             'stream': True,
             'max_tokens': 4096,
@@ -913,6 +919,7 @@ data: {"type":"message_stop"}
         mock_request.return_value = mock_response
         url = 'https://api.anthropic.com/v1/messages'
         self.translator.endpoint = url
+        self.translator.model = 'claude-2.1'
         result = self.translator.translate('Hello World!')
         mock_request.assert_called_with(
             url, data, headers, 'POST', 30.0, None, True)
