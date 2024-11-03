@@ -33,7 +33,9 @@ class TestFunction(unittest.TestCase):
         markup = '<p xmlns:epub="http://www.idpf.org/2007/ops">abc</p>'
         element = etree.XML(markup)
         self.assertEqual(markup, get_string(element, False))
-        self.assertEqual('<p>abc</p>', get_string(element, True))
+        self.assertEqual(
+            '<p xmlns:epub="http://www.idpf.org/2007/ops">abc</p>',
+            get_string(element, True))
 
     def test_get_name(self):
         xhtml = '<p xmlns="http://www.w3.org/1999/xhtml">a</p>'
@@ -618,6 +620,28 @@ xmlns:epub="http://www.idpf.org/2007/ops" lang="en">
             'xmlns:epub="http://www.idpf.org/2007/ops" '
             'dir="auto">A<code><span epub:type="pagebreak"/>b</code></p>',
             get_string(elements[1]))
+        
+    def test_add_translation_with_missing_namespace(self):
+        xhtml = etree.XML(rb"""<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head><title>Test Document</title></head>
+    <body><p>a<code><span xmlns:epub="http://www.idpf.org/2007/ops"
+epub:type="pagebreak"/>b</code></p></body>
+</html>""")
+        element = PageElement(xhtml.find('.//x:p', namespaces=ns), 'p1')
+        element.reserve_pattern = create_xpath(('code',))
+        element.set_placeholder(Base.placeholder)
+        element.get_content()
+        element.add_translation('A{{id_00000}}')
+
+        elements = xhtml.findall('.//x:p', namespaces=ns)
+        self.assertEqual(2, len(elements))
+        self.assertEqual(
+            '<p xmlns="http://www.w3.org/1999/xhtml" dir="auto">'
+            'A<code><span xmlns:epub="http://www.idpf.org/2007/ops" '
+            'epub:type="pagebreak"/>b</code></p>',
+            get_string(elements[1]))
 
     def test_add_translation_below(self):
         self.element.position = 'next'
@@ -1066,8 +1090,10 @@ class TestExtraction(unittest.TestCase):
         self.assertEqual(4, len(elements))
         self.assertEqual(
             xhtml.find('.//x:div[1]/x:p', namespaces=ns), elements[0].element)
+        self.assertTrue(elements[1].ignored)
         self.assertEqual(
             xhtml.find('.//x:div[3]/x:p', namespaces=ns), elements[2].element)
+        self.assertTrue(elements[3].ignored)
 
     def test_filter_content(self):
         def elements(markups):
@@ -1259,6 +1285,26 @@ class TestElementHandler(unittest.TestCase):
                     self.handler.remove_pattern)
                 self.assertRegex(
                     element.reserve_pattern, r'^\.//\*\[self::x:img.*style\]$')
+
+    @patch('calibre_plugins.ebook_translator.lib.element.uid')    
+    def test_prepare_translation_contains_ignored_element(self, mock_uid):
+        self.xhtml = etree.XML(b"""<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head><title>Test Document</title></head>
+    <body>
+        <p><b class="test">a</b></p>
+    </body>
+</html>""")
+        self.handler.load_remove_rules(['.test'])
+        mock_uid.return_value = 'm1'
+        elements = [
+            PageElement(element, 'p1') for element
+            in self.xhtml.findall('./x:body/*', namespaces=ns)]
+        self.assertEqual([
+            (0, 'm1', '<p><b class="test">a</b></p>', '', True, None, 'p1')],
+            self.handler.prepare_original(elements))
+        self.assertTrue(elements[0].ignored)
 
     def test_prepare_translation(self):
         pass

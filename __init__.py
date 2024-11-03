@@ -26,7 +26,7 @@ class EbookTranslator(InterfaceActionBase):
     description = _('A Calibre plugin to translate ebook into a specified '
                     'language (optionally keeping the original content).')
     # see: https://www.mobileread.com/forums/showthread.php?t=242223
-    minimum_calibre_version = (2, 0, 0)
+    minimum_calibre_version = (5, 0, 0)
 
     actual_plugin = 'calibre_plugins.ebook_translator.ui:EbookTranslatorGui'
 
