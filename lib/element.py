@@ -14,7 +14,7 @@ def get_string(element, remove_ns=False):
     element.text = element.text or ''  # prevent auto-closing empty elements
     markup = trim(etree.tostring(
         element, encoding='utf-8', with_tail=False).decode('utf-8'))
-    return re.sub(r'\sxmlns([^"]+"){2}', '', markup) if remove_ns else markup
+    return re.sub(r'\sxmlns="[^"]+"', '', markup) if remove_ns else markup
 
 
 def get_name(element):
@@ -242,6 +242,7 @@ class PageElement(Element):
 
     def _create_new_element(
             self, name, content='', copy_attrs=True, excluding_attrs=[]):
+        # Copy the namespaces from the original namespaces to the new ones.
         namespaces = ' '.join(
             'xmlns%s="%s"' % ('' if name is None else ':' + name, value)
             for name, value in self.element.nsmap.items())
@@ -419,6 +420,8 @@ class PageElement(Element):
                 wrapper.text = translation_br.tail
                 if wrapper.text or len(list(wrapper)) > 0:
                     new_br = etree.SubElement(self.element, 'br')
+                    new_br.tail = br.tail
+                    br.tail = None
                     br.addnext(new_br)
                     new_br.addprevious(wrapper)
                 if br == original_br_list[0]:
@@ -663,6 +666,10 @@ class ElementHandler:
             element.set_reserve_pattern(self.reserve_pattern)
             raw = element.get_raw()
             content = element.get_content()
+            # Make sure the element does not contain empty content because it
+            # may only contain ignored elements.
+            if content.strip() == '':
+                element.set_ignored(True)
             md5 = uid('%s%s' % (oid, content))
             attrs = element.get_attributes()
             if not element.ignored:
