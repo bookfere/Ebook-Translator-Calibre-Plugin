@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-06-16 22:34+0800\n"
+"POT-Creation-Date: 2024-11-03 20:44+0800\n"
 "PO-Revision-Date: 2023-04-25 15:36+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -310,19 +310,16 @@ msgstr ""
 msgid "Apply"
 msgstr ""
 
+msgid "Are you sure you want to cancel the batch translation?"
+msgstr ""
+
 msgid "Batch translation details"
 msgstr ""
 
 msgid "Status"
 msgstr ""
 
-msgid "Total"
-msgstr ""
-
-msgid "Completed"
-msgstr ""
-
-msgid "Failed"
+msgid "Detail"
 msgstr ""
 
 msgid "Translating..."
@@ -420,6 +417,12 @@ msgstr ""
 
 msgid "Can not parse returned response. Raw data: {}"
 msgstr "無法剖析返回的回應。原始資料：{}"
+
+msgid "Invalid event type received: {}"
+msgstr ""
+
+msgid "Error received: {}"
+msgstr ""
 
 msgid "Baidu"
 msgstr "百度"
@@ -865,7 +868,7 @@ msgstr "無效的色彩值。"
 msgid "The specified glossary file does not exist."
 msgstr "指定的詞彙表檔案不存在。"
 
-msgid "{} is not a valid CSS seletor."
+msgid "{} is not a valid CSS selector."
 msgstr ""
 
 msgid "{} is not a valid regular expression."
