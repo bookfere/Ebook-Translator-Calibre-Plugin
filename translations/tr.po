@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-06-16 22:34+0800\n"
+"POT-Creation-Date: 2024-11-03 20:44+0800\n"
 "PO-Revision-Date: 2024-05-15 16:21+0300\n"
 "Last-Translator: DogancanYr <EMAIL@ADDRESS>\n"
 "Language-Team: Turkish <LL@li.org>\n"
@@ -312,19 +312,16 @@ msgstr ""
 msgid "Apply"
 msgstr ""
 
+msgid "Are you sure you want to cancel the batch translation?"
+msgstr ""
+
 msgid "Batch translation details"
 msgstr ""
 
 msgid "Status"
 msgstr "Durum"
 
-msgid "Total"
-msgstr ""
-
-msgid "Completed"
-msgstr ""
-
-msgid "Failed"
+msgid "Detail"
 msgstr ""
 
 msgid "Translating..."
@@ -428,6 +425,12 @@ msgstr "En az bir satırı koru."
 
 msgid "Can not parse returned response. Raw data: {}"
 msgstr "Geri dönen yanıt ayrıştırılamıyor. "
+
+msgid "Invalid event type received: {}"
+msgstr ""
+
+msgid "Error received: {}"
+msgstr ""
 
 msgid "Baidu"
 msgstr "Baidu"
@@ -882,8 +885,8 @@ msgstr "Geçersiz renk değeri."
 msgid "The specified glossary file does not exist."
 msgstr "Belirtilen sözlük dosyası mevcut değil."
 
-msgid "{} is not a valid CSS seletor."
-msgstr "{} geçerli bir CSS seçici değil."
+msgid "{} is not a valid CSS selector."
+msgstr ""
 
 msgid "{} is not a valid regular expression."
 msgstr "{} geçerli bir normal ifade değil."
@@ -917,9 +920,3 @@ msgstr "Önbellek Yöneticisi"
 
 msgid "Choose Translation Mode"
 msgstr "Çeviri Modunu Seçin"
-
-#~ msgid "No available API key."
-#~ msgstr "Kullanılabilir API anahtarı yok."
-
-#~ msgid "API key was Changed due to previous one unavailable."
-#~ msgstr "API anahtarı öncekinin kullanılamaması nedeniyle değiştirildi."

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-06-16 22:34+0800\n"
+"POT-Creation-Date: 2024-11-03 20:44+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: none\n"
@@ -316,19 +316,16 @@ msgstr ""
 msgid "Apply"
 msgstr ""
 
+msgid "Are you sure you want to cancel the batch translation?"
+msgstr ""
+
 msgid "Batch translation details"
 msgstr ""
 
 msgid "Status"
 msgstr "Status"
 
-msgid "Total"
-msgstr ""
-
-msgid "Completed"
-msgstr ""
-
-msgid "Failed"
+msgid "Detail"
 msgstr ""
 
 msgid "Translating..."
@@ -430,6 +427,12 @@ msgstr "Manter pelo menos uma linha."
 
 msgid "Can not parse returned response. Raw data: {}"
 msgstr "Não é possível analisar a resposta retornada. Dados não tratados: {}"
+
+msgid "Invalid event type received: {}"
+msgstr ""
+
+msgid "Error received: {}"
+msgstr ""
 
 msgid "Baidu"
 msgstr "Baidu"
@@ -888,8 +891,8 @@ msgstr "Valor de cor inválido."
 msgid "The specified glossary file does not exist."
 msgstr "O arquivo de vocabulário especificado não existe."
 
-msgid "{} is not a valid CSS seletor."
-msgstr "{} não é uma seletor CSS válido."
+msgid "{} is not a valid CSS selector."
+msgstr ""
 
 msgid "{} is not a valid regular expression."
 msgstr "{} não é uma expressão regular válida."
@@ -927,9 +930,3 @@ msgstr "Gerenciar Armazenamento Cache"
 
 msgid "Choose Translation Mode"
 msgstr "Escolha o Modo de Tradução"
-
-#~ msgid "No available API key."
-#~ msgstr "Nenhuma chave API disponível."
-
-#~ msgid "API key was Changed due to previous one unavailable."
-#~ msgstr "A chave API foi alterada devido à indisponibilidade da anterior."

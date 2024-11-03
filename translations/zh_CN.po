@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-06-16 22:34+0800\n"
+"POT-Creation-Date: 2024-11-03 20:44+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -299,8 +299,9 @@ msgid ""
 "href=\"https://cookbook.openai.com/examples/batch_processing\">more details</"
 "a>"
 msgstr ""
-"所有原文内容必须上传到 OpenAI 以进行批量翻译，你将需要等待最多 24 小时才能继续翻译过程。"
-"<a href=\"https://cookbook.openai.com/examples/batch_processing\">更多细节</a>"
+"所有原文内容必须上传到 OpenAI 以进行批量翻译，你将需要等待最多 24 小时才能继"
+"续翻译过程。<a href=\"https://cookbook.openai.com/examples/"
+"batch_processing\">更多细节</a>"
 
 msgid "Refresh"
 msgstr "刷新"
@@ -311,20 +312,17 @@ msgstr "取消批量翻译"
 msgid "Apply"
 msgstr "应用"
 
+msgid "Are you sure you want to cancel the batch translation?"
+msgstr ""
+
 msgid "Batch translation details"
 msgstr "批量翻译详情"
 
 msgid "Status"
 msgstr "状态"
 
-msgid "Total"
-msgstr "全部"
-
-msgid "Completed"
-msgstr "已完成"
-
-msgid "Failed"
-msgstr "已失败"
+msgid "Detail"
+msgstr ""
 
 msgid "Translating..."
 msgstr "翻译中……"
@@ -421,6 +419,12 @@ msgstr "至少保留一行。"
 
 msgid "Can not parse returned response. Raw data: {}"
 msgstr "无法解析返回的响应。原始数据：{}"
+
+msgid "Invalid event type received: {}"
+msgstr ""
+
+msgid "Error received: {}"
+msgstr ""
 
 msgid "Baidu"
 msgstr "百度"
@@ -871,8 +875,8 @@ msgstr "无效的颜色值。"
 msgid "The specified glossary file does not exist."
 msgstr "指定的词汇表文件不存在。"
 
-msgid "{} is not a valid CSS seletor."
-msgstr "{} 不是一个有效的 CSS 选择器。"
+msgid "{} is not a valid CSS selector."
+msgstr ""
 
 msgid "{} is not a valid regular expression."
 msgstr "{} 不是有效的正则表达式。"
@@ -906,9 +910,3 @@ msgstr "缓存管理器"
 
 msgid "Choose Translation Mode"
 msgstr "选择翻译模式"
-
-#~ msgid "No available API key."
-#~ msgstr "没有可用的 API 密钥。"
-
-#~ msgid "API key was Changed due to previous one unavailable."
-#~ msgstr "由于上一个 API 密钥不可用，已自动更换。"
