@@ -437,7 +437,9 @@ class TranslationSetting(QDialog):
         gemini_model_layout = QHBoxLayout(gemini_model)
         gemini_model_layout.setContentsMargins(0, 0, 0, 0)
         gemini_model_select = QComboBox()
+        gemini_model_custom = QLineEdit()
         gemini_model_layout.addWidget(gemini_model_select)
+        gemini_model_layout.addWidget(gemini_model_custom)
         gemini_layout.addRow(_('Model'), gemini_model)
 
         gemini_temperature = QDoubleSpinBox()
@@ -543,6 +545,35 @@ class TranslationSetting(QDialog):
 
         layout.addWidget(chatgpt_group)
 
+        def change_ai_model(config, model_list, model_input):
+            model = config.get('model', self.current_engine.model)
+            model_list.setCurrentText(
+                model if model in self.current_engine.models else _('Custom'))
+
+            def setup_ai_model(model):
+                if model in self.current_engine.models:
+                    model_input.setVisible(False)
+                else:
+                    model_input.setVisible(True)
+                    if model != _('Custom'):
+                        model_input.setText(model)
+            setup_ai_model(model)
+
+            def update_chatgpt_model(model):
+                if not model or _(model) == _('Custom'):
+                    model = self.current_engine.models[0]
+                config.update(model=model)
+
+            def change_ai_model(model):
+                setup_ai_model(model)
+                update_chatgpt_model(model)
+
+            model_input.textChanged.connect(
+                lambda model: update_chatgpt_model(model=model.strip()))
+            model_list.currentTextChanged.connect(change_ai_model)
+            self.save_config.connect(
+                lambda: model_list.setCurrentText(config.get('model')))
+
         def show_gemini_preferences():
             if not issubclass(self.current_engine, GeminiTranslate):
                 gemini_group.setVisible(False)
@@ -553,6 +584,7 @@ class TranslationSetting(QDialog):
             self.gemini_prompt.setPlainText(
                 config.get('prompt', self.current_engine.prompt))
             gemini_model_select.addItems(self.current_engine.models)
+            gemini_model_select.addItem(_('Custom'))
             gemini_temperature.setValue(
                 config.get('temperature', self.current_engine.temperature))
             gemini_temperature.valueChanged.connect(
@@ -566,10 +598,7 @@ class TranslationSetting(QDialog):
             gemini_top_k.valueChanged.connect(
                 lambda value: config.update(top_k=value))
 
-            model = config.get('model', self.current_engine.model)
-            gemini_model_select.setCurrentText(model)
-            gemini_model_select.currentTextChanged.connect(
-                lambda model: config.update(model=model))
+            change_ai_model(config, gemini_model_select, gemini_model_custom)
 
         def show_chatgpt_preferences():
             is_chatgpt = issubclass(self.current_engine, ChatgptTranslate)
@@ -607,36 +636,8 @@ class TranslationSetting(QDialog):
                 chatgpt_model_select.setDisabled(False)
                 chatgpt_model_select.addItems(self.current_engine.models)
                 chatgpt_model_select.addItem(_('Custom'))
-                model = config.get('model', self.current_engine.model)
-                chatgpt_model_select.setCurrentText(
-                    model if model in self.current_engine.models
-                    else _('Custom'))
 
-                def setup_chatgpt_model(model):
-                    if model in self.current_engine.models:
-                        chatgpt_model_custom.setVisible(False)
-                    else:
-                        chatgpt_model_custom.setVisible(True)
-                        if model != _('Custom'):
-                            chatgpt_model_custom.setText(model)
-                setup_chatgpt_model(model)
-
-                def update_chatgpt_model(model):
-                    if not model or _(model) == _('Custom'):
-                        model = self.current_engine.models[0]
-                    config.update(model=model)
-
-                def change_chatgpt_model(model):
-                    setup_chatgpt_model(model)
-                    update_chatgpt_model(model)
-
-                chatgpt_model_custom.textChanged.connect(
-                    lambda model: update_chatgpt_model(model=model.strip()))
-                chatgpt_model_select.currentTextChanged.connect(
-                    change_chatgpt_model)
-                self.save_config.connect(
-                    lambda: chatgpt_model_select.setCurrentText(
-                        config.get('model')))
+            change_ai_model(config, chatgpt_model_select, chatgpt_model_custom)
 
             # Sampling
             sampling = config.get('sampling', self.current_engine.sampling)
