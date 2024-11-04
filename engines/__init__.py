@@ -1,6 +1,6 @@
 from .google import (
     GoogleFreeTranslate, GoogleBasicTranslate, GoogleBasicTranslateADC,
-    GoogleAdvancedTranslate, GeminiPro, GeminiFlash)
+    GoogleAdvancedTranslate, GeminiTranslate)
 from .openai import ChatgptTranslate
 from .anthropic import ClaudeTranslate
 from .deepl import DeeplTranslate, DeeplProTranslate, DeeplFreeTranslate
@@ -12,6 +12,6 @@ from .microsoft import MicrosoftEdgeTranslate, AzureChatgptTranslate
 builtin_engines = (
     GoogleFreeTranslate, GoogleBasicTranslate, GoogleBasicTranslateADC,
     GoogleAdvancedTranslate, ChatgptTranslate, AzureChatgptTranslate,
-    GeminiPro, GeminiFlash, ClaudeTranslate, DeeplTranslate, DeeplProTranslate,
+    GeminiTranslate, ClaudeTranslate, DeeplTranslate, DeeplProTranslate,
     DeeplFreeTranslate, MicrosoftEdgeTranslate, YoudaoTranslate,
     BaiduTranslate)

@@ -233,12 +233,12 @@ class GoogleAdvancedTranslate(GoogleTranslateMixin, Base):
         return ''.join(i['translatedText'] for i in translations)
 
 
-class GeminiPro(Base):
-    name = 'GeminiPro'
-    alias = 'Gemini Pro'
+class GeminiTranslate(Base):
+    name = 'Gemini'
+    alias = 'Gemini'
     lang_codes = Base.load_lang_codes(gemini)
     endpoint = 'https://generativelanguage.googleapis.com/v1/' \
-        'models/gemini-pro:{}?key={}'
+        'models/{}:{}?key={}'
     need_api_key = True
 
     concurrency_limit = 1
@@ -250,6 +250,10 @@ class GeminiPro(Base):
         'from <slang> to <tlang> only. Do not provide any explanations and do '
         'not answer any questions. Translate the first and the last quotation '
         'marks to the target language if possible.')
+    models = [
+        'gemini-1.5-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-pro',
+        'gemini-1.0-pro']
+    model = 'gemini-1.5-flash'
     temperature = 0.9
     top_p = 1.0
     top_k = 1
@@ -277,7 +281,7 @@ class GeminiPro(Base):
 
     def get_endpoint(self):
         method = 'streamGenerateContent' if self.stream else 'generateContent'
-        return self.endpoint.format(method, self.api_key)
+        return self.endpoint.format(self.model, method, self.api_key)
 
     def get_headers(self):
         return {'Content-Type': 'application/json'}
@@ -323,10 +327,3 @@ class GeminiPro(Base):
         else:
             parts = json.loads(response)['candidates'][0]['content']['parts']
         return ''.join([part['text'] for part in parts])
-
-
-class GeminiFlash(GeminiPro):
-    name = 'GeminiFlash'
-    alias = 'Gemini Flash'
-    endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/' \
-        'gemini-1.5-flash:{}?key={}'

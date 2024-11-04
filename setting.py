@@ -7,7 +7,7 @@ from .lib.utils import css, is_proxy_available
 from .lib.translation import get_engine_class
 
 from .engines import (
-    builtin_engines, GeminiPro, ChatgptTranslate, AzureChatgptTranslate,
+    builtin_engines, GeminiTranslate, ChatgptTranslate, AzureChatgptTranslate,
     ClaudeTranslate)
 from .engines.custom import CustomTranslate
 from .components import (
@@ -433,6 +433,13 @@ class TranslationSetting(QDialog):
         self.gemini_prompt.setFixedHeight(80)
         gemini_layout.addRow(_('Prompt'), self.gemini_prompt)
 
+        gemini_model = QWidget()
+        gemini_model_layout = QHBoxLayout(gemini_model)
+        gemini_model_layout.setContentsMargins(0, 0, 0, 0)
+        gemini_model_select = QComboBox()
+        gemini_model_layout.addWidget(gemini_model_select)
+        gemini_layout.addRow(_('Model'), gemini_model)
+
         gemini_temperature = QDoubleSpinBox()
         gemini_temperature.setDecimals(1)
         gemini_temperature.setSingleStep(0.1)
@@ -537,7 +544,7 @@ class TranslationSetting(QDialog):
         layout.addWidget(chatgpt_group)
 
         def show_gemini_preferences():
-            if not issubclass(self.current_engine, GeminiPro):
+            if not issubclass(self.current_engine, GeminiTranslate):
                 gemini_group.setVisible(False)
                 return
             config = self.current_engine.config
@@ -545,6 +552,7 @@ class TranslationSetting(QDialog):
             self.gemini_prompt.setPlaceholderText(self.current_engine.prompt)
             self.gemini_prompt.setPlainText(
                 config.get('prompt', self.current_engine.prompt))
+            gemini_model_select.addItems(self.current_engine.models)
             gemini_temperature.setValue(
                 config.get('temperature', self.current_engine.temperature))
             gemini_temperature.valueChanged.connect(
@@ -557,6 +565,11 @@ class TranslationSetting(QDialog):
                 config.get('top_k', self.current_engine.top_k))
             gemini_top_k.valueChanged.connect(
                 lambda value: config.update(top_k=value))
+
+            model = config.get('model', self.current_engine.model)
+            gemini_model_select.setCurrentText(model)
+            gemini_model_select.currentTextChanged.connect(
+                lambda model: config.update(model=model))
 
         def show_chatgpt_preferences():
             is_chatgpt = issubclass(self.current_engine, ChatgptTranslate)
@@ -1237,7 +1250,7 @@ class TranslationSetting(QDialog):
             config.update(api_keys=api_keys)
             self.set_api_keys()
 
-        # ChatGPT preference
+        # ChatGPT preference & Claude preference
         if issubclass(self.current_engine, ChatgptTranslate) or \
                 issubclass(self.current_engine, ClaudeTranslate):
             self.update_prompt(self.chatgpt_prompt, config)
@@ -1246,8 +1259,8 @@ class TranslationSetting(QDialog):
                 del config['endpoint']
             if endpoint and endpoint != self.current_engine.endpoint:
                 config.update(endpoint=endpoint)
-
-        if issubclass(self.current_engine, GeminiPro):
+        # Gemini preference
+        elif issubclass(self.current_engine, GeminiTranslate):
             self.update_prompt(self.gemini_prompt, config)
 
         # Preferred Language
