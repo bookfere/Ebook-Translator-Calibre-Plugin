@@ -2,6 +2,7 @@ import io
 import re
 import json
 import unittest
+from pathlib import Path
 from types import GeneratorType
 from unittest.mock import call, patch, Mock
 
@@ -161,23 +162,26 @@ class TestBase(unittest.TestCase):
 
     @patch(module_name + '.base.os.path.isfile')
     def test_get_external_program(self, mock_os_path_isfile):
-        mock_os_path_isfile.side_effect = lambda p: p in [
-            '/path/to/real', '/path/to/folder/real', '/path/to/specify/real']
+        mock_os_path_isfile.side_effect = lambda path: path in [
+            str(Path('/path/to/real')), str(Path('/path/to/folder/real')),
+            str(Path('/path/to/specify/real'))]
 
-        self.translator.search_paths = ['/path/to/real']
+        self.translator.search_paths = [str(Path('/path/to/real'))]
         self.assertEqual(
-            '/path/to/real', self.translator.get_external_program('real'))
+            str(Path('/path/to/real')),
+            self.translator.get_external_program('real'))
 
-        self.translator.search_paths = ['/path/to/folder']
+        self.translator.search_paths = [str(Path('/path/to/folder'))]
         self.assertEqual(
-            '/path/to/folder/real',
+            str(Path('/path/to/folder/real')),
             self.translator.get_external_program('real'))
         self.assertEqual(
-            '/path/to/specify/real',
-            self.translator.get_external_program('real', ['/path/to/specify']))
+            str(Path('/path/to/specify/real')),
+            self.translator.get_external_program(
+                'real', [str(Path('/path/to/specify'))]))
 
         self.assertIsNone(
-            self.translator.get_external_program('/path/to/fake'))
+            self.translator.get_external_program(str(Path('/path/to/fake'))))
 
     @patch(module_name + '.base.request')
     def test_translate(self, mock_request):
