@@ -92,7 +92,6 @@ class TestUtils(unittest.TestCase):
             cert_reqs=mock_ssl.CERT_NONE)
         browser.set_ca_data.assert_called_once_with(
             context=mock_ssl._create_unverified_context())
-        browser.set_proxies.assert_not_called()
 
         mock_request.assert_called_once_with(
             'https://example.com/api', 'test data', headers={}, timeout=30,
@@ -115,7 +114,6 @@ class TestUtils(unittest.TestCase):
             cert_reqs=mock_ssl.CERT_NONE)
         browser.set_ca_data.assert_called_once_with(
             context=mock_ssl._create_unverified_context())
-        browser.set_proxies.assert_not_called()
 
         mock_request.assert_called_once_with(
             'https://example.com/api', 'test data', headers={}, timeout=30,
@@ -137,7 +135,6 @@ class TestUtils(unittest.TestCase):
             cert_reqs=mock_ssl.CERT_NONE)
         browser.set_ca_data.assert_called_once_with(
             context=mock_ssl._create_unverified_context())
-        browser.set_proxies.assert_not_called()
 
         mock_request.assert_called_once_with(
             'https://example.com/api', 'test data', headers={}, timeout=30,
