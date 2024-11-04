@@ -103,10 +103,11 @@ def upgrade_config():
     version = EbookTranslator.version
     version >= (2, 0, 0) and ver200_upgrade(config)
     version >= (2, 0, 3) and ver203_upgrade(config)
+    version >= (2, 0, 5) and ver205_upgrade(config)
 
 
 def ver200_upgrade(config):
-    """Upgrade to 2.0.0"""
+    """Upgrade the configuration for version 2.0.0 or earlier."""
     if config.get('engine_preferences'):
         return
 
@@ -146,7 +147,7 @@ def ver200_upgrade(config):
 
 
 def ver203_upgrade(config):
-    """Upgrade to 2.0.3"""
+    """Upgrade the configuration for version 2.0.3 or earlier."""
     engine_config = config.get('engine_preferences')
     azure_chatgpt = engine_config.get('ChatGPT(Azure)')
     if azure_chatgpt and 'model' in azure_chatgpt:
@@ -177,4 +178,17 @@ def ver203_upgrade(config):
     config.delete('request_interval')
     config.delete('request_timeout')
 
+    config.commit()
+
+
+def ver205_upgrade(config):
+    """Upgrade the configuration for version 2.0.5 or earlier."""
+    if config.get('translate_engine') in ('GeminiPro', 'GeminiFlash'):
+        config.update(translate_engine='Gemini')
+    preferences = config.get('engine_preferences')
+    if 'GeminiPro' in preferences.keys():
+        preferences['Gemini'] = preferences.pop('GeminiPro')
+    if 'GeminiFlash' in preferences.keys():
+        preferences['Gemini'] = preferences.pop('GeminiFlash')
+        preferences['Gemini'].update(model='gemini-1.5-flash')
     config.commit()
