@@ -147,14 +147,14 @@ def traceback_error():
 
 def request(
         url, data=None, headers={}, method='GET', timeout=30, proxy_uri=None,
-        as_bytes=False, stream=False):
+        raw_object=False) -> Response | str:
     br = Browser()
     br.set_handle_robots(False)
     # Do not verify SSL certificates
     br.set_ca_data(
         context=ssl._create_unverified_context(cert_reqs=ssl.CERT_NONE))
     # Set up proxy
-    proxies = {}
+    proxies: dict = {}
     if proxy_uri is not None:
         proxies.update(http=proxy_uri, https=proxy_uri)
     else:
@@ -171,8 +171,4 @@ def request(
         _request = Request(url, data, headers=headers, timeout=timeout)
     br.open(_request)
     response: Response = br.response()
-    if stream:
-        return response
-    if as_bytes:
-        return response.read()
-    return response.read().decode('utf-8').strip()
+    return response if raw_object else response.read().decode('utf-8').strip()

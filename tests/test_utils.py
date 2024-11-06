@@ -101,33 +101,12 @@ class TestUtils(unittest.TestCase):
     @patch(module_name + '.ssl')
     @patch(module_name + '.Request')
     @patch(module_name + '.Browser')
-    def test_request_output_as_bytes(
+    def test_request_output_as_raw_object(
             self, mock_browser, mock_request, mock_ssl):
         browser = mock_browser()
 
         self.assertIs(
-            request('https://example.com/api', 'test data', as_bytes=True),
-            browser.response().read())
-
-        browser.set_handle_robots.assert_called_once_with(False)
-        mock_ssl._create_unverified_context.assert_called_once_with(
-            cert_reqs=mock_ssl.CERT_NONE)
-        browser.set_ca_data.assert_called_once_with(
-            context=mock_ssl._create_unverified_context())
-
-        mock_request.assert_called_once_with(
-            'https://example.com/api', 'test data', headers={}, timeout=30,
-            method='GET')
-        browser.open.assert_called_once_with(mock_request())
-
-    @patch(module_name + '.ssl')
-    @patch(module_name + '.Request')
-    @patch(module_name + '.Browser')
-    def test_request_with_stream(self, mock_browser, mock_request, mock_ssl):
-        browser = mock_browser()
-
-        self.assertIs(
-            request('https://example.com/api', 'test data', stream=True),
+            request('https://example.com/api', 'test data', raw_object=True),
             browser.response())
 
         browser.set_handle_robots.assert_called_once_with(False)

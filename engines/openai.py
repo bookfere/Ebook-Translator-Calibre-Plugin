@@ -3,6 +3,8 @@ import time
 import json
 import uuid
 
+from mechanize._response import response_seek_wrapper as Response
+
 from .. import EbookTranslator
 from ..lib.utils import request
 from ..lib.exception import UnsupportedModel
@@ -205,14 +207,16 @@ class ChatgptBatchTranslate:
         del headers['Content-Type']
         response = request(
             '%s/%s/content' % (self.file_endpoint, output_file_id),
-            headers=headers, as_bytes=True)
+            headers=headers, raw_object=True)
+        assert isinstance(response, Response)
 
         translations = {}
-        for line in io.BytesIO(response):
+        for line in io.BytesIO(response.read()):
             result = json.loads(line)
-            response = result['response']
-            if response.get('status_code') == 200:
-                content = response['body']['choices'][0]['message']['content']
+            response_item = result['response']
+            if response_item.get('status_code') == 200:
+                content = response_item[
+                    'body']['choices'][0]['message']['content']
                 translations[result.get('custom_id')] = content
         return translations
 

@@ -192,9 +192,10 @@ class TestBase(unittest.TestCase):
             '{"text": "你好世界"}', self.translator.translate('Hello World'))
 
         mock_request.assert_called_once_with(
-            'https://example.com/api', '{"text": "Hello World"}',
-            {'Authorization': 'Bearer a', 'Content-Type': 'application/json'},
-            'POST', 10.0, None, False)
+            url='https://example.com/api', data='{"text": "Hello World"}',
+            headers={
+                'Authorization': 'Bearer a', 'Content-Type': 'application/json'
+            }, method='POST', timeout=10.0, proxy_uri=None, raw_object=False)
 
     @patch(module_name + '.base.request')
     def test_translate_with_stream(self, mock_request):
@@ -205,9 +206,10 @@ class TestBase(unittest.TestCase):
         self.assertIs(mock_response, self.translator.translate('Hello World'))
 
         mock_request.assert_called_once_with(
-            'https://example.com/api', '{"text": "Hello World"}',
-            {'Authorization': 'Bearer a', 'Content-Type': 'application/json'},
-            'POST', 10.0, None, True)
+            url='https://example.com/api', data='{"text": "Hello World"}',
+            headers={
+                'Authorization': 'Bearer a', 'Content-Type': 'application/json'
+            }, method='POST', timeout=10.0, proxy_uri=None, raw_object=True)
 
     @patch(module_name + '.base.request')
     def test_translate_with_http_error(self, mock_request):
@@ -457,7 +459,8 @@ class TestChatgptTranslate(unittest.TestCase):
         result = self.translator.translate('Hello World!')
 
         mock_request.assert_called_with(
-            url, data, headers, 'POST', 30.0, None, True)
+            url=url, data=data, headers=headers, method='POST', timeout=30.0,
+            proxy_uri=None, raw_object=True)
         self.assertIsInstance(result, GeneratorType)
         self.assertEqual('你好世界！', ''.join(result))
 
@@ -626,7 +629,7 @@ class TestChatgptBatchTranslate(unittest.TestCase):
         line_2 = (
             b'{"custom_id":"def","response":{"status_code":200,"body":{'
             b'"choices": [{"message": {"content": "B"}}]}}}')
-        mock_request.return_value = line_1 + b'\n' + line_2
+        mock_request.return_value.read.return_value = line_1 + b'\n' + line_2
         self.mock_translator.get_headers.return_value = {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer abc',
@@ -641,7 +644,8 @@ class TestChatgptBatchTranslate(unittest.TestCase):
             'User-Agent': 'Ebook-Translator/v1.0.0'}
         mock_request.assert_called_once_with(
             'https://api.openai.com/v1/files/test-batch-id/content',
-            headers=headers, as_bytes=True)
+            headers=headers, raw_object=True)
+        mock_request().read.assert_called_once()
 
     @patch(module_name + '.openai.request')
     def test_create(self, mock_request):
@@ -804,7 +808,8 @@ class TestAzureChatgptTranslate(unittest.TestCase):
         self.translator.endpoint = url
         result = self.translator.translate('Hello World!')
         mock_request.assert_called_with(
-            url, data, headers, 'POST', 30.0, None, True)
+            url=url, data=data, headers=headers, method='POST', timeout=30.0,
+            proxy_uri=None, raw_object=True)
         self.assertIsInstance(result, GeneratorType)
         self.assertEqual('你好世界！', ''.join(result))
 
@@ -873,7 +878,8 @@ class TestClaudeTranslate(unittest.TestCase):
         result = self.translator.translate('Hello World!')
 
         mock_request.assert_called_with(
-            url, data, headers, 'POST', 30.0, None, False)
+            url=url, data=data, headers=headers, method='POST', timeout=30.0,
+            proxy_uri=None, raw_object=False)
         self.assertEqual('你好世界！', result)
 
     @patch(module_name + '.anthropic.EbookTranslator')
@@ -943,7 +949,8 @@ data: {"type":"message_stop"}
         self.translator.model = 'claude-2.1'
         result = self.translator.translate('Hello World!')
         mock_request.assert_called_with(
-            url, data, headers, 'POST', 30.0, None, True)
+            url=url, data=data, headers=headers, method='POST', timeout=30.0,
+            proxy_uri=None, raw_object=True)
         self.assertIsInstance(result, GeneratorType)
         self.assertEqual('你好世界！', ''.join(result))
 
@@ -1076,9 +1083,10 @@ class TestCustom(unittest.TestCase):
         mock_request.return_value = '{"text": "你好世界"}'
         self.assertEqual('你好世界', translator.translate('Hello "World"'))
         mock_request.assert_called_with(
-            'https://example.api',
-            b'{"source": "en", "target": "zh", "text": "Hello \\"World\\""}',
-            {'Content-Type': 'application/json'}, 'POST', 10.0, None, False)
+            url='https://example.api', data=b'{"source": "en", "target": "zh",'
+            b' "text": "Hello \\"World\\""}',
+            headers={'Content-Type': 'application/json'}, method='POST',
+            timeout=10.0, proxy_uri=None, raw_object=False)
         # XML response
         translator.response = 'response.text'
         mock_request.return_value = '<test>你好世界</test>'
