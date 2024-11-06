@@ -166,8 +166,10 @@ class Base:
     def translate(self, text):
         try:
             response = request(
-                self.get_endpoint(), self.get_body(text), self.get_headers(),
-                self.method, self.request_timeout, self.proxy_uri, self.stream)
+                url=self.get_endpoint(), data=self.get_body(text),
+                headers=self.get_headers(), method=self.method,
+                timeout=self.request_timeout, proxy_uri=self.proxy_uri,
+                raw_object=self.stream)
             return self.get_result(response)
         except Exception as e:
             # Combine the error messages for investigation.
