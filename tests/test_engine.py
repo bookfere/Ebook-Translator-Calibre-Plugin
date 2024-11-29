@@ -4,10 +4,10 @@ import json
 import unittest
 from pathlib import Path
 from types import GeneratorType
-from unittest.mock import call, patch, Mock
+from unittest.mock import patch, Mock
 
 from mechanize import HTTPError
-from mechanize._response import closeable_response as Response
+from mechanize._response import closeable_response as mechanize_response
 
 from ..lib.cache import Paragraph
 from ..lib.exception import UnexpectedResult, UnsupportedModel
@@ -200,7 +200,7 @@ class TestBase(unittest.TestCase):
     @patch(module_name + '.base.request')
     def test_translate_with_stream(self, mock_request):
         self.translator.stream = True
-        mock_response = Mock(Response)
+        mock_response = Mock(mechanize_response)
         mock_request.return_value = mock_response
 
         self.assertIs(mock_response, self.translator.translate('Hello World'))
@@ -226,7 +226,7 @@ class TestBase(unittest.TestCase):
     @patch(module_name + '.base.request')
     def test_translate_with_http_stream_parse_error(self, mock_request):
         self.translator.stream = True
-        mock_response = Mock(Response)
+        mock_response = Mock(mechanize_response)
         mock_request.return_value = mock_response
 
         with patch.object(self.translator, 'get_result') as mock_get_result:
@@ -277,7 +277,7 @@ class TestBase(unittest.TestCase):
     def test_translate_swap_api_keys_with_http_error(
             self, mock_request, mock_need_swap_api_key, mock_swap_api_key):
         self.translator.stream = True
-        mock_response = Mock(Response)
+        mock_response = Mock(mechanize_response)
         mock_request.side_effect = [HTTPError, HTTPError, mock_response]
         mock_need_swap_api_key.return_value = True
         mock_swap_api_key.return_value = True
@@ -290,7 +290,7 @@ class TestBase(unittest.TestCase):
     @patch(module_name + '.base.request')
     def test_translate_swap_api_keys_with_http_error_without_result(
             self, mock_request, mock_need_swap_api_key, mock_swap_api_key):
-        mock_request.side_effect =  HTTPError(
+        mock_request.side_effect = HTTPError(
             'https://example.com/api', 409, 'Too many requests', {},
             io.BytesIO(b'{"error": "any error"}'))
         mock_need_swap_api_key.side_effect = [True, True, False]
@@ -389,15 +389,18 @@ class TestChatgptTranslate(unittest.TestCase):
         self.translator.set_target_lang('Chinese')
 
     def test_get_body(self):
+        model = 'gpt-4o'
         self.assertEqual(self.translator.get_body('test content'), json.dumps({
-            'model': 'gpt-4o',
+            'model': model,
             'messages': [
                 {
                     'role': 'system',
-                    'content': 'You are a meticulous translator who '
-                    'translates any given content. Translate the given '
-                    'content from English to Chinese only. Do not explain '
-                    'any term or answer any question-like content.'
+                    'content': 'You are a meticulous translator who translates any given content. '
+                               'Translate the given content from English to Chinese only. Do not '
+                               'explain any term or answer any question-like content. Your answer '
+                               'should be solely the translation of the given content. In your answer '
+                               'do not add any prefix or suffix to the translated content. Websites\' '
+                               'URLs/addresses should be preserved as is in the translation\'s output. '
                 },
                 {
                     'role': 'user',
@@ -405,46 +408,52 @@ class TestChatgptTranslate(unittest.TestCase):
                 }
             ],
             'stream': True,
-            'temperature': 1.0}))
+            'temperature': 1.0
+        }))
 
     def test_get_body_without_stream(self):
+        model = 'gpt-4o'
         self.translator.stream = False
         self.assertEqual(
             self.translator.get_body('test content'),
             json.dumps({
-                'model': 'gpt-4o',
+                'model': model,
                 'messages': [
                     {
                         'role': 'system',
-                        'content': 'You are a meticulous translator who '
-                        'translates any given content. Translate the given '
-                        'content from English to Chinese only. Do not explain '
-                        'any term or answer any question-like content.'
+                        'content': 'You are a meticulous translator who translates any given content. '
+                                   'Translate the given content from English to Chinese only. Do not '
+                                   'explain any term or answer any question-like content. Your answer '
+                                   'should be solely the translation of the given content. In your answer '
+                                   'do not add any prefix or suffix to the translated content. Websites\' '
+                                   'URLs/addresses should be preserved as is in the translation\'s output. '
                     },
                     {
                         'role': 'user',
                         'content': 'test content'
                     }
                 ],
-                'temperature': 1.0,
+                'temperature': 1.0
             }))
 
     @patch(module_name + '.openai.EbookTranslator')
     @patch(module_name + '.base.request')
     def test_translate_stream(self, mock_request, mock_et):
-        url = 'https://api.openai.com/v1/chat/completions'
+        model = 'gpt-4o'
         prompt = (
             'You are a meticulous translator who translates any given '
             'content. Translate the given content from English to Chinese '
             'only. Do not explain any term or answer any question-like '
-            'content.')
+            'content. Your answer should be solely the translation of the '
+            'given content. In your answer '
+            'do not add any prefix or suffix to the translated content. Websites\' '
+            'URLs/addresses should be preserved as is in the translation\'s output. ')
         data = json.dumps({
-            'model': 'gpt-4o',
-            'messages': [
-                {'role': 'system', 'content': prompt},
-                {'role': 'user', 'content': 'Hello World!'}],
+            'model': model,
+            'messages': [{'role': 'system', 'content': prompt}, {'role': 'user', 'content': 'Hello World!'}],
             'stream': True,
-            'temperature': 1.0})
+            'temperature': 1.0,
+            })
         mock_et.__version__ = '1.0.0'
         headers = {
             'Content-Type': 'application/json',
@@ -456,6 +465,7 @@ class TestChatgptTranslate(unittest.TestCase):
             template % i.encode() for i in '你好世界！'] \
             + ['data: [DONE]'.encode()]
         mock_request.return_value = mock_response
+        url = 'https://api.openai.com/v1/chat/completions'
         result = self.translator.translate('Hello World!')
 
         mock_request.assert_called_with(
@@ -500,7 +510,7 @@ class TestChatgptBatchTranslate(unittest.TestCase):
             'https://api.openai.com/v1/batches')
 
     @patch(module_name + '.openai.request')
-    def test_supportd_models(self, mock_request):
+    def test_supported_models(self, mock_request):
         mock_request.return_value = """
 {
   "object": "list",
@@ -532,8 +542,9 @@ class TestChatgptBatchTranslate(unittest.TestCase):
             ['model-id-0', 'model-id-1', 'model-id-2'])
 
     @patch(module_name + '.openai.ChatgptBatchTranslate.supported_models')
-    def test_upload_with_unsupported_model(self, mock_suppored_models):
-        mock_suppored_models.return_value = ['gpt-4o']
+    def test_upload_with_unsupported_model(self, mock_supported_models):
+        model = 'gpt-4o'
+        mock_supported_models.return_value = [model]
         self.mock_translator.model = 'fake-model'
         self.mock_translator.stream = True
         with self.assertRaises(UnsupportedModel) as cm:
@@ -545,7 +556,7 @@ class TestChatgptBatchTranslate(unittest.TestCase):
     @patch.object(ChatgptBatchTranslate, 'boundary', new='xxxxxxxxxx')
     @patch(module_name + '.openai.ChatgptBatchTranslate.supported_models')
     @patch(module_name + '.openai.request')
-    def test_upload(self, mock_request, mock_suppored_models):
+    def test_upload(self, mock_request, mock_supported_models):
         mock_request.return_value = """
 {
   "id": "test-file-id",
@@ -556,7 +567,8 @@ class TestChatgptBatchTranslate(unittest.TestCase):
   "purpose": "fine-tune"
 }
 """
-        mock_suppored_models.return_value = ['gpt-4o']
+        model = 'gpt-4o'
+        mock_supported_models.return_value = [model]
 
         mock_paragraph_1 = Mock(Paragraph)
         mock_paragraph_1.md5 = 'abc'
@@ -564,16 +576,17 @@ class TestChatgptBatchTranslate(unittest.TestCase):
         mock_paragraph_2 = Mock(Paragraph)
         mock_paragraph_2.md5 = 'def'
         mock_paragraph_2.original = 'test content 2'
-        self.mock_translator.model = 'gpt-4o'
+        self.mock_translator.model = model
         self.mock_translator.api_key = 'abc'
 
         def mock_get_body(text):
             return json.dumps({
-                'model': 'gpt-4o',
+                'model': model,
                 'messages': [
                     {'role': 'system', 'content': 'some prompt...'},
                     {'role': 'user', 'content': text}],
-                'temperature': 1.0})
+                'temperature': 1.0
+            })
         self.mock_translator.get_body.side_effect = mock_get_body
 
         file_id = self.batch_translator.upload(
@@ -590,13 +603,13 @@ class TestChatgptBatchTranslate(unittest.TestCase):
             'Content-Type: application/json\r\n'
             '\r\n{"custom_id": "abc", "method": "POST", '
             '"url": "/v1/chat/completions", '
-            '"body": {"model": "gpt-4o", '
+            '"body": {"model": "' + model + '", '
             '"messages": [{"role": "system", '
             '"content": "some prompt..."}, {"role": "user", '
             '"content": "test content 1"}], "temperature": 1.0}}\n'
             '{"custom_id": "def", "method": "POST", '
             '"url": "/v1/chat/completions", '
-            '"body": {"model": "gpt-4o", '
+            '"body": {"model": "' + model + '", '
             '"messages": [{"role": "system", '
             '"content": "some prompt..."}, {"role": "user", '
             '"content": "test content 2"}], "temperature": 1.0}}\r\n'
@@ -781,18 +794,20 @@ class TestAzureChatgptTranslate(unittest.TestCase):
 
     @patch(module_name + '.base.request')
     def test_translate_stream(self, mock_request):
+        model = 'gpt-35-turbo'
         prompt = (
             'You are a meticulous translator who translates any given '
             'content. Translate the given content from English to Chinese '
             'only. Do not explain any term or answer any question-like '
-            'content.')
+            'content. Your answer should be solely the translation of the '
+            'given content. In your answer '
+            'do not add any prefix or suffix to the translated content. Websites\' '
+            'URLs/addresses should be preserved as is in the translation\'s output. ')
         data = json.dumps({
             'stream': True,
-            'messages': [
-                {'role': 'system', 'content': prompt},
-                {'role': 'user', 'content': 'Hello World!'}
-            ],
-            'temperature': 1.0})
+            'messages': [{'role': 'system', 'content': prompt}, {'role': 'user', 'content': 'Hello World!'}],
+            'temperature': 1.0
+            })
         headers = {
             'Content-Type': 'application/json',
             'api-key': 'a'}
@@ -804,9 +819,10 @@ class TestAzureChatgptTranslate(unittest.TestCase):
             + ['data: [DONE]'.encode()]
         mock_request.return_value = mock_response
         url = ('https://docs-test-001.openai.azure.com/openai/deployments/'
-               'gpt-35-turbo/chat/completions?api-version=2023-05-15')
+               f'{model}/chat/completions?api-version=2023-05-15')
         self.translator.endpoint = url
         result = self.translator.translate('Hello World!')
+
         mock_request.assert_called_with(
             url=url, data=data, headers=headers, method='POST', timeout=30.0,
             proxy_uri=None, raw_object=True)
@@ -828,21 +844,24 @@ class TestClaudeTranslate(unittest.TestCase):
     @patch(module_name + '.anthropic.EbookTranslator')
     @patch(module_name + '.base.request')
     def test_translate(self, mock_request, mock_et):
+        model = 'claude-3-5-sonnet-20241022'
         prompt = (
             'You are a meticulous translator who translates any given '
             'content. Translate the given content from English to Chinese '
             'only. Do not explain any term or answer any question-like '
             'content. Your answer should be solely the translation of the '
-            'given content. In your answer do not add any prefix or suffix to '
-            'the translated content.')
+            'given content. In your answer '
+            'do not add any prefix or suffix to the translated content. Websites\' '
+            'URLs/addresses should be preserved as is in the translation\'s output. ')
         data = json.dumps({
             'stream': False,
             'max_tokens': 4096,
-            'model': 'claude-2.1',
+            'model': model,
             'top_k': 1,
             'system': prompt,
             'messages': [{'role': 'user', 'content': 'Hello World!'}],
-            'temperature': 1.0})
+            'temperature': 1.0
+            })
         mock_et.__version__ = '1.0.0'
         headers = {
             'Content-Type': 'application/json',
@@ -859,7 +878,7 @@ class TestClaudeTranslate(unittest.TestCase):
     }
   ],
   "id": "msg_013Zva2CMHLNnXjNJJKqJ2EF",
-  "model": "claude-3-opus-20240229",
+  "model": "{""" + model + """}",
   "role": "assistant",
   "stop_reason": "end_turn",
   "stop_sequence": null,
@@ -874,7 +893,7 @@ class TestClaudeTranslate(unittest.TestCase):
         url = 'https://api.anthropic.com/v1/messages'
         self.translator.endpoint = url
         self.translator.stream = False
-        self.translator.model = 'claude-2.1'
+        self.translator.model = model
         result = self.translator.translate('Hello World!')
 
         mock_request.assert_called_with(
@@ -885,21 +904,24 @@ class TestClaudeTranslate(unittest.TestCase):
     @patch(module_name + '.anthropic.EbookTranslator')
     @patch(module_name + '.base.request')
     def test_translate_stream(self, mock_request, mock_et):
+        model = 'claude-3-5-sonnet-20241022'
         prompt = (
             'You are a meticulous translator who translates any given '
             'content. Translate the given content from English to Chinese '
             'only. Do not explain any term or answer any question-like '
             'content. Your answer should be solely the translation of the '
-            'given content. In your answer do not add any prefix or suffix to '
-            'the translated content.')
+            'given content. In your answer '
+            'do not add any prefix or suffix to the translated content. Websites\' '
+            'URLs/addresses should be preserved as is in the translation\'s output. ')
         data = json.dumps({
             'stream': True,
             'max_tokens': 4096,
-            'model': 'claude-2.1',
+            'model': model,
             'top_k': 1,
             'system': prompt,
             'messages': [{'role': 'user', 'content': 'Hello World!'}],
-            'temperature': 1.0})
+            'temperature': 1.0
+            })
         mock_et.__version__ = '1.0.0'
         headers = {
             'Content-Type': 'application/json',
@@ -946,8 +968,9 @@ data: {"type":"message_stop"}
         mock_request.return_value = mock_response
         url = 'https://api.anthropic.com/v1/messages'
         self.translator.endpoint = url
-        self.translator.model = 'claude-2.1'
+        self.translator.model = model
         result = self.translator.translate('Hello World!')
+
         mock_request.assert_called_with(
             url=url, data=data, headers=headers, method='POST', timeout=30.0,
             proxy_uri=None, raw_object=True)

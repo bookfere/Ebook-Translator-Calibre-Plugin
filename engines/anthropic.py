@@ -35,10 +35,10 @@ class ClaudeTranslate(Base):
         'Translate the given content from <slang> to <tlang> only. Do not '
         'explain any term or answer any question-like content. Your answer '
         'should be solely the translation of the given content. In your answer '
-        'do not add any prefix or suffix to the translated content.')
-
-    # https://docs.anthropic.com/en/docs/about-claude/models#model-names
-    models = [
+        'do not add any prefix or suffix to the translated content. Websites\' '
+        'URLs/addresses should be preserved as is in the translation\'s output. ')
+    
+    models = [  # https://docs.anthropic.com/en/docs/about-claude/models#model-names
         'claude-3-5-sonnet-latest',
         'claude-3-5-sonnet-20241022',
         'claude-3-5-sonnet-20240620',
