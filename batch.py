@@ -5,6 +5,7 @@ from .lib.config import get_config
 from .lib.translation import get_engine_class
 from .lib.conversion import extra_formats
 from .lib.encodings import encoding_list
+from .lib.ebook import Ebooks, Ebook
 from .engines.custom import CustomTranslate
 from .components import (
     Footer, AlertMessage, SourceLang, TargetLang, InputFormat,
@@ -24,7 +25,7 @@ load_translations()
 
 
 class BatchTranslation(QDialog):
-    def __init__(self, parent, worker, ebooks):
+    def __init__(self, parent, worker, ebooks: Ebooks):
         QDialog.__init__(self, parent)
 
         self.gui = parent
@@ -82,39 +83,9 @@ class BatchTranslation(QDialog):
 
         translation_engine = get_engine_class()
         for row, ebook in enumerate(self.ebooks):
+            ebook: Ebook
             ebook_title = QTableWidgetItem(ebook.title)
             table.setItem(row, 0, ebook_title)
-
-            if ebook.input_format in extra_formats.keys():
-                input_encoding = QComboBox()
-                input_encoding.wheelEvent = lambda event: None
-                table.setCellWidget(row, 1, self._cell_widget(input_encoding))
-                input_encoding.addItems(encoding_list)
-                input_encoding.currentTextChanged.connect(
-                    lambda encoding, row=row: self.ebooks[row]
-                    .set_encoding(encoding))
-                input_encoding.currentTextChanged.connect(
-                    lambda encoding: input_encoding.setToolTip(encoding))
-                # Target directionality
-                target_direction = QTableWidgetItem(_('Default'))
-                target_direction.setTextAlignment(Qt.AlignCenter)
-                table.setItem(row, 6, target_direction)
-            else:
-                input_encoding = QTableWidgetItem(_('Default'))
-                input_encoding.setTextAlignment(Qt.AlignCenter)
-                table.setItem(row, 1, input_encoding)
-                # Target directionality
-                direction_list = QComboBox()
-                direction_list.wheelEvent = lambda event: None
-                direction_list.addItem(_('Auto'), 'auto')
-                direction_list.addItem(_('Left to Right'), 'ltr')
-                direction_list.addItem(_('Right to Left'), 'rtl')
-                direction_list.currentIndexChanged.connect(
-                    lambda index, row=row: self.ebooks[row]
-                    .set_target_direction(direction_list.itemData(index)))
-                direction_list.currentTextChanged.connect(
-                    lambda direction: direction_list.setToolTip(direction))
-                table.setCellWidget(row, 6, self._cell_widget(direction_list))
 
             input_fmt = InputFormat(ebook.files.keys())
             table.setCellWidget(row, 2, self._cell_widget(input_fmt))
@@ -174,6 +145,45 @@ class BatchTranslation(QDialog):
             target_lang.refresh.emit(
                 translation_engine.lang_codes.get('target'),
                 translation_engine.config.get('target_lang'))
+
+            if ebook.input_format in extra_formats.keys():
+                input_encoding = QComboBox()
+                input_encoding.wheelEvent = lambda event: None
+                table.setCellWidget(row, 1, self._cell_widget(input_encoding))
+                input_encoding.addItems(encoding_list)
+                input_encoding.currentTextChanged.connect(
+                    lambda encoding, row=row: self.ebooks[row]
+                    .set_encoding(encoding))
+                input_encoding.currentTextChanged.connect(
+                    lambda encoding: input_encoding.setToolTip(encoding))
+                # Target directionality
+                target_direction = QTableWidgetItem(_('Default'))
+                target_direction.setTextAlignment(Qt.AlignCenter)
+                table.setItem(row, 6, target_direction)
+            else:
+                input_encoding = QTableWidgetItem(_('Default'))
+                input_encoding.setTextAlignment(Qt.AlignCenter)
+                table.setItem(row, 1, input_encoding)
+                # Target directionality
+                direction_list = QComboBox()
+                direction_list.wheelEvent = lambda event: None
+                direction_list.addItem(_('Auto'), 'auto')
+                direction_list.addItem(_('Left to Right'), 'ltr')
+                direction_list.addItem(_('Right to Left'), 'rtl')
+                direction_list.currentIndexChanged.connect(
+                    lambda index, row=row: self.ebooks[row]
+                    .set_target_direction(direction_list.itemData(index)))
+                direction_list.currentTextChanged.connect(
+                    lambda direction: direction_list.setToolTip(direction))
+
+                engine_target_lange_codes = translation_engine.lang_codes.get('target')
+                if engine_target_lange_codes is not None and ebook.target_lang in engine_target_lange_codes:
+                    target_lang_code = engine_target_lange_codes[ebook.target_lang]
+                    direction = translation_engine.lang_codes_directionality.get(target_lang_code, 'auto')
+                    index = direction_list.findData(direction)
+                    direction_list.setCurrentIndex(index)
+
+                table.setCellWidget(row, 6, self._cell_widget(direction_list))
 
             table.resizeRowsToContents()
             table.resizeColumnsToContents()

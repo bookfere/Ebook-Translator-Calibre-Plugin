@@ -86,10 +86,12 @@ class EbookTranslatorGui(InterfaceAction):
         ebooks = self.get_selected_ebooks()
         if len(ebooks) < 1:
             return self.alert.pop(
-                _('Please choose one single book.'), 'warning')
+                _('Please choose a book.'), 'warning')
         window = CreateTranslationProject(self.gui, ebooks.first())
         window.start_translation.connect(self.advanced_translation_window)
         window.setModal(True)
+        window.setWindowTitle(
+            '%s - %s' % (_('Advanced Mode'), self.title))
         window.setWindowTitle(self.title)
         window.show()
 
