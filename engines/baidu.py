@@ -7,6 +7,7 @@ from .. import _z
 from ..lib.exception import BadApiKeyFormat
 
 from .base import Base
+from .languages import lang_directionality
 from .languages import baidu
 
 
@@ -17,6 +18,7 @@ class BaiduTranslate(Base):
     name = 'Baidu'
     alias = _z('Baidu')
     lang_codes = Base.load_lang_codes(baidu)
+    lang_codes_directionality = Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://fanyi-api.baidu.com/api/trans/vip/translate'
     api_key_hint = 'appid|appkey'
     api_key_pattern = r'^[^\s:\|]+?[:\|][^\s:\|]+$'

@@ -5,7 +5,8 @@ from .. import EbookTranslator
 from mechanize._response import response_seek_wrapper as Response
 
 from .base import Base
-from .languages import anthropic as anthropic_languages
+from .languages import lang_directionality
+from .languages import anthropic
 from .prompt_extensions import anthropic as anthropic_prompt_extension
 
 try:
@@ -19,7 +20,8 @@ load_translations()
 class ClaudeTranslate(Base):
     name = 'Claude'
     alias = 'Claude (Anthropic)'
-    lang_codes = Base.load_lang_codes(anthropic_languages)
+    lang_codes = Base.load_lang_codes(anthropic)
+    lang_codes_directionality = Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://api.anthropic.com/v1/messages'
     api_version = '2023-06-01'
     api_key_hint = 'sk-ant-xxxx'

@@ -10,6 +10,7 @@ from ..lib.utils import request
 from ..lib.exception import UnsupportedModel
 
 from .base import Base
+from .languages import lang_directionality
 from .languages import google
 
 
@@ -27,6 +28,7 @@ class ChatgptTranslate(Base):
     name = 'ChatGPT'
     alias = 'ChatGPT (OpenAI)'
     lang_codes = Base.load_lang_codes(google)
+    lang_codes_directionality = Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://api.openai.com/v1/chat/completions'
     # api_key_hint = 'sk-xxx...xxx'
     # https://help.openai.com/en/collections/3808446-api-error-codes-explained
