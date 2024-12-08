@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-11-03 20:44+0800\n"
+"POT-Creation-Date: 2024-12-08 12:47+0800\n"
 "PO-Revision-Date: 2023-04-25 15:36+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -43,6 +43,9 @@ msgstr ""
 
 msgid "Input Format"
 msgstr "輸入格式"
+
+msgid "Output Format"
+msgstr "輸出格式"
 
 msgid "Source Language"
 msgstr "來源語言"
@@ -202,9 +205,6 @@ msgstr ""
 
 msgid "Are you sure you want to cancel the translation progress?"
 msgstr ""
-
-msgid "Output Format"
-msgstr "輸出格式"
 
 msgid "Title"
 msgstr "書名"
@@ -691,13 +691,13 @@ msgstr ""
 msgid "Prompt"
 msgstr "提示"
 
+msgid "Model"
+msgstr ""
+
 msgid "Sampling"
 msgstr ""
 
 msgid "Endpoint"
-msgstr ""
-
-msgid "Model"
 msgstr ""
 
 msgid "Enable streaming text like in ChatGPT"
@@ -886,7 +886,7 @@ msgstr "設定"
 msgid "About"
 msgstr "關於"
 
-msgid "Please choose one single book."
+msgid "Please choose a book."
 msgstr ""
 
 msgid "Please choose at least one book."

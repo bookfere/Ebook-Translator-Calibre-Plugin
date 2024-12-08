@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-11-03 20:44+0800\n"
+"POT-Creation-Date: 2024-12-08 12:47+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: none\n"
@@ -44,6 +44,9 @@ msgstr "&Iniciar"
 
 msgid "Input Format"
 msgstr "Formato de Entrada"
+
+msgid "Output Format"
+msgstr "Formato de Saída"
 
 msgid "Source Language"
 msgstr "Idioma de Origem"
@@ -206,9 +209,6 @@ msgstr "Tem certeza de que deseja cancelar o andamento da preparação?"
 
 msgid "Are you sure you want to cancel the translation progress?"
 msgstr "Tem certeza de que deseja cancelar o andamento da tradução?"
-
-msgid "Output Format"
-msgstr "Formato de Saída"
 
 msgid "Title"
 msgstr "Título"
@@ -709,14 +709,14 @@ msgstr "Ajuste do Gemini"
 msgid "Prompt"
 msgstr "Prompt"
 
+msgid "Model"
+msgstr "Modelo"
+
 msgid "Sampling"
 msgstr "Amostragem"
 
 msgid "Endpoint"
 msgstr "Ponto final"
-
-msgid "Model"
-msgstr "Modelo"
 
 msgid "Enable streaming text like in ChatGPT"
 msgstr "Habilite de texto em tempo real como no ChatGPT"
@@ -909,8 +909,8 @@ msgstr "Configurações"
 msgid "About"
 msgstr "Sobre"
 
-msgid "Please choose one single book."
-msgstr "Por favor, escolha um único livro."
+msgid "Please choose a book."
+msgstr ""
 
 msgid "Please choose at least one book."
 msgstr "Por favor, escolha pelo menos um livro."
