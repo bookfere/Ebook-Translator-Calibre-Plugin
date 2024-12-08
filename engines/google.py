@@ -4,6 +4,7 @@ import sys
 import time
 import json
 import os.path
+from html import unescape
 from subprocess import Popen, PIPE
 
 from ..lib.utils import traceback_error
@@ -184,7 +185,7 @@ class GoogleBasicTranslateADC(GoogleTranslateMixin, Base):
 
     def get_result(self, data):
         translations = json.loads(data)['data']['translations']
-        return ''.join(i['translatedText'] for i in translations)
+        return ''.join(unescape(i['translatedText']) for i in translations)
 
 
 class GoogleBasicTranslate(GoogleBasicTranslateADC):
