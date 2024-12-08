@@ -8,6 +8,7 @@ from .. import _z
 from ..lib.exception import BadApiKeyFormat
 
 from .base import Base
+from .languages import lang_directionality
 from .languages import youdao
 
 
@@ -18,6 +19,7 @@ class YoudaoTranslate(Base):
     name = 'Youdao'
     alias = _z('Youdao')
     lang_codes = Base.load_lang_codes(youdao)
+    lang_codes_directionality = Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://openapi.youdao.com/api'
     api_key_hint = 'appid|appsecret'
     api_key_pattern = r'^[^\s:\|]+?[:\|][^\s:\|]+$'

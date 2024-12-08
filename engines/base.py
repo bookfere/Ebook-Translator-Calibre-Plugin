@@ -70,6 +70,10 @@ class Base:
         return codes
 
     @classmethod
+    def load_lang_codes_directionality(cls, codes):
+        return codes
+
+    @classmethod
     def get_source_code(cls, lang):
         source_codes = cls.lang_codes.get('source')
         return 'auto' if lang == _('Auto detect') else source_codes.get(lang)

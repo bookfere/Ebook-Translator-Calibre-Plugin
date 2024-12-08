@@ -4,7 +4,7 @@ from typing import Callable
 from unittest.mock import call, patch, Mock
 
 from ..lib.conversion import ConversionWorker
-from ..lib.ebook import Ebooks
+from ..lib.ebook import Ebook
 
 
 module_name = 'calibre_plugins.ebook_translator.lib.conversion'
@@ -18,7 +18,7 @@ class TestConversionWorker(unittest.TestCase):
         self.worker.db = Mock()
         self.worker.api = Mock()
 
-        self.ebook = Mock(Ebooks.Ebook)
+        self.ebook = Mock(Ebook)
         self.job = Mock()
         self.worker.working_jobs = {
             self.job: (self.ebook, str(Path('/path/to/test.epub')))}

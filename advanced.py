@@ -247,6 +247,7 @@ class CreateTranslationProject(QDialog):
         layout.addWidget(self.start_button)
 
     def layout_format(self):
+        engine_class = get_engine_class()
         widget = QWidget()
         layout = QHBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -257,6 +258,13 @@ class CreateTranslationProject(QDialog):
         input_format.setFixedWidth(150)
         input_layout.addWidget(input_format)
         layout.addWidget(input_group)
+
+        output_group = QGroupBox(_('Output Format'))
+        output_layout = QGridLayout(output_group)
+        output_format = OutputFormat()
+        output_format.setFixedWidth(150)
+        output_layout.addWidget(output_format)
+        layout.addWidget(output_group)
 
         source_group = QGroupBox(_('Source Language'))
         source_layout = QVBoxLayout(source_group)
@@ -271,6 +279,35 @@ class CreateTranslationProject(QDialog):
         target_lang.setFixedWidth(150)
         target_layout.addWidget(target_lang)
         layout.addWidget(target_group)
+
+        source_lang.refresh.emit(
+            engine_class.lang_codes.get('source'),
+            engine_class.config.get('source_lang'),
+            not issubclass(engine_class, CustomTranslate))
+
+        target_lang.refresh.emit(
+            engine_class.lang_codes.get('target'),
+            engine_class.config.get('target_lang'))
+
+        def change_input_format(_format):
+            self.ebook.set_input_format(_format)
+        change_input_format(input_format.currentText())
+        input_format.currentTextChanged.connect(change_input_format)
+
+        def change_output_format(_format):
+            self.ebook.set_output_format(_format)
+        change_output_format(output_format.currentText())
+        output_format.currentTextChanged.connect(change_output_format)
+
+        def change_source_lang(lang):
+            self.ebook.set_source_lang(lang)
+        change_source_lang(source_lang.currentText())
+        source_lang.currentTextChanged.connect(change_source_lang)
+
+        def change_target_lang(lang):
+            self.ebook.set_target_lang(lang)
+        change_target_lang(target_lang.currentText())
+        target_lang.currentTextChanged.connect(change_target_lang)
 
         if self.ebook.input_format in extra_formats.keys():
             encoding_group = QGroupBox(_('Encoding'))
@@ -295,34 +332,17 @@ class CreateTranslationProject(QDialog):
             direction_layout.addWidget(direction_list)
             layout.addWidget(direction_group)
 
-            def change_direction(index):
-                direction = direction_list.itemData(index)
-                self.ebook.set_target_direction(direction)
+            def change_direction(_index):
+                _direction = direction_list.itemData(_index)
+                self.ebook.set_target_direction(_direction)
             direction_list.currentIndexChanged.connect(change_direction)
 
-        def change_input_format(format):
-            self.ebook.set_input_format(format)
-        change_input_format(input_format.currentText())
-        input_format.currentTextChanged.connect(change_input_format)
-
-        engine_class = get_engine_class()
-        source_lang.refresh.emit(
-            engine_class.lang_codes.get('source'),
-            engine_class.config.get('source_lang'),
-            not issubclass(engine_class, CustomTranslate))
-        target_lang.refresh.emit(
-            engine_class.lang_codes.get('target'),
-            engine_class.config.get('target_lang'))
-
-        def change_source_lang(lang):
-            self.ebook.set_source_lang(source_lang.currentText())
-        change_source_lang(source_lang.currentText())
-        source_lang.currentTextChanged.connect(change_source_lang)
-
-        def change_target_lang(lang):
-            self.ebook.set_target_lang(lang)
-        change_target_lang(target_lang.currentText())
-        target_lang.currentTextChanged.connect(change_target_lang)
+            engine_target_lange_codes = engine_class.lang_codes.get('target')
+            if engine_target_lange_codes is not None and self.ebook.target_lang in engine_target_lange_codes:
+                target_lang_code = engine_target_lange_codes[self.ebook.target_lang]
+                direction = engine_class.lang_codes_directionality.get(target_lang_code, 'auto')
+                index = direction_list.findData(direction)
+                direction_list.setCurrentIndex(index)
 
         return widget
 
@@ -356,7 +376,7 @@ class AdvancedTranslation(QDialog):
         self.cache = None
         self.merge_enabled = False
 
-        self.prgress_step = 0
+        self.progress_step = 0
         self.translate_all = False
 
         self.editor_worker = EditorWorker()
@@ -612,7 +632,7 @@ class AdvancedTranslation(QDialog):
         progress_bar.setVisible(False)
 
         def write_progress():
-            value = progress_bar.value() + self.prgress_step
+            value = progress_bar.value() + self.progress_step
             if value > progress_bar.maximum():
                 value = progress_bar.maximum()
             progress_bar.setValue(value)
@@ -941,9 +961,12 @@ class AdvancedTranslation(QDialog):
             translation_text.ensureCursorVisible)
 
         def refresh_translation(paragraph):
-            raw_text.setPlainText(paragraph.raw.strip())
-            original_text.setPlainText(paragraph.original.strip())
-            translation_text.setPlainText(paragraph.translation)
+            # TODO: how can this happen and what should we do in case it does?
+            if paragraph is not None:
+                raw_text.setPlainText(paragraph.raw.strip())
+                original_text.setPlainText(paragraph.original.strip())
+                translation_text.setPlainText(paragraph.translation)
+
         self.paragraph_sig.connect(refresh_translation)
 
         self.trans_worker.start.connect(
@@ -1060,17 +1083,19 @@ class AdvancedTranslation(QDialog):
         self.editor_worker.show.connect(save_status.setText)
 
         def save_translation():
-            save_button.setDisabled(True)
-            paragraph = self.table.current_paragraph()
-            translation = translation_text.toPlainText()
-            paragraph.translation = translation
-            paragraph.engine_name = self.current_engine.name
-            paragraph.target_lang = self.ebook.target_lang
-            self.table.row.emit(paragraph.row)
-            self.cache.update_paragraph(paragraph)
-            translation_text.setFocus(Qt.OtherFocusReason)
-            self.editor_worker.start[str].emit(
-                _('Your changes have been saved.'))
+            # TODO: how can this happen and what should we do in case it does?
+            if paragraph is not None:
+                save_button.setDisabled(True)
+                paragraph = self.table.current_paragraph()
+                translation = translation_text.toPlainText()
+                paragraph.translation = translation
+                paragraph.engine_name = self.current_engine.name
+                paragraph.target_lang = self.ebook.target_lang
+                self.table.row.emit(paragraph.row)
+                self.cache.update_paragraph(paragraph)
+                translation_text.setFocus(Qt.OtherFocusReason)
+                self.editor_worker.start[str].emit(_('Your changes have been saved.'))
+
         save_button.clicked.connect(save_translation)
         set_shortcut(save_button, 'save', save_translation, save_button.text())
 
@@ -1109,7 +1134,7 @@ class AdvancedTranslation(QDialog):
         is_fresh = len(paragraphs) < 1
         if is_fresh:
             paragraphs = self.table.get_selected_paragraphs(False, True)
-        self.prgress_step = self.get_progress_step(len(paragraphs))
+        self.progress_step = self.get_progress_step(len(paragraphs))
         if not self.translate_all:
             message = _(
                 'Are you sure you want to translate all {:n} paragraphs?')
@@ -1124,7 +1149,7 @@ class AdvancedTranslation(QDialog):
         if len(paragraphs) == self.table.rowCount():
             self.translate_all_paragraphs()
         else:
-            self.prgress_step = self.get_progress_step(len(paragraphs))
+            self.progress_step = self.get_progress_step(len(paragraphs))
             self.trans_worker.translate.emit(paragraphs, True)
 
     def install_widget_event(

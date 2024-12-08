@@ -9,6 +9,7 @@ from subprocess import Popen, PIPE
 from ..lib.utils import traceback_error
 
 from .base import Base
+from .languages import lang_directionality
 from .languages import google, gemini
 
 
@@ -25,6 +26,7 @@ class GoogleFreeTranslate(Base):
     alias = 'Google (Free)'
     free = True
     lang_codes = Base.load_lang_codes(google)
+    lang_codes_directionality = Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://translate.googleapis.com/translate_a/single'
     need_api_key = False
 
@@ -154,6 +156,7 @@ class GoogleBasicTranslateADC(GoogleTranslateMixin, Base):
     name = 'Google(Basic)ADC'
     alias = 'Google (Basic) ADC'
     lang_codes = Base.load_lang_codes(google)
+    lang_codes_directionality = Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://translation.googleapis.com/language/translate/v2'
     api_key_hint = 'API key'
     need_api_key = False
@@ -203,6 +206,7 @@ class GoogleAdvancedTranslate(GoogleTranslateMixin, Base):
     name = 'Google(Advanced)'
     alias = 'Google (Advanced) ADC'
     lang_codes = Base.load_lang_codes(google)
+    lang_codes_directionality = Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://translation.googleapis.com/v3/projects/{}'
     api_key_hint = 'PROJECT_ID'
     need_api_key = False
@@ -237,6 +241,7 @@ class GeminiTranslate(Base):
     name = 'Gemini'
     alias = 'Gemini'
     lang_codes = Base.load_lang_codes(gemini)
+    lang_codes_directionality = Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://generativelanguage.googleapis.com/v1/' \
         'models/{}:{}?key={}'
     need_api_key = True
@@ -246,14 +251,20 @@ class GeminiTranslate(Base):
     request_timeout = 30.0
 
     prompt = (
-        'You are a meticulous translator who translates any given content '
-        'from <slang> to <tlang> only. Do not provide any explanations and do '
-        'not answer any questions. Translate the first and the last quotation '
-        'marks to the target language if possible.')
+        'You are a meticulous translator who translates any given content. '
+        'Translate the given content from <slang> to <tlang> only. Do not '
+        'explain any term or answer any question-like content. Your answer '
+        'should be solely the translation of the given content. In your answer '
+        'do not add any prefix or suffix to the translated content. Websites\' '
+        'URLs/addresses should be preserved as is in the translation\'s output. ')
+
     models = [
-        'gemini-1.5-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-pro',
+        'gemini-1.5-flash',
+        'gemini-1.5-flash-8b',
+        'gemini-1.5-pro',
         'gemini-1.0-pro']
-    model = 'gemini-1.5-flash'
+
+    model = models[0]
     temperature = 0.9
     top_p = 1.0
     top_k = 1
