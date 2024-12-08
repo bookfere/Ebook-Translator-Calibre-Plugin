@@ -491,7 +491,6 @@ anthropic = {
     'Zulu': 'zu',
 }
 
-
 gemini = {
     'Arabic': 'ar',
     'Bengali': 'bn',
@@ -534,6 +533,7 @@ gemini = {
     'Vietnamese': "v'i'"
 }
 
+# https://developers.deepl.com/docs/resources/supported-languages
 deepl = {
     'source': {
         'Arabic': 'AR',
@@ -542,7 +542,7 @@ deepl = {
         'Danish': 'DA',
         'German': 'DE',
         'Greek': 'EL',
-        'English': 'EN',
+        'English (all variants)': 'EN',
         'Spanish': 'ES',
         'Estonian': 'ET',
         'Finnish': 'FI',
@@ -554,10 +554,10 @@ deepl = {
         'Korean': 'KO',
         'Lithuanian': 'LT',
         'Latvian': 'LV',
-        'Norwegian (Bokmål)': 'NB',
+        'Norwegian Bokmål': 'NB',
         'Dutch': 'NL',
         'Polish': 'PL',
-        'Portuguese': 'PT',
+        'Portuguese (all variants)': 'PT',
         'Romanian': 'RO',
         'Russian': 'RU',
         'Slovak': 'SK',
@@ -565,7 +565,7 @@ deepl = {
         'Swedish': 'SV',
         'Turkish': 'TR',
         'Ukrainian': 'UK',
-        'Chinese': 'ZH'
+        'Chinese (all variants)': 'ZH',
     },
     'target': {
         'Arabic': 'AR',
@@ -588,7 +588,7 @@ deepl = {
         'Korean': 'KO',
         'Lithuanian': 'LT',
         'Latvian': 'LV',
-        'Norwegian (Bokmål)': 'NB',
+        'Norwegian Bokmål': 'NB',
         'Dutch': 'NL',
         'Polish': 'PL',
         'Portuguese': 'PT',
@@ -601,7 +601,9 @@ deepl = {
         'Swedish': 'SV',
         'Turkish': 'TR',
         'Ukrainian': 'UK',
-        'Chinese (simplified)': 'ZH'
+        'Chinese': 'ZH',
+        'Chinese (simplified)': 'ZH-HANS',
+        'Chinese (traditional)': 'ZH-HANT',
     }
 }
 
