@@ -5,7 +5,8 @@ from .. import EbookTranslator
 from mechanize._response import response_seek_wrapper as Response
 
 from .base import Base
-from .languages import anthropic as anthropic_languages
+from .languages import lang_directionality
+from .languages import anthropic
 from .prompt_extensions import anthropic as anthropic_prompt_extension
 
 try:
@@ -19,7 +20,8 @@ load_translations()
 class ClaudeTranslate(Base):
     name = 'Claude'
     alias = 'Claude (Anthropic)'
-    lang_codes = Base.load_lang_codes(anthropic_languages)
+    lang_codes = Base.load_lang_codes(anthropic)
+    lang_codes_directionality = Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://api.anthropic.com/v1/messages'
     api_version = '2023-06-01'
     api_key_hint = 'sk-ant-xxxx'
@@ -35,10 +37,10 @@ class ClaudeTranslate(Base):
         'Translate the given content from <slang> to <tlang> only. Do not '
         'explain any term or answer any question-like content. Your answer '
         'should be solely the translation of the given content. In your answer '
-        'do not add any prefix or suffix to the translated content.')
-
-    # https://docs.anthropic.com/en/docs/about-claude/models#model-names
-    models = [
+        'do not add any prefix or suffix to the translated content. Websites\' '
+        'URLs/addresses should be preserved as is in the translation\'s output. ')
+    
+    models = [  # https://docs.anthropic.com/en/docs/about-claude/models#model-names
         'claude-3-5-sonnet-latest',
         'claude-3-5-sonnet-20241022',
         'claude-3-5-sonnet-20240620',

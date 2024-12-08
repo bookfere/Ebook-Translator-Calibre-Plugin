@@ -327,7 +327,7 @@ anthropic = {
     'Hausa': 'ha',
     'Hawaiian': 'haw',
     'Hebrew': 'iw',
-    'Hebrew (with Niqqud)': 'iwn',
+    'Hebrew (with Niqqud)': 'iw',
     'Hiligaynon': 'hil',
     'Hindi': 'hi',
     'Hmong': 'hmn',
@@ -1037,4 +1037,13 @@ baidu = {
     '中古法语': 'frm',
     '祖鲁语': 'zul',
     '爪哇语': 'jav'
+}
+
+lang_directionality = {
+    'iw': 'rtl',
+    'ar': 'rtl',
+    'en': 'ltr',
+    'es': 'ltr',
+    'it': 'ltr',
+    'de': 'ltr'
 }
