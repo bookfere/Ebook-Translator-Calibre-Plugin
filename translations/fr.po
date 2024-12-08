@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-11-03 20:44+0800\n"
+"POT-Creation-Date: 2024-12-08 12:47+0800\n"
 "PO-Revision-Date: 2023-10-01 15:35-0400\n"
 "Last-Translator: <a href=\"https://www.mobileread.com/forums/member.php?"
 "u=90932\">PoP</a>\n"
@@ -45,6 +45,9 @@ msgstr "&Début"
 
 msgid "Input Format"
 msgstr "Format d'entrée"
+
+msgid "Output Format"
+msgstr "Format de sortie"
 
 msgid "Source Language"
 msgstr "Langage d'origine"
@@ -204,9 +207,6 @@ msgstr ""
 
 msgid "Are you sure you want to cancel the translation progress?"
 msgstr ""
-
-msgid "Output Format"
-msgstr "Format de sortie"
 
 msgid "Title"
 msgstr "Titre"
@@ -702,14 +702,14 @@ msgstr ""
 msgid "Prompt"
 msgstr "Demander"
 
+msgid "Model"
+msgstr "Modèle"
+
 msgid "Sampling"
 msgstr "Échantillonant"
 
 msgid "Endpoint"
 msgstr "Point final"
-
-msgid "Model"
-msgstr "Modèle"
 
 msgid "Enable streaming text like in ChatGPT"
 msgstr "Activer le défilage du texte comme dans ChatGPT"
@@ -900,8 +900,8 @@ msgstr "Réglage"
 msgid "About"
 msgstr "À propos"
 
-msgid "Please choose one single book."
-msgstr "Veuillez choisir un seul ebook."
+msgid "Please choose a book."
+msgstr ""
 
 msgid "Please choose at least one book."
 msgstr "Veuillez choisir au moins un livre."

@@ -895,6 +895,8 @@ class AdvancedTranslation(QDialog):
             refresh_languages()
         engine_list.currentIndexChanged.connect(choose_engine)
 
+        output_format.setCurrentText(self.ebook.output_format)
+
         def change_output_format(format):
             self.ebook.set_output_format(format)
         change_output_format(output_format.currentText())

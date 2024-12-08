@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-11-03 20:44+0800\n"
+"POT-Creation-Date: 2024-12-08 12:47+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -42,6 +42,9 @@ msgstr "开始(&S)"
 
 msgid "Input Format"
 msgstr "输入格式"
+
+msgid "Output Format"
+msgstr "输出格式"
 
 msgid "Source Language"
 msgstr "来源语言"
@@ -202,9 +205,6 @@ msgstr "你确定中止准备过程吗？"
 msgid "Are you sure you want to cancel the translation progress?"
 msgstr "你确定要取消翻译过程吗？"
 
-msgid "Output Format"
-msgstr "输出格式"
-
 msgid "Title"
 msgstr "书名"
 
@@ -313,7 +313,7 @@ msgid "Apply"
 msgstr "应用"
 
 msgid "Are you sure you want to cancel the batch translation?"
-msgstr ""
+msgstr "确定要取消批量翻译吗？"
 
 msgid "Batch translation details"
 msgstr "批量翻译详情"
@@ -322,7 +322,7 @@ msgid "Status"
 msgstr "状态"
 
 msgid "Detail"
-msgstr ""
+msgstr "详情"
 
 msgid "Translating..."
 msgstr "翻译中……"
@@ -421,10 +421,10 @@ msgid "Can not parse returned response. Raw data: {}"
 msgstr "无法解析返回的响应。原始数据：{}"
 
 msgid "Invalid event type received: {}"
-msgstr ""
+msgstr "接收到无效的事件类型：{}"
 
 msgid "Error received: {}"
-msgstr ""
+msgstr "接收到错误：{}"
 
 msgid "Baidu"
 msgstr "百度"
@@ -698,14 +698,14 @@ msgstr "调节 Gemini"
 msgid "Prompt"
 msgstr "提示词"
 
+msgid "Model"
+msgstr "模型"
+
 msgid "Sampling"
 msgstr "采样"
 
 msgid "Endpoint"
 msgstr "端点"
-
-msgid "Model"
-msgstr "模型"
 
 msgid "Enable streaming text like in ChatGPT"
 msgstr "启用类似 ChatGPT 的文本流效果"
@@ -876,7 +876,7 @@ msgid "The specified glossary file does not exist."
 msgstr "指定的词汇表文件不存在。"
 
 msgid "{} is not a valid CSS selector."
-msgstr ""
+msgstr "{} 不是一个有效的 CSS 选择器。"
 
 msgid "{} is not a valid regular expression."
 msgstr "{} 不是有效的正则表达式。"
@@ -893,8 +893,8 @@ msgstr "设置"
 msgid "About"
 msgstr "关于"
 
-msgid "Please choose one single book."
-msgstr "请选择一本书籍。"
+msgid "Please choose a book."
+msgstr "请选择一本书。"
 
 msgid "Please choose at least one book."
 msgstr "必须选择至少一本电子书。"

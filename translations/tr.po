@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-11-03 20:44+0800\n"
+"POT-Creation-Date: 2024-12-08 12:47+0800\n"
 "PO-Revision-Date: 2024-05-15 16:21+0300\n"
 "Last-Translator: DogancanYr <EMAIL@ADDRESS>\n"
 "Language-Team: Turkish <LL@li.org>\n"
@@ -43,6 +43,9 @@ msgstr "&Başlat"
 
 msgid "Input Format"
 msgstr "Giriş Formatı"
+
+msgid "Output Format"
+msgstr "Çıktı Formatı"
 
 msgid "Source Language"
 msgstr "Kaynak Dil"
@@ -204,9 +207,6 @@ msgstr "Hazırlık sürecini iptal etmek istediğinizden emin misiniz?"
 
 msgid "Are you sure you want to cancel the translation progress?"
 msgstr "Çeviri ilerlemesini iptal etmek istediğinizden emin misiniz?"
-
-msgid "Output Format"
-msgstr "Çıktı Formatı"
 
 msgid "Title"
 msgstr "Başlık"
@@ -707,14 +707,14 @@ msgstr "İkizler'i Ayarla"
 msgid "Prompt"
 msgstr "İstem"
 
+msgid "Model"
+msgstr "Model"
+
 msgid "Sampling"
 msgstr "Örnekleme"
 
 msgid "Endpoint"
 msgstr "Son nokta"
-
-msgid "Model"
-msgstr "Model"
 
 msgid "Enable streaming text like in ChatGPT"
 msgstr "ChatGPT'deki gibi metin akışını etkinleştir"
@@ -903,8 +903,8 @@ msgstr "Ayar"
 msgid "About"
 msgstr "Hakkında"
 
-msgid "Please choose one single book."
-msgstr "Lütfen tek bir kitap seçin."
+msgid "Please choose a book."
+msgstr ""
 
 msgid "Please choose at least one book."
 msgstr "Lütfen en az bir kitap seçin."
