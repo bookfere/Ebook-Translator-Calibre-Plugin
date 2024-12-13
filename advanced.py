@@ -963,7 +963,8 @@ class AdvancedTranslation(QDialog):
             translation_text.ensureCursorVisible)
 
         def refresh_translation(paragraph):
-            # TODO: how can this happen and what should we do in case it does?
+
+            # TODO: check - why/how can "paragraph" be None and what should we do in such case?
             if paragraph is not None:
                 raw_text.setPlainText(paragraph.raw.strip())
                 original_text.setPlainText(paragraph.original.strip())
@@ -1075,20 +1076,25 @@ class AdvancedTranslation(QDialog):
             if self.trans_worker.on_working and \
                     self.table.selected_count() > 1:
                 return
+
             paragraph = self.table.current_paragraph()
+
+            # TODO: check - why/how can "paragraph" be None and what should we do in such case?
             if paragraph is not None:
                 translation = translation_text.toPlainText()
                 save_button.setDisabled(
                     translation == (paragraph.translation or ''))
+
         translation_text.textChanged.connect(modify_translation)
 
         self.editor_worker.show.connect(save_status.setText)
 
         def save_translation():
-            # TODO: how can this happen and what should we do in case it does?
+            paragraph = self.table.current_paragraph()
+
+            # TODO: check - why/how can "paragraph" be None and what should we do in such case?
             if paragraph is not None:
                 save_button.setDisabled(True)
-                paragraph = self.table.current_paragraph()
                 translation = translation_text.toPlainText()
                 paragraph.translation = translation
                 paragraph.engine_name = self.current_engine.name
