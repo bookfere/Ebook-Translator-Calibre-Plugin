@@ -259,12 +259,14 @@ class GeminiTranslate(Base):
         'do not add any prefix or suffix to the translated content. Websites\' '
         'URLs/addresses should be preserved as is in the translation\'s output. ')
 
+    # TODO: check if it is possible to fetch this this directly from the api, if yes - implement this
     models = [
         'gemini-1.5-flash',
         'gemini-1.5-flash-8b',
         'gemini-1.5-pro',
         'gemini-1.0-pro']
 
+    # use the most recent model
     model = models[0]
     temperature = 0.9
     top_p = 1.0

@@ -45,14 +45,16 @@ class ChatgptTranslate(Base):
         'should be solely the translation of the given content. In your answer '
         'do not add any prefix or suffix to the translated content. Websites\' '
         'URLs/addresses should be preserved as is in the translation\'s output. ')
-    
+
+    # TODO: check if it is possible to fetch this this directly from the api, if yes - implement this
     models = [
         'gpt-4o', 
         'gpt-4o-mini', 
         'gpt-4-turbo', 
         'gpt-4', 
         'gpt-3.5-turbo']
-        
+
+    # use the most recent model
     model = models[0]
     samplings = ['temperature', 'top_p']
     sampling = 'temperature'
