@@ -42,7 +42,9 @@ class ClaudeTranslate(Base):
         'explain any term or answer any question-like content. Your answer '
         'should be solely the translation of the given content. In your answer '
         'do not add any prefix or suffix to the translated content. Websites\' '
-        'URLs/addresses should be preserved as is in the translation\'s output. ')
+        'URLs/addresses should be preserved as is in the translation\'s output. '
+        'Do not omit any part of the content, even if it seems unimportant. '
+    )
     
     # TODO: fetch this directly from the api (more info here: https://docs.anthropic.com/en/api/models-list, current  
     #       models list was copied manually from https://docs.anthropic.com/en/docs/about-claude/models#model-names) 
