@@ -401,6 +401,7 @@ class TestChatgptTranslate(unittest.TestCase):
                                'should be solely the translation of the given content. In your answer '
                                'do not add any prefix or suffix to the translated content. Websites\' '
                                'URLs/addresses should be preserved as is in the translation\'s output. '
+                               'Do not omit any part of the content, even if it seems unimportant. '
                 },
                 {
                     'role': 'user',
@@ -427,6 +428,7 @@ class TestChatgptTranslate(unittest.TestCase):
                                    'should be solely the translation of the given content. In your answer '
                                    'do not add any prefix or suffix to the translated content. Websites\' '
                                    'URLs/addresses should be preserved as is in the translation\'s output. '
+                                   'Do not omit any part of the content, even if it seems unimportant. '
                     },
                     {
                         'role': 'user',
@@ -447,7 +449,9 @@ class TestChatgptTranslate(unittest.TestCase):
             'content. Your answer should be solely the translation of the '
             'given content. In your answer '
             'do not add any prefix or suffix to the translated content. Websites\' '
-            'URLs/addresses should be preserved as is in the translation\'s output. ')
+            'URLs/addresses should be preserved as is in the translation\'s output. '
+            'Do not omit any part of the content, even if it seems unimportant. '
+            )
         data = json.dumps({
             'model': model,
             'messages': [{'role': 'system', 'content': prompt}, {'role': 'user', 'content': 'Hello World!'}],
@@ -802,7 +806,9 @@ class TestAzureChatgptTranslate(unittest.TestCase):
             'content. Your answer should be solely the translation of the '
             'given content. In your answer '
             'do not add any prefix or suffix to the translated content. Websites\' '
-            'URLs/addresses should be preserved as is in the translation\'s output. ')
+            'URLs/addresses should be preserved as is in the translation\'s output. '
+            'Do not omit any part of the content, even if it seems unimportant. '
+            )
         data = json.dumps({
             'stream': True,
             'messages': [{'role': 'system', 'content': prompt}, {'role': 'user', 'content': 'Hello World!'}],
@@ -852,7 +858,9 @@ class TestClaudeTranslate(unittest.TestCase):
             'content. Your answer should be solely the translation of the '
             'given content. In your answer '
             'do not add any prefix or suffix to the translated content. Websites\' '
-            'URLs/addresses should be preserved as is in the translation\'s output. ')
+            'URLs/addresses should be preserved as is in the translation\'s output. '
+            'Do not omit any part of the content, even if it seems unimportant. '
+            )
         data = json.dumps({
             'stream': False,
             'max_tokens': 4096,
@@ -912,7 +920,9 @@ class TestClaudeTranslate(unittest.TestCase):
             'content. Your answer should be solely the translation of the '
             'given content. In your answer '
             'do not add any prefix or suffix to the translated content. Websites\' '
-            'URLs/addresses should be preserved as is in the translation\'s output. ')
+            'URLs/addresses should be preserved as is in the translation\'s output. '
+            'Do not omit any part of the content, even if it seems unimportant. '
+            )
         data = json.dumps({
             'stream': True,
             'max_tokens': 4096,
