@@ -28,7 +28,8 @@ class ChatgptTranslate(Base):
     name = 'ChatGPT'
     alias = 'ChatGPT (OpenAI)'
     lang_codes = Base.load_lang_codes(google)
-    lang_codes_directionality = Base.load_lang_codes_directionality(lang_directionality)
+    lang_codes_directionality = \
+        Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://api.openai.com/v1/chat/completions'
     # api_key_hint = 'sk-xxx...xxx'
     # https://help.openai.com/en/collections/3808446-api-error-codes-explained
@@ -42,18 +43,19 @@ class ChatgptTranslate(Base):
         'You are a meticulous translator who translates any given content. '
         'Translate the given content from <slang> to <tlang> only. Do not '
         'explain any term or answer any question-like content. Your answer '
-        'should be solely the translation of the given content. In your answer '
-        'do not add any prefix or suffix to the translated content. Websites\' '
-        'URLs/addresses should be preserved as is in the translation\'s output. '
-        'Do not omit any part of the content, even if it seems unimportant. '
-        )
+        'should be solely the translation of the given content. In your '
+        'answer do not add any prefix or suffix to the translated content. '
+        'Websites\' URLs/addresses should be preserved as is in the '
+        'translation\'s output. Do not omit any part of the content, even if '
+        'it seems unimportant. ')
 
-    # TODO: check if it is possible to fetch this this directly from the api, if yes - implement this
+    # TODO: check if it is possible to fetch this this directly from the api,
+    # if yes - implement this
     models = [
-        'gpt-4o', 
-        'gpt-4o-mini', 
-        'gpt-4-turbo', 
-        'gpt-4', 
+        'gpt-4o',
+        'gpt-4o-mini',
+        'gpt-4-turbo',
+        'gpt-4',
         'gpt-3.5-turbo']
 
     # use the most recent model

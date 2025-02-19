@@ -1,26 +1,28 @@
 import os.path
 
+from typing import Any
 from mechanize import HTTPError
 from mechanize._response import response_seek_wrapper as Response
 
 from calibre.utils.localization import lang_as_iso639_1
 
 from ..lib.utils import traceback_error, request
-from ..lib.exception import UnexpectedResult, NoAvailableApiKey
+from ..lib.exception import UnexpectedResult
 
 
 load_translations()
 
 
 class Base:
-    name = None
-    alias = None
+    name: str | None = None
+    alias: str | None = None
     free = False
 
-    lang_codes = {}
-    config = {}
-    endpoint = None
+    lang_codes: dict[str, Any] = {}
+    config: dict[str, Any] = {}
+    endpoint: str | None = None
     method = 'POST'
+    headers: dict[str, str] = {}
     stream = False
     need_api_key = True
     api_key_hint = _('API Keys')
@@ -43,7 +45,7 @@ class Base:
         self.search_paths = []
 
         self.merge_enabled = False
-        self.api_keys = self.config.get('api_keys', [])[:]
+        self.api_keys: list = self.config.get('api_keys', [])[:]
         self.bad_api_keys = []
         self.api_key = self.get_api_key()
 
@@ -75,12 +77,12 @@ class Base:
 
     @classmethod
     def get_source_code(cls, lang):
-        source_codes = cls.lang_codes.get('source')
+        source_codes: dict = cls.lang_codes.get('source') or {}
         return 'auto' if lang == _('Auto detect') else source_codes.get(lang)
 
     @classmethod
     def get_target_code(cls, lang):
-        target_codes = cls.lang_codes.get('target')
+        target_codes: dict = cls.lang_codes.get('target') or {}
         return target_codes.get(lang)
 
     @classmethod
@@ -193,10 +195,10 @@ class Base:
         return self.endpoint
 
     def get_headers(self):
-        return {}
+        return self.headers
 
     def get_body(self, text):
-        return None
+        return text
 
     def get_result(self, response: Response | bytes | str):
         return response
