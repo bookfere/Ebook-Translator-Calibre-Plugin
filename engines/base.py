@@ -39,9 +39,9 @@ class Base:
     max_error_count = 10
 
     def __init__(self):
-        self.source_lang = None
-        self.target_lang = None
-        self.proxy_uri = None
+        self.source_lang: str | None = None
+        self.target_lang: str | None = None
+        self.proxy_uri: str | None = None
         self.search_paths = []
 
         self.merge_enabled = False

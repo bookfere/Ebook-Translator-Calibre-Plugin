@@ -163,12 +163,8 @@ def request(
         https = get_proxies(False).get('https')
         https and proxies.update(https=https)
     proxies and br.set_proxies(proxies)
-    # Compatible with mechanize 0.3.0 on Calibre 3.21.
-    try:
-        _request = Request(
-            url, data, headers=headers, timeout=timeout, method=method)
-    except Exception:
-        _request = Request(url, data, headers=headers, timeout=timeout)
+    _request = Request(
+        url, data, headers=headers, timeout=timeout, method=method)
     br.open(_request)
     response: Response = br.response()
     return response if raw_object else response.read().decode('utf-8').strip()

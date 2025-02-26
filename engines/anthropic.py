@@ -17,17 +17,21 @@ except ImportError:
 load_translations()
 
 
-# TODO: Enable using Message Batches API (currently only the Streaming API can be used). The Message Batches API allows 
-#       sending any number of batches of up to 100,000 messages per batch. Batches are processed asynchronously with 
-#       results returned as soon as the batch is complete and cost 50% less than standard API calls (more info here: 
-#       https://docs.anthropic.com/en/docs/build-with-claude/message-batches)
+# TODO: Enable using Message Batches API (currently only the Streaming API can
+# be used). The Message Batches API allows sending any number of batches of up
+# to 100,000 messages per batch. Batches are processed asynchronously with
+# results returned as soon as the batch is complete and cost 50% less than
+# standard API calls (more info here:
+# https://docs.anthropic.com/en/docs/build-with-claude/message-batches)
 class ClaudeTranslate(Base):
     name = 'Claude'
     alias = 'Claude (Anthropic)'
     lang_codes = Base.load_lang_codes(anthropic)
-    lang_codes_directionality = Base.load_lang_codes_directionality(lang_directionality)
+    lang_codes_directionality = \
+        Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://api.anthropic.com/v1/messages'
-    api_version = '2023-06-01'  # this is currently the latest version of the api
+    # this is currently the latest version of the api
+    api_version = '2023-06-01'
     api_key_hint = 'sk-ant-xxxx'
     # https://docs.anthropic.com/claude/reference/errors
     api_key_errors = ['401', 'permission_error']
@@ -40,15 +44,17 @@ class ClaudeTranslate(Base):
         'You are a meticulous translator who translates any given content. '
         'Translate the given content from <slang> to <tlang> only. Do not '
         'explain any term or answer any question-like content. Your answer '
-        'should be solely the translation of the given content. In your answer '
-        'do not add any prefix or suffix to the translated content. Websites\' '
-        'URLs/addresses should be preserved as is in the translation\'s output. '
-        'Do not omit any part of the content, even if it seems unimportant. '
-    )
-    
-    # TODO: fetch this directly from the api (more info here: https://docs.anthropic.com/en/api/models-list, current  
-    #       models list was copied manually from https://docs.anthropic.com/en/docs/about-claude/models#model-names) 
-    models = [  
+        'should be solely the translation of the given content. In your '
+        'answer do not add any prefix or suffix to the translated content. '
+        'Websites\' URLs/addresses should be preserved as is in the '
+        'translation\'s output. Do not omit any part of the content, even if '
+        'it seems unimportant. ')
+
+    # TODO: fetch this directly from the api,
+    # more info here: https://docs.anthropic.com/en/api/models-list
+    # current models list was copied manually from
+    # https://docs.anthropic.com/en/docs/about-claude/models#model-names)
+    models = [
         'claude-3-5-sonnet-latest',
         'claude-3-5-sonnet-20241022',
         'claude-3-5-sonnet-20240620',
@@ -56,24 +62,26 @@ class ClaudeTranslate(Base):
         'claude-3-opus-20240229',
         'claude-3-sonnet-20240229',
         'claude-3-haiku-20240307']
-
     # use the most recent model
     model = models[0]
+
     samplings = ['temperature', 'top_p']
     sampling = 'temperature'
     temperature = 1.0
     top_p = 1.0
     top_k = 1
     stream = True
-    # event types for streaming are listed here: https://docs.anthropic.com/en/api/messages-streaming
-    valid_event_types = ['ping',
-                         'error',
-                         'content_block_start',
-                         'content_block_delta',
-                         'content_block_stop',
-                         'message_start',
-                         'message_delta',
-                         'message_stop']
+    # event types for streaming are listed here:
+    # https://docs.anthropic.com/en/api/messages-streaming
+    valid_event_types = [
+        'ping',
+        'error',
+        'content_block_start',
+        'content_block_delta',
+        'content_block_stop',
+        'message_start',
+        'message_delta',
+        'message_stop']
 
     def __init__(self):
         Base.__init__(self)

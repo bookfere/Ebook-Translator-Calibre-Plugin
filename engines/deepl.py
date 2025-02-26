@@ -66,7 +66,8 @@ class DeeplFreeTranslate(Base):
     alias = 'DeepL (Free)'
     free = True
     lang_codes = Base.load_lang_codes(deepl)
-    lang_codes_directionality = Base.load_lang_codes_directionality(lang_directionality)
+    lang_codes_directionality = \
+        Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://www2.deepl.com/jsonrpc?client=chrome-extension,1.5.1'
     need_api_key = False
     placeholder = DeeplTranslate.placeholder
@@ -93,9 +94,9 @@ class DeeplFreeTranslate(Base):
             'Authorization': 'None',
             'Authority': 'www2.deepl.com',
             'Content-Type': 'application/json; charset=utf-8',
-            'User-Agent': 'DeepLBrowserExtension/1.5.1 Mozilla/5.0 (Macintosh; '
-                        'Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, '
-                        'like Gecko) Chrome/114.0.0.0 Safari/537.36',
+            'User-Agent': 'DeepLBrowserExtension/1.5.1 Mozilla/5.0 '
+            '(Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, '
+            'like Gecko) Chrome/114.0.0.0 Safari/537.36',
             'Origin': 'chrome-extension://cofdbpoegempjloogbagkncekinflcnj',
             'Referer': 'https://www.deepl.com/',
         }
@@ -124,7 +125,7 @@ class DeeplFreeTranslate(Base):
                 'timestamp': ts
             },
             'id': uid
-        }, separators=',:')
+        }, separators=(',', ':'))
 
         # ((e, t) => e = (t.id + 3) % 13 == 0 || (t.id + 5) % 29 == 0
         # ? e.replace('"method":"', '"method" : "')
