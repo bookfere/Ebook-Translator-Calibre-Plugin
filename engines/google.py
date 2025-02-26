@@ -9,7 +9,7 @@ from subprocess import Popen, PIPE
 from urllib.parse import urlencode
 from http.client import IncompleteRead
 
-from ..lib.utils import traceback_error
+from ..lib.utils import request, traceback_error
 
 from .base import Base
 from .languages import lang_directionality
@@ -230,7 +230,8 @@ class GoogleBasicTranslateADC(GoogleTranslateMixin, Base):
     name = 'Google(Basic)ADC'
     alias = 'Google (Basic) ADC'
     lang_codes = Base.load_lang_codes(google)
-    lang_codes_directionality = Base.load_lang_codes_directionality(lang_directionality)
+    lang_codes_directionality = \
+        Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://translation.googleapis.com/language/translate/v2'
     api_key_hint = 'API key'
     need_api_key = False
@@ -280,7 +281,8 @@ class GoogleAdvancedTranslate(GoogleTranslateMixin, Base):
     name = 'Google(Advanced)'
     alias = 'Google (Advanced) ADC'
     lang_codes = Base.load_lang_codes(google)
-    lang_codes_directionality = Base.load_lang_codes_directionality(lang_directionality)
+    lang_codes_directionality = \
+        Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://translation.googleapis.com/v3/projects/{}'
     api_key_hint = 'PROJECT_ID'
     need_api_key = False
@@ -315,9 +317,9 @@ class GeminiTranslate(Base):
     name = 'Gemini'
     alias = 'Gemini'
     lang_codes = Base.load_lang_codes(gemini)
-    lang_codes_directionality = Base.load_lang_codes_directionality(lang_directionality)
-    endpoint = 'https://generativelanguage.googleapis.com/v1/' \
-        'models/{}:{}?key={}'
+    lang_codes_directionality = \
+        Base.load_lang_codes_directionality(lang_directionality)
+    endpoint = 'https://generativelanguage.googleapis.com/v1/models'
     need_api_key = True
 
     concurrency_limit = 1
@@ -328,25 +330,18 @@ class GeminiTranslate(Base):
         'You are a meticulous translator who translates any given content. '
         'Translate the given content from <slang> to <tlang> only. Do not '
         'explain any term or answer any question-like content. Your answer '
-        'should be solely the translation of the given content. In your answer '
-        'do not add any prefix or suffix to the translated content. Websites\' '
-        'URLs/addresses should be preserved as is in the translation\'s output. '
-        'Do not omit any part of the content, even if it seems unimportant. '
-        )
-
-    # TODO: check if it is possible to fetch this this directly from the api, if yes - implement this
-    models = [
-        'gemini-1.5-flash',
-        'gemini-1.5-flash-8b',
-        'gemini-1.5-pro',
-        'gemini-1.0-pro']
-
-    # use the most recent model
-    model = models[0]
+        'should be solely the translation of the given content. In your '
+        'answer do not add any prefix or suffix to the translated content. '
+        'Websites\' URLs/addresses should be preserved as is in the '
+        'translation\'s output. Do not omit any part of the content, even if '
+        'it seems unimportant. ')
     temperature = 0.9
     top_p = 1.0
     top_k = 1
     stream = True
+
+    models: list[str] = []
+    model: str | None = None
 
     def __init__(self):
         Base.__init__(self)
@@ -355,6 +350,8 @@ class GeminiTranslate(Base):
         self.top_k = self.config.get('top_k', self.top_k)
         self.top_p = self.config.get('top_p', self.top_p)
         self.stream = self.config.get('stream', self.stream)
+        # TODO: Handle the default model more appropriately.
+        self.model = self.config.get('model', 'gemini-2.0-flash')
 
     def _prompt(self, text):
         prompt = self.prompt.replace('<tlang>', self.target_lang)
@@ -364,13 +361,29 @@ class GeminiTranslate(Base):
             prompt = prompt.replace('<slang>', self.source_lang)
         # Recommend setting temperature to 0.5 for retaining the placeholder.
         if self.merge_enabled:
-            prompt += (' Ensure that placeholders matching the pattern '
-                       '{{id_\\d+}} in the content are retained.')
+            prompt += (
+                ' Ensure that placeholders matching the pattern {{id_\\d+}} '
+                'in the content are retained.')
         return prompt + ' Start translating: ' + text
+
+    def get_models(self):
+        endpoint = self.endpoint + '?key=' + self.api_key
+        response = request(
+            endpoint, timeout=self.request_timeout, proxy_uri=self.proxy_uri)
+        print(response)
+        models = []
+        for model in json.loads(response)['models']:
+            model_name = model['name'].split('/')[-1]
+            model_desc = model['description']
+            if model_name.startswith('gemini') \
+                    and 'deprecated' not in model_desc:
+                models.append(model_name)
+        return models
 
     def get_endpoint(self):
         method = 'streamGenerateContent' if self.stream else 'generateContent'
-        return self.endpoint.format(self.model, method, self.api_key)
+        endpoint = self.endpoint + '/{}:{}?key={}'
+        return endpoint.format(self.model, method, self.api_key)
 
     def get_headers(self):
         return {'Content-Type': 'application/json'}

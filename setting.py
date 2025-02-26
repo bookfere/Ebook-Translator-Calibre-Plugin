@@ -2,10 +2,18 @@ import re
 import os
 import os.path
 
+from qt.core import (
+    Qt, QLabel, QDialog, QWidget, QLineEdit, QPushButton, QPlainTextEdit,
+    QTabWidget, QHBoxLayout, QVBoxLayout, QGroupBox, QFileDialog, QColor,
+    QIntValidator, QScrollArea, QRadioButton, QGridLayout, QCheckBox, QObject,
+    QButtonGroup, QColorDialog, QSpinBox, QPalette, QApplication, QFrame,
+    QComboBox, QRegularExpression, pyqtSignal, QFormLayout, QDoubleSpinBox,
+    QSettings, QSpacerItem, QRegularExpressionValidator, QBoxLayout, QThread,
+    pyqtSlot)
+
 from .lib.config import get_config
 from .lib.utils import css, is_proxy_available
-from .lib.translation import get_engine_class
-
+from .lib.translation import get_engine_class, get_translator
 from .engines import (
     builtin_engines, GeminiTranslate, ChatgptTranslate, AzureChatgptTranslate,
     ClaudeTranslate)
@@ -14,28 +22,35 @@ from .components import (
     Footer, AlertMessage, TargetLang, SourceLang, EngineList, EngineTester,
     ManageCustomEngine, InputFormat, OutputFormat, set_shortcut)
 
-try:
-    from qt.core import (
-        Qt, QLabel, QDialog, QWidget, QLineEdit, QPushButton, QPlainTextEdit,
-        QTabWidget, QHBoxLayout, QVBoxLayout, QGroupBox, QFileDialog, QColor,
-        QIntValidator, QScrollArea, QRadioButton, QGridLayout, QCheckBox,
-        QButtonGroup, QColorDialog, QSpinBox, QPalette, QApplication, QFrame,
-        QComboBox, QRegularExpression, pyqtSignal, QFormLayout, QDoubleSpinBox,
-        QSettings, QSpacerItem, QRegularExpressionValidator, QBoxLayout)
-except ImportError:
-    from PyQt5.Qt import (
-        Qt, QLabel, QDialog, QWidget, QLineEdit, QPushButton, QPlainTextEdit,
-        QTabWidget, QHBoxLayout, QVBoxLayout, QGroupBox, QFileDialog, QColor,
-        QIntValidator, QScrollArea, QRadioButton, QGridLayout, QCheckBox,
-        QButtonGroup, QColorDialog, QSpinBox, QPalette, QApplication, QFrame,
-        QComboBox, QRegularExpression, pyqtSignal, QFormLayout, QDoubleSpinBox,
-        QSettings, QSpacerItem, QRegularExpressionValidator, QBoxLayout)
-
 load_translations()
+
+
+class ModelWorker(QObject):
+    start = pyqtSignal(object)
+    finished = pyqtSignal()
+
+    def __init__(self):
+        QObject.__init__(self)
+        self.start.connect(self.get_models)
+
+    @pyqtSlot(object)
+    def get_models(self, engine_class):
+        engine = get_translator(engine_class)
+        try:
+            models = engine.get_models()
+            engine_class.models = models
+            if len(models) > 0 and engine_class.model is None:
+                engine_class.model = models[0]
+        except Exception:
+            # TODO: Inform the UI to add a button to retry when the API key or
+            # network is available.
+            pass
+        self.finished.emit()
 
 
 class TranslationSetting(QDialog):
     save_config = pyqtSignal(int)
+    model_thread = QThread()
 
     def __init__(self, plugin, parent, icon):
         QDialog.__init__(self, parent)
@@ -45,6 +60,11 @@ class TranslationSetting(QDialog):
 
         self.config = get_config()
         self.current_engine = get_engine_class()
+
+        self.model_worker = ModelWorker()
+        self.model_worker.moveToThread(self.model_thread)
+        self.model_thread.finished.connect(self.model_worker.deleteLater)
+        self.model_thread.start()
 
         self.main_layout()
 
@@ -102,7 +122,7 @@ class TranslationSetting(QDialog):
                 self.save_config.emit(self.tabs.currentIndex())
             save_button.clicked.connect(save_current_config)
             set_shortcut(
-                save_button, 'save', save_current_config,save_button.text())
+                save_button, 'save', save_current_config, save_button.text())
 
             return widget
         return scroll_widget
@@ -140,9 +160,7 @@ class TranslationSetting(QDialog):
         if preferred_mode is not None:
             mode_btn_group.button(
                 mode_rmap.get(preferred_mode)).setChecked(True)
-        mode_btn_click = getattr(mode_btn_group, 'idClicked', None) \
-            or mode_btn_group.buttonClicked[int]
-        mode_btn_click.connect(
+        mode_btn_group.idClicked.connect(
             lambda btn_id: self.config.update(
                 preferred_mode=mode_map.get(btn_id)))
 
@@ -438,6 +456,8 @@ class TranslationSetting(QDialog):
         gemini_model_layout.setContentsMargins(0, 0, 0, 0)
         gemini_model_select = QComboBox()
         gemini_model_custom = QLineEdit()
+        # gemini_model_refresh = QLabel(_('Refresh'))
+        gemini_model_custom.setVisible(False)
         gemini_model_layout.addWidget(gemini_model_select)
         gemini_model_layout.addWidget(gemini_model_custom)
         gemini_layout.addRow(_('Model'), gemini_model)
@@ -545,32 +565,32 @@ class TranslationSetting(QDialog):
 
         layout.addWidget(chatgpt_group)
 
-        def change_ai_model(config, model_list, model_input):
+        def change_ai_model(config, model_list, model_custom_input):
             model = config.get('model', self.current_engine.model)
-            model_list.setCurrentText(
-                model if model in self.current_engine.models else _('Custom'))
 
             def setup_ai_model(model):
                 if model in self.current_engine.models:
-                    model_input.setVisible(False)
+                    model_list.setCurrentText(model)
+                    model_custom_input.setVisible(False)
                 else:
-                    model_input.setVisible(True)
+                    model_list.setCurrentText(_('Custom'))
+                    model_custom_input.setVisible(True)
                     if model != _('Custom'):
-                        model_input.setText(model)
+                        model_custom_input.setText(model)
             setup_ai_model(model)
 
-            def update_chatgpt_model(model):
+            def update_ai_model(model):
                 if not model or _(model) == _('Custom'):
                     model = self.current_engine.models[0]
                 config.update(model=model)
+            model_custom_input.textChanged.connect(
+                lambda model: update_ai_model(model=model.strip()))
 
             def change_ai_model(model):
                 setup_ai_model(model)
-                update_chatgpt_model(model)
-
-            model_input.textChanged.connect(
-                lambda model: update_chatgpt_model(model=model.strip()))
+                update_ai_model(model)
             model_list.currentTextChanged.connect(change_ai_model)
+
             self.save_config.connect(
                 lambda: model_list.setCurrentText(config.get('model')))
 
@@ -583,8 +603,7 @@ class TranslationSetting(QDialog):
             self.gemini_prompt.setPlaceholderText(self.current_engine.prompt)
             self.gemini_prompt.setPlainText(
                 config.get('prompt', self.current_engine.prompt))
-            gemini_model_select.addItems(self.current_engine.models)
-            gemini_model_select.addItem(_('Custom'))
+
             gemini_temperature.setValue(
                 config.get('temperature', self.current_engine.temperature))
             gemini_temperature.valueChanged.connect(
@@ -598,7 +617,19 @@ class TranslationSetting(QDialog):
             gemini_top_k.valueChanged.connect(
                 lambda value: config.update(top_k=value))
 
-            change_ai_model(config, gemini_model_select, gemini_model_custom)
+            # Automatically retreive models.
+            gemini_model_select.addItem(_('Fetching...'))
+            gemini_model_select.setDisabled(True)
+            self.model_worker.start.emit(self.current_engine)
+
+            def populate_models():
+                gemini_model_select.clear()
+                gemini_model_select.setDisabled(False)
+                gemini_model_select.addItems(self.current_engine.models)
+                gemini_model_select.addItem(_('Custom'))
+                change_ai_model(
+                    config, gemini_model_select, gemini_model_custom)
+            self.model_worker.finished.connect(populate_models)
 
         def show_chatgpt_preferences():
             is_chatgpt = issubclass(self.current_engine, ChatgptTranslate)
@@ -887,9 +918,6 @@ class TranslationSetting(QDialog):
         if map_key not in position_rmap.keys():
             map_key = 'below'
         position_btn_group.button(position_rmap.get(map_key)).setChecked(True)
-        # Check the attribute for compatibility with PyQt5.
-        position_btn_click = getattr(position_btn_group, 'idClicked', None) \
-            or position_btn_group.buttonClicked[int]
 
         names = ('TopToBottom', 'BottomToTop', 'LeftToRight', 'RightToLeft')
         directions = []
@@ -906,7 +934,7 @@ class TranslationSetting(QDialog):
             position_setup.setVisible(btn_id in [2, 3])
             self.config.update(translation_position=position_map.get(btn_id))
         choose_option(position_btn_group.checkedId())
-        position_btn_click.connect(choose_option)
+        position_btn_group.idClicked.connect(choose_option)
 
         # Color group
         color_group = QWidget()
@@ -971,9 +999,8 @@ class TranslationSetting(QDialog):
 
         def create_color_picker(color_widget, color_show):
             color_picker = QColorDialog(self)
-            color_picker.setOption(getattr(
-                QColorDialog.ColorDialogOption, 'DontUseNativeDialog', None)
-                or QColorDialog.DontUseNativeDialog)
+            color_picker.setOption(
+                QColorDialog.ColorDialogOption.DontUseNativeDialog)
             color_picker.colorSelected.connect(
                 lambda color: color_widget.setText(color.name()))
             color_picker.colorSelected.connect(
@@ -1097,9 +1124,7 @@ class TranslationSetting(QDialog):
         scope_btn_group.button(scope_rmap.get(
             self.config.get('filter_scope'))).setChecked(True)
 
-        scope_btn_click = getattr(scope_btn_group, 'idClicked', None) or \
-            scope_btn_group.buttonClicked[int]
-        scope_btn_click.connect(
+        scope_btn_group.idClicked.connect(
             lambda btn_id: self.config.update(
                 filter_scope=scope_map.get(btn_id)))
 
@@ -1125,9 +1150,7 @@ class TranslationSetting(QDialog):
             self.config.get('rule_mode'))).setChecked(True)
         tip.setText(tips[mode_btn_group.checkedId()])
 
-        mode_btn_click = getattr(mode_btn_group, 'idClicked', None) or \
-            mode_btn_group.buttonClicked[int]
-        mode_btn_click.connect(choose_filter_mode)
+        mode_btn_group.idClicked.connect(choose_filter_mode)
 
         # Reserve element
         reserve_group = QGroupBox(_('Reserve Element'))
