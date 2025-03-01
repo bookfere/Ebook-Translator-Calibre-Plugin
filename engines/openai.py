@@ -13,13 +13,9 @@ from .base import Base
 from .languages import lang_directionality
 from .languages import google
 
+from http.client import IncompleteRead
+from urllib.parse import urlsplit
 
-try:
-    from http.client import IncompleteRead
-    from urllib.parse import urlsplit
-except ImportError:
-    from httplib import IncompleteRead
-    from urlparse import urlsplit
 
 load_translations()
 
@@ -49,33 +45,31 @@ class ChatgptTranslate(Base):
         'translation\'s output. Do not omit any part of the content, even if '
         'it seems unimportant. ')
 
-    # TODO: check if it is possible to fetch this this directly from the api,
-    # if yes - implement this
-    models = [
-        'gpt-4o',
-        'gpt-4o-mini',
-        'gpt-4-turbo',
-        'gpt-4',
-        'gpt-3.5-turbo']
-
-    # use the most recent model
-    model = models[0]
     samplings = ['temperature', 'top_p']
     sampling = 'temperature'
     temperature = 1.0
     top_p = 1.0
     stream = True
 
+    models: list[str] = []
+    model: str | None = None
+
     def __init__(self):
         Base.__init__(self)
         self.endpoint = self.config.get('endpoint', self.endpoint)
         self.prompt = self.config.get('prompt', self.prompt)
-        if self.model is not None:
-            self.model = self.config.get('model', self.model)
         self.sampling = self.config.get('sampling', self.sampling)
         self.temperature = self.config.get('temperature', self.temperature)
         self.top_p = self.config.get('top_p', self.top_p)
         self.stream = self.config.get('stream', self.stream)
+        # TODO: Handle the default model more appropriately.
+        self.model = self.config.get('model', 'gpt-4o')
+
+    def get_models(self):
+        domain_name = '://'.join(urlsplit(self.endpoint, 'https')[:2])
+        model_endpint = '%s/v1/models' % domain_name
+        response = request(model_endpint, headers=self.get_headers())
+        return [item['id'] for item in json.loads(response).get('data')]
 
     def get_prompt(self):
         prompt = self.prompt.replace('<tlang>', self.target_lang)
@@ -143,7 +137,6 @@ class ChatgptBatchTranslate:
 
         domain_name = '://'.join(
             urlsplit(self.translator.endpoint, 'https')[:2])
-        self.model_endpint = '%s/v1/models' % domain_name
         self.file_endpoint = '%s/v1/files' % domain_name
         self.batch_endpoint = '%s/v1/batches' % domain_name
 
@@ -165,9 +158,7 @@ class ChatgptBatchTranslate:
         return '\r\n'.join(data).encode('utf-8')
 
     def supported_models(self):
-        response = request(
-            self.model_endpint, headers=self.translator.get_headers())
-        return [item['id'] for item in json.loads(response).get('data')]
+        return self.translator.get_models()
 
     def headers(self, extra_headers={}):
         headers = self.translator.get_headers()

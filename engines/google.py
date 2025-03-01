@@ -370,7 +370,6 @@ class GeminiTranslate(Base):
         endpoint = self.endpoint + '?key=' + self.api_key
         response = request(
             endpoint, timeout=self.request_timeout, proxy_uri=self.proxy_uri)
-        print(response)
         models = []
         for model in json.loads(response)['models']:
             model_name = model['name'].split('/')[-1]
