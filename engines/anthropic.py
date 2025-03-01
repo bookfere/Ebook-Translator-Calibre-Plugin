@@ -1,7 +1,8 @@
 import json
 from typing import Generator
+from urllib.parse import urljoin
+from http.client import IncompleteRead
 
-from .. import EbookTranslator
 from mechanize._response import response_seek_wrapper as Response
 
 from .base import Base
@@ -9,10 +10,9 @@ from .languages import lang_directionality
 from .languages import anthropic
 from .prompt_extensions import anthropic as anthropic_prompt_extension
 
-try:
-    from http.client import IncompleteRead
-except ImportError:
-    from httplib import IncompleteRead
+from .. import EbookTranslator
+from ..lib.utils import request
+
 
 load_translations()
 
@@ -50,21 +50,6 @@ class ClaudeTranslate(Base):
         'translation\'s output. Do not omit any part of the content, even if '
         'it seems unimportant. ')
 
-    # TODO: fetch this directly from the api,
-    # more info here: https://docs.anthropic.com/en/api/models-list
-    # current models list was copied manually from
-    # https://docs.anthropic.com/en/docs/about-claude/models#model-names)
-    models = [
-        'claude-3-5-sonnet-latest',
-        'claude-3-5-sonnet-20241022',
-        'claude-3-5-sonnet-20240620',
-        'claude-3-opus-latest',
-        'claude-3-opus-20240229',
-        'claude-3-sonnet-20240229',
-        'claude-3-haiku-20240307']
-    # use the most recent model
-    model = models[0]
-
     samplings = ['temperature', 'top_p']
     sampling = 'temperature'
     temperature = 1.0
@@ -82,6 +67,9 @@ class ClaudeTranslate(Base):
         'message_start',
         'message_delta',
         'message_stop']
+
+    models: list[str] = []
+    model: str | None = None
 
     def __init__(self):
         Base.__init__(self)
@@ -111,6 +99,11 @@ class ClaudeTranslate(Base):
             prompt += (' Ensure that placeholders matching the pattern '
                        '{{id_\\d+}} in the content are retained.')
         return prompt
+
+    def get_models(self):
+        model_endpoint = urljoin(self.endpoint, 'models')
+        response = request(model_endpoint, headers=self.get_headers())
+        return [i['id'] for i in json.loads(response)['data']]
 
     def get_headers(self):
         return {

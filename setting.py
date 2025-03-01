@@ -11,8 +11,10 @@ from qt.core import (
     QSettings, QSpacerItem, QRegularExpressionValidator, QBoxLayout, QThread,
     pyqtSlot)
 
+from calibre.utils.logging import Log
+
 from .lib.config import get_config
-from .lib.utils import css, is_proxy_available
+from .lib.utils import css, is_proxy_available, traceback_error
 from .lib.translation import get_engine_class, get_translator
 from .engines import (
     builtin_engines, GeminiTranslate, ChatgptTranslate, AzureChatgptTranslate,
@@ -22,29 +24,34 @@ from .components import (
     Footer, AlertMessage, TargetLang, SourceLang, EngineList, EngineTester,
     ManageCustomEngine, InputFormat, OutputFormat, set_shortcut)
 
+
 load_translations()
 
 
 class ModelWorker(QObject):
     start = pyqtSignal(object)
+    status = pyqtSignal(bool)
     finished = pyqtSignal()
 
     def __init__(self):
         QObject.__init__(self)
+        self.log = Log()
         self.start.connect(self.get_models)
 
     @pyqtSlot(object)
     def get_models(self, engine_class):
-        engine = get_translator(engine_class)
         try:
+            engine = get_translator(engine_class)
             models = engine.get_models()
             engine_class.models = models
             if len(models) > 0 and engine_class.model is None:
                 engine_class.model = models[0]
+            self.status.emit(True)
         except Exception:
             # TODO: Inform the UI to add a button to retry when the API key or
             # network is available.
-            pass
+            self.log.error('Failed to fetch models: %s' % traceback_error())
+            self.status.emit(False)
         self.finished.emit()
 
 
@@ -65,6 +72,11 @@ class TranslationSetting(QDialog):
         self.model_worker.moveToThread(self.model_thread)
         self.model_thread.finished.connect(self.model_worker.deleteLater)
         self.model_thread.start()
+
+        self.model_worker.status.connect(
+            lambda success: success or self.alert.pop(
+                _("Can't fetch model list now. Check and try again."),
+                level='error'))
 
         self.main_layout()
 
@@ -123,6 +135,11 @@ class TranslationSetting(QDialog):
             save_button.clicked.connect(save_current_config)
             set_shortcut(
                 save_button, 'save', save_current_config, save_button.text())
+
+            self.model_worker.start.connect(
+                lambda: save_button.setDisabled(True))
+            self.model_worker.finished.connect(
+                lambda: save_button.setDisabled(False))
 
             return widget
         return scroll_widget
@@ -367,6 +384,10 @@ class TranslationSetting(QDialog):
         engine_layout.addWidget(manage_engine)
         layout.addWidget(engine_group)
 
+        self.model_worker.finished.connect(
+            lambda: engine_list.setDisabled(False))
+        self.model_worker.start.connect(lambda: engine_list.setDisabled(True))
+
         # Using Tip
         self.tip_group = QGroupBox(_('Usage Tip'))
         tip_layout = QVBoxLayout(self.tip_group)
@@ -516,6 +537,7 @@ class TranslationSetting(QDialog):
         chatgpt_model_layout.setContentsMargins(0, 0, 0, 0)
         chatgpt_model_select = QComboBox()
         chatgpt_model_custom = QLineEdit()
+        chatgpt_model_custom.setVisible(False)
         chatgpt_model_layout.addWidget(chatgpt_model_select)
         chatgpt_model_layout.addWidget(chatgpt_model_custom)
         chatgpt_layout.addRow(_('Model'), chatgpt_model)
@@ -568,28 +590,32 @@ class TranslationSetting(QDialog):
         def change_ai_model(config, model_list, model_custom_input):
             model = config.get('model', self.current_engine.model)
 
-            def setup_ai_model(model):
+            def setup_model_list(model):
                 if model in self.current_engine.models:
                     model_list.setCurrentText(model)
                     model_custom_input.setVisible(False)
                 else:
                     model_list.setCurrentText(_('Custom'))
                     model_custom_input.setVisible(True)
-                    if model != _('Custom'):
+                    if model not in (_('Custom'), _('Fetching...')):
                         model_custom_input.setText(model)
-            setup_ai_model(model)
+            setup_model_list(model)
 
-            def update_ai_model(model):
+            def update_model_name(model):
+                models = self.current_engine.models
+                if len(models) < 1:
+                    return
                 if not model or _(model) == _('Custom'):
-                    model = self.current_engine.models[0]
+                    model = models[0]
                 config.update(model=model)
+            update_model_name(model)
             model_custom_input.textChanged.connect(
-                lambda model: update_ai_model(model=model.strip()))
+                lambda model: update_model_name(model.strip()))
 
-            def change_ai_model(model):
-                setup_ai_model(model)
-                update_ai_model(model)
-            model_list.currentTextChanged.connect(change_ai_model)
+            def refresh_model_list(model):
+                setup_model_list(model)
+                update_model_name(model)
+            model_list.currentTextChanged.connect(refresh_model_list)
 
             self.save_config.connect(
                 lambda: model_list.setCurrentText(config.get('model')))
@@ -617,11 +643,7 @@ class TranslationSetting(QDialog):
             gemini_top_k.valueChanged.connect(
                 lambda value: config.update(top_k=value))
 
-            # Automatically retreive models.
-            gemini_model_select.addItem(_('Fetching...'))
-            gemini_model_select.setDisabled(True)
-            self.model_worker.start.emit(self.current_engine)
-
+            # Automatically retreive Gemini models.
             def populate_models():
                 gemini_model_select.clear()
                 gemini_model_select.setDisabled(False)
@@ -629,7 +651,16 @@ class TranslationSetting(QDialog):
                 gemini_model_select.addItem(_('Custom'))
                 change_ai_model(
                     config, gemini_model_select, gemini_model_custom)
-            self.model_worker.finished.connect(populate_models)
+
+            if len(self.current_engine.models) > 0:
+                populate_models()
+            else:
+                gemini_model_select.clear()
+                gemini_model_select.addItem(_('Fetching...'))
+                gemini_model_select.setDisabled(True)
+                gemini_model_custom.setVisible(False)
+                self.model_worker.start.emit(self.current_engine)
+                self.model_worker.finished.connect(populate_models)
 
         def show_chatgpt_preferences():
             is_chatgpt = issubclass(self.current_engine, ChatgptTranslate)
@@ -655,20 +686,31 @@ class TranslationSetting(QDialog):
             self.chatgpt_endpoint.setText(
                 config.get('endpoint', self.current_engine.endpoint))
             self.chatgpt_endpoint.setCursorPosition(0)
-            # Model
-            if self.current_engine.model is not None:
+
+            # Automatically retreive ChatGPT models.
+            def populate_models():
                 chatgpt_model_select.clear()
-                if issubclass(self.current_engine, AzureChatgptTranslate):
-                    chatgpt_model_select.addItem(
-                        _('The model depends on your Azure project.'))
-                    chatgpt_model_select.setDisabled(True)
-                    chatgpt_model_custom.setVisible(False)
-                    return
                 chatgpt_model_select.setDisabled(False)
                 chatgpt_model_select.addItems(self.current_engine.models)
                 chatgpt_model_select.addItem(_('Custom'))
+                change_ai_model(
+                    config, chatgpt_model_select, chatgpt_model_custom)
 
-            change_ai_model(config, chatgpt_model_select, chatgpt_model_custom)
+            if issubclass(self.current_engine, AzureChatgptTranslate):
+                chatgpt_model_select.clear()
+                chatgpt_model_select.addItem(
+                    _('The model depends on your Azure project.'))
+                chatgpt_model_select.setDisabled(True)
+                chatgpt_model_custom.setVisible(False)
+            elif len(self.current_engine.models) > 0:
+                populate_models()
+            else:
+                chatgpt_model_select.clear()
+                chatgpt_model_select.addItem(_('Fetching...'))
+                chatgpt_model_select.setDisabled(True)
+                chatgpt_model_custom.setVisible(False)
+                self.model_worker.start.emit(self.current_engine)
+                self.model_worker.finished.connect(populate_models)
 
             # Sampling
             sampling = config.get('sampling', self.current_engine.sampling)

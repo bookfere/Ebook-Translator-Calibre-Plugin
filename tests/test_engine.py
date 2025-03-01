@@ -388,6 +388,42 @@ class TestChatgptTranslate(unittest.TestCase):
         self.translator.set_source_lang('English')
         self.translator.set_target_lang('Chinese')
 
+    @patch(module_name + '.openai.request')
+    def test_get_models(self, mock_request):
+        mock_request.return_value = """
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "model-id-0",
+      "object": "model",
+      "created": 1686935002,
+      "owned_by": "organization-owner"
+    },
+    {
+      "id": "model-id-1",
+      "object": "model",
+      "created": 1686935002,
+      "owned_by": "organization-owner"
+    },
+    {
+      "id": "model-id-2",
+      "object": "model",
+      "created": 1686935002,
+      "owned_by": "openai"
+    }
+  ],
+  "object": "list"
+}
+"""
+
+        self.assertEqual(
+            self.translator.get_models(),
+            ['model-id-0', 'model-id-1', 'model-id-2'])
+        mock_request.assert_called_once_with(
+            'https://api.openai.com/v1/models',
+            headers=self.translator.get_headers())
+
     def test_get_body(self):
         model = 'gpt-4o'
         self.assertEqual(self.translator.get_body('test content'), json.dumps({
@@ -513,34 +549,9 @@ class TestChatgptBatchTranslate(unittest.TestCase):
             self.batch_translator.batch_endpoint,
             'https://api.openai.com/v1/batches')
 
-    @patch(module_name + '.openai.request')
-    def test_supported_models(self, mock_request):
-        mock_request.return_value = """
-{
-  "object": "list",
-  "data": [
-    {
-      "id": "model-id-0",
-      "object": "model",
-      "created": 1686935002,
-      "owned_by": "organization-owner"
-    },
-    {
-      "id": "model-id-1",
-      "object": "model",
-      "created": 1686935002,
-      "owned_by": "organization-owner"
-    },
-    {
-      "id": "model-id-2",
-      "object": "model",
-      "created": 1686935002,
-      "owned_by": "openai"
-    }
-  ],
-  "object": "list"
-}
-"""
+    def test_supported_models(self):
+        self.mock_translator.get_models.return_value = [
+            'model-id-0', 'model-id-1', 'model-id-2']
         self.assertEqual(
             self.batch_translator.supported_models(),
             ['model-id-0', 'model-id-1', 'model-id-2'])
