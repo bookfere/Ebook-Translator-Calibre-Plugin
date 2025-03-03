@@ -27,6 +27,7 @@ class DeepseekTranslate(Base):
     lang_codes_directionality = \
         Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://api.deepseek.com/v1/chat/completions'
+    is_genai = True
     api_key_errors = ['401', 'unauthorized', 'quota']
 
     concurrency_limit = 1

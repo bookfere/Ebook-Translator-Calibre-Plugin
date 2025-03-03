@@ -27,6 +27,7 @@ class ChatgptTranslate(Base):
     lang_codes_directionality = \
         Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://api.openai.com/v1/chat/completions'
+    is_genai = True
     # api_key_hint = 'sk-xxx...xxx'
     # https://help.openai.com/en/collections/3808446-api-error-codes-explained
     api_key_errors = ['401', 'unauthorized', 'quota']
