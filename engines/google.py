@@ -319,7 +319,9 @@ class GeminiTranslate(Base):
     lang_codes = Base.load_lang_codes(gemini)
     lang_codes_directionality = \
         Base.load_lang_codes_directionality(lang_directionality)
-    endpoint = 'https://generativelanguage.googleapis.com/v1/models'
+    # v1, stable version of the API. v1beta, more early-access features.
+    # details: https://ai.google.dev/gemini-api/docs/api-versions
+    endpoint = 'https://generativelanguage.googleapis.com/v1beta/models'
     need_api_key = True
 
     concurrency_limit = 1
