@@ -23,6 +23,7 @@ class Base:
     endpoint: str | None = None
     method = 'POST'
     headers: dict[str, str] = {}
+    is_genai = False
     stream = False
     need_api_key = True
     api_key_hint = _('API Keys')

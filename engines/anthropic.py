@@ -30,6 +30,7 @@ class ClaudeTranslate(Base):
     lang_codes_directionality = \
         Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://api.anthropic.com/v1/messages'
+    is_genai = True
     # this is currently the latest version of the api
     api_version = '2023-06-01'
     api_key_hint = 'sk-ant-xxxx'

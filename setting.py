@@ -30,29 +30,62 @@ load_translations()
 
 class ModelWorker(QObject):
     start = pyqtSignal(object)
-    status = pyqtSignal(bool)
+    success = pyqtSignal(bool)
     finished = pyqtSignal()
 
     def __init__(self):
         QObject.__init__(self)
         self.log = Log()
+        self.working = False
         self.start.connect(self.get_models)
 
     @pyqtSlot(object)
     def get_models(self, engine_class):
+        self.working = True
         try:
             engine = get_translator(engine_class)
             models = engine.get_models()
             engine_class.models = models
             if len(models) > 0 and engine_class.model is None:
                 engine_class.model = models[0]
-            self.status.emit(True)
+            self.success.emit(True)
         except Exception:
             # TODO: Inform the UI to add a button to retry when the API key or
             # network is available.
             self.log.error('Failed to fetch models: %s' % traceback_error())
-            self.status.emit(False)
+            self.success.emit(False)
         self.finished.emit()
+        self.working = False
+
+
+def layout_scroll_area(name):
+    def decorator(func):
+        def scroll_widget(dialog):
+            widget = QWidget()
+            layout = QVBoxLayout(widget)
+
+            scroll_area = QScrollArea(widget)
+            scroll_area.setWidgetResizable(True)
+            # Compatible with lower versions of Calibre
+            instance = QApplication.instance()
+            if not (getattr(instance, 'is_dark_theme', None) and
+                    instance.is_dark_theme):
+                scroll_area.setBackgroundRole(QPalette.Light)
+            scroll_area.setWidget(func(dialog))
+            layout.addWidget(scroll_area, 1)
+
+            save_button = QPushButton(_('&Save'))
+            save_button.setObjectName(name)
+            layout.addWidget(save_button)
+
+            def save_current_config():
+                dialog.save_config.emit(dialog.tabs.currentIndex())
+            save_button.clicked.connect(save_current_config)
+            set_shortcut(
+                save_button, 'save', save_current_config, save_button.text())
+            return widget
+        return scroll_widget
+    return decorator
 
 
 class TranslationSetting(QDialog):
@@ -73,7 +106,7 @@ class TranslationSetting(QDialog):
         self.model_thread.finished.connect(self.model_worker.deleteLater)
         self.model_thread.start()
 
-        self.model_worker.status.connect(
+        self.model_worker.success.connect(
             lambda success: success or self.alert.pop(
                 _("Can't fetch model list now. Check and try again."),
                 level='error'))
@@ -95,7 +128,9 @@ class TranslationSetting(QDialog):
         engine_index = self.tabs.addTab(self.layout_engine(), _('Engine'))
         content_index = self.tabs.addTab(self.layout_content(), _('Content'))
         self.tabs.setStyleSheet('QTabBar::tab {min-width:120px;}')
-        self.tabs.currentChanged.connect(lambda _: self.config.refresh())
+
+        layout.addWidget(self.tabs)
+        layout.addWidget(Footer())
 
         def save_setting(index):
             actions = {
@@ -109,42 +144,19 @@ class TranslationSetting(QDialog):
                 self.alert.pop(_('The setting has been saved.'))
         self.save_config.connect(save_setting)
 
-        layout.addWidget(self.tabs)
-        layout.addWidget(Footer())
+        def disable_button(disabled):
+            save_button = self.findChild(QPushButton, 'engine')
+            save_button.setDisabled(disabled)
+        self.model_worker.start.connect(lambda: disable_button(True))
+        self.model_worker.finished.connect(lambda: disable_button(False))
 
-    def layout_scroll_area(func):
-        def scroll_widget(self):
-            widget = QWidget()
-            layout = QVBoxLayout(widget)
+        def change_tab_index(index):
+            self.config.refresh()
+            if index == engine_index and self.current_engine.is_genai:
+                self.model_worker.start.emit(self.current_engine)
+        self.tabs.currentChanged.connect(change_tab_index)
 
-            scroll_area = QScrollArea(widget)
-            scroll_area.setWidgetResizable(True)
-            # Compatible with lower versions of Calibre
-            instance = QApplication.instance()
-            if not (getattr(instance, 'is_dark_theme', None) and
-                    instance.is_dark_theme):
-                scroll_area.setBackgroundRole(QPalette.Light)
-            scroll_area.setWidget(func(self))
-            layout.addWidget(scroll_area, 1)
-
-            save_button = QPushButton(_('&Save'))
-            layout.addWidget(save_button)
-
-            def save_current_config():
-                self.save_config.emit(self.tabs.currentIndex())
-            save_button.clicked.connect(save_current_config)
-            set_shortcut(
-                save_button, 'save', save_current_config, save_button.text())
-
-            self.model_worker.start.connect(
-                lambda: save_button.setDisabled(True))
-            self.model_worker.finished.connect(
-                lambda: save_button.setDisabled(False))
-
-            return widget
-        return scroll_widget
-
-    @layout_scroll_area
+    @layout_scroll_area('general')
     def layout_general(self):
         widget = QWidget()
         layout = QVBoxLayout(widget)
@@ -368,7 +380,7 @@ class TranslationSetting(QDialog):
 
         return widget
 
-    @layout_scroll_area
+    @layout_scroll_area('engine')
     def layout_engine(self):
         widget = QWidget()
         layout = QVBoxLayout(widget)
@@ -384,9 +396,10 @@ class TranslationSetting(QDialog):
         engine_layout.addWidget(manage_engine)
         layout.addWidget(engine_group)
 
+        self.model_worker.start.connect(
+            lambda: engine_group.setDisabled(True))
         self.model_worker.finished.connect(
-            lambda: engine_list.setDisabled(False))
-        self.model_worker.start.connect(lambda: engine_list.setDisabled(True))
+            lambda: engine_group.setDisabled(False))
 
         # Using Tip
         self.tip_group = QGroupBox(_('Usage Tip'))
@@ -659,7 +672,6 @@ class TranslationSetting(QDialog):
                 gemini_model_select.addItem(_('Fetching...'))
                 gemini_model_select.setDisabled(True)
                 gemini_model_custom.setVisible(False)
-                self.model_worker.start.emit(self.current_engine)
                 self.model_worker.finished.connect(populate_models)
 
         def show_chatgpt_preferences():
@@ -709,7 +721,6 @@ class TranslationSetting(QDialog):
                 chatgpt_model_select.addItem(_('Fetching...'))
                 chatgpt_model_select.setDisabled(True)
                 chatgpt_model_custom.setVisible(False)
-                self.model_worker.start.emit(self.current_engine)
                 self.model_worker.finished.connect(populate_models)
 
             # Sampling
@@ -797,6 +808,9 @@ class TranslationSetting(QDialog):
                     max_error_count=value))
             show_gemini_preferences()
             show_chatgpt_preferences()
+            if self.current_engine.is_genai and \
+                    len(self.current_engine.models) < 1:
+                self.model_worker.start.emit(self.current_engine)
         choose_default_engine(engine_list.findData(self.current_engine.name))
         engine_list.currentIndexChanged.connect(choose_default_engine)
 
@@ -841,7 +855,7 @@ class TranslationSetting(QDialog):
             for api_key in api_keys:
                 self.api_keys.appendPlainText(api_key)
 
-    @layout_scroll_area
+    @layout_scroll_area('content')
     def layout_content(self):
         widget = QWidget()
         layout = QVBoxLayout(widget)
