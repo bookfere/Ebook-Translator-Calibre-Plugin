@@ -1,7 +1,9 @@
 import io
-import time
+# import time
 import json
 import uuid
+from http.client import IncompleteRead
+from urllib.parse import urlsplit
 
 from mechanize._response import response_seek_wrapper as Response
 
@@ -9,31 +11,24 @@ from .. import EbookTranslator
 from ..lib.utils import request
 from ..lib.exception import UnsupportedModel
 
-from .base import Base
-from .languages import lang_directionality
+from .genai import GenAI
 from .languages import google
-
-from http.client import IncompleteRead
-from urllib.parse import urlsplit
 
 
 load_translations()
 
 
-class ChatgptTranslate(Base):
+class ChatgptTranslate(GenAI):
     name = 'ChatGPT'
     alias = 'ChatGPT (OpenAI)'
-    lang_codes = Base.load_lang_codes(google)
-    lang_codes_directionality = \
-        Base.load_lang_codes_directionality(lang_directionality)
+    lang_codes = GenAI.load_lang_codes(google)
     endpoint = 'https://api.openai.com/v1/chat/completions'
-    is_genai = True
     # api_key_hint = 'sk-xxx...xxx'
     # https://help.openai.com/en/collections/3808446-api-error-codes-explained
     api_key_errors = ['401', 'unauthorized', 'quota']
 
     concurrency_limit = 1
-    request_interval = 20
+    request_interval = 20.0
     request_timeout = 30.0
 
     prompt = (
@@ -56,7 +51,7 @@ class ChatgptTranslate(Base):
     model: str | None = None
 
     def __init__(self):
-        Base.__init__(self)
+        super().__init__()
         self.endpoint = self.config.get('endpoint', self.endpoint)
         self.prompt = self.config.get('prompt', self.prompt)
         self.sampling = self.config.get('sampling', self.sampling)

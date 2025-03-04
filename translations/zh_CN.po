@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-12-08 12:47+0800\n"
+"POT-Creation-Date: 2025-03-04 12:56+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -584,6 +584,9 @@ msgstr "翻译已失败。"
 msgid "Time consuming: {} minutes"
 msgstr "耗时：{} 分钟"
 
+msgid "Can't fetch model list now. Check and try again."
+msgstr "无法获取模型列表。请检查后重试。"
+
 msgid "General"
 msgstr "通用"
 
@@ -692,8 +695,8 @@ msgstr "最大错误数"
 msgid "The number of consecutive errors to abort translation."
 msgstr "超过连续错误次数中止翻译。"
 
-msgid "Tune Gemini"
-msgstr "调节 Gemini"
+msgid "Fine-tuning"
+msgstr "功能微调"
 
 msgid "Prompt"
 msgstr "提示词"
@@ -713,11 +716,8 @@ msgstr "启用类似 ChatGPT 的文本流效果"
 msgid "Stream"
 msgstr "文本流"
 
-msgid "Tune ChatGPT"
-msgstr "调节 ChatGPT"
-
-msgid "Tune Claude"
-msgstr "调节 Claude"
+msgid "Fetching..."
+msgstr "获取中..."
 
 msgid "The model depends on your Azure project."
 msgstr "模型取决于你的 Azure 项目。"

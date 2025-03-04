@@ -100,7 +100,7 @@ class CustomTranslate(Base):
         cls.lang_codes = cls.load_lang_codes(data.get('languages'))
 
     def __init__(self):
-        Base.__init__(self)
+        super().__init__()
         self.endpoint = self.request.get('url')
         self.method = self.request.get('method') or 'GET'
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-12-08 12:47+0800\n"
+"POT-Creation-Date: 2025-03-04 12:56+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: none\n"
@@ -593,6 +593,9 @@ msgstr "Tradução falhou."
 msgid "Time consuming: {} minutes"
 msgstr "Tempo gasto: {} minutos"
 
+msgid "Can't fetch model list now. Check and try again."
+msgstr ""
+
 msgid "General"
 msgstr "Geral"
 
@@ -703,8 +706,8 @@ msgstr "Erros máximos"
 msgid "The number of consecutive errors to abort translation."
 msgstr "O número de erros consecutivos para abortar a tradução."
 
-msgid "Tune Gemini"
-msgstr "Ajuste do Gemini"
+msgid "Fine-tuning"
+msgstr ""
 
 msgid "Prompt"
 msgstr "Prompt"
@@ -724,11 +727,8 @@ msgstr "Habilite de texto em tempo real como no ChatGPT"
 msgid "Stream"
 msgstr "Fluxo"
 
-msgid "Tune ChatGPT"
-msgstr "Ajustar ChatGPT"
-
-msgid "Tune Claude"
-msgstr "Ajustar Claude"
+msgid "Fetching..."
+msgstr ""
 
 msgid "The model depends on your Azure project."
 msgstr "O modelo depende do seu projeto do Azure."

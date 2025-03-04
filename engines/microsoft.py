@@ -5,7 +5,6 @@ from datetime import datetime
 from ..lib.utils import request
 
 from .base import Base
-from .languages import lang_directionality
 from .languages import microsoft
 from .openai import ChatgptTranslate
 
@@ -23,8 +22,6 @@ class MicrosoftEdgeTranslate(Base):
     alias = 'Microsoft Edge (Free)'
     free = True
     lang_codes = Base.load_lang_codes(microsoft)
-    lang_codes_directionality = \
-        Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://api-edge.cognitive.microsofttranslator.com/translate'
     need_api_key = False
     access_info = None

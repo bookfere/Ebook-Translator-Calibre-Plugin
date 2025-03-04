@@ -8,8 +8,7 @@ from qt.core import (
     QIntValidator, QScrollArea, QRadioButton, QGridLayout, QCheckBox, QObject,
     QButtonGroup, QColorDialog, QSpinBox, QPalette, QApplication, QFrame,
     QComboBox, QRegularExpression, pyqtSignal, QFormLayout, QDoubleSpinBox,
-    QSettings, QSpacerItem, QRegularExpressionValidator, QBoxLayout, QThread,
-    pyqtSlot)
+    QSpacerItem, QRegularExpressionValidator, QBoxLayout, QThread, pyqtSlot)
 
 from calibre.utils.logging import Log
 
@@ -19,6 +18,7 @@ from .lib.translation import get_engine_class, get_translator
 from .engines import (
     builtin_engines, GeminiTranslate, ChatgptTranslate, AzureChatgptTranslate,
     ClaudeTranslate)
+from .engines.genai import GenAI
 from .engines.custom import CustomTranslate
 from .components import (
     Footer, AlertMessage, TargetLang, SourceLang, EngineList, EngineTester,
@@ -152,7 +152,8 @@ class TranslationSetting(QDialog):
 
         def change_tab_index(index):
             self.config.refresh()
-            if index == engine_index and self.current_engine.is_genai:
+            if index == engine_index and \
+                    issubclass(self.current_engine, GenAI):
                 self.model_worker.start.emit(self.current_engine)
         self.tabs.currentChanged.connect(change_tab_index)
 
@@ -476,7 +477,7 @@ class TranslationSetting(QDialog):
         self.disable_wheel_event(request_timeout)
 
         # GeminiPro Setting
-        gemini_group = QGroupBox(_('Tune Gemini'))
+        gemini_group = QGroupBox(_('Fine-tuning'))
         gemini_group.setVisible(False)
         gemini_layout = QFormLayout(gemini_group)
         self.set_form_layout_policy(gemini_layout)
@@ -499,7 +500,7 @@ class TranslationSetting(QDialog):
         gemini_temperature = QDoubleSpinBox()
         gemini_temperature.setDecimals(1)
         gemini_temperature.setSingleStep(0.1)
-        gemini_temperature.setRange(0, 1)
+        gemini_temperature.setRange(0, 2)
 
         gemini_top_p = QDoubleSpinBox()
         gemini_top_p.setDecimals(1)
@@ -533,7 +534,7 @@ class TranslationSetting(QDialog):
         layout.addWidget(gemini_group)
 
         # ChatGPT Setting
-        chatgpt_group = QGroupBox()
+        chatgpt_group = QGroupBox(_('Fine-tuning'))
         chatgpt_group.setVisible(False)
         chatgpt_layout = QFormLayout(chatgpt_group)
         self.set_form_layout_policy(chatgpt_layout)
@@ -634,9 +635,6 @@ class TranslationSetting(QDialog):
                 lambda: model_list.setCurrentText(config.get('model')))
 
         def show_gemini_preferences():
-            if not issubclass(self.current_engine, GeminiTranslate):
-                gemini_group.setVisible(False)
-                return
             config = self.current_engine.config
             gemini_group.setVisible(True)
             self.gemini_prompt.setPlaceholderText(self.current_engine.prompt)
@@ -674,19 +672,12 @@ class TranslationSetting(QDialog):
                 gemini_model_custom.setVisible(False)
                 self.model_worker.finished.connect(populate_models)
 
-        def show_chatgpt_preferences():
-            is_chatgpt = issubclass(self.current_engine, ChatgptTranslate)
+        def show_chatgpt_compitable_preferences():
             is_claude = issubclass(self.current_engine, ClaudeTranslate)
-            if not is_chatgpt and not is_claude:
-                chatgpt_group.setVisible(False)
-                return
             chatgpt_group.setVisible(True)
-            if is_chatgpt:
-                temperature_value.setRange(0, 2)
-                chatgpt_group.setTitle(_('Tune ChatGPT'))
-            elif is_claude:
+            temperature_value.setRange(0, 2)
+            if is_claude:
                 temperature_value.setRange(0, 1)
-                chatgpt_group.setTitle(_('Tune Claude'))
             config = self.current_engine.config
             # Prompt
             self.chatgpt_prompt.setPlaceholderText(self.current_engine.prompt)
@@ -806,9 +797,15 @@ class TranslationSetting(QDialog):
             max_error_count.valueChanged.connect(
                 lambda value: self.current_engine.config.update(
                     max_error_count=value))
-            show_gemini_preferences()
-            show_chatgpt_preferences()
-            if self.current_engine.is_genai and \
+            # Show GenAI preferences respectively.
+            chatgpt_group.setVisible(False)
+            gemini_group.setVisible(False)
+            if issubclass(self.current_engine, GeminiTranslate):
+                show_gemini_preferences()
+            elif issubclass(self.current_engine, GenAI):
+                show_chatgpt_compitable_preferences()
+            # Automatically fetch GenAI models
+            if issubclass(self.current_engine, GenAI) and \
                     len(self.current_engine.models) < 1:
                 self.model_worker.start.emit(self.current_engine)
         choose_default_engine(engine_list.findData(self.current_engine.name))

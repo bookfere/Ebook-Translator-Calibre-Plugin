@@ -5,7 +5,6 @@ import random
 from ..lib.utils import request
 
 from .base import Base
-from .languages import lang_directionality
 from .languages import deepl
 
 
@@ -16,7 +15,6 @@ class DeeplTranslate(Base):
     name = 'DeepL'
     alias = 'DeepL'
     lang_codes = Base.load_lang_codes(deepl)
-    lang_codes_directionality = Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://api-free.deepl.com/v2/translate'
     usage_endpoint = 'https://api-free.deepl.com/v2/usage'
     # api_key_hint = 'xxx-xxx-xxx:fx'
@@ -66,8 +64,6 @@ class DeeplFreeTranslate(Base):
     alias = 'DeepL (Free)'
     free = True
     lang_codes = Base.load_lang_codes(deepl)
-    lang_codes_directionality = \
-        Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://www2.deepl.com/jsonrpc?client=chrome-extension,1.5.1'
     need_api_key = False
     placeholder = DeeplTranslate.placeholder

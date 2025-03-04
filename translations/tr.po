@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2024-12-08 12:47+0800\n"
+"POT-Creation-Date: 2025-03-04 12:56+0800\n"
 "PO-Revision-Date: 2024-05-15 16:21+0300\n"
 "Last-Translator: DogancanYr <EMAIL@ADDRESS>\n"
 "Language-Team: Turkish <LL@li.org>\n"
@@ -591,6 +591,9 @@ msgstr "Çeviri başarısız oldu."
 msgid "Time consuming: {} minutes"
 msgstr "Harcanan zaman: {} dakika"
 
+msgid "Can't fetch model list now. Check and try again."
+msgstr ""
+
 msgid "General"
 msgstr "Genel"
 
@@ -701,8 +704,8 @@ msgstr "Maksimum hatalar"
 msgid "The number of consecutive errors to abort translation."
 msgstr "Çeviriyi iptal etmek için ardışık hataların sayısı."
 
-msgid "Tune Gemini"
-msgstr "İkizler'i Ayarla"
+msgid "Fine-tuning"
+msgstr ""
 
 msgid "Prompt"
 msgstr "İstem"
@@ -722,11 +725,8 @@ msgstr "ChatGPT'deki gibi metin akışını etkinleştir"
 msgid "Stream"
 msgstr "Yayın"
 
-msgid "Tune ChatGPT"
-msgstr "ChatGPT'yi Ayarla"
-
-msgid "Tune Claude"
-msgstr "Claude'yi dinle"
+msgid "Fetching..."
+msgstr ""
 
 msgid "The model depends on your Azure project."
 msgstr "Model, Azure projenize bağlıdır."

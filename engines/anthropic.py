@@ -5,32 +5,22 @@ from http.client import IncompleteRead
 
 from mechanize._response import response_seek_wrapper as Response
 
-from .base import Base
-from .languages import lang_directionality
-from .languages import anthropic
-from .prompt_extensions import anthropic as anthropic_prompt_extension
-
 from .. import EbookTranslator
 from ..lib.utils import request
+
+from .genai import GenAI
+from .languages import anthropic
+from .prompt_extensions import anthropic as anthropic_prompt_extension
 
 
 load_translations()
 
 
-# TODO: Enable using Message Batches API (currently only the Streaming API can
-# be used). The Message Batches API allows sending any number of batches of up
-# to 100,000 messages per batch. Batches are processed asynchronously with
-# results returned as soon as the batch is complete and cost 50% less than
-# standard API calls (more info here:
-# https://docs.anthropic.com/en/docs/build-with-claude/message-batches)
-class ClaudeTranslate(Base):
+class ClaudeTranslate(GenAI):
     name = 'Claude'
     alias = 'Claude (Anthropic)'
-    lang_codes = Base.load_lang_codes(anthropic)
-    lang_codes_directionality = \
-        Base.load_lang_codes_directionality(lang_directionality)
+    lang_codes = GenAI.load_lang_codes(anthropic)
     endpoint = 'https://api.anthropic.com/v1/messages'
-    is_genai = True
     # this is currently the latest version of the api
     api_version = '2023-06-01'
     api_key_hint = 'sk-ant-xxxx'
@@ -73,16 +63,16 @@ class ClaudeTranslate(Base):
     model: str | None = None
 
     def __init__(self):
-        Base.__init__(self)
+        super().__init__()
         self.endpoint = self.config.get('endpoint', self.endpoint)
         self.prompt = self.config.get('prompt', self.prompt)
-        if self.model is not None:
-            self.model = self.config.get('model', self.model)
         self.sampling = self.config.get('sampling', self.sampling)
         self.temperature = self.config.get('temperature', self.temperature)
         self.top_p = self.config.get('top_p', self.top_p)
         self.top_k = self.config.get('top_k', self.top_k)
         self.stream = self.config.get('stream', self.stream)
+        # TODO: Handle the default model more appropriately.
+        self.model = self.config.get('model', 'claude-3-7-sonnet-latest')
 
     def _get_prompt(self):
         prompt = self.prompt.replace('<tlang>', self.target_lang)
@@ -166,3 +156,13 @@ class ClaudeTranslate(Base):
                     raise Exception(
                         _('Error received: {}')
                         .format(chunk['error']['message']))
+
+
+class ClaudeBatchTranslate:
+    """TODO: Enable using Message Batches API (currently only the Streaming API
+    can be used). The Message Batches API allows sending any number of batches
+    of up to 100,000 messages per batch. Batches are processed asynchronously
+    with results returned as soon as the batch is complete and cost 50% less
+    than standard API calls (more info here:
+    https://docs.anthropic.com/en/docs/build-with-claude/message-batches)
+    """
