@@ -1,8 +1,15 @@
 import time
 from types import MethodType
 
+from qt.core import (
+    Qt, QObject, QDialog, QGroupBox, QWidget, QVBoxLayout, QHBoxLayout,
+    QPlainTextEdit, QPushButton, QSplitter, QLabel, QThread, QLineEdit,
+    QGridLayout, QProgressBar, pyqtSignal, pyqtSlot, QPixmap, QEvent,
+    QStackedWidget, QSpacerItem, QTabWidget, QCheckBox,
+    QComboBox, QSizePolicy)
 from calibre.constants import __version__
 
+from . import EbookTranslator
 from .lib.utils import uid, traceback_error
 from .lib.config import get_config
 from .lib.encodings import encoding_list
@@ -12,28 +19,11 @@ from .lib.element import get_element_handler
 from .lib.conversion import extract_item, extra_formats
 from .engines.openai import ChatgptTranslate, ChatgptBatchTranslate
 from .engines.custom import CustomTranslate
-
-from . import EbookTranslator
 from .components import (
     EngineList, Footer, SourceLang, TargetLang, InputFormat, OutputFormat,
     AlertMessage, AdvancedTranslationTable, StatusColor, TranslationStatus,
     set_shortcut, ChatgptBatchTranslationManager)
 
-
-try:
-    from qt.core import (
-        Qt, QObject, QDialog, QGroupBox, QWidget, QVBoxLayout, QHBoxLayout,
-        QPlainTextEdit, QPushButton, QSplitter, QLabel, QThread, QLineEdit,
-        QGridLayout, QProgressBar, pyqtSignal, pyqtSlot, QPixmap, QEvent,
-        QStackedWidget, QSpacerItem, QTextCursor, QTabWidget, QCheckBox,
-        QComboBox, QSizePolicy)
-except ImportError:
-    from PyQt5.Qt import (
-        Qt, QObject, QDialog, QGroupBox, QWidget, QVBoxLayout, QHBoxLayout,
-        QPlainTextEdit, QPushButton, QSplitter, QLabel, QThread, QLineEdit,
-        QGridLayout, QProgressBar, pyqtSignal, pyqtSlot, QPixmap, QEvent,
-        QStackedWidget, QSpacerItem, QTextCursor, QTabWidget, QCheckBox,
-        QComboBox, QSizePolicy)
 
 load_translations()
 
@@ -249,36 +239,36 @@ class CreateTranslationProject(QDialog):
     def layout_format(self):
         engine_class = get_engine_class()
         widget = QWidget()
-        layout = QHBoxLayout(widget)
+        layout = QGridLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
 
         input_group = QGroupBox(_('Input Format'))
         input_layout = QGridLayout(input_group)
         input_format = InputFormat(self.ebook.files.keys())
-        input_format.setFixedWidth(150)
+        # input_format.setFixedWidth(150)
         input_layout.addWidget(input_format)
-        layout.addWidget(input_group)
+        layout.addWidget(input_group, 0, 0, 1, 3)
 
         output_group = QGroupBox(_('Output Format'))
         output_layout = QGridLayout(output_group)
         output_format = OutputFormat()
-        output_format.setFixedWidth(150)
+        # output_format.setFixedWidth(150)
         output_layout.addWidget(output_format)
-        layout.addWidget(output_group)
+        layout.addWidget(output_group, 0, 3, 1, 3)
 
         source_group = QGroupBox(_('Source Language'))
         source_layout = QVBoxLayout(source_group)
         source_lang = SourceLang()
         source_lang.setFixedWidth(150)
         source_layout.addWidget(source_lang)
-        layout.addWidget(source_group)
+        layout.addWidget(source_group, 1, 0, 1, 2)
 
         target_group = QGroupBox(_('Target Language'))
         target_layout = QVBoxLayout(target_group)
         target_lang = TargetLang()
         target_lang.setFixedWidth(150)
         target_layout.addWidget(target_lang)
-        layout.addWidget(target_group)
+        layout.addWidget(target_group, 1, 2, 1, 2)
 
         source_lang.refresh.emit(
             engine_class.lang_codes.get('source'),
@@ -316,7 +306,7 @@ class CreateTranslationProject(QDialog):
             encoding_select.setFixedWidth(150)
             encoding_select.addItems(encoding_list)
             encoding_layout.addWidget(encoding_select)
-            layout.addWidget(encoding_group)
+            layout.addWidget(encoding_group, 1, 4, 1, 2)
 
             def change_encoding(encoding):
                 self.ebook.set_encoding(encoding)
@@ -330,7 +320,7 @@ class CreateTranslationProject(QDialog):
             direction_list.addItem(_('Left to Right'), 'ltr')
             direction_list.addItem(_('Right to Left'), 'rtl')
             direction_layout.addWidget(direction_list)
-            layout.addWidget(direction_group)
+            layout.addWidget(direction_group, 1, 4, 1, 2)
 
             def change_direction(_index):
                 _direction = direction_list.itemData(_index)
@@ -338,9 +328,12 @@ class CreateTranslationProject(QDialog):
             direction_list.currentIndexChanged.connect(change_direction)
 
             engine_target_lange_codes = engine_class.lang_codes.get('target')
-            if engine_target_lange_codes is not None and self.ebook.target_lang in engine_target_lange_codes:
-                target_lang_code = engine_target_lange_codes[self.ebook.target_lang]
-                direction = engine_class.lang_codes_directionality.get(target_lang_code, 'auto')
+            if engine_target_lange_codes is not None and \
+                    self.ebook.target_lang in engine_target_lange_codes:
+                target_lang_code = engine_target_lange_codes[
+                    self.ebook.target_lang]
+                direction = engine_class.get_lang_directionality(
+                    target_lang_code)
                 index = direction_list.findData(direction)
                 direction_list.setCurrentIndex(index)
 
@@ -464,9 +457,8 @@ class AdvancedTranslation(QDialog):
             cover_image = QPixmap(self.api.cover(self.ebook.id, as_image=True))
         if cover_image.isNull():
             cover_image = QPixmap(I('default_cover.png'))
-        mode = getattr(Qt.TransformationMode, 'SmoothTransformation', None) \
-            or Qt.SmoothTransformation
-        cover_image = cover_image.scaledToHeight(480, mode)
+        cover_image = cover_image.scaledToHeight(
+            480, Qt.TransformationMode.SmoothTransformation)
 
         cover = QLabel()
         cover.setAlignment(Qt.AlignCenter)

@@ -1,4 +1,3 @@
-import re
 import os
 import sys
 import time
@@ -6,13 +5,11 @@ import json
 import os.path
 from html import unescape
 from subprocess import Popen, PIPE
-from urllib.parse import urlencode
-from http.client import IncompleteRead
 
 from ..lib.utils import request, traceback_error
 
 from .base import Base
-from .languages import lang_directionality
+from .genai import GenAI
 from .languages import google, gemini
 
 
@@ -24,8 +21,6 @@ class GoogleFreeTranslateNew(Base):
     alias = 'Google (Free) - New'
     free = True
     lang_codes = Base.load_lang_codes(google)
-    lang_codes_directionality = \
-        Base.load_lang_codes_directionality(lang_directionality)
     endpoint: str = 'https://translate-pa.googleapis.com/v1/translate'
     need_api_key = False
 
@@ -63,8 +58,6 @@ class GoogleFreeTranslateHtml(Base):
     alias = 'Google (Free) - HTML'
     free = True
     lang_codes = Base.load_lang_codes(google)
-    lang_codes_directionality = \
-        Base.load_lang_codes_directionality(lang_directionality)
     endpoint: str = 'https://translate-pa.googleapis.com/v1/translateHtml'
     need_api_key = False
 
@@ -99,8 +92,6 @@ class GoogleFreeTranslate(Base):
     alias = 'Google (Free) - Old'
     free = True
     lang_codes = Base.load_lang_codes(google)
-    lang_codes_directionality = \
-        Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://translate.googleapis.com/translate_a/single'
     need_api_key = False
 
@@ -230,8 +221,6 @@ class GoogleBasicTranslateADC(GoogleTranslateMixin, Base):
     name = 'Google(Basic)ADC'
     alias = 'Google (Basic) ADC'
     lang_codes = Base.load_lang_codes(google)
-    lang_codes_directionality = \
-        Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://translation.googleapis.com/language/translate/v2'
     api_key_hint = 'API key'
     need_api_key = False
@@ -281,8 +270,6 @@ class GoogleAdvancedTranslate(GoogleTranslateMixin, Base):
     name = 'Google(Advanced)'
     alias = 'Google (Advanced) ADC'
     lang_codes = Base.load_lang_codes(google)
-    lang_codes_directionality = \
-        Base.load_lang_codes_directionality(lang_directionality)
     endpoint = 'https://translation.googleapis.com/v3/projects/{}'
     api_key_hint = 'PROJECT_ID'
     need_api_key = False
@@ -313,16 +300,13 @@ class GoogleAdvancedTranslate(GoogleTranslateMixin, Base):
         return ''.join(i['translatedText'] for i in translations)
 
 
-class GeminiTranslate(Base):
+class GeminiTranslate(GenAI):
     name = 'Gemini'
     alias = 'Gemini'
-    lang_codes = Base.load_lang_codes(gemini)
-    lang_codes_directionality = \
-        Base.load_lang_codes_directionality(lang_directionality)
+    lang_codes = GenAI.load_lang_codes(gemini)
     # v1, stable version of the API. v1beta, more early-access features.
     # details: https://ai.google.dev/gemini-api/docs/api-versions
     endpoint = 'https://generativelanguage.googleapis.com/v1beta/models'
-    is_genai = True
     need_api_key = True
 
     concurrency_limit = 1
@@ -347,7 +331,7 @@ class GeminiTranslate(Base):
     model: str | None = None
 
     def __init__(self):
-        Base.__init__(self)
+        super().__init__()
         self.prompt = self.config.get('prompt', self.prompt)
         self.temperature = self.config.get('temperature', self.temperature)
         self.top_k = self.config.get('top_k', self.top_k)

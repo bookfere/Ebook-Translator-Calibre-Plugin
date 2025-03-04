@@ -12,6 +12,7 @@ from mechanize._response import closeable_response as mechanize_response
 from ..lib.cache import Paragraph
 from ..lib.exception import UnexpectedResult, UnsupportedModel
 from ..engines.base import Base
+from ..engines.genai import GenAI
 from ..engines.deepl import DeeplTranslate
 from ..engines.openai import ChatgptTranslate, ChatgptBatchTranslate
 from ..engines.microsoft import AzureChatgptTranslate
@@ -387,6 +388,10 @@ class TestChatgptTranslate(unittest.TestCase):
         self.translator = ChatgptTranslate()
         self.translator.set_source_lang('English')
         self.translator.set_target_lang('Chinese')
+
+    def test_created_engine(self):
+        self.assertIsInstance(self.translator, Base)
+        self.assertIsInstance(self.translator, GenAI)
 
     @patch(module_name + '.openai.request')
     def test_get_models(self, mock_request):
@@ -807,6 +812,11 @@ class TestAzureChatgptTranslate(unittest.TestCase):
         self.translator.set_source_lang('English')
         self.translator.set_target_lang('Chinese')
 
+    def test_created_engine(self):
+        self.assertIsInstance(self.translator, Base)
+        self.assertIsInstance(self.translator, GenAI)
+        self.assertIsInstance(self.translator, ChatgptTranslate)
+
     @patch(module_name + '.base.request')
     def test_translate_stream(self, mock_request):
         model = 'gpt-35-turbo'
@@ -857,6 +867,10 @@ class TestClaudeTranslate(unittest.TestCase):
         self.translator = ClaudeTranslate()
         self.translator.set_source_lang('English')
         self.translator.set_target_lang('Chinese')
+
+    def test_created_engine(self):
+        self.assertIsInstance(self.translator, Base)
+        self.assertIsInstance(self.translator, GenAI)
 
     @patch(module_name + '.anthropic.EbookTranslator')
     @patch(module_name + '.base.request')

@@ -16,6 +16,10 @@ def _z(message): return message
 
 
 class EbookTranslator(InterfaceActionBase):
+    """Development environment requirements for the project:
+    - Calibre version: >= 5.0.0
+    - Python version: >=3.8.5
+    """
     name = _z('Ebook Translator')
     title = _(name)
     supported_platforms = ['windows', 'osx', 'linux']

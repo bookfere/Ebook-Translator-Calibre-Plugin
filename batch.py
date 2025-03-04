@@ -1,6 +1,10 @@
 import os
 import os.path
 
+from qt.core import (
+    QDialog, QWidget, QPushButton, QHeaderView, QVBoxLayout, QTableWidget,
+    QTableWidgetItem, Qt, QComboBox, QHBoxLayout)
+
 from .lib.config import get_config
 from .lib.translation import get_engine_class
 from .lib.conversion import extra_formats
@@ -11,15 +15,6 @@ from .components import (
     Footer, AlertMessage, SourceLang, TargetLang, InputFormat,
     OutputFormat)
 
-
-try:
-    from qt.core import (
-        QDialog, QWidget, QPushButton, QHeaderView, QVBoxLayout, QTableWidget,
-        QTableWidgetItem, Qt, QComboBox, QLabel, QSizePolicy, QHBoxLayout)
-except ImportError:
-    from PyQt5.Qt import (
-        QDialog, QWidget, QPushButton, QHeaderView, QVBoxLayout, QTableWidget,
-        QTableWidgetItem, Qt, QComboBox, QLabel, QSizePolicy, QHBoxLayout)
 
 load_translations()
 
@@ -176,10 +171,14 @@ class BatchTranslation(QDialog):
                 direction_list.currentTextChanged.connect(
                     lambda direction: direction_list.setToolTip(direction))
 
-                engine_target_lange_codes = translation_engine.lang_codes.get('target')
-                if engine_target_lange_codes is not None and ebook.target_lang in engine_target_lange_codes:
-                    target_lang_code = engine_target_lange_codes[ebook.target_lang]
-                    direction = translation_engine.lang_codes_directionality.get(target_lang_code, 'auto')
+                engine_target_lange_codes = \
+                    translation_engine.lang_codes.get('target')
+                if engine_target_lange_codes is not None and \
+                        ebook.target_lang in engine_target_lange_codes:
+                    target_lang_code = engine_target_lange_codes[
+                        ebook.target_lang]
+                    direction = translation_engine.get_lang_directionality(
+                        target_lang_code)
                     index = direction_list.findData(direction)
                     direction_list.setCurrentIndex(index)
 
