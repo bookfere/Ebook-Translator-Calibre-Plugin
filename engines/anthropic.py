@@ -21,7 +21,7 @@ class ClaudeTranslate(GenAI):
     alias = 'Claude (Anthropic)'
     lang_codes = GenAI.load_lang_codes(anthropic)
     endpoint = 'https://api.anthropic.com/v1/messages'
-    # this is currently the latest version of the api
+    # by default use the latest version of the api (currently this is 2023-06-01)
     api_version = '2023-06-01'
     api_key_hint = 'sk-ant-xxxx'
     # https://docs.anthropic.com/claude/reference/errors
@@ -47,6 +47,7 @@ class ClaudeTranslate(GenAI):
     top_p = 1.0
     top_k = 1
     stream = True
+
     # event types for streaming are listed here:
     # https://docs.anthropic.com/en/api/messages-streaming
     valid_event_types = [
@@ -71,7 +72,8 @@ class ClaudeTranslate(GenAI):
         self.top_p = self.config.get('top_p', self.top_p)
         self.top_k = self.config.get('top_k', self.top_k)
         self.stream = self.config.get('stream', self.stream)
-        # TODO: Handle the default model more appropriately.
+        # TODO: better handle setting the default model (e.g. fetch programmatically)
+        # by default use the latest version of the most intelligent model available (currently this is claude-3-7-sonnet)
         self.model = self.config.get('model', 'claude-3-7-sonnet-latest')
 
     def _get_prompt(self):
@@ -97,12 +99,21 @@ class ClaudeTranslate(GenAI):
         return [i['id'] for i in json.loads(response)['data']]
 
     def get_headers(self):
-        return {
+        headers = {
             'Content-Type': 'application/json',
             'anthropic-version': self.api_version,
             'x-api-key': self.api_key,
             'User-Agent': 'Ebook-Translator/%s' % EbookTranslator.__version__,
         }
+
+        # NOTE: Claude 3.7 Sonnet can produce substantially longer responses than previous models with support
+        #       for up to 128K output tokens (beta), this feature can be enabled by passing an anthropic-beta
+        #       header of "output-128k-2025-02-19", more here:
+        #       https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking#extended-output-capabilities-beta
+        if self.model.startswith('claude-3-7-sonnet-'):
+            headers['anthropic-beta'] = 'output-128k-2025-02-19'
+
+        return headers
 
     def get_body(self, text):
         body = {
@@ -159,10 +170,7 @@ class ClaudeTranslate(GenAI):
 
 
 class ClaudeBatchTranslate:
-    """TODO: Enable using Message Batches API (currently only the Streaming API
-    can be used). The Message Batches API allows sending any number of batches
-    of up to 100,000 messages per batch. Batches are processed asynchronously
-    with results returned as soon as the batch is complete and cost 50% less
-    than standard API calls (more info here:
-    https://docs.anthropic.com/en/docs/build-with-claude/message-batches)
-    """
+    """TODO: use the message batches api (currently only the streaming api can be used).
+             The message batches api allows sending any number of batches of up to 100,000 messages per batch. Batches are
+             processed asynchronously with results returned as soon as the batch is complete and cost 50% less than standard
+             API calls (more info here: https://docs.anthropic.com/en/docs/build-with-claude/message-batches)"""
