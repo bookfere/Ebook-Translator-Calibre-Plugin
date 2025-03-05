@@ -71,9 +71,7 @@ class BatchTranslation(QDialog):
         table.setHorizontalHeaderLabels(headers)
 
         header = table.horizontalHeader()
-        stretch = getattr(QHeaderView.ResizeMode, 'Stretch', None) \
-            or QHeaderView.Stretch
-        header.setSectionResizeMode(0, stretch)
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         table.verticalHeader().setMaximumSectionSize(36)
 
         translation_engine = get_engine_class()

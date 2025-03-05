@@ -2,6 +2,10 @@ import time
 import uuid
 from types import GeneratorType
 
+from qt.core import (
+    pyqtSignal, pyqtSlot, QDialog, QThread, QGridLayout, QPushButton,
+    QPlainTextEdit, QObject, QTextCursor, QLabel, QComboBox, QSpacerItem)
+
 from ..lib.utils import sorted_mixed_keys, traceback_error
 from ..lib.config import get_config
 from ..engines.custom import (
@@ -12,15 +16,6 @@ from .lang import SourceLang, TargetLang
 from .alert import AlertMessage
 from .shortcut import set_shortcut
 
-
-try:
-    from qt.core import (
-        pyqtSignal, pyqtSlot, QDialog, QThread, QGridLayout, QPushButton,
-        QPlainTextEdit, QObject, QTextCursor, QLabel, QComboBox, QSpacerItem)
-except ImportError:
-    from PyQt5.Qt import (
-        pyqtSignal, pyqtSlot, QDialog, QThread, QGridLayout, QPushButton,
-        QPlainTextEdit, QObject, QTextCursor, QLabel, QComboBox, QSpacerItem)
 
 load_translations()
 
@@ -113,8 +108,7 @@ class EngineTester(QDialog):
         source = QPlainTextEdit()
         source.setPlainText('Hello World!')
         cursor = source.textCursor()
-        cursor.movePosition(
-            getattr(QTextCursor, 'End', None) or QTextCursor.MoveOperation.End)
+        cursor.movePosition(QTextCursor.MoveOperation.End)
         source.setTextCursor(cursor)
         layout.addWidget(source, 0, 0, 1, 3)
 

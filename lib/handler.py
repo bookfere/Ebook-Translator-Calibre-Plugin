@@ -7,7 +7,7 @@ from ..lib.utils import traceback_error
 from .exception import TranslationCanceled
 
 
-class AsyncHandler:
+class Handler:
     def __init__(self, paragraphs, concurrency_limit, translate_paragraph,
                  process_translation, request_interval):
         if sys.platform == 'win32':

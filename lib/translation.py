@@ -1,5 +1,4 @@
 import re
-import sys
 import time
 import json
 from types import GeneratorType
@@ -11,6 +10,7 @@ from ..engines.custom import CustomTranslate
 from .utils import sep, trim, dummy, traceback_error
 from .config import get_config
 from .exception import TranslationFailed, TranslationCanceled
+from .handler import Handler
 
 
 load_translations()
@@ -228,20 +228,11 @@ class Translation:
             raise Exception(_('There is no content need to translate.'))
         self.progress_bar.load(self.total)
 
-        if sys.version_info >= (3, 7, 0):
-            from .async_handler import AsyncHandler
-            handler = AsyncHandler(
-                paragraphs, self.translator.concurrency_limit,
-                self.translate_paragraph, self.process_translation,
-                self.translator.request_interval)
-            handler.handle()
-        else:
-            from .thread_handler import ThreadHandler
-            handler = ThreadHandler(
-                paragraphs, self.translator.concurrency_limit,
-                self.translate_paragraph, self.process_translation,
-                self.translator.request_interval)
-            handler.handle()
+        handler = Handler(
+            paragraphs, self.translator.concurrency_limit,
+            self.translate_paragraph, self.process_translation,
+            self.translator.request_interval)
+        handler.handle()
 
         self.log(sep())
         if self.batch and self.need_stop():

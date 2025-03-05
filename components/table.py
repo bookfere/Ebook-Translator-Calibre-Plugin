@@ -1,19 +1,13 @@
+from qt.core import (
+    Qt, QTableWidget, QHeaderView, QMenu, QAbstractItemView, QCursor,
+    QBrush, QTableWidgetItem, pyqtSignal, QTableWidgetSelectionRange,
+    QColor, QPalette, QT_VERSION_STR)
+
 from ..lib.utils import group
 from ..lib.translation import get_engine_class
 
 from .alert import AlertMessage
 
-
-try:
-    from qt.core import (
-        Qt, QTableWidget, QHeaderView, QMenu, QAbstractItemView, QCursor,
-        QBrush, QTableWidgetItem, pyqtSignal, QTableWidgetSelectionRange,
-        QColor, QPalette, QT_VERSION_STR)
-except ImportError:
-    from PyQt5.Qt import (
-        Qt, QTableWidget, QHeaderView, QMenu, QAbstractItemView, QCursor,
-        QBrush, QTableWidgetItem, pyqtSignal, QTableWidgetSelectionRange,
-        QColor, QPalette, QT_VERSION_STR)
 
 load_translations()
 
@@ -40,10 +34,7 @@ class AdvancedTranslationTable(QTableWidget):
             [_('Original'), _('Engine'), _('Language'), _('Status')])
         self.verticalHeader().setMinimumWidth(28)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
-        triggers = (getattr(
-            QAbstractItemView.EditTrigger, 'NoEditTriggers', None)
-            or QAbstractItemView.NoEditTriggers)
-        self.setEditTriggers(triggers)
+        self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.setAlternatingRowColors(True)
 
         # self.setVerticalHeaderLabels(
@@ -75,10 +66,7 @@ class AdvancedTranslationTable(QTableWidget):
             self.track_row_data(row)
 
         header = self.horizontalHeader()
-        stretch = (
-            getattr(QHeaderView.ResizeMode, 'Stretch', None)
-            or QHeaderView.Stretch)
-        header.setSectionResizeMode(0, stretch)
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
 
     def track_row_data(self, row):
         paragraph = self.paragraph(row)

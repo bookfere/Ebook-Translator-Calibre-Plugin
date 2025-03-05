@@ -1,9 +1,6 @@
-try:
-    from qt.core import (
-        Qt, QPen, QWidget, QPainter, QColor, QHBoxLayout, QLabel)
-except ImportError:
-    from PyQt5.Qt import (
-        Qt, QPen, QWidget, QPainter, QColor, QHBoxLayout, QLabel)
+from qt.core import (
+    Qt, QPen, QWidget, QPainter, QColor, QHBoxLayout, QLabel)
+
 
 load_translations()
 
@@ -49,9 +46,7 @@ class CircularStatusWidget(QWidget):
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        hint = getattr(QPainter.RenderHint, 'Antialiasing', None) or \
-            QPainter.Antialiasing
-        painter.setRenderHint(hint)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setBrush(QColor(str(self.color)))
         pen = QPen(QColor(127, 127, 127))
         pen.setStyle(Qt.SolidLine)

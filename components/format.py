@@ -1,17 +1,9 @@
+from qt.core import QComboBox
 from calibre.ebooks.conversion.plumber import supported_input_formats
+from calibre.ebooks.conversion.config import get_output_formats
 
 from ..lib.config import get_config
 
-
-try:
-    from qt.core import QComboBox
-except ImportError:
-    from PyQt5.Qt import QComboBox
-
-try:
-    from calibre.ebooks.conversion.config import get_output_formats
-except ImportError:
-    from calibre.gui2.convert.single import get_output_formats
 
 load_translations()
 

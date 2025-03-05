@@ -1,12 +1,8 @@
-try:
-    from qt.core import Qt, QShortcut, QKeySequence
-except ImportError:
-    from PyQt5.Qt import Qt, QShortcut, QKeySequence
+from qt.core import QShortcut, QKeySequence
 
 
 def get_standard_key(key):
-    return getattr(QKeySequence, key, None) or getattr(
-        QKeySequence.StandardKey, key)
+    return getattr(QKeySequence.StandardKey, key)
 
 
 shortcuts = {

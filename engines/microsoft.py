@@ -1,6 +1,7 @@
 import json
 import base64
 from datetime import datetime
+from urllib.parse import urlencode
 
 from ..lib.utils import request
 
@@ -8,11 +9,6 @@ from .base import Base
 from .languages import microsoft
 from .openai import ChatgptTranslate
 
-
-try:
-    from urllib.parse import urlencode
-except ImportError:
-    from urllib import urlencode
 
 load_translations()
 

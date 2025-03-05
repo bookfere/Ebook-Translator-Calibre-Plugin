@@ -1,19 +1,14 @@
 import re
 import zipfile
 
+from qt.core import (
+    Qt, QLabel, QDialog, QWidget, QVBoxLayout, QTextBrowser, QTextDocument)
 from calibre.library.comments import markdown
 from calibre.utils.localization import get_lang
 
 from . import EbookTranslator
 from .components import Footer
 
-
-try:
-    from qt.core import (
-        Qt, QLabel, QDialog, QWidget, QVBoxLayout, QTextBrowser, QTextDocument)
-except ImportError:
-    from PyQt5.Qt import (
-        Qt, QLabel, QDialog, QWidget, QVBoxLayout, QTextBrowser, QTextDocument)
 
 load_translations()
 

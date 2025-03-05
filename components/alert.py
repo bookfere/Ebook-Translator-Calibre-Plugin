@@ -1,7 +1,4 @@
-try:
-    from qt.core import QMessageBox
-except ImportError:
-    from PyQt5.Qt import QMessageBox
+from qt.core import QMessageBox
 
 
 class AlertMessage:

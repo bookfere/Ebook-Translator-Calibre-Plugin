@@ -1,22 +1,16 @@
 import os
-import sys
 import os.path
+
+from qt.core import (
+    Qt, QDialog, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
+    QTableView, QAbstractTableModel, QAbstractItemView, pyqtSignal,
+    QLineEdit, QFileDialog, QModelIndex, QMenu, QCursor)
 
 from .lib.utils import open_path
 from .lib.cache import default_cache_path, TranslationCache
 from .lib.config import get_config
 from .components import Footer, AlertMessage
 
-try:
-    from qt.core import (
-        Qt, QDialog, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
-        QTableView, QAbstractTableModel, QAbstractItemView, pyqtSignal,
-        QLineEdit, QFileDialog, QModelIndex, QMenu, QCursor, QHeaderView)
-except ImportError:
-    from PyQt5.Qt import (
-        Qt, QDialog, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
-        QTableView, QAbstractTableModel, QAbstractItemView, pyqtSignal,
-        QLineEdit, QFileDialog, QModelIndex, QMenu, QCursor, QHeaderView)
 
 load_translations()
 
