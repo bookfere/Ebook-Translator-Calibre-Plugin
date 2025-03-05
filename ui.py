@@ -1,4 +1,9 @@
+import os.path
+
+from qt.core import QMenu, QSettings
+
 from calibre.gui2.actions import InterfaceAction
+from calibre.utils.config_base import plugin_dir
 
 from . import EbookTranslator
 from .lib.utils import uid
@@ -18,16 +23,9 @@ try:
 except ImportError:
     from calibre.gui2.convert.single import get_input_format_for_book
 
-try:
-    from qt.core import QMenu, QCoreApplication, QSettings
-except ImportError:
-    from PyQt5.Qt import QMenu, QCoreApplication, QSettings
 
 load_translations()
-
-QCoreApplication.setOrganizationName(EbookTranslator.author)
-QCoreApplication.setOrganizationDomain(EbookTranslator.author)
-QCoreApplication.setApplicationName(EbookTranslator.identifier)
+upgrade_config()
 
 
 class EbookTranslatorGui(InterfaceAction):
@@ -35,7 +33,9 @@ class EbookTranslatorGui(InterfaceAction):
     action_spec = (
         _('Translate Book'), None, _('Translate Ebook Content'), None)
     title = '%s - %s' % (EbookTranslator.title, EbookTranslator.__version__)
-    settings = QSettings()
+    settings = QSettings(os.path.join(
+        plugin_dir, EbookTranslator.identifier, 'settings.ini'),
+        QSettings.Format.IniFormat)
 
     class Status:
         jobs = {}
@@ -65,8 +65,6 @@ class EbookTranslatorGui(InterfaceAction):
 
         if not getattr(self.gui, 'bookfere_ebook_translator', None):
             self.gui.bookfere_ebook_translator = self.Status()
-
-        upgrade_config()
 
     def advanced_translation_window(self, ebook):
         name = 'advanced_' + uid(ebook.get_input_path())
