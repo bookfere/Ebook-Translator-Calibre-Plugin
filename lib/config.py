@@ -1,3 +1,8 @@
+import os
+import os.path
+
+from calibre.constants import config_dir
+from calibre.utils.config_base import plugin_dir
 from calibre.utils.config import JSONConfig
 
 from .. import EbookTranslator
@@ -104,6 +109,7 @@ def upgrade_config():
     version >= (2, 0, 0) and ver200_upgrade(config)
     version >= (2, 0, 3) and ver203_upgrade(config)
     version >= (2, 0, 5) and ver205_upgrade(config)
+    version >= (2, 3, 6) and ver236_upgrade()
 
 
 def ver200_upgrade(config):
@@ -192,3 +198,13 @@ def ver205_upgrade(config):
         preferences['Gemini'] = preferences.pop('GeminiFlash')
         preferences['Gemini'].update(model='gemini-1.5-flash')
     config.commit()
+
+
+def ver236_upgrade():
+    old_config_path = os.path.join(config_dir, EbookTranslator.author)
+    new_config_path = os.path.join(plugin_dir, EbookTranslator.identifier)
+    if os.path.exists(old_config_path):
+        os.rename(old_config_path, new_config_path)
+        os.rename(
+            os.path.join(new_config_path, EbookTranslator.identifier + '.ini'),
+            os.path.join(new_config_path, 'settings.ini'))
