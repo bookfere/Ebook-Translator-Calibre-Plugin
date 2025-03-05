@@ -9,7 +9,6 @@ from qt.core import (
     QButtonGroup, QColorDialog, QSpinBox, QPalette, QApplication, QFrame,
     QComboBox, QRegularExpression, pyqtSignal, QFormLayout, QDoubleSpinBox,
     QSpacerItem, QRegularExpressionValidator, QBoxLayout, QThread, pyqtSlot)
-
 from calibre.utils.logging import Log
 
 from .lib.config import get_config
@@ -973,12 +972,7 @@ class TranslationSetting(QDialog):
         position_btn_group.button(position_rmap.get(map_key)).setChecked(True)
 
         names = ('TopToBottom', 'BottomToTop', 'LeftToRight', 'RightToLeft')
-        directions = []
-        for name in names:
-            direction = getattr(QBoxLayout, name, None)
-            if direction is None:
-                direction = getattr(QBoxLayout.Direction, name)
-            directions.append(direction)
+        directions = [getattr(QBoxLayout.Direction, name) for name in names]
 
         def choose_option(btn_id):
             original_sample.setVisible(btn_id != 4)
@@ -1479,8 +1473,6 @@ class TranslationSetting(QDialog):
         widget.wheelEvent = lambda event: None
 
     def set_form_layout_policy(self, layout):
-        field_policy = getattr(
-            QFormLayout.FieldGrowthPolicy, 'AllNonFixedFieldsGrow', None) \
-            or QFormLayout.AllNonFixedFieldsGrow
-        layout.setFieldGrowthPolicy(field_policy)
+        layout.setFieldGrowthPolicy(
+            QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
         layout.setLabelAlignment(Qt.AlignRight)

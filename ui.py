@@ -1,9 +1,9 @@
 import os.path
 
 from qt.core import QMenu, QSettings
-
 from calibre.gui2.actions import InterfaceAction
 from calibre.utils.config_base import plugin_dir
+from calibre.ebooks.conversion.config import get_input_format_for_book
 
 from . import EbookTranslator
 from .lib.utils import uid
@@ -16,12 +16,6 @@ from .cache import CacheManager
 from .about import AboutDialog
 from .components import AlertMessage, ModeSelection
 from .advanced import CreateTranslationProject, AdvancedTranslation
-
-
-try:
-    from calibre.ebooks.conversion.config import get_input_format_for_book
-except ImportError:
-    from calibre.gui2.convert.single import get_input_format_for_book
 
 
 load_translations()

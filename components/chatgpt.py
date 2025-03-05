@@ -1,22 +1,15 @@
 from functools import wraps
 
+from qt.core import (
+    pyqtSignal, pyqtSlot, Qt, QLabel, QDialog, QVBoxLayout, QStackedLayout,
+    QWidget, QPushButton, QProgressBar, QFormLayout, QGroupBox, QObject,
+    QThread, QHBoxLayout, QPlainTextEdit, QEvent)
 from calibre.utils.logging import Log
 
 from ..lib.utils import traceback_error
 
 from .alert import AlertMessage
 
-
-try:
-    from qt.core import (
-        pyqtSignal, pyqtSlot, Qt, QLabel, QDialog, QVBoxLayout, QStackedLayout,
-        QWidget, QPushButton, QProgressBar, QFormLayout, QGroupBox, QObject,
-        QThread, QHBoxLayout, QPlainTextEdit, QEvent)
-except ImportError:
-    from PyQt5.Qt import (
-        pyqtSignal, pyqtSlot, Qt, QLabel, QDialog, QVBoxLayout, QStackedLayout,
-        QWidget, QPushButton, QProgressBar, QFormLayout, QGroupBox, QObject,
-        QThread, QHBoxLayout, QPlainTextEdit, QEvent)
 
 load_translations()
 
@@ -337,8 +330,6 @@ class ChatgptBatchTranslationManager(QDialog):
         self.parent().raise_()
 
     def set_form_layout_policy(self, layout):
-        field_policy = getattr(
-            QFormLayout.FieldGrowthPolicy, 'AllNonFixedFieldsGrow', None) \
-            or QFormLayout.AllNonFixedFieldsGrow
-        layout.setFieldGrowthPolicy(field_policy)
+        layout.setFieldGrowthPolicy(
+            QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
         layout.setLabelAlignment(Qt.AlignRight)

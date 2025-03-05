@@ -1,11 +1,7 @@
+from qt.core import QWidget, QHBoxLayout, QLabel
 from calibre.utils.localization import get_lang
 from calibre_plugins.ebook_translator import EbookTranslator
 
-
-try:
-    from qt.core import QWidget, QHBoxLayout, QLabel
-except ImportError:
-    from PyQt5.Qt import QWidget, QHBoxLayout, QLabel
 
 load_translations()
 

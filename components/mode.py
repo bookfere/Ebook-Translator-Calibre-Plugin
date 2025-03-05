@@ -1,14 +1,9 @@
+from qt.core import (
+    pyqtSignal, QDialog, QPushButton, QPlainTextEdit, QHBoxLayout,
+    QGridLayout, QGroupBox, QLabel, Qt)
+
 from ..lib.config import get_config
 
-
-try:
-    from qt.core import (
-        pyqtSignal, QDialog, QPushButton, QPlainTextEdit, QHBoxLayout,
-        QGridLayout, QGroupBox, QLabel, Qt)
-except ImportError:
-    from PyQt5.Qt import (
-        pyqtSignal, QDialog, QPushButton, QPlainTextEdit, QHBoxLayout,
-        QGridLayout, QGroupBox, QLabel, Qt)
 
 load_translations()
 
