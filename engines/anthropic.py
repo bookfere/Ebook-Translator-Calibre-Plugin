@@ -28,7 +28,7 @@ class ClaudeTranslate(GenAI):
     api_key_errors = ['401', 'permission_error']
 
     concurrency_limit = 1
-    request_interval = 12
+    request_interval = 12.0
     request_timeout = 30.0
 
     prompt = (
@@ -106,11 +106,13 @@ class ClaudeTranslate(GenAI):
             'User-Agent': 'Ebook-Translator/%s' % EbookTranslator.__version__,
         }
 
-        # NOTE: Claude 3.7 Sonnet can produce substantially longer responses than previous models with support
-        #       for up to 128K output tokens (beta), this feature can be enabled by passing an anthropic-beta
-        #       header of "output-128k-2025-02-19", more here:
-        #       https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking#extended-output-capabilities-beta
-        if self.model.startswith('claude-3-7-sonnet-'):
+        # NOTE: Claude 3.7 Sonnet can produce substantially longer responses
+        # than previous models with support for up to 128K output tokens (beta)
+        # this feature can be enabled by passing an anthropic-beta header of
+        # "output-128k-2025-02-19", more here:
+        # https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking#extended-output-capabilities-beta
+        if self.model is not None and \
+                self.model.startswith('claude-3-7-sonnet-'):
             headers['anthropic-beta'] = 'output-128k-2025-02-19'
 
         return headers
@@ -170,7 +172,10 @@ class ClaudeTranslate(GenAI):
 
 
 class ClaudeBatchTranslate:
-    """TODO: use the message batches api (currently only the streaming api can be used).
-             The message batches api allows sending any number of batches of up to 100,000 messages per batch. Batches are
-             processed asynchronously with results returned as soon as the batch is complete and cost 50% less than standard
-             API calls (more info here: https://docs.anthropic.com/en/docs/build-with-claude/message-batches)"""
+    """TODO: use the message batches api (currently only the streaming api can
+    be used). The message batches api allows sending any number of batches of
+    up to 100,000 messages per batch. Batches are processed asynchronously with
+    results returned as soon as the batch is complete and cost 50% less than
+    standard API calls (more info here:
+    https://docs.anthropic.com/en/docs/build-with-claude/message-batches)
+    """

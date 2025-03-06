@@ -139,10 +139,7 @@ def open_file(path, encoding='utf-8'):
 
 
 def traceback_error():
-    if sys.version_info >= (3, 0, 0):
-        return traceback.format_exc(chain=False).strip()
-    else:
-        return traceback.format_exc().strip()
+    return traceback.format_exc(chain=False).strip()
 
 
 def request(

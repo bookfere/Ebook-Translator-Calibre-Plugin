@@ -4,7 +4,7 @@ import json
 from types import GeneratorType
 
 from ..engines import builtin_engines
-from ..engines import GoogleFreeTranslate
+from ..engines import GoogleFreeTranslateNew
 from ..engines.custom import CustomTranslate
 
 from .utils import sep, trim, dummy, traceback_error
@@ -154,6 +154,8 @@ class Translation:
             if row >= 0:
                 error_messages.insert(1, _('Row: {}').format(row))
             self.log('\n'.join(error_messages), True)
+            if self.translator.match_error(str(e)):
+                raise TranslationCanceled(_('Translation canceled.'))
             time.sleep(interval)
             return self.translate_text(row, text, retry, interval)
 
@@ -255,7 +257,7 @@ def get_engine_class(engine_name=None):
         engine_data = json.loads(custom_engines.get(engine_name))
         engine_class.set_engine_data(engine_data)
     else:
-        engine_class = GoogleFreeTranslate
+        engine_class = GoogleFreeTranslateNew
     engine_preferences = config.get('engine_preferences')
     engine_class.set_config(engine_preferences.get(engine_class.name) or {})
     return engine_class

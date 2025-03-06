@@ -174,6 +174,7 @@ class TestTranslation(unittest.TestCase):
     @patch('calibre_plugins.ebook_translator.lib.translation.time')
     def test_translate_text_retry_failed_translation(self, mock_time, mock_te):
         mock_te.return_value = 'test error trackback'
+        self.translation.translator.match_error.return_value = False
         self.translation.translator.translate.side_effect = Exception(
             'network error')
         self.translation.log = self.log
@@ -201,6 +202,9 @@ class TestTranslation(unittest.TestCase):
         mock_time.sleep.assert_has_calls([
             call(5), call(10), call(15), call(20), call(25)])
         self.assertEqual(6, self.translation.abort_count)
+
+    def test_translate_cancel_due_to_fatal_error(self):
+        pass
 
     def test_translate_paragraph_cancel(self):
         self.translation.cancel_request = self.cancel_request

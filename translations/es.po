@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2025-03-04 12:56+0800\n"
+"POT-Creation-Date: 2025-03-07 01:30+0800\n"
 "PO-Revision-Date: 2024-07-07 17:05-0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -601,7 +601,7 @@ msgstr "La traducción falló."
 msgid "Time consuming: {} minutes"
 msgstr "Tiempo consumido: {} minutos"
 
-msgid "Can't fetch model list now. Check and try again."
+msgid "Can't fetch model list, please check and try again."
 msgstr ""
 
 msgid "General"
@@ -719,17 +719,20 @@ msgstr ""
 msgid "Prompt"
 msgstr "Prompt"
 
+msgid "Endpoint"
+msgstr "PuntoFinal"
+
+msgid "A model name"
+msgstr ""
+
 msgid "Model"
 msgstr "Modelo"
 
 msgid "Sampling"
 msgstr "Muestreo"
 
-msgid "Endpoint"
-msgstr "PuntoFinal"
-
-msgid "Enable streaming text like in ChatGPT"
-msgstr "Habilite la transmisión de texto como en ChatGPT"
+msgid "Enable streaming response"
+msgstr ""
 
 msgid "Stream"
 msgstr "Trasmitir"

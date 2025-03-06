@@ -7,7 +7,7 @@ from calibre.utils.config import JSONConfig
 
 from .. import EbookTranslator
 from ..engines import (
-    GoogleFreeTranslate, ChatgptTranslate, AzureChatgptTranslate)
+    GoogleFreeTranslateNew, ChatgptTranslate, AzureChatgptTranslate)
 
 
 defaults = {
@@ -162,7 +162,7 @@ def ver203_upgrade(config):
             del azure_chatgpt['model']
 
     if len(engine_config) < 1:
-        engine_config.update({GoogleFreeTranslate.name: {}})
+        engine_config.update({GoogleFreeTranslateNew.name: {}})
 
     old_concurrency_limit = config.get('concurrency_limit')
     old_request_attempt = config.get('request_attempt')

@@ -33,11 +33,11 @@ class Base:
     placeholder = ('{{{{id_{}}}}}', r'({{\s*)+id\s*_\s*{}\s*(\s*}})+')
     using_tip = None
 
-    concurrency_limit = 0
-    request_interval = 0.0
-    request_attempt = 3
-    request_timeout = 10.0
-    max_error_count = 10
+    concurrency_limit: int = 0
+    request_interval: float = 0.0
+    request_attempt: int = 3
+    request_timeout: float = 10.0
+    max_error_count: int = 10
 
     def __init__(self):
         self.source_lang: str | None = None
@@ -114,10 +114,15 @@ class Base:
         return False
 
     def need_swap_api_key(self, error_message):
-        if self.need_api_key and len(self.api_keys) > 0:
-            for error in self.api_key_errors:
-                if error in error_message:
-                    return True
+        if self.need_api_key and len(self.api_keys) > 0 \
+                and self.match_error(error_message):
+            return True
+        return False
+
+    def match_error(self, error_message):
+        for error in self.api_key_errors:
+            if error in error_message:
+                return True
         return False
 
     def set_search_paths(self, paths):

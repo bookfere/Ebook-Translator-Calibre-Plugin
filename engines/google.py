@@ -5,6 +5,7 @@ import json
 import os.path
 from html import unescape
 from subprocess import Popen, PIPE
+from http.client import IncompleteRead
 
 from ..lib.utils import request, traceback_error
 
@@ -307,10 +308,12 @@ class GeminiTranslate(GenAI):
     # v1, stable version of the API. v1beta, more early-access features.
     # details: https://ai.google.dev/gemini-api/docs/api-versions
     endpoint = 'https://generativelanguage.googleapis.com/v1beta/models'
-    need_api_key = True
+    # https://ai.google.dev/gemini-api/docs/troubleshooting
+    api_key_errors = [
+        'API_KEY_INVALID', 'PERMISSION_DENIED', 'RESOURCE_EXHAUSTED']
 
     concurrency_limit = 1
-    request_interval = 1
+    request_interval = 1.0
     request_timeout = 30.0
 
     prompt = (
@@ -354,7 +357,7 @@ class GeminiTranslate(GenAI):
         return prompt + ' Start translating: ' + text
 
     def get_models(self):
-        endpoint = self.endpoint + '?key=' + self.api_key
+        endpoint = f'{self.endpoint}?key={self.api_key}'
         response = request(
             endpoint, timeout=self.request_timeout, proxy_uri=self.proxy_uri)
         models = []
@@ -367,9 +370,12 @@ class GeminiTranslate(GenAI):
         return models
 
     def get_endpoint(self):
-        method = 'streamGenerateContent' if self.stream else 'generateContent'
-        endpoint = self.endpoint + '/{}:{}?key={}'
-        return endpoint.format(self.model, method, self.api_key)
+        if self.stream:
+            return f'{self.endpoint}/{self.model}:streamGenerateContent?' \
+                f'alt=sse&key={self.api_key}'
+        else:
+            return f'{self.endpoint}/{self.model}:generateContent?' \
+                f'key={self.api_key}'
 
     def get_headers(self):
         return {'Content-Type': 'application/json'}
@@ -408,10 +414,26 @@ class GeminiTranslate(GenAI):
 
     def get_result(self, response):
         if self.stream:
-            parts = []
-            for item in json.loads(response.read()):
-                for part in item['candidates'][0]['content']['parts']:
-                    parts.append(part)
-        else:
-            parts = json.loads(response)['candidates'][0]['content']['parts']
+            return self._parse_stream(response)
+        parts = json.loads(response)['candidates'][0]['content']['parts']
         return ''.join([part['text'] for part in parts])
+
+    def _parse_stream(self, response):
+        while True:
+            try:
+                line = response.readline().decode('utf-8').strip()
+            except IncompleteRead:
+                continue
+            except Exception as e:
+                raise Exception(
+                    _('Can not parse returned response. Raw data: {}')
+                    .format(str(e)))
+            if line.startswith('data:'):
+                item = json.loads(line.split('data: ')[1])
+                candidate = item['candidates'][0]
+                content = candidate['content']
+                if 'parts' in content.keys():
+                    for part in content['parts']:
+                        yield part['text']
+                if candidate.get('finishReason') == 'STOP':
+                    break

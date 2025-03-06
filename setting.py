@@ -15,8 +15,7 @@ from .lib.config import get_config
 from .lib.utils import css, is_proxy_available, traceback_error
 from .lib.translation import get_engine_class, get_translator
 from .engines import (
-    builtin_engines, GeminiTranslate, ChatgptTranslate, AzureChatgptTranslate,
-    ClaudeTranslate)
+    builtin_engines, GeminiTranslate, ChatgptTranslate, AzureChatgptTranslate)
 from .engines.genai import GenAI
 from .engines.custom import CustomTranslate
 from .components import (
@@ -35,12 +34,10 @@ class ModelWorker(QObject):
     def __init__(self):
         QObject.__init__(self)
         self.log = Log()
-        self.working = False
         self.start.connect(self.get_models)
 
     @pyqtSlot(object)
     def get_models(self, engine_class):
-        self.working = True
         try:
             engine = get_translator(engine_class)
             models = engine.get_models()
@@ -49,12 +46,10 @@ class ModelWorker(QObject):
                 engine_class.model = models[0]
             self.success.emit(True)
         except Exception:
-            # TODO: Inform the UI to add a button to retry when the API key or
-            # network is available.
-            self.log.error('Failed to fetch models: %s' % traceback_error())
+            self.log.error(
+                'Failed to fetch models: %s' % traceback_error())
             self.success.emit(False)
         self.finished.emit()
-        self.working = False
 
 
 def layout_scroll_area(name):
@@ -89,6 +84,7 @@ def layout_scroll_area(name):
 
 class TranslationSetting(QDialog):
     save_config = pyqtSignal(int)
+    fetch_models = pyqtSignal()
     model_thread = QThread()
 
     def __init__(self, plugin, parent, icon):
@@ -107,7 +103,7 @@ class TranslationSetting(QDialog):
 
         self.model_worker.success.connect(
             lambda success: success or self.alert.pop(
-                _("Can't fetch model list now. Check and try again."),
+                _("Can't fetch model list, please check and try again."),
                 level='error'))
 
         self.main_layout()
@@ -137,8 +133,7 @@ class TranslationSetting(QDialog):
                 engine_index: self.update_engine_config,
                 content_index: self.update_content_config,
             }
-            if actions.get(index)():
-                self.config.update(cache_path=get_config().get('cache_path'))
+            if actions[index]():
                 self.config.commit()
                 self.alert.pop(_('The setting has been saved.'))
         self.save_config.connect(save_setting)
@@ -153,7 +148,7 @@ class TranslationSetting(QDialog):
             self.config.refresh()
             if index == engine_index and \
                     issubclass(self.current_engine, GenAI):
-                self.model_worker.start.emit(self.current_engine)
+                self.fetch_models.emit()
         self.tabs.currentChanged.connect(change_tab_index)
 
     @layout_scroll_area('general')
@@ -237,7 +232,7 @@ class TranslationSetting(QDialog):
         format_layout.addRow(_('Output Format'), output_format)
         layout.addWidget(format_group)
 
-        self.set_form_layout_policy(format_layout)
+        self.apply_form_layout_policy(format_layout)
 
         input_format.setCurrentText(self.config.get('input_format'))
         output_format.setCurrentText(self.config.get('output_format'))
@@ -435,7 +430,7 @@ class TranslationSetting(QDialog):
         language_layout.addRow(_('Target Language'), self.target_lang)
         layout.addWidget(language_group)
 
-        self.set_form_layout_policy(language_layout)
+        self.apply_form_layout_policy(language_layout)
 
         # Network Request
         request_group = QGroupBox(_('HTTP Request'))
@@ -454,7 +449,7 @@ class TranslationSetting(QDialog):
         request_layout.addRow(_('Interval (seconds)'), request_interval)
         request_layout.addRow(_('Attempt times'), request_attempt)
         request_layout.addRow(_('Timeout (seconds)'), request_timeout)
-        layout.addWidget(request_group, 1)
+        layout.addWidget(request_group)
 
         # Abort Translation
         abort_translation_group = QGroupBox(_('Abort Translation'))
@@ -465,106 +460,53 @@ class TranslationSetting(QDialog):
         abort_translation_layout.addWidget(max_error_count)
         abort_translation_layout.addWidget(QLabel(
             _('The number of consecutive errors to abort translation.')), 1)
-        layout.addWidget(abort_translation_group, 1)
+        layout.addWidget(abort_translation_group)
 
         self.disable_wheel_event(max_error_count)
 
-        self.set_form_layout_policy(request_layout)
+        self.apply_form_layout_policy(request_layout)
         self.disable_wheel_event(concurrency_limit)
         self.disable_wheel_event(request_attempt)
         self.disable_wheel_event(request_interval)
         self.disable_wheel_event(request_timeout)
 
-        # GeminiPro Setting
-        gemini_group = QGroupBox(_('Fine-tuning'))
-        gemini_group.setVisible(False)
-        gemini_layout = QFormLayout(gemini_group)
-        self.set_form_layout_policy(gemini_layout)
+        # GenAI Setting
+        genai_group = QGroupBox(_('Fine-tuning'))
+        genai_group.setVisible(False)
+        genai_layout = QFormLayout(genai_group)
+        self.apply_form_layout_policy(genai_layout)
 
-        self.gemini_prompt = QPlainTextEdit()
-        self.gemini_prompt.setFixedHeight(80)
-        gemini_layout.addRow(_('Prompt'), self.gemini_prompt)
+        self.genai_prompt = QPlainTextEdit()
+        self.genai_prompt.setFixedHeight(100)
+        genai_layout.addRow(_('Prompt'), self.genai_prompt)
+        self.genai_endpoint = QLineEdit()
+        genai_layout.addRow(_('Endpoint'), self.genai_endpoint)
 
-        gemini_model = QWidget()
-        gemini_model_layout = QHBoxLayout(gemini_model)
-        gemini_model_layout.setContentsMargins(0, 0, 0, 0)
-        gemini_model_select = QComboBox()
-        gemini_model_custom = QLineEdit()
-        # gemini_model_refresh = QLabel(_('Refresh'))
-        gemini_model_custom.setVisible(False)
-        gemini_model_layout.addWidget(gemini_model_select)
-        gemini_model_layout.addWidget(gemini_model_custom)
-        gemini_layout.addRow(_('Model'), gemini_model)
+        genai_model = QWidget()
+        genai_model_layout = QHBoxLayout(genai_model)
+        genai_model_layout.setContentsMargins(0, 0, 0, 0)
+        genai_model_refresh = QPushButton(_('Refresh'))
+        genai_model_list = QComboBox()
+        genai_model_input = QLineEdit()
+        genai_model_input.setPlaceholderText(_('A model name'))
+        genai_model_input.setVisible(False)
+        genai_model_layout.addWidget(genai_model_refresh)
+        genai_model_layout.addWidget(genai_model_list, 1)
+        genai_model_layout.addWidget(genai_model_input, 3)
+        genai_layout.addRow(_('Model'), genai_model)
 
-        gemini_temperature = QDoubleSpinBox()
-        gemini_temperature.setDecimals(1)
-        gemini_temperature.setSingleStep(0.1)
-        gemini_temperature.setRange(0, 2)
-
-        gemini_top_p = QDoubleSpinBox()
-        gemini_top_p.setDecimals(1)
-        gemini_top_p.setSingleStep(0.1)
-        gemini_top_p.setRange(0, 1)
-
-        gemini_top_k = QSpinBox()
-        gemini_top_k.setSingleStep(1)
-        gemini_top_k.setRange(0, 40)
-        # gemini_top_k.setMinimum(0)
-
-        gemini_sampling = QWidget()
-        gemini_sampling_layout = QHBoxLayout(gemini_sampling)
-        gemini_sampling_layout.setContentsMargins(0, 0, 0, 0)
-        gemini_sampling_layout.addWidget(QLabel('temperature'))
-        gemini_sampling_layout.addWidget(gemini_temperature)
-        gemini_sampling_layout.addSpacing(20)
-        gemini_sampling_layout.addWidget(QLabel('topP'))
-        gemini_sampling_layout.addWidget(gemini_top_p)
-        gemini_sampling_layout.addSpacing(20)
-        gemini_sampling_layout.addWidget(QLabel('topK'))
-        gemini_sampling_layout.addWidget(gemini_top_k)
-        gemini_sampling_layout.addStretch(1)
-
-        gemini_layout.addRow(_('Sampling'), gemini_sampling)
-
-        self.disable_wheel_event(gemini_temperature)
-        self.disable_wheel_event(gemini_top_p)
-        self.disable_wheel_event(gemini_top_k)
-
-        layout.addWidget(gemini_group)
-
-        # ChatGPT Setting
-        chatgpt_group = QGroupBox(_('Fine-tuning'))
-        chatgpt_group.setVisible(False)
-        chatgpt_layout = QFormLayout(chatgpt_group)
-        self.set_form_layout_policy(chatgpt_layout)
-
-        self.chatgpt_prompt = QPlainTextEdit()
-        self.chatgpt_prompt.setMinimumHeight(80)
-        self.chatgpt_prompt.setMaximumHeight(80)
-        chatgpt_layout.addRow(_('Prompt'), self.chatgpt_prompt)
-        self.chatgpt_endpoint = QLineEdit()
-        chatgpt_layout.addRow(_('Endpoint'), self.chatgpt_endpoint)
-
-        chatgpt_model = QWidget()
-        chatgpt_model_layout = QHBoxLayout(chatgpt_model)
-        chatgpt_model_layout.setContentsMargins(0, 0, 0, 0)
-        chatgpt_model_select = QComboBox()
-        chatgpt_model_custom = QLineEdit()
-        chatgpt_model_custom.setVisible(False)
-        chatgpt_model_layout.addWidget(chatgpt_model_select)
-        chatgpt_model_layout.addWidget(chatgpt_model_custom)
-        chatgpt_layout.addRow(_('Model'), chatgpt_model)
-
-        self.disable_wheel_event(chatgpt_model_select)
+        self.disable_wheel_event(genai_model_list)
 
         sampling_widget = QWidget()
         sampling_layout = QHBoxLayout(sampling_widget)
         sampling_layout.setContentsMargins(0, 0, 0, 0)
-        temperature = QRadioButton('temperature')
+        temperature = QRadioButton()
+        temperature_label = QLabel('temperature')
         temperature_value = QDoubleSpinBox()
         temperature_value.setDecimals(1)
         temperature_value.setSingleStep(0.1)
-        top_p = QRadioButton('top_p')
+        top_p = QRadioButton()
+        top_p_label = QLabel('top_p')
         top_p_value = QDoubleSpinBox()
         top_p_value.setDecimals(1)
         top_p_value.setSingleStep(0.1)
@@ -574,184 +516,164 @@ class TranslationSetting(QDialog):
         top_k_value.setSingleStep(1)
         top_k_value.setRange(1, 40)
         sampling_layout.addWidget(temperature)
+        sampling_layout.addWidget(temperature_label)
         sampling_layout.addWidget(temperature_value)
         sampling_layout.addSpacing(20)
         sampling_layout.addWidget(top_p)
+        sampling_layout.addWidget(top_p_label)
         sampling_layout.addWidget(top_p_value)
         sampling_layout.addSpacing(20)
         sampling_layout.addWidget(top_k)
         sampling_layout.addWidget(top_k_value)
         sampling_layout.addStretch(1)
-        chatgpt_layout.addRow(_('Sampling'), sampling_widget)
+        genai_layout.addRow(_('Sampling'), sampling_widget)
 
         self.disable_wheel_event(temperature_value)
         self.disable_wheel_event(top_p_value)
 
-        stream_enabled = QCheckBox(_('Enable streaming text like in ChatGPT'))
-        chatgpt_layout.addRow(_('Stream'), stream_enabled)
+        stream_enabled = QCheckBox(_('Enable streaming response'))
+        genai_layout.addRow(_('Stream'), stream_enabled)
 
         sampling_btn_group = QButtonGroup(sampling_widget)
         sampling_btn_group.addButton(temperature, 0)
         sampling_btn_group.addButton(top_p, 1)
 
-        def change_sampling_method(button):
-            self.current_engine.config.update(sampling=button.text())
-        sampling_btn_group.buttonClicked.connect(change_sampling_method)
+        labels = {
+            temperature: temperature_label.text(),
+            top_p: top_p_label.text()}
 
-        layout.addWidget(chatgpt_group)
+        sampling_btn_group.buttonClicked.connect(
+            lambda button:  self.current_engine.config
+            .update(sampling=labels[button]))
 
-        def change_ai_model(config, model_list, model_custom_input):
-            model = config.get('model', self.current_engine.model)
+        layout.addWidget(genai_group)
 
-            def setup_model_list(model):
-                if model in self.current_engine.models:
-                    model_list.setCurrentText(model)
-                    model_custom_input.setVisible(False)
-                else:
-                    model_list.setCurrentText(_('Custom'))
-                    model_custom_input.setVisible(True)
-                    if model not in (_('Custom'), _('Fetching...')):
-                        model_custom_input.setText(model)
-            setup_model_list(model)
-
-            def update_model_name(model):
-                models = self.current_engine.models
-                if len(models) < 1:
-                    return
-                if not model or _(model) == _('Custom'):
-                    model = models[0]
+        # Setup genAI model
+        def init_ai_models(model=None):
+            try:
+                genai_model_list.currentTextChanged.disconnect()
+            except TypeError:
+                pass
+            config = self.current_engine.config
+            models = self.current_engine.models
+            genai_model_refresh.setVisible(len(models) < 1)
+            # Clear the model list to refill data
+            genai_model_list.clear()
+            genai_model_list.setDisabled(False)
+            genai_model_list.addItems(models)
+            genai_model_list.addItem(_('Custom'))
+            # Fill data according to the passed model or the default model
+            if model is None:
+                model = config.get('model', self.current_engine.model)
+            elif model != _('Custom'):
                 config.update(model=model)
-            update_model_name(model)
-            model_custom_input.textChanged.connect(
-                lambda model: update_model_name(model.strip()))
-
-            def refresh_model_list(model):
-                setup_model_list(model)
-                update_model_name(model)
-            model_list.currentTextChanged.connect(refresh_model_list)
-
-            self.save_config.connect(
-                lambda: model_list.setCurrentText(config.get('model')))
-
-        def show_gemini_preferences():
-            config = self.current_engine.config
-            gemini_group.setVisible(True)
-            self.gemini_prompt.setPlaceholderText(self.current_engine.prompt)
-            self.gemini_prompt.setPlainText(
-                config.get('prompt', self.current_engine.prompt))
-
-            gemini_temperature.setValue(
-                config.get('temperature', self.current_engine.temperature))
-            gemini_temperature.valueChanged.connect(
-                lambda value: config.update(temperature=round(value, 1)))
-            gemini_top_p.setValue(
-                config.get('top_p', self.current_engine.top_p))
-            gemini_top_p.valueChanged.connect(
-                lambda value: config.update(top_p=value))
-            gemini_top_k.setValue(
-                config.get('top_k', self.current_engine.top_k))
-            gemini_top_k.valueChanged.connect(
-                lambda value: config.update(top_k=value))
-
-            # Automatically retreive Gemini models.
-            def populate_models():
-                gemini_model_select.clear()
-                gemini_model_select.setDisabled(False)
-                gemini_model_select.addItems(self.current_engine.models)
-                gemini_model_select.addItem(_('Custom'))
-                change_ai_model(
-                    config, gemini_model_select, gemini_model_custom)
-
-            if len(self.current_engine.models) > 0:
-                populate_models()
+            if model in models:
+                genai_model_list.setCurrentText(model)
+                genai_model_input.setVisible(False)
             else:
-                gemini_model_select.clear()
-                gemini_model_select.addItem(_('Fetching...'))
-                gemini_model_select.setDisabled(True)
-                gemini_model_custom.setVisible(False)
-                self.model_worker.finished.connect(populate_models)
+                genai_model_list.setCurrentText(_('Custom'))
+                genai_model_input.setVisible(True)
+                genai_model_input.setText(model)
+                if model in models or model == _('Custom'):
+                    genai_model_input.clear()
+            genai_model_list.currentTextChanged.connect(init_ai_models)
+        self.model_worker.finished.connect(init_ai_models)
+        genai_model_input.textChanged.connect(
+            lambda model: self.current_engine.config.update(
+                model=model.strip()))
 
-        def show_chatgpt_compitable_preferences():
-            is_claude = issubclass(self.current_engine, ClaudeTranslate)
-            chatgpt_group.setVisible(True)
-            temperature_value.setRange(0, 2)
-            if is_claude:
-                temperature_value.setRange(0, 1)
-            config = self.current_engine.config
+        def fetch_ai_models():
+            genai_model_refresh.setVisible(False)
+            genai_model_list.clear()
+            genai_model_list.addItem(_('Fetching...'))
+            genai_model_list.setDisabled(True)
+            genai_model_input.setVisible(False)
+            # Refresh the engine config and fetch models.
+            self.current_engine.set_config(self.get_engine_config())
+            self.model_worker.start.emit(self.current_engine)
+        genai_model_refresh.clicked.connect(fetch_ai_models)
+
+        def auto_fetch_ai_models():
+            if len(self.current_engine.models) < 1 \
+                    and self.api_keys.toPlainText().strip() != '':
+                fetch_ai_models()
+            else:
+                init_ai_models()
+        self.fetch_models.connect(auto_fetch_ai_models)
+
+        self.model_worker.success.connect(
+            lambda success: genai_model_refresh.setVisible(not success))
+
+        def show_genai_preferences(config):
+            genai_group.setVisible(True)
+            is_gemini = issubclass(self.current_engine, GeminiTranslate)
+            top_p_label.setText('topP' if is_gemini else 'top_p')
+            top_k.setText('topK' if is_gemini else 'top_k')
+            temperature.setVisible(not is_gemini)
+            top_p.setVisible(not is_gemini)
+            # Temperature range
+            is_chatgpt = issubclass(self.current_engine, ChatgptTranslate)
+            temperature_value.setRange(0, 2 if is_chatgpt else 1)
             # Prompt
-            self.chatgpt_prompt.setPlaceholderText(self.current_engine.prompt)
-            self.chatgpt_prompt.setPlainText(
+            self.genai_prompt.setPlaceholderText(self.current_engine.prompt)
+            self.genai_prompt.setPlainText(
                 config.get('prompt', self.current_engine.prompt))
             # Endpoint
-            self.chatgpt_endpoint.setPlaceholderText(
+            self.genai_endpoint.setPlaceholderText(
                 self.current_engine.endpoint)
-            self.chatgpt_endpoint.setText(
+            self.genai_endpoint.setText(
                 config.get('endpoint', self.current_engine.endpoint))
-            self.chatgpt_endpoint.setCursorPosition(0)
-
-            # Automatically retreive ChatGPT models.
-            def populate_models():
-                chatgpt_model_select.clear()
-                chatgpt_model_select.setDisabled(False)
-                chatgpt_model_select.addItems(self.current_engine.models)
-                chatgpt_model_select.addItem(_('Custom'))
-                change_ai_model(
-                    config, chatgpt_model_select, chatgpt_model_custom)
-
+            self.genai_endpoint.setCursorPosition(0)
+            # Models
             if issubclass(self.current_engine, AzureChatgptTranslate):
-                chatgpt_model_select.clear()
-                chatgpt_model_select.addItem(
+                genai_model_list.clear()
+                genai_model_list.addItem(
                     _('The model depends on your Azure project.'))
-                chatgpt_model_select.setDisabled(True)
-                chatgpt_model_custom.setVisible(False)
-            elif len(self.current_engine.models) > 0:
-                populate_models()
+                genai_model_list.setDisabled(True)
+                genai_model_input.setVisible(False)
             else:
-                chatgpt_model_select.clear()
-                chatgpt_model_select.addItem(_('Fetching...'))
-                chatgpt_model_select.setDisabled(True)
-                chatgpt_model_custom.setVisible(False)
-                self.model_worker.finished.connect(populate_models)
-
+                auto_fetch_ai_models()
             # Sampling
-            sampling = config.get('sampling', self.current_engine.sampling)
-            btn_id = self.current_engine.samplings.index(sampling)
-            sampling_btn_group.button(btn_id).setChecked(True)
-
+            if not issubclass(self.current_engine, GeminiTranslate):
+                sampling = config.get('sampling', self.current_engine.sampling)
+                btn_id = self.current_engine.samplings.index(sampling)
+                sampling_btn_group.button(btn_id).setChecked(True)
             temperature_value.setValue(
                 config.get('temperature', self.current_engine.temperature))
             temperature_value.valueChanged.connect(
-                lambda value: self.current_engine.config.update(
-                    temperature=round(value, 1)))
+                lambda value: config.update(temperature=round(value, 1)))
             top_p_value.setValue(
                 config.get('top_p', self.current_engine.top_p))
             top_p_value.valueChanged.connect(
-                lambda value: self.current_engine.config.update(top_p=value))
-            top_k.setVisible(is_claude)
-            top_k_value.setVisible(is_claude)
-            if is_claude:
+                lambda value: config.update(top_p=round(value, 1)))
+            top_k.setVisible(False)
+            top_k_value.setVisible(False)
+            if not issubclass(self.current_engine, ChatgptTranslate):
+                top_k.setVisible(True)
+                top_k_value.setVisible(True)
                 top_k_value.setValue(
                     config.get('top_k', self.current_engine.top_k))
                 top_k_value.valueChanged.connect(
-                    lambda value: self.current_engine.config
-                    .update(top_k=value))
+                    lambda value: config.update(top_k=value))
             # Stream
             stream_enabled.setChecked(
                 config.get('stream', self.current_engine.stream))
             stream_enabled.toggled.connect(
                 lambda checked: config.update(stream=checked))
-            chatgpt_group.setVisible(True)
+            genai_group.setVisible(True)
 
         def choose_default_engine(index):
             engine_name = engine_list.itemData(index)
             self.config.update(translate_engine=engine_name)
             self.current_engine = get_engine_class(engine_name)
+            config = self.current_engine.config
+            # self.current_engine.config = config
             # Refresh preferred language
-            source_lang = self.current_engine.config.get('source_lang')
+            source_lang = config.get('source_lang')
             self.source_lang.refresh.emit(
                 self.current_engine.lang_codes.get('source'), source_lang,
                 not issubclass(self.current_engine, CustomTranslate))
-            target_lang = self.current_engine.config.get('target_lang')
+            target_lang = config.get('target_lang')
             self.target_lang.refresh.emit(
                 self.current_engine.lang_codes.get('target'), target_lang)
             # show use notice
@@ -759,54 +681,43 @@ class TranslationSetting(QDialog):
             self.tip_group.setVisible(show_tip)
             show_tip and self.using_tip.setText(self.current_engine.using_tip)
             # show api key setting
-            self.set_api_keys()
+            self.reformat_api_keys()
             # Request setting
-            value = self.current_engine.config.get('concurrency_limit')
+            value = config.get('concurrency_limit')
             if value is None:
                 value = self.current_engine.concurrency_limit
             concurrency_limit.setValue(value)
-            value = self.current_engine.config.get('request_interval')
+            value = config.get('request_interval')
             if value is None:
                 value = self.current_engine.request_interval
             request_interval.setValue(float(value))
-            value = self.current_engine.config.get('request_attempt')
+            value = config.get('request_attempt')
             if value is None:
                 value = self.current_engine.request_attempt
             request_attempt.setValue(value)
-            value = self.current_engine.config.get('request_timeout')
+            value = config.get('request_timeout')
             if value is None:
                 value = self.current_engine.request_timeout
             request_timeout.setValue(float(value))
-            value = self.current_engine.config.get('max_error_count')
+            value = config.get('max_error_count')
             if value is None:
                 value = self.current_engine.max_error_count
             max_error_count.setValue(value)
             concurrency_limit.valueChanged.connect(
-                lambda value: self.current_engine.config.update(
-                    concurrency_limit=value))
+                lambda value: config.update(concurrency_limit=value))
             request_interval.valueChanged.connect(
-                lambda value: self.current_engine.config.update(
-                    request_interval=round(value, 1)))
+                lambda value: config.update(request_interval=round(value, 1)))
             request_attempt.valueChanged.connect(
-                lambda value: self.current_engine.config.update(
-                    request_attempt=value))
+                lambda value: config.update(request_attempt=value))
             request_timeout.valueChanged.connect(
-                lambda value: self.current_engine.config.update(
-                    request_timeout=round(value, 1)))
+                lambda value: config.update(request_timeout=round(value, 1)))
             max_error_count.valueChanged.connect(
-                lambda value: self.current_engine.config.update(
-                    max_error_count=value))
-            # Show GenAI preferences respectively.
-            chatgpt_group.setVisible(False)
-            gemini_group.setVisible(False)
-            if issubclass(self.current_engine, GeminiTranslate):
-                show_gemini_preferences()
-            elif issubclass(self.current_engine, GenAI):
-                show_chatgpt_compitable_preferences()
-            # Automatically fetch GenAI models
-            if issubclass(self.current_engine, GenAI) and \
-                    len(self.current_engine.models) < 1:
-                self.model_worker.start.emit(self.current_engine)
+                lambda value: config.update(max_error_count=value))
+            # Show GenAI preferences
+            genai_group.setVisible(False)
+            if issubclass(self.current_engine, GenAI):
+                genai_group.setVisible(True)
+                show_genai_preferences(config)
         choose_default_engine(engine_list.findData(self.current_engine.name))
         engine_list.currentIndexChanged.connect(choose_default_engine)
 
@@ -827,21 +738,19 @@ class TranslationSetting(QDialog):
         manage_engine.clicked.connect(manage_custom_translation_engine)
 
         def make_test_translator():
-            config = self.get_engine_config()
-            if config is not None:
-                self.current_engine.set_config(config)
-                translator = self.current_engine()
-                translator.set_search_paths(self.get_search_paths())
-                self.proxy_enabled.isChecked() and translator.set_proxy(
-                    [self.proxy_host.text(), self.proxy_port.text()])
-                EngineTester(self, translator)
+            self.current_engine.set_config(self.get_engine_config())
+            translator = self.current_engine()
+            translator.set_search_paths(self.get_search_paths())
+            self.proxy_enabled.isChecked() and translator.set_proxy(
+                [self.proxy_host.text(), self.proxy_port.text()])
+            EngineTester(self, translator)
         engine_test.clicked.connect(make_test_translator)
 
         layout.addStretch(1)
 
         return widget
 
-    def set_api_keys(self):
+    def reformat_api_keys(self):
         need_api_key = self.current_engine.need_api_key
         self.keys_group.setVisible(need_api_key)
         if need_api_key:
@@ -1219,7 +1128,7 @@ class TranslationSetting(QDialog):
         # Ebook Metadata
         metadata_group = QGroupBox(_('Ebook Metadata'))
         metadata_layout = QFormLayout(metadata_group)
-        self.set_form_layout_policy(metadata_layout)
+        self.apply_form_layout_policy(metadata_layout)
         self.metadata_translation = QCheckBox(
             _('Translate all of the metadata information'))
         self.metadata_lang_mark = QCheckBox(
@@ -1262,8 +1171,6 @@ class TranslationSetting(QDialog):
 
     def is_valid_data(self, validator, value):
         state = validator.validate(value, 0)[0]
-        if isinstance(state, int):
-            return state == 2  # Compatible with PyQt5
         return state.value == 2
 
     def get_search_paths(self):
@@ -1304,7 +1211,7 @@ class TranslationSetting(QDialog):
 
         return True
 
-    def get_engine_config(self):
+    def get_engine_config(self) -> dict:
         config = self.current_engine.config
         # API key
         if self.current_engine.need_api_key:
@@ -1313,27 +1220,20 @@ class TranslationSetting(QDialog):
                 QRegularExpression(self.current_engine.api_key_pattern))
             key_str = re.sub('\n+', '\n', self.api_keys.toPlainText()).strip()
             for key in [k.strip() for k in key_str.split('\n')]:
-                if not self.is_valid_data(api_key_validator, key):
-                    self.alert.pop(
-                        self.current_engine.api_key_error_message(), 'warning')
-                    return None
-                api_keys.append(key)
+                if self.is_valid_data(api_key_validator, key):
+                    api_keys.append(key)
             config.update(api_keys=api_keys)
-            self.set_api_keys()
+            self.reformat_api_keys()
 
-        # ChatGPT preference & Claude preference
-        if issubclass(self.current_engine, ChatgptTranslate) or \
-                issubclass(self.current_engine, ClaudeTranslate):
-            self.update_prompt(self.chatgpt_prompt, config)
-            endpoint = self.chatgpt_endpoint.text().strip()
-            if 'endpoint' in config:
-                del config['endpoint']
-            if endpoint and endpoint != self.current_engine.endpoint:
-                config.update(endpoint=endpoint)
-        # Gemini preference
-        elif issubclass(self.current_engine, GeminiTranslate):
-            self.update_prompt(self.gemini_prompt, config)
-
+        # GenAI preference
+        if issubclass(self.current_engine, GenAI):
+            self.update_prompt(self.genai_prompt, config)
+            if not issubclass(self.current_engine, GeminiTranslate):
+                endpoint = self.genai_endpoint.text().strip()
+                if 'endpoint' in config:
+                    del config['endpoint']
+                if endpoint and endpoint != self.current_engine.endpoint:
+                    config.update(endpoint=endpoint)
         # Preferred Language
         source_lang = self.source_lang.currentText()
         if 'source_lang' in config:
@@ -1358,8 +1258,6 @@ class TranslationSetting(QDialog):
 
     def update_engine_config(self):
         config = self.get_engine_config()
-        if not config:
-            return False
         # Do not update directly as you may get default preferences!
         engine_config = self.config.get('engine_preferences').copy()
         engine_config.update({self.current_engine.name: config})
@@ -1472,7 +1370,7 @@ class TranslationSetting(QDialog):
     def disable_wheel_event(self, widget):
         widget.wheelEvent = lambda event: None
 
-    def set_form_layout_policy(self, layout):
+    def apply_form_layout_policy(self, layout):
         layout.setFieldGrowthPolicy(
             QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
         layout.setLabelAlignment(Qt.AlignRight)

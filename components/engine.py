@@ -10,7 +10,7 @@ from ..lib.utils import sorted_mixed_keys, traceback_error
 from ..lib.config import get_config
 from ..engines.custom import (
     create_engine_template, load_engine_data, CustomTranslate)
-from ..engines import builtin_engines, GoogleFreeTranslate
+from ..engines import builtin_engines, GoogleFreeTranslateNew
 
 from .lang import SourceLang, TargetLang
 from .alert import AlertMessage
@@ -250,7 +250,7 @@ class ManageCustomEngine(QDialog):
         def save_data():
             current_name = custom_list.currentText()
             if not current_name:  # If all engine was deleted
-                self.default_name = GoogleFreeTranslate.name
+                self.default_name = GoogleFreeTranslateNew.name
             else:
                 # Validate the custom engine data
                 raw_data = custom_engine_data.toPlainText()
@@ -296,7 +296,7 @@ class ManageCustomEngine(QDialog):
             if current_name in self.engine_config:
                 del self.engine_config[current_name]
             if current_name == self.default_name:
-                self.default_name = GoogleFreeTranslate.name
+                self.default_name = GoogleFreeTranslateNew.name
             custom_list.removeItem(current_index)
 
         def disable_save_button():
