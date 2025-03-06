@@ -1,9 +1,8 @@
 import io
-# import time
 import json
 import uuid
-from http.client import IncompleteRead
 from urllib.parse import urlsplit
+from http.client import IncompleteRead
 
 from mechanize._response import response_seek_wrapper as Response
 
@@ -63,8 +62,10 @@ class ChatgptTranslate(GenAI):
 
     def get_models(self):
         domain_name = '://'.join(urlsplit(self.endpoint, 'https')[:2])
-        model_endpint = '%s/v1/models' % domain_name
-        response = request(model_endpint, headers=self.get_headers())
+        model_endpoint = '%s/v1/models' % domain_name
+        response = request(
+            model_endpoint, headers=self.get_headers(),
+            proxy_uri=self.proxy_uri)
         return [item['id'] for item in json.loads(response).get('data')]
 
     def get_prompt(self):
@@ -162,9 +163,6 @@ class ChatgptBatchTranslate:
         return headers
 
     def upload(self, paragraphs):
-        # time.sleep(2)
-        # return 'test-file-id'
-
         """Upload the original content and retrieve the file id.
         https://platform.openai.com/docs/api-reference/files/create
         """
@@ -185,33 +183,26 @@ class ChatgptBatchTranslate:
         content_type = 'multipart/form-data; boundary="%s"' % self.boundary
         headers = self.headers({'Content-Type': content_type})
         body = self._create_multipart_form_data(body.getvalue())
-        response = request(self.file_endpoint, body, headers, 'POST')
+        response = request(
+            self.file_endpoint, body, headers, 'POST',
+            proxy_uri=self.translator.proxy_uri)
         return json.loads(response).get('id')
 
     def delete(self, file_id):
-        # time.sleep(2)
-        # return True
-
         headers = self.translator.get_headers()
         del headers['Content-Type']
         response = request(
             '%s/%s' % (self.file_endpoint, file_id), headers=headers,
-            method='DELETE')
+            method='DELETE', proxy_uri=self.translator.proxy_uri)
         return json.loads(response).get('deleted')
 
     def retrieve(self, output_file_id):
-        # time.sleep(2)
-        # return {
-        #     '0ac5d998596c8a7b0517be70784654e8': 'AAAA',
-        #     'f3994e8e7c2ce9be789811df77f721de': 'BBBB',
-        #     'de03c04fb55cb9fbc24f6acbf4847ce7': 'CCCC',
-        # }
-
         headers = self.translator.get_headers()
         del headers['Content-Type']
         response = request(
             '%s/%s/content' % (self.file_endpoint, output_file_id),
-            headers=headers, raw_object=True)
+            headers=headers, raw_object=True,
+            proxy_uri=self.translator.proxy_uri)
         assert isinstance(response, Response)
 
         translations = {}
@@ -225,56 +216,28 @@ class ChatgptBatchTranslate:
         return translations
 
     def create(self, file_id):
-        # time.sleep(2)
-        # return 'test-batch-id'
-
         headers = self.translator.get_headers()
         body = json.dumps({
             'input_file_id': file_id,
             'endpoint': '/v1/chat/completions',
             'completion_window': '24h'})
-        response = request(self.batch_endpoint, body, headers, 'POST')
+        response = request(
+            self.batch_endpoint, body, headers, 'POST',
+            proxy_uri=self.translator.proxy_uri)
         return json.loads(response).get('id')
 
     def check(self, batch_id):
-        # time.sleep(2)
-        # return {
-        #     'status': 'failed',
-        #     'output_file_id': 'xxxx',
-        #     'errors': {
-        #         'object': 'list',
-        #         'data': [
-        #             {
-        #                 'code': 'error-code',
-        #                 'message': 'error-message',
-        #                 'param': 'error-param',
-        #                 'line': 'error-line',
-        #             }
-        #         ]
-        #     },
-        # }
-        # return {
-        #     'status': 'completed',
-        #     'output_file_id': 'xxxx',
-        #     'request_counts': {
-        #         'total': 100,
-        #         'completed': 95,
-        #         'failed': 5
-        #     },
-        # }
-
         response = request(
             '%s/%s' % (self.batch_endpoint, batch_id),
-            headers=self.translator.get_headers())
+            headers=self.translator.get_headers(),
+            proxy_uri=self.translator.proxy_uri)
         return json.loads(response)
 
     def cancel(self, batch_id):
-        # time.sleep(2)
-        # return True
-
         headers = self.translator.get_headers()
         response = request(
             '%s/%s/cancel' % (self.batch_endpoint, batch_id),
-            headers=headers, method='POST')
+            headers=headers, method='POST',
+            proxy_uri=self.translator.proxy_uri)
         return json.loads(response).get('status') in (
             'cancelling', 'cancelled')

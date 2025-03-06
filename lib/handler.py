@@ -2,8 +2,7 @@ import sys
 import asyncio
 import concurrent.futures
 
-from ..lib.utils import traceback_error
-
+from .utils import traceback_error
 from .exception import TranslationCanceled
 
 

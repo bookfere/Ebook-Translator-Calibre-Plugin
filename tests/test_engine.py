@@ -427,7 +427,8 @@ class TestChatgptTranslate(unittest.TestCase):
             ['model-id-0', 'model-id-1', 'model-id-2'])
         mock_request.assert_called_once_with(
             'https://api.openai.com/v1/models',
-            headers=self.translator.get_headers())
+            headers=self.translator.get_headers(),
+            proxy_uri=self.translator.proxy_uri)
 
     def test_get_body(self):
         model = 'gpt-4o'
@@ -533,6 +534,7 @@ class TestChatgptBatchTranslate(unittest.TestCase):
     def setUp(self):
         self.mock_translator = Mock(ChatgptTranslate)
         self.mock_translator.endpoint = 'https://api.openai.com/test'
+        self.mock_translator.proxy_uri = {}
         self.mock_headers = {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer abc',
@@ -598,6 +600,7 @@ class TestChatgptBatchTranslate(unittest.TestCase):
         mock_paragraph_2.original = 'test content 2'
         self.mock_translator.model = model
         self.mock_translator.api_key = 'abc'
+        self.mock_translator.proxy_uri = {}
 
         def mock_get_body(text):
             return json.dumps({
@@ -636,7 +639,7 @@ class TestChatgptBatchTranslate(unittest.TestCase):
             '--xxxxxxxxxx--').encode()
         mock_request.assert_called_once_with(
             'https://api.openai.com/v1/files', mock_body, self.mock_headers,
-            'POST')
+            'POST', proxy_uri=self.mock_translator.proxy_uri)
 
     @patch(module_name + '.openai.request')
     def test_delete(self, mock_request):
@@ -652,7 +655,8 @@ class TestChatgptBatchTranslate(unittest.TestCase):
             'User-Agent': 'Ebook-Translator/v1.0.0'}
         mock_request.assert_called_once_with(
             'https://api.openai.com/v1/files/test-file-id',
-            headers=headers, method='DELETE')
+            headers=headers, method='DELETE',
+            proxy_uri=self.mock_translator.proxy_uri)
 
     @patch(module_name + '.openai.request')
     def test_retrieve(self, mock_request):
@@ -677,7 +681,8 @@ class TestChatgptBatchTranslate(unittest.TestCase):
             'User-Agent': 'Ebook-Translator/v1.0.0'}
         mock_request.assert_called_once_with(
             'https://api.openai.com/v1/files/test-batch-id/content',
-            headers=headers, raw_object=True)
+            headers=headers, raw_object=True,
+            proxy_uri=self.mock_translator.proxy_uri)
         mock_request().read.assert_called_once()
 
     @patch(module_name + '.openai.request')
@@ -721,7 +726,8 @@ class TestChatgptBatchTranslate(unittest.TestCase):
             'completion_window': '24h'})
         mock_request.assert_called_once_with(
             'https://api.openai.com/v1/batches',
-            body, self.mock_headers, 'POST')
+            body, self.mock_headers, 'POST',
+            proxy_uri=self.mock_translator.proxy_uri)
 
     @patch(module_name + '.openai.request')
     def test_check(self, mock_request):
@@ -760,7 +766,8 @@ class TestChatgptBatchTranslate(unittest.TestCase):
 
         mock_request.assert_called_once_with(
             'https://api.openai.com/v1/batches/test-batch-id',
-            headers=self.mock_headers)
+            headers=self.mock_headers,
+            proxy_uri=self.mock_translator.proxy_uri)
 
     @patch(module_name + '.openai.request')
     def test_cancel(self, mock_request):
@@ -799,7 +806,8 @@ class TestChatgptBatchTranslate(unittest.TestCase):
 
         mock_request.assert_called_once_with(
             'https://api.openai.com/v1/batches/test-batch-id/cancel',
-            headers=self.mock_headers, method='POST')
+            headers=self.mock_headers, method='POST',
+            proxy_uri=self.mock_translator.proxy_uri)
 
 
 class TestAzureChatgptTranslate(unittest.TestCase):

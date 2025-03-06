@@ -25,7 +25,8 @@ class DeeplTranslate(Base):
         # See: https://www.deepl.com/docs-api/general/get-usage/
         headers = {'Authorization': 'DeepL-Auth-Key %s' % self.api_key}
         try:
-            response = request(self.usage_endpoint, headers=headers)
+            response = request(
+                self.usage_endpoint, headers=headers, proxy_uri=self.proxy_uri)
             usage = json.loads(response)
         except Exception:
             return None
