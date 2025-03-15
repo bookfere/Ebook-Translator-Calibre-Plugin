@@ -17,7 +17,7 @@ class DeepseekTranslate(ChatgptTranslate):
 
     def __init__(self):
         super().__init__()
-        self.model = self.config.get('model', 'deepseek-chat')
+        self.model = self.config.get('model', self.model)
 
     def get_models(self):
         return self.models

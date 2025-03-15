@@ -61,7 +61,10 @@ class ClaudeTranslate(GenAI):
         'message_stop']
 
     models: list[str] = []
-    model: str | None = None
+    # TODO: better handle setting the default model
+    # (e.g. fetch programmatically) by default use the latest version of the
+    # most intelligent model available (currently this is claude-3-7-sonnet)
+    model: str | None = 'claude-3-7-sonnet-latest'
 
     def __init__(self):
         super().__init__()
@@ -72,9 +75,7 @@ class ClaudeTranslate(GenAI):
         self.top_p = self.config.get('top_p', self.top_p)
         self.top_k = self.config.get('top_k', self.top_k)
         self.stream = self.config.get('stream', self.stream)
-        # TODO: better handle setting the default model (e.g. fetch programmatically)
-        # by default use the latest version of the most intelligent model available (currently this is claude-3-7-sonnet)
-        self.model = self.config.get('model', 'claude-3-7-sonnet-latest')
+        self.model = self.config.get('model', self.model)
 
     def _get_prompt(self):
         prompt = self.prompt.replace('<tlang>', self.target_lang)

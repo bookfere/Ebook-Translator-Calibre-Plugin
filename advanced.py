@@ -523,6 +523,7 @@ class AdvancedTranslation(QDialog):
         self.trans_worker.finished.connect(
             lambda: tabs.setCurrentIndex(
                 errors_index if self.errors_text.toPlainText()
+                and len(self.table.get_selected_paragraphs(True, True)) > 0
                 else review_index))
         splitter = QSplitter()
         splitter.addWidget(self.layout_table())
@@ -1071,7 +1072,8 @@ class AdvancedTranslation(QDialog):
 
             paragraph = self.table.current_paragraph()
 
-            # TODO: check - why/how can "paragraph" be None and what should we do in such case?
+            # TODO: check - why/how can "paragraph" be None and what should we
+            # do in such case?
             if paragraph is not None:
                 translation = translation_text.toPlainText()
                 save_button.setDisabled(
@@ -1084,7 +1086,8 @@ class AdvancedTranslation(QDialog):
         def save_translation():
             paragraph = self.table.current_paragraph()
 
-            # TODO: check - why/how can "paragraph" be None and what should we do in such case?
+            # TODO: check - why/how can "paragraph" be None and what should we
+            # do in such case?
             if paragraph is not None:
                 save_button.setDisabled(True)
                 translation = translation_text.toPlainText()
@@ -1094,7 +1097,8 @@ class AdvancedTranslation(QDialog):
                 self.table.row.emit(paragraph.row)
                 self.cache.update_paragraph(paragraph)
                 translation_text.setFocus(Qt.OtherFocusReason)
-                self.editor_worker.start[str].emit(_('Your changes have been saved.'))
+                self.editor_worker.start[str].emit(
+                    _('Your changes have been saved.'))
 
         save_button.clicked.connect(save_translation)
         set_shortcut(save_button, 'save', save_translation, save_button.text())
