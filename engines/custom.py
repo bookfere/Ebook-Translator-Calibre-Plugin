@@ -1,4 +1,6 @@
 import json
+from typing import Any
+
 from lxml import etree
 
 from ..lib.utils import is_str
@@ -90,7 +92,9 @@ class CustomTranslate(Base):
     name = 'Custom'
     alias = 'Custom'
     need_api_key = False
-    engine_data = {}
+    engine_data: dict[str, Any] = {}
+    request: dict[str, Any] = {}
+    response: dict[str, Any] = {}
 
     @classmethod
     def set_engine_data(cls, data):

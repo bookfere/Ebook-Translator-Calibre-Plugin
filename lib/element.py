@@ -1,6 +1,7 @@
 import re
 import json
 import copy
+from typing import Any
 
 from lxml import etree
 from calibre import prepare_string_for_xml as xml_escape
@@ -27,7 +28,7 @@ class Element:
         self.page_id = page_id
         self.ignored = ignored
 
-        self.placeholder = None
+        self.placeholder: tuple = ()
         self.reserve_elements = []
         self.original = []
         self.column_gap = None
@@ -139,7 +140,7 @@ class PgnElement(Element):
             else:
                 content = (self.get_content(), translation)
                 if self.position not in ('below', 'right'):
-                    content = reversed(content)
+                    content = tuple(reversed(content))
                 self.element[1] = ' | '.join(content)
 
     def get_translation(self):
@@ -352,8 +353,9 @@ class PageElement(Element):
 
         # new_element.tag = 'span'
         if self.position in ('left', 'above'):
+            # Add translation next to the element.
             self.element.addprevious(new_element)
-            # # Added translation at the start of the element.
+            # # Add translation at the start of the element.
             # new_element.tail = self.element.text
             # self.element.text = None
             # self.element.insert(0, etree.SubElement(self.element, 'br'))
@@ -363,6 +365,7 @@ class PageElement(Element):
             elif is_text_element:
                 new_element.tail = ' '
         else:
+            # Add translation next to the element.
             self.element.addnext(new_element)
             # # Added translation at the end of the element.
             # self.element.append(etree.SubElement(self.element, 'br'))
@@ -734,7 +737,8 @@ class ElementHandlerMerge(ElementHandler):
             raw = code
             txt = content
         md5 = uid('%s%s' % (oid, txt))
-        txt and self.originals.append((oid, md5, raw, txt, False))
+        if txt:
+            self.originals.append((oid, md5, raw, txt, False))
         return self.originals
 
     def align_paragraph(self, paragraph):
@@ -753,7 +757,7 @@ class ElementHandlerMerge(ElementHandler):
             return list(zip(originals, [None] * len(originals)))
         pattern = re.compile('%s+' % self.separator)
         translation = pattern.sub(self.separator, paragraph.translation)
-        translations = translation.strip().split(self.separator)
+        translations: list[Any] = translation.strip().split(self.separator)
         offset = len(originals) - len(translations)
         if offset > 0:
             if self.position in ['left', 'right']:

@@ -104,9 +104,7 @@ class MockedElement(Element):
     def get_content(self):
         pass
 
-    def add_translation(
-            self, translation, placeholder, position, translation_lang=None,
-            original_color=None, translation_color=None):
+    def add_translation(self, translation=None):
         pass
 
 
@@ -119,7 +117,7 @@ class TestElement(unittest.TestCase):
         self.assertIs(self._element, self.element.element)
         self.assertIsNone(self.element.page_id)
         self.assertFalse(self.element.ignored)
-        self.assertIsNone(self.element.placeholder)
+        self.assertEqual((), self.element.placeholder)
         self.assertEqual([], self.element.reserve_elements)
         self.assertEqual([], self.element.original)
         self.assertIsNone(self.element.column_gap)
@@ -620,7 +618,7 @@ xmlns:epub="http://www.idpf.org/2007/ops" lang="en">
             'xmlns:epub="http://www.idpf.org/2007/ops" '
             'dir="auto">A<code><span epub:type="pagebreak"/>b</code></p>',
             get_string(elements[1]))
-        
+
     def test_add_translation_with_missing_namespace(self):
         xhtml = etree.XML(rb"""<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html>
@@ -1286,7 +1284,7 @@ class TestElementHandler(unittest.TestCase):
                 self.assertRegex(
                     element.reserve_pattern, r'^\.//\*\[self::x:img.*style\]$')
 
-    @patch('calibre_plugins.ebook_translator.lib.element.uid')    
+    @patch('calibre_plugins.ebook_translator.lib.element.uid')
     def test_prepare_translation_contains_ignored_element(self, mock_uid):
         self.xhtml = etree.XML(b"""<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html>
