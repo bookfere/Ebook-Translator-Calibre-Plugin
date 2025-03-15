@@ -5,6 +5,7 @@ from types import GeneratorType
 
 from ..engines import builtin_engines
 from ..engines import GoogleFreeTranslateNew
+from ..engines.base import Base
 from ..engines.custom import CustomTranslate
 
 from .utils import sep, trim, dummy, traceback_error
@@ -22,21 +23,12 @@ class Glossary:
         self.glossary = []
 
     def load_from_file(self, path):
-        """In the universal newlines mode (by adding 'U' to the mode in
-        Python 2.x or keeping newline=None in Python 3.x), there is no need
-        to use `os.linesep`. Instead, using '\n' can properly parse newlines
-        when reading from or writing to files on multiple platforms.
-        """
         content = None
         try:
             with open(path, 'r', newline=None) as f:
                 content = f.read().strip()
         except Exception:
-            try:
-                with open(path, 'rU') as f:
-                    content = f.read().strip()
-            except Exception:
-                pass
+            pass
         if not content:
             return
         groups = re.split(r'\n{2,}', content.strip(u'\ufeff'))
@@ -248,10 +240,11 @@ class Translation:
 def get_engine_class(engine_name=None):
     config = get_config()
     engine_name = engine_name or config.get('translate_engine')
-    engines = {engine.name: engine for engine in builtin_engines}
+    engines: dict[str, type[Base]] = {
+        engine.name: engine for engine in builtin_engines}
     custom_engines = config.get('custom_engines')
     if engine_name in engines:
-        engine_class = engines.get(engine_name)
+        engine_class = engines[engine_name]
     elif engine_name in custom_engines:
         engine_class = CustomTranslate
         engine_data = json.loads(custom_engines.get(engine_name))

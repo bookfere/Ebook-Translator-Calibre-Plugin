@@ -1,3 +1,26 @@
+## v2.4.0
+
+Added features and fixed bugs as follows:
+
+1. feat: Automatically retrieve available GenAI models.
+2. feat: Add a new version of the Google Translate API to the engines.
+3. feat: Add ChatGPT batch translation feature.
+4. feat: Add DeepSeek to the built-in engines. Credit to @jcodingSpace.
+5. feat: Change the Gemini API version to v1beta.
+6. feat: Remove all Python 2.x-compatible and PyQt5-compatible code.
+7. feat: Store the plugin's window settings in the Calibre plugin folder.
+8. feat: Improve prompts for various GenAI models. Credit to @seidnerj.
+9. feat: Update Spanish UI translation. Credit to @Dunhill69.
+10. feat: Support Gemini Flash. Credit to @Kentoseth.
+11. feat: Update supported languages for the Google Translate engine.
+12. feat: Update supported languages for DeepL.
+13. fix: Fix an XML namespace bug that was preventing ebook output.
+14. fix: Fix an issue with line-break paragraph translation.
+15. fix: Restore special characters in Google Translate API results.
+16. Other Bug fixes and feature enhancements. (c4808c7...d2583ba)
+
+---
+
 ## v2.3.5
 
 Added features and fixed bugs as follows:

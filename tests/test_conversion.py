@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 from typing import Callable
-from unittest.mock import call, patch, Mock
+from unittest.mock import patch, Mock
 
 from ..lib.conversion import ConversionWorker
 from ..lib.ebook import Ebook
