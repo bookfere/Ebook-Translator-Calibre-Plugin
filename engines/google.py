@@ -125,9 +125,9 @@ class GoogleFreeTranslate(Base):
         return ''.join(i['trans'] for i in json.loads(response)['sentences'])
 
 
-class GoogleTranslateMixin:
+class GoogleTranslate(Base):
     api_key_errors = ['429']
-    api_key_cache = []
+    api_key_cache: tuple[float, str | None] = (0.0, None)
     gcloud = None
     project_id = None
     using_tip = _(
@@ -201,7 +201,7 @@ class GoogleTranslateMixin:
         """The default lifetime of the API key is 3600 seconds. Once an
         available key is generated, it will be cached until it expired.
         """
-        timestamp, old_api_key = self.api_key_cache or (None, None)
+        timestamp, old_api_key = self.api_key_cache
         if old_api_key is not None and time.time() - timestamp < 3600:
             return old_api_key
         # Temporarily add existing proxies.
@@ -214,11 +214,11 @@ class GoogleTranslateMixin:
         for proxy in ('http_proxy', 'https_proxy'):
             if proxy in os.environ:
                 del os.environ[proxy]
-        self.api_key_cache[:] = [time.time(), new_api_key]
+        self.api_key_cache = (time.time(), new_api_key)
         return new_api_key
 
 
-class GoogleBasicTranslateADC(GoogleTranslateMixin, Base):
+class GoogleBasicTranslateADC(GoogleTranslate):
     name = 'Google(Basic)ADC'
     alias = 'Google (Basic) ADC'
     lang_codes = Base.load_lang_codes(google)
@@ -267,7 +267,7 @@ class GoogleBasicTranslate(GoogleBasicTranslateADC):
         return body
 
 
-class GoogleAdvancedTranslate(GoogleTranslateMixin, Base):
+class GoogleAdvancedTranslate(GoogleTranslate):
     name = 'Google(Advanced)'
     alias = 'Google (Advanced) ADC'
     lang_codes = Base.load_lang_codes(google)
@@ -309,12 +309,12 @@ class GeminiTranslate(GenAI):
     # details: https://ai.google.dev/gemini-api/docs/api-versions
     endpoint = 'https://generativelanguage.googleapis.com/v1beta/models'
     # https://ai.google.dev/gemini-api/docs/troubleshooting
-    api_key_errors = [
+    api_key_errors: list[str] = [
         'API_KEY_INVALID', 'PERMISSION_DENIED', 'RESOURCE_EXHAUSTED']
 
     concurrency_limit = 1
-    request_interval = 1.0
-    request_timeout = 30.0
+    request_interval: float = 1.0
+    request_timeout: float = 30.0
 
     prompt = (
         'You are a meticulous translator who translates any given content. '
@@ -325,13 +325,14 @@ class GeminiTranslate(GenAI):
         'Websites\' URLs/addresses should be preserved as is in the '
         'translation\'s output. Do not omit any part of the content, even if '
         'it seems unimportant. ')
-    temperature = 0.9
-    top_p = 1.0
+    temperature: float = 0.9
+    top_p: float = 1.0
     top_k = 1
     stream = True
 
     models: list[str] = []
-    model: str | None = None
+    # TODO: Handle the default model more appropriately.
+    model: str | None = 'gemini-2.0-flash'
 
     def __init__(self):
         super().__init__()
@@ -340,8 +341,7 @@ class GeminiTranslate(GenAI):
         self.top_k = self.config.get('top_k', self.top_k)
         self.top_p = self.config.get('top_p', self.top_p)
         self.stream = self.config.get('stream', self.stream)
-        # TODO: Handle the default model more appropriately.
-        self.model = self.config.get('model', 'gemini-2.0-flash')
+        self.model = self.config.get('model', self.model)
 
     def _prompt(self, text):
         prompt = self.prompt.replace('<tlang>', self.target_lang)
@@ -363,10 +363,10 @@ class GeminiTranslate(GenAI):
         models = []
         for model in json.loads(response)['models']:
             model_name = model['name'].split('/')[-1]
-            model_desc = model['description']
-            if model_name.startswith('gemini') \
-                    and 'deprecated' not in model_desc:
-                models.append(model_name)
+            if model_name.startswith('gemini'):
+                model_desc = model['description']
+                if 'deprecated' not in model_desc:
+                    models.append(model_name)
         return models
 
     def get_endpoint(self):

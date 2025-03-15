@@ -40,10 +40,7 @@ class ModelWorker(QObject):
     def get_models(self, engine_class):
         try:
             engine = get_translator(engine_class)
-            models = engine.get_models()
-            engine_class.models = models
-            if len(models) > 0 and engine_class.model is None:
-                engine_class.model = models[0]
+            engine_class.models = engine.get_models()
             self.success.emit(True)
         except Exception:
             self.log.error(
@@ -543,7 +540,7 @@ class TranslationSetting(QDialog):
             top_p: top_p_label.text()}
 
         sampling_btn_group.buttonClicked.connect(
-            lambda button:  self.current_engine.config
+            lambda button: self.current_engine.config
             .update(sampling=labels[button]))
 
         layout.addWidget(genai_group)
@@ -564,7 +561,7 @@ class TranslationSetting(QDialog):
             genai_model_list.addItem(_('Custom'))
             # Fill data according to the passed model or the default model
             if model is None:
-                model = config.get('model', self.current_engine.model)
+                model = config.get('model')
             elif model != _('Custom'):
                 config.update(model=model)
             if model in models:
@@ -583,18 +580,21 @@ class TranslationSetting(QDialog):
                 model=model.strip()))
 
         def fetch_ai_models():
+            try:
+                genai_model_list.currentTextChanged.disconnect()
+            except TypeError:
+                pass
             genai_model_refresh.setVisible(False)
             genai_model_list.clear()
             genai_model_list.addItem(_('Fetching...'))
             genai_model_list.setDisabled(True)
             genai_model_input.setVisible(False)
-            # Refresh the engine config and fetch models.
-            self.current_engine.set_config(self.get_engine_config())
             self.model_worker.start.emit(self.current_engine)
         genai_model_refresh.clicked.connect(fetch_ai_models)
 
         def auto_fetch_ai_models():
-            if len(self.current_engine.models) < 1 \
+            if self.tabs.currentIndex() != 0 \
+                    and len(self.current_engine.models) < 1 \
                     and self.api_keys.toPlainText().strip() != '':
                 fetch_ai_models()
             else:
@@ -667,7 +667,6 @@ class TranslationSetting(QDialog):
             self.config.update(translate_engine=engine_name)
             self.current_engine = get_engine_class(engine_name)
             config = self.current_engine.config
-            # self.current_engine.config = config
             # Refresh preferred language
             source_lang = config.get('source_lang')
             self.source_lang.refresh.emit(

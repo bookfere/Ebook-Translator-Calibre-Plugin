@@ -1,6 +1,7 @@
 import io
 import json
 import uuid
+from typing import Any
 from urllib.parse import urlsplit
 from http.client import IncompleteRead
 
@@ -47,7 +48,8 @@ class ChatgptTranslate(GenAI):
     stream = True
 
     models: list[str] = []
-    model: str | None = None
+    # TODO: Handle the default model more appropriately.
+    model: str | None = 'gpt-4o'
 
     def __init__(self):
         super().__init__()
@@ -57,8 +59,7 @@ class ChatgptTranslate(GenAI):
         self.temperature = self.config.get('temperature', self.temperature)
         self.top_p = self.config.get('top_p', self.top_p)
         self.stream = self.config.get('stream', self.stream)
-        # TODO: Handle the default model more appropriately.
-        self.model = self.config.get('model', 'gpt-4o')
+        self.model = self.config.get('model', self.model)
 
     def get_models(self):
         domain_name = '://'.join(urlsplit(self.endpoint, 'https')[:2])
@@ -88,7 +89,7 @@ class ChatgptTranslate(GenAI):
         }
 
     def get_body(self, text):
-        body = {
+        body: dict[str, Any] = {
             'model': self.model,
             'messages': [
                 {'role': 'system', 'content': self.get_prompt()},
