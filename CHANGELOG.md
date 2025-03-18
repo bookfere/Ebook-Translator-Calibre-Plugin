@@ -16,7 +16,7 @@ Added features and fixed bugs as follows:
 12. feat: Update supported languages for DeepL.
 13. fix: Fix an XML namespace bug that was preventing ebook output.
 14. fix: Fix an issue with line-break paragraph translation.
-15. fix: Restore special characters in Google Translate API results.
+15. fix: Restore special characters in Google Translate ADC results.
 16. Other Bug fixes and feature enhancements. (c4808c7...d2583ba)
 
 ---

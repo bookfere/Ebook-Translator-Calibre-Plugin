@@ -1373,3 +1373,8 @@ class TranslationSetting(QDialog):
         layout.setFieldGrowthPolicy(
             QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
         layout.setLabelAlignment(Qt.AlignRight)
+
+    def done(self, result):
+        self.model_thread.quit()
+        self.model_thread.wait()
+        QDialog.done(self, result)

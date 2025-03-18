@@ -1,7 +1,6 @@
 import re
 import sys
 import ssl
-import codecs
 import socket
 import hashlib
 import traceback
@@ -10,7 +9,6 @@ from subprocess import Popen
 from calibre import get_proxies
 from mechanize import Browser, Request
 from mechanize._response import response_seek_wrapper as Response
-
 
 from ..lib.cssselect import GenericTranslator, SelectorError
 
@@ -37,8 +35,8 @@ def css(selector):
 def css_to_xpath(selectors):
     patterns = []
     for selector in selectors:
-        rule = css(selector)
-        rule and patterns.append(rule)
+        if rule := css(selector):
+            patterns.append(rule)
     return patterns
 
 
@@ -80,7 +78,7 @@ def chunk(items, length=0):
 
 def group(numbers):
     ranges = []
-    current_range = []
+    current_range: list[int] = []
     numbers = sorted(numbers)
     for number in numbers:
         if not current_range:
@@ -130,12 +128,8 @@ def open_path(path):
 
 
 def open_file(path, encoding='utf-8'):
-    try:
-        with open(path, 'r', encoding=encoding, newline=None) as file:
-            return file.read()
-    except TypeError:
-        with codecs.open(path, 'rbU') as file:
-            return file.read().decode(encoding)
+    with open(path, 'r', encoding=encoding, newline=None) as file:
+        return file.read()
 
 
 def traceback_error():

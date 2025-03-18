@@ -2,13 +2,17 @@ import unittest
 from unittest.mock import patch
 from types import GeneratorType
 
-from ..lib.utils import uid, trim, chunk, group, open_file, request
+from ..lib.utils import (
+    css_to_xpath, uid, trim, chunk, group, open_file, request)
 
 
 module_name = 'calibre_plugins.ebook_translator.lib.utils'
 
 
 class TestUtils(unittest.TestCase):
+    def test_css_to_xpath(self):
+        self.assertEqual(["self::x:*[@id = 'id']"], css_to_xpath(['#id']))
+
     def test_uid(self):
         self.assertEqual('202cb962ac59075b964b07152d234b70', uid('123'))
         self.assertEqual('202cb962ac59075b964b07152d234b70', uid(b'123'))
@@ -66,15 +70,6 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(open_file('/path/to/file', 'ascii'), 'a')
         mock_open.assert_called_once_with(
             '/path/to/file', 'r', encoding='ascii', newline=None)
-
-    @patch(module_name + '.codecs.open')
-    @patch(module_name + '.open')
-    def test_open_file_with_open_error(self, mock_open, mock_codecs_open):
-        mock_open.side_effect = TypeError
-        open_file('/path/to/file')
-        mock_open.assert_called_once_with(
-            '/path/to/file', 'r', encoding='utf-8', newline=None)
-        mock_codecs_open.assert_called_once_with('/path/to/file', 'rbU')
 
     @patch(module_name + '.ssl')
     @patch(module_name + '.Request')
