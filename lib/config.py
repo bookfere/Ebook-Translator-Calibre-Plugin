@@ -1,5 +1,6 @@
 import os
 import os.path
+import shutil
 
 from calibre.constants import config_dir
 from calibre.utils.config_base import plugin_dir
@@ -109,7 +110,7 @@ def upgrade_config():
     version >= (2, 0, 0) and ver200_upgrade(config)
     version >= (2, 0, 3) and ver203_upgrade(config)
     version >= (2, 0, 5) and ver205_upgrade(config)
-    version >= (2, 3, 6) and ver236_upgrade()
+    version >= (2, 4, 0) and ver240_upgrade()
 
 
 def ver200_upgrade(config):
@@ -200,9 +201,11 @@ def ver205_upgrade(config):
     config.commit()
 
 
-def ver236_upgrade():
+def ver240_upgrade():
     old_config_path = os.path.join(config_dir, EbookTranslator.author)
     new_config_path = os.path.join(plugin_dir, EbookTranslator.identifier)
+    if os.path.exists(new_config_path) and os.path.exists(old_config_path):
+        shutil.rmtree(old_config_path)
     if os.path.exists(old_config_path):
         os.rename(old_config_path, new_config_path)
         os.rename(
