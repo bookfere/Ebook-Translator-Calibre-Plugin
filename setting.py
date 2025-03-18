@@ -10,6 +10,7 @@ from qt.core import (
     QComboBox, QRegularExpression, pyqtSignal, QFormLayout, QDoubleSpinBox,
     QSpacerItem, QRegularExpressionValidator, QBoxLayout, QThread, pyqtSlot)
 from calibre.utils.logging import Log
+from calibre.gui2 import error_dialog
 
 from .lib.config import get_config
 from .lib.utils import css, is_proxy_available, traceback_error
@@ -28,7 +29,7 @@ load_translations()
 
 class ModelWorker(QObject):
     start = pyqtSignal(object)
-    success = pyqtSignal(bool)
+    success = pyqtSignal(bool, str)
     finished = pyqtSignal()
 
     def __init__(self):
@@ -41,11 +42,11 @@ class ModelWorker(QObject):
         try:
             engine = get_translator(engine_class)
             engine_class.models = engine.get_models()
-            self.success.emit(True)
+            self.success.emit(True, '')
         except Exception:
-            self.log.error(
-                'Failed to fetch models: %s' % traceback_error())
-            self.success.emit(False)
+            error = traceback_error()
+            self.log.error('Failed to fetch models: %s' % error)
+            self.success.emit(False, error)
         self.finished.emit()
 
 
@@ -97,11 +98,6 @@ class TranslationSetting(QDialog):
         self.model_worker.moveToThread(self.model_thread)
         self.model_thread.finished.connect(self.model_worker.deleteLater)
         self.model_thread.start()
-
-        self.model_worker.success.connect(
-            lambda success: success or self.alert.pop(
-                _("Can't fetch model list, please check and try again."),
-                level='error'))
 
         self.main_layout()
 
@@ -590,7 +586,13 @@ class TranslationSetting(QDialog):
             genai_model_list.setDisabled(True)
             genai_model_input.setVisible(False)
             self.model_worker.start.emit(self.current_engine)
-        genai_model_refresh.clicked.connect(fetch_ai_models)
+
+        def man_fetch_ai_models():
+            if self.api_keys.toPlainText().strip() != '':
+                fetch_ai_models()
+            else:
+                self.alert.pop(_('You need to provide an API key to proceed.'))
+        genai_model_refresh.clicked.connect(man_fetch_ai_models)
 
         def auto_fetch_ai_models():
             if self.tabs.currentIndex() != 0 \
@@ -601,8 +603,13 @@ class TranslationSetting(QDialog):
                 init_ai_models()
         self.fetch_models.connect(auto_fetch_ai_models)
 
-        self.model_worker.success.connect(
-            lambda success: genai_model_refresh.setVisible(not success))
+        def handle_worker_status(success, message=''):
+            genai_model_refresh.setVisible(not success)
+            if not success:
+                error_dialog(self, _("Can't fetch model list"), _(
+                    "Can't fetch model list, please check and try again."),
+                    message, show=True)
+        self.model_worker.success.connect(handle_worker_status)
 
         def show_genai_preferences(config):
             genai_group.setVisible(True)
