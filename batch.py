@@ -3,7 +3,7 @@ import os.path
 
 from qt.core import (
     QDialog, QWidget, QPushButton, QHeaderView, QVBoxLayout, QTableWidget,
-    QTableWidgetItem, Qt, QComboBox, QHBoxLayout)
+    QTableWidgetItem, Qt, QComboBox, QHBoxLayout, QApplication)
 
 from .lib.config import get_config
 from .lib.translation import get_engine_class
@@ -188,8 +188,12 @@ class BatchTranslation(QDialog):
         layout.addWidget(table)
 
         start_button = QPushButton(_('Translate'))
+
+        btn_text_color = 'royalblue'
+        if QApplication.instance().is_dark_theme:
+            btn_text_color = 'white'
         start_button.setStyleSheet(
-            'padding:0;height:48;font-size:20px;color:royalblue;'
+            f'padding:0;height:48;font-size:20px;color:{btn_text_color};'
             'text-transform:uppercase;')
         start_button.clicked.connect(
             lambda: self.translate_ebooks(self.ebooks))
