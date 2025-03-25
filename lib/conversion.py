@@ -1,6 +1,7 @@
 import os
 import os.path
 from types import MethodType
+from typing import Callable, Any
 from tempfile import gettempdir
 
 from calibre import sanitize_file_name
@@ -48,7 +49,7 @@ class PrepareStream:
 
 def convert_book(
         input_path, output_path, translation, element_handler, cache,
-        debug_info, encoding, notification):
+        debug_info, encoding, notification) -> None:
     """Process ebooks that Calibre supported."""
     plumber = Plumber(
         input_path, output_path, log=log, report_progress=notification)
@@ -88,7 +89,7 @@ def convert_book(
 
 def convert_srt(
         input_path, output_path, translation, element_handler, cache,
-        debug_info, encoding, notification):
+        debug_info, encoding, notification) -> None:
     log.info('Translating subtitles content... (this will take a while)')
     log.info(debug_info)
 
@@ -113,7 +114,7 @@ def convert_srt(
 
 def convert_pgn(
         input_path, output_path, translation, element_handler, cache,
-        debug_info, encoding, notification):
+        debug_info, encoding, notification) -> None:
     log.info('Translating PGN content... (this may be take a while)')
     log.info(debug_info)
 
@@ -238,9 +239,10 @@ def convert_item(
     debug_info += '| Output Path: %s' % output_path
 
     handler = extra_formats.get(format)
-    converter = convert_book if handler is None else handler.get('converter')
-    converter(input_path, output_path, translation, element_handler, cache,
-              debug_info, encoding, notification)
+    convertor = convert_book if handler is None else handler['convertor']
+    convertor(
+        input_path, output_path, translation, element_handler, cache,
+        debug_info, encoding, notification)
     cache.done()
 
 
