@@ -1,3 +1,4 @@
+# https://cloud.google.com/translate/docs/languages
 google = {
     'Abkhaz': 'ab',
     'Acehnese': 'ace',
@@ -517,6 +518,7 @@ gemini = {
     'Latvian': 'lv',
     'Lithuanian': 'lt',
     'Norwegian': 'no',
+    'Persian': 'fa',
     'Polish': 'pl',
     'Portuguese': 'pt',
     'Romanian': 'ro',
