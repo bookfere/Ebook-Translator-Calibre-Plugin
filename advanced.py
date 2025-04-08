@@ -23,6 +23,7 @@ from .components import (
     EngineList, Footer, SourceLang, TargetLang, InputFormat, OutputFormat,
     AlertMessage, AdvancedTranslationTable, StatusColor, TranslationStatus,
     set_shortcut, ChatgptBatchTranslationManager)
+from .components.editor import CodeEditor
 
 
 load_translations()
@@ -285,6 +286,8 @@ class CreateTranslationProject(QDialog):
         input_format.currentTextChanged.connect(change_input_format)
 
         def change_output_format(_format):
+            if self.ebook.is_extra_format():
+                output_format.lock_format(self.ebook.input_format)
             self.ebook.set_output_format(_format)
         change_output_format(output_format.currentText())
         output_format.currentTextChanged.connect(change_output_format)
@@ -891,13 +894,11 @@ class AdvancedTranslation(QDialog):
         output_format.setCurrentText(self.ebook.output_format)
 
         def change_output_format(format):
+            if self.ebook.is_extra_format():
+                output_format.lock_format(self.ebook.input_format)
             self.ebook.set_output_format(format)
         change_output_format(output_format.currentText())
         output_format.currentTextChanged.connect(change_output_format)
-
-        if self.ebook.is_extra_format():
-            output_format.lock_format(self.ebook.input_format)
-            change_output_format(self.ebook.input_format)
 
         def output_ebook():
             if len(self.table.findItems(_('Translated'), Qt.MatchExactly)) < 1:
@@ -935,11 +936,11 @@ class AdvancedTranslation(QDialog):
 
         splitter = QSplitter(Qt.Vertical)
         splitter.setContentsMargins(0, 0, 0, 0)
-        raw_text = QPlainTextEdit()
+        raw_text = CodeEditor()
         raw_text.setReadOnly(True)
-        original_text = QPlainTextEdit()
+        original_text = CodeEditor()
         original_text.setReadOnly(True)
-        translation_text = QPlainTextEdit()
+        translation_text = CodeEditor()
         if self.ebook.target_direction == 'rtl':
             translation_text.setLayoutDirection(Qt.RightToLeft)
             document = translation_text.document()
@@ -952,11 +953,18 @@ class AdvancedTranslation(QDialog):
         splitter.addWidget(translation_text)
         splitter.setSizes([0] + [int(splitter.height() / 2)] * 2)
 
+        def synchronizeScrollbars(editors):
+            for editor in editors:
+                for other_editor in editors:
+                    if editor != other_editor:
+                        editor.verticalScrollBar().valueChanged.connect(
+                            other_editor.verticalScrollBar().setValue)
+        synchronizeScrollbars((raw_text, original_text, translation_text))
+
         translation_text.cursorPositionChanged.connect(
             translation_text.ensureCursorVisible)
 
         def refresh_translation(paragraph):
-
             # TODO: check - why/how can "paragraph" be None and what should we do in such case?
             if paragraph is not None:
                 raw_text.setPlainText(paragraph.raw.strip())
