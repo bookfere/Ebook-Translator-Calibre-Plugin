@@ -1,3 +1,14 @@
+## v2.4.1
+
+Added features and fixed bugs as follows:
+
+1. feat: Add line numbers and synced scrolling in review editor.
+2. feat: Add Persian language support for Gemini.
+3. feat: Improve the clarity of the model fetching alert.
+4. fix: Fix the bug that caused incorrect configuration migration.
+5. fix: Fix a bug that prevents converting PNG and SRT files.
+6. All Bug fixes and feature enhancements. (aefc9c1...75804a4)
+
 ## v2.4.0
 
 Added features and fixed bugs as follows:
