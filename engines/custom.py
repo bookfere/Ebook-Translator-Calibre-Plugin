@@ -137,4 +137,22 @@ class CustomTranslate(Base):
         result = eval(self.response, {"response": response})
         if not is_str(result):
             raise Exception(_('Response was parsed incorrectly.'))
-        return result
+        
+        # 对结果进行格式化处理：清理空格行并在非空连续行之间添加空行
+        lines = result.split('\n')
+        processed_lines = []
+        
+        for i, line in enumerate(lines):
+            # 去掉行尾空格，将只有空格的行视为空行
+            cleaned_line = line.strip()
+            processed_lines.append(cleaned_line)
+            
+            # 判断是否需要添加空行
+            current_line_empty = cleaned_line == ""
+            next_line_empty = (i + 1 >= len(lines)) or (lines[i + 1].strip() == "")
+            
+            # 只有当前行和下一行都不为空时，才添加空行
+            if not current_line_empty and not next_line_empty:
+                processed_lines.append("")
+        
+        return '\n'.join(processed_lines)
