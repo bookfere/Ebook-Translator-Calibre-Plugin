@@ -945,3 +945,9 @@ msgstr "Administrador de caché"
 
 msgid "Choose Translation Mode"
 msgstr "Elija el modo de traducción"
+
+msgid "Add Line Spacing"
+msgstr "Agregar espaciado de líneas"
+
+msgid "Add empty lines between consecutive non-empty lines"
+msgstr "Agregar líneas vacías entre líneas consecutivas no vacías"

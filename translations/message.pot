@@ -1209,3 +1209,11 @@ msgstr ""
 #: ui.py:165
 msgid "Choose Translation Mode"
 msgstr ""
+
+#: advanced.py:1008
+msgid "Add Line Spacing"
+msgstr ""
+
+#: advanced.py:1009
+msgid "Add empty lines between consecutive non-empty lines"
+msgstr ""
