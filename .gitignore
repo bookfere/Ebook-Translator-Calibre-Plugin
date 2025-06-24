@@ -2,3 +2,5 @@
 .DS_Store
 .jekyll-cache
 _site
+*.pyc
+tags

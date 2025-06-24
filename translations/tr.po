@@ -929,3 +929,9 @@ msgstr "Önbellek Yöneticisi"
 
 msgid "Choose Translation Mode"
 msgstr "Çeviri Modunu Seçin"
+
+msgid "Add Line Spacing"
+msgstr ""
+
+msgid "Add empty lines between consecutive non-empty lines"
+msgstr ""

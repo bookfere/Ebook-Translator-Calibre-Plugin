@@ -911,4 +911,10 @@ msgid "Cache Manager"
 msgstr ""
 
 msgid "Choose Translation Mode"
-msgstr ""
+msgstr "選擇翻譯模式"
+
+msgid "Add Line Spacing"
+msgstr "添加行間距"
+
+msgid "Add empty lines between consecutive non-empty lines"
+msgstr "在連續的非空行之間添加空行"
