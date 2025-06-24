@@ -927,4 +927,10 @@ msgid "Cache Manager"
 msgstr "Gestionnaire du cache"
 
 msgid "Choose Translation Mode"
-msgstr "Choisissez le mode de traduction"
+msgstr ""
+
+msgid "Add Line Spacing"
+msgstr ""
+
+msgid "Add empty lines between consecutive non-empty lines"
+msgstr ""
