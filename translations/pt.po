@@ -939,9 +939,3 @@ msgstr "Gerenciar Armazenamento Cache"
 
 msgid "Choose Translation Mode"
 msgstr "Escolha o modo de tradução"
-
-msgid "Add Line Spacing"
-msgstr ""
-
-msgid "Add empty lines between consecutive non-empty lines"
-msgstr ""
