@@ -183,6 +183,22 @@ class Translation:
         paragraph.target_lang = self.translator.get_target_lang()
         # paragraph.separator = self.translator.separator
         paragraph.is_cache = False
+        
+        # Auto-add line spacing to translation text
+        if paragraph.translation and paragraph.translation.strip():
+            lines = paragraph.translation.split('\n')
+            processed_lines = []
+            
+            for i, line in enumerate(lines):
+                processed_lines.append(line)
+                # Add empty line after non-empty line if next line is also non-empty
+                if (line.strip() and 
+                    i + 1 < len(lines) and 
+                    lines[i + 1].strip()):
+                    processed_lines.append('')
+            
+            processed_text = '\n'.join(processed_lines)
+            paragraph.translation = processed_text
 
     def process_translation(self, paragraph):
         self.progress(
