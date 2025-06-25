@@ -184,6 +184,13 @@ class Translation:
         # paragraph.separator = self.translator.separator
         paragraph.is_cache = False
         
+        # Filter reasoning model <think></think> tags
+        if paragraph.translation:
+            # Remove only the first <think> and </think> tags and their content
+            paragraph.translation = re.sub(r'<think>.*?</think>', '', paragraph.translation, flags=re.DOTALL, count=1)
+            # Clean up any remaining whitespace
+            paragraph.translation = paragraph.translation.strip()
+        
         # Auto-add line spacing to translation text
         if paragraph.translation and paragraph.translation.strip():
             lines = paragraph.translation.split('\n')
