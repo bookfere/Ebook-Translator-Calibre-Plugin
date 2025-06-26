@@ -189,12 +189,7 @@ class Translation:
             # Check if translation is aligned with original
             is_aligned = paragraph.is_alignment(self.translator.separator)
             
-            if not is_aligned:
-                # Remove only the first <think> and </think> tags and their content
-                paragraph.translation = re.sub(r'<think>.*?</think>', '', paragraph.translation, flags=re.DOTALL, count=1)
-                # Clean up any remaining whitespace
-                paragraph.translation = paragraph.translation.strip()
-                
+            if not is_aligned:                
                 # Auto-add line spacing to translation text
                 if paragraph.translation.strip():
                     lines = paragraph.translation.split('\n')
