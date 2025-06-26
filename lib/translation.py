@@ -191,17 +191,16 @@ class Translation:
             
             if not is_aligned:                
                 # Auto-add line spacing to translation text
-                if paragraph.translation.strip():
-                    lines = paragraph.translation.split('\n')
-                    processed_lines = []
-                    
-                    for i, line in enumerate(lines):
-                        processed_lines.append(line)
-                        # Add empty line after non-empty line if next line is also non-empty
-                        if (line.strip() and 
-                            i + 1 < len(lines) and 
-                            lines[i + 1].strip()):
-                            processed_lines.append('')
+                lines = paragraph.translation.split('\n')
+                processed_lines = []
+                
+                for i, line in enumerate(lines):
+                    processed_lines.append(line)
+                    # Add empty line after non-empty line if next line is also non-empty
+                    if (line.strip() and 
+                        i + 1 < len(lines) and 
+                        lines[i + 1].strip()):
+                        processed_lines.append('')
                     
                     processed_text = '\n'.join(processed_lines)
                     paragraph.translation = processed_text
