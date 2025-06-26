@@ -938,4 +938,4 @@ msgid "Cache Manager"
 msgstr "Gerenciar Armazenamento Cache"
 
 msgid "Choose Translation Mode"
-msgstr "Escolha o modo de tradução"
+msgstr "Escolha o Modo de Tradução"

@@ -184,28 +184,32 @@ class Translation:
         # paragraph.separator = self.translator.separator
         paragraph.is_cache = False
         
-        # Filter reasoning model <think></think> tags
+        # Check alignment status and filter reasoning model <think></think> tags only when translation is not aligned
         if paragraph.translation:
-            # Remove only the first <think> and </think> tags and their content
-            paragraph.translation = re.sub(r'<think>.*?</think>', '', paragraph.translation, flags=re.DOTALL, count=1)
-            # Clean up any remaining whitespace
-            paragraph.translation = paragraph.translation.strip()
-        
-        # Auto-add line spacing to translation text
-        if paragraph.translation and paragraph.translation.strip():
-            lines = paragraph.translation.split('\n')
-            processed_lines = []
+            # Check if translation is aligned with original
+            is_aligned = paragraph.is_alignment(self.translator.separator)
             
-            for i, line in enumerate(lines):
-                processed_lines.append(line)
-                # Add empty line after non-empty line if next line is also non-empty
-                if (line.strip() and 
-                    i + 1 < len(lines) and 
-                    lines[i + 1].strip()):
-                    processed_lines.append('')
-            
-            processed_text = '\n'.join(processed_lines)
-            paragraph.translation = processed_text
+            if not is_aligned:
+                # Remove only the first <think> and </think> tags and their content
+                paragraph.translation = re.sub(r'<think>.*?</think>', '', paragraph.translation, flags=re.DOTALL, count=1)
+                # Clean up any remaining whitespace
+                paragraph.translation = paragraph.translation.strip()
+                
+                # Auto-add line spacing to translation text
+                if paragraph.translation.strip():
+                    lines = paragraph.translation.split('\n')
+                    processed_lines = []
+                    
+                    for i, line in enumerate(lines):
+                        processed_lines.append(line)
+                        # Add empty line after non-empty line if next line is also non-empty
+                        if (line.strip() and 
+                            i + 1 < len(lines) and 
+                            lines[i + 1].strip()):
+                            processed_lines.append('')
+                    
+                    processed_text = '\n'.join(processed_lines)
+                    paragraph.translation = processed_text
 
     def process_translation(self, paragraph):
         self.progress(
