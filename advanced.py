@@ -1015,9 +1015,6 @@ class AdvancedTranslation(QDialog):
             lambda: control.setVisible(True))
 
         save_status = QLabel()
-        add_spacing_button = QPushButton(_('Add Line Spacing'))
-        add_spacing_button.setToolTip(_('Add empty lines between consecutive non-empty lines'))
-        add_spacing_button.setDisabled(True)  # Initially disabled
         save_button = QPushButton(_('&Save'))
         save_button.setDisabled(True)
 
@@ -1026,7 +1023,6 @@ class AdvancedTranslation(QDialog):
         control_layout.addWidget(status_indicator)
         control_layout.addStretch(1)
         control_layout.addWidget(save_status)
-        control_layout.addWidget(add_spacing_button)
         control_layout.addWidget(save_button)
 
         layout.addWidget(splitter)
@@ -1066,6 +1062,7 @@ class AdvancedTranslation(QDialog):
             self.paragraph_sig.emit(paragraph)
             self.cache.update_paragraph(paragraph)
             self.progress_bar.emit()
+                
         self.trans_worker.callback.connect(translation_callback)
 
         def streaming_translation(data):
@@ -1095,47 +1092,6 @@ class AdvancedTranslation(QDialog):
 
         self.editor_worker.show.connect(save_status.setText)
         
-        def add_line_spacing():
-            """Add empty lines between consecutive non-empty lines in translation text."""
-            paragraph = self.table.current_paragraph()
-            if paragraph is None:
-                return
-                
-            current_text = translation_text.toPlainText()
-            if not current_text.strip():
-                return
-                
-            lines = current_text.split('\n')
-            processed_lines = []
-            
-            for i, line in enumerate(lines):
-                processed_lines.append(line)
-                # Add empty line after non-empty line if next line is also non-empty
-                if (line.strip() and 
-                    i + 1 < len(lines) and 
-                    lines[i + 1].strip()):
-                    processed_lines.append('')
-            
-            processed_text = '\n'.join(processed_lines)
-            translation_text.setPlainText(processed_text)
-            
-        add_spacing_button.clicked.connect(add_line_spacing)
-        
-        def update_spacing_button_state():
-            """Update the state of the add spacing button based on content."""
-            has_content = bool(translation_text.toPlainText().strip())
-            add_spacing_button.setEnabled(has_content)
-            
-        # Connect the text change to update button state
-        translation_text.textChanged.connect(update_spacing_button_state)
-        
-        # Also update spacing button when paragraph changes
-        self.paragraph_sig.connect(lambda p: update_spacing_button_state())
-        
-        # Disable spacing button during translation
-        self.trans_worker.start.connect(lambda: add_spacing_button.setEnabled(False))
-        self.trans_worker.finished.connect(update_spacing_button_state)
-
         def save_translation():
             paragraph = self.table.current_paragraph()
 
