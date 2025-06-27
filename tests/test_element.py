@@ -1282,7 +1282,8 @@ class TestElementHandler(unittest.TestCase):
                     './/*[self::x:rt or self::x:rp]',
                     self.handler.remove_pattern)
                 self.assertRegex(
-                    element.reserve_pattern, r'^\.//\*\[self::x:img.*style\]$')
+                    element.reserve_pattern or '',
+                    r'^\.//\*\[self::x:img.*style\]$')
 
     @patch('calibre_plugins.ebook_translator.lib.element.uid')
     def test_prepare_translation_contains_ignored_element(self, mock_uid):

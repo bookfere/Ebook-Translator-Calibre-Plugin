@@ -35,22 +35,41 @@ class Paragraph:
         self.error = None
         self.aligned = True
 
-    def get_attributes(self):
+    def get_attributes(self) -> dict:
         if self.attributes:
             return json.loads(self.attributes)
         return {}
 
-    def is_alignment(self, separator):
+    def is_alignment(self, separator: str) -> bool:
+        if self.translation is None or self.translation.strip() == '':
+            return True
         pattern = re.compile(separator)
         count_original = len(pattern.split(self.original.strip()))
         count_translation = len(pattern.split(self.translation.strip()))
         return count_original == count_translation
 
+    def do_aligment(self, separator: str) -> None:
+        """Verify alignment status if the translation is misaligned."""
+        # Check if translation is aligned with original
+        if self.is_alignment(separator):
+            return
+        # Auto-add line spacing to translation text
+        single_saparator = separator[0]
+        lines = self.translation.split(single_saparator)
+        processed_lines = []
+        # Add empty line after non-empty line if next line is also non-empty.
+        for i, line in enumerate(lines):
+            processed_lines.append(line)
+            if (line.strip() and i + 1 < len(lines) and lines[i + 1].strip()):
+                processed_lines.append('')
+        self.translation = single_saparator.join(processed_lines)
+
 
 def default_cache_path():
     path = os.path.join(
         tempfile.gettempdir(), 'com.bookfere.Calibre.EbookTranslator')
-    not os.path.exists(path) and os.mkdir(path)
+    if not os.path.exists(path):
+        os.mkdir(path)
     return path
 
 

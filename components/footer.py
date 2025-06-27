@@ -19,7 +19,7 @@ class Footer(QWidget):
             donate = 'https://{}/donate'.format(app_author)
         else:
             feedback = '{}/issues'.format(github)
-            donate = 'https://www.paypal.com/paypalme/bookere'
+            donate = 'https://www.paypal.com/paypalme/bookfere'
         link = QLabel(
             '<span style="color:crimson;">♥</span> by <a href="https://{0}">'
             '{0}</a> ｜ <a href="{1}">GitHub</a> ｜ <a href="{2}">{4}</a>'

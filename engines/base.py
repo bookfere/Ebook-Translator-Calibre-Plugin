@@ -30,6 +30,7 @@ class Base:
     api_key_pattern = r'^[^\s]+$'
     api_key_errors = ['401']
     separator = '\n\n'
+    support_html = False
     placeholder = ('{{{{id_{}}}}}', r'({{\s*)+id\s*_\s*{}\s*(\s*}})+')
     using_tip = None
 
@@ -175,10 +176,10 @@ class Base:
     def _is_auto_lang(self):
         return self._get_source_code() == 'auto'
 
-    def translate(self, text):
+    def translate(self, content):
         try:
             response = request(
-                url=self.get_endpoint(), data=self.get_body(text),
+                url=self.get_endpoint(), data=self.get_body(content),
                 headers=self.get_headers(), method=self.method,
                 timeout=self.request_timeout, proxy_uri=self.proxy_uri,
                 raw_object=self.stream)
@@ -192,7 +193,7 @@ class Base:
                 error_message += '\n\n' + response
             # Swap a valid API key if necessary.
             if self.need_swap_api_key(error_message) and self.swap_api_key():
-                return self.translate(text)
+                return self.translate(content)
             raise UnexpectedResult(
                 _('Can not parse returned response. Raw data: {}')
                 .format('\n\n' + error_message))
@@ -211,3 +212,9 @@ class Base:
 
     def get_usage(self):
         return None
+
+    def allow_raw(self) -> bool:
+        """Allow raw content translation only if the engine supports HTML and
+        merge translation is disabled.
+        """
+        return self.support_html and not self.merge_enabled

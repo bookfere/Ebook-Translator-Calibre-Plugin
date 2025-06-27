@@ -2,7 +2,6 @@ import os
 import sys
 import time
 import json
-import os.path
 from html import unescape
 from subprocess import Popen, PIPE
 from http.client import IncompleteRead
@@ -61,6 +60,7 @@ class GoogleFreeTranslateHtml(Base):
     lang_codes = Base.load_lang_codes(google)
     endpoint: str = 'https://translate-pa.googleapis.com/v1/translateHtml'
     need_api_key = False
+    support_html = True
 
     def get_headers(self):
         return {

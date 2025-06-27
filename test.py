@@ -13,9 +13,9 @@ def get_tests(module):
 def get_test_suite():
     suite = unittest.TestSuite()
     for module in iter_modules(['tests']):
-        module = import_module(
-            'calibre_plugins.ebook_translator.tests.%s' % module.name)
-        suite.addTests(get_tests(module))
+        test_module = import_module(
+            f'calibre_plugins.ebook_translator.tests.{module.name}')
+        suite.addTests(get_tests(test_module))
     return suite
 
 

@@ -9,6 +9,8 @@ Added features and fixed bugs as follows:
 5. fix: Fix a bug that prevents converting PNG and SRT files.
 6. All Bug fixes and feature enhancements. (aefc9c1...75804a4)
 
+---
+
 ## v2.4.0
 
 Added features and fixed bugs as follows:
