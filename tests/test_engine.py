@@ -340,6 +340,21 @@ class TestBase(unittest.TestCase):
         self.assertRegex(calls[1].args[0], 'any unexpected error')
         self.assertRegex(calls[2].args[0], 'any unexpected error')
 
+    def test_allow_raw(self):
+        cases = (
+            (True, False, True),
+            (False, True, False),
+            (False, False, False),
+            (True, True, False),
+        )
+
+        for support_html, merge_enabled, expected in cases:
+            with self.subTest(
+                    support_html=support_html, merge_enabled=merge_enabled):
+                self.translator.support_html = support_html
+                self.translator.merge_enabled = merge_enabled
+                self.assertEqual(expected, self.translator.allow_raw())
+
 
 class TestDeepl(unittest.TestCase):
     def setUp(self):

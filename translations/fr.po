@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2025-03-18 19:57+0800\n"
+"POT-Creation-Date: 2025-06-27 11:59+0800\n"
 "PO-Revision-Date: 2023-10-01 15:35-0400\n"
 "Last-Translator: <a href=\"https://www.mobileread.com/forums/member.php?"
 "u=90932\">PoP</a>\n"
@@ -587,12 +587,6 @@ msgstr "La traduction a échoué."
 msgid "Time consuming: {} minutes"
 msgstr ""
 
-msgid "Can't fetch model list"
-msgstr ""
-
-msgid "Can't fetch model list, please check and try again."
-msgstr ""
-
 msgid "General"
 msgstr "Général"
 
@@ -730,6 +724,12 @@ msgid "Fetching..."
 msgstr ""
 
 msgid "You need to provide an API key to proceed."
+msgstr ""
+
+msgid "Can't fetch model list"
+msgstr ""
+
+msgid "Can't fetch model list, please check and try again."
 msgstr ""
 
 msgid "The model depends on your Azure project."

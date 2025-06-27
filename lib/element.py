@@ -256,6 +256,7 @@ class PageElement(Element):
                         name in excluding_attrs:
                     continue
                 new_element.set(name, value)
+        # Set the attributes for the new element.
         new_element.set('dir', self.target_direction or 'auto')
         if self.translation_lang is not None:
             new_element.set('lang', self.translation_lang)
@@ -274,6 +275,7 @@ class PageElement(Element):
                 self.element.addnext(self._create_table())
                 self._safe_remove(self.element)
             return
+
         # Escape the markups (<m id=1 />) to replace escaped markups.
         translation = xml_escape(translation)
         for rid, element in enumerate(self.reserve_elements):

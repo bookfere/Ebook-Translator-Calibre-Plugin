@@ -179,31 +179,12 @@ class Translation:
             translation = temp
         translation = self.glossary.restore(translation)
         paragraph.translation = translation.strip()
+        # Apply aligment checking and processing.
+        if self.translator.merge_enabled:
+            paragraph.do_aligment(self.translator.separator)
         paragraph.engine_name = self.translator.name
         paragraph.target_lang = self.translator.get_target_lang()
-        # paragraph.separator = self.translator.separator
         paragraph.is_cache = False
-        
-        # Check alignment status and filter reasoning model <think></think> tags only when translation is not aligned
-        if paragraph.translation:
-            # Check if translation is aligned with original
-            is_aligned = paragraph.is_alignment(self.translator.separator)
-            
-            if not is_aligned:                
-                # Auto-add line spacing to translation text
-                lines = paragraph.translation.split('\n')
-                processed_lines = []
-                
-                for i, line in enumerate(lines):
-                    processed_lines.append(line)
-                    # Add empty line after non-empty line if next line is also non-empty
-                    if (line.strip() and 
-                        i + 1 < len(lines) and 
-                        lines[i + 1].strip()):
-                        processed_lines.append('')
-                    
-                    processed_text = '\n'.join(processed_lines)
-                    paragraph.translation = processed_text
 
     def process_translation(self, paragraph):
         self.progress(

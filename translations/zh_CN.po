@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2025-03-18 19:57+0800\n"
+"POT-Creation-Date: 2025-06-27 11:59+0800\n"
 "PO-Revision-Date: 2023-04-17 14:17+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -584,12 +584,6 @@ msgstr "翻译已失败。"
 msgid "Time consuming: {} minutes"
 msgstr "耗时：{} 分钟"
 
-msgid "Can't fetch model list"
-msgstr "无法获取模型列表"
-
-msgid "Can't fetch model list, please check and try again."
-msgstr "无法获取模型列表，请检查后重试。"
-
 msgid "General"
 msgstr "通用"
 
@@ -727,6 +721,12 @@ msgstr "获取中..."
 
 msgid "You need to provide an API key to proceed."
 msgstr "你需要提供一个 API 密钥才能获取。"
+
+msgid "Can't fetch model list"
+msgstr "无法获取模型列表"
+
+msgid "Can't fetch model list, please check and try again."
+msgstr "无法获取模型列表，请检查后重试。"
 
 msgid "The model depends on your Azure project."
 msgstr "模型取决于你的 Azure 项目。"

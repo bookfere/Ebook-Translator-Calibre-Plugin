@@ -77,7 +77,7 @@ class TestTranslation(unittest.TestCase):
         self.glossary = Mock()
         self.paragraph = Mock()
         self.streaming = Mock()
-        self.cancel_request = Mock()
+        self.cancel_request = Mock(return_value=False)
         self.log = Mock()
         self.translation = Translation(self.translator, self.glossary)
 
@@ -162,14 +162,15 @@ class TestTranslation(unittest.TestCase):
             TranslationCanceled, self.translation.translate_text, 0, 'test')
         self.assertEqual(2, self.cancel_request.call_count)
 
+    @patch.object(Translation, 'need_stop', lambda self: True)
     def test_translate_text_need_cancel(self):
         self.translation.translator.translate.side_effect = Exception
         self.translation.cancel_request = self.cancel_request
         self.cancel_request.return_value = False
-        self.translation.need_stop = lambda: True
         self.assertRaises(
             TranslationCanceled, self.translation.translate_text, 0, 'text')
 
+    @patch.object(Translation, 'need_stop', lambda self: False)
     @patch('calibre_plugins.ebook_translator.lib.translation.traceback_error')
     @patch('calibre_plugins.ebook_translator.lib.translation.time')
     def test_translate_text_retry_failed_translation(self, mock_time, mock_te):
@@ -178,8 +179,7 @@ class TestTranslation(unittest.TestCase):
         self.translation.translator.translate.side_effect = Exception(
             'network error')
         self.translation.log = self.log
-        self.translation.cancel_request = lambda: False
-        self.translation.need_stop = lambda: False
+        self.translation.cancel_request = self.cancel_request
         self.translator.request_attempt = 5
 
         with self.assertRaises(TranslationFailed) as cm:
@@ -268,3 +268,20 @@ class TestTranslation(unittest.TestCase):
         mock_time.sleep.assert_not_called()
 
         self.assertEqual('你好呀世界', self.paragraph.translation)
+
+    def test_translate_paragraph_without_merge_enabled(self):
+        self.translation.set_fresh(True)
+        self.translator.merge_enabled = False
+
+        self.translation.translate_paragraph(self.paragraph)
+
+        self.paragraph.do_aligment.assert_not_called()
+
+    def test_translate_paragraph_with_merge_enabled(self):
+        self.translation.set_fresh(True)
+        self.translator.separator = '\n\n'
+        self.translator.merge_enabled = True
+
+        self.translation.translate_paragraph(self.paragraph)
+
+        self.paragraph.do_aligment.assert_called_once_with('\n\n')
