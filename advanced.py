@@ -1018,9 +1018,46 @@ class AdvancedTranslation(QDialog):
         save_button = QPushButton(_('&Save'))
         save_button.setDisabled(True)
 
+        # Word Wrap toggle button
+        word_wrap_button = QPushButton(_("Word Wrap"))
+        word_wrap_button.setCheckable(True)
+        word_wrap_button.setChecked(True)  # Default to enabled
+
+        # Set initial word wrap state for all editors
+        # Try different approaches for different Qt versions
+        try:
+            # Method 1: Modern Qt with LineWrapMode enum
+            from qt.core import QPlainTextEdit
+
+            wrap_enabled = QPlainTextEdit.LineWrapMode.WidgetWidth
+            wrap_disabled = QPlainTextEdit.LineWrapMode.NoWrap
+        except AttributeError:
+            try:
+                # Method 2: Older Qt versions
+                wrap_enabled = QPlainTextEdit.WidgetWidth
+                wrap_disabled = QPlainTextEdit.NoWrap
+            except AttributeError:
+                # Method 3: Direct integer values as fallback
+                wrap_enabled = 1  # WidgetWidth
+                wrap_disabled = 0  # NoWrap
+
+        raw_text.setLineWrapMode(wrap_enabled)
+        original_text.setLineWrapMode(wrap_enabled)
+        translation_text.setLineWrapMode(wrap_enabled)
+
+        def toggle_word_wrap():
+            is_wrapped = word_wrap_button.isChecked()
+            wrap_mode = wrap_enabled if is_wrapped else wrap_disabled
+            raw_text.setLineWrapMode(wrap_mode)
+            original_text.setLineWrapMode(wrap_mode)
+            translation_text.setLineWrapMode(wrap_mode)
+
+        word_wrap_button.clicked.connect(toggle_word_wrap)
+
         status_indicator = TranslationStatus()
 
         control_layout.addWidget(status_indicator)
+        control_layout.addWidget(word_wrap_button)
         control_layout.addStretch(1)
         control_layout.addWidget(save_status)
         control_layout.addWidget(save_button)

@@ -1209,3 +1209,11 @@ msgstr ""
 #: ui.py:165
 msgid "Choose Translation Mode"
 msgstr ""
+
+#: advanced.py:1020
+msgid "Word Wrap"
+msgstr ""
+
+#: advanced.py:1020
+msgid "Word Wrap"
+msgstr ""

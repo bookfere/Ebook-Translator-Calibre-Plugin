@@ -945,3 +945,8 @@ msgstr "Administrador de caché"
 
 msgid "Choose Translation Mode"
 msgstr "Elija el modo de traducción"
+
+msgid "Word Wrap"
+msgstr ""
+
+
