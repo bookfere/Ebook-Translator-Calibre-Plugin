@@ -912,3 +912,6 @@ msgstr ""
 
 msgid "Choose Translation Mode"
 msgstr "選擇翻譯模式"
+
+msgid "Word Wrap"
+msgstr "自動換行"
