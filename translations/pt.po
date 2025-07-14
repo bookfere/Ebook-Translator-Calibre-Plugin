@@ -939,3 +939,6 @@ msgstr "Gerenciar Armazenamento Cache"
 
 msgid "Choose Translation Mode"
 msgstr "Escolha o Modo de Tradução"
+
+msgid "Word Wrap"
+msgstr ""

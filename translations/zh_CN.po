@@ -919,3 +919,6 @@ msgstr "缓存管理器"
 
 msgid "Choose Translation Mode"
 msgstr "选择翻译模式"
+
+msgid "Word Wrap"
+msgstr "自动换行"
