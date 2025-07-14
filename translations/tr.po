@@ -929,3 +929,6 @@ msgstr "Önbellek Yöneticisi"
 
 msgid "Choose Translation Mode"
 msgstr "Çeviri Modunu Seçin"
+
+msgid "Word Wrap"
+msgstr ""
