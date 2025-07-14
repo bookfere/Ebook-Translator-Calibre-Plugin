@@ -500,7 +500,7 @@ class Extraction:
 
     def load_priority_patterns(self):
         default_selectors = [
-            'p', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote']
+            'p', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'div']
         self.priority_patterns = css_to_xpath(
             default_selectors + self.priority_rules)
 
