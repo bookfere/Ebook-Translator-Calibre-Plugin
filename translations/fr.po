@@ -928,3 +928,6 @@ msgstr "Gestionnaire du cache"
 
 msgid "Choose Translation Mode"
 msgstr "Choisissez le mode de traduction"
+
+msgid "Word Wrap"
+msgstr ""
