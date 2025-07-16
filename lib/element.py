@@ -271,8 +271,11 @@ class PageElement(Element):
             for element in self.element.iter():
                 if element.text is not None or len(list(element)) > 0:
                     # Some users encountered errors when trying to set the
-                    # style on certain child elements, e.g., comment nodes.
-                    # So we simply skip those elements.
+                    # style on certain child elements, e.g., comment nodes,
+                    # so we simply skip those elements. Checking the type may
+                    # be a better approach, e.g., isinstance(element.tag, str),
+                    # since comment and processing instruction nodes do not
+                    # have string tags, e.g., etree.Comment and etree.PI.
                     try:
                         element.set('style', 'color:%s' % self.original_color)
                     except TypeError:

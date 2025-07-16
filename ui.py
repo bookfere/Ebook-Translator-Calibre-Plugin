@@ -9,7 +9,8 @@ from . import EbookTranslator
 from .lib.utils import uid
 from .lib.ebook import Ebooks
 from .lib.config import get_config, upgrade_config
-from .lib.conversion import ConversionWorker
+from .lib.conversion import (
+    ConversionWorker, extra_formats as predefined_extra_formats)
 from .batch import BatchTranslation
 from .setting import TranslationSetting
 from .cache import CacheManager
@@ -32,8 +33,8 @@ class EbookTranslatorGui(InterfaceAction):
         QSettings.Format.IniFormat)
 
     class Status:
-        jobs = {}
-        windows = {}
+        jobs: dict[object, tuple] = {}
+        windows: dict[str, object] = {}
 
     def genesis(self):
         try:
@@ -165,7 +166,7 @@ class EbookTranslatorGui(InterfaceAction):
                 '%s - %s' % (_('Choose Translation Mode'), self.title))
             window.show()
         else:
-            modes.get(preferred_mode)()
+            modes[preferred_mode]()
 
     def add_window(self, name, window):
         identifier = name.split('_')[0]
@@ -222,7 +223,7 @@ class EbookTranslatorGui(InterfaceAction):
             try:
                 fmt, fmts = get_input_format_for_book(db, book_id, 'epub')
             except Exception as e:
-                for extra_format in ('srt', 'pgn'):
+                for extra_format in predefined_extra_formats.keys():
                     if api.has_format(book_id, extra_format):
                         if fmt is None:
                             fmt = extra_format
