@@ -154,7 +154,7 @@ extra_formats: dict[str, dict[str, Callable]] = {
 def extract_item(input_path, input_format, encoding, callback=None):
     if callback is not None:
         log.outputs = [Stream(PrepareStream(callback))]
-    handler = extra_formats[input_format]
+    handler = extra_formats.get(input_format)
     extractor = extract_book if handler is None else handler['extractor']
     return extractor(input_path, encoding)
 

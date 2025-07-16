@@ -286,11 +286,13 @@ class CreateTranslationProject(QDialog):
         input_format.currentTextChanged.connect(change_input_format)
 
         def change_output_format(_format):
-            if self.ebook.is_extra_format():
-                output_format.lock_format(self.ebook.input_format)
             self.ebook.set_output_format(_format)
-        change_output_format(output_format.currentText())
-        output_format.currentTextChanged.connect(change_output_format)
+        if self.ebook.is_extra_format():
+            output_format.lock_format(self.ebook.input_format)
+            change_output_format(self.ebook.input_format)
+        else:
+            change_output_format(output_format.currentText())
+            output_format.currentTextChanged.connect(change_output_format)
 
         def change_source_lang(lang):
             self.ebook.set_source_lang(lang)
@@ -893,12 +895,14 @@ class AdvancedTranslation(QDialog):
 
         output_format.setCurrentText(self.ebook.output_format)
 
-        def change_output_format(format):
-            if self.ebook.is_extra_format():
-                output_format.lock_format(self.ebook.input_format)
-            self.ebook.set_output_format(format)
-        change_output_format(output_format.currentText())
-        output_format.currentTextChanged.connect(change_output_format)
+        def change_output_format(_format):
+            self.ebook.set_output_format(_format)
+        if self.ebook.is_extra_format():
+            output_format.lock_format(self.ebook.input_format)
+            change_output_format(self.ebook.input_format)
+        else:
+            change_output_format(output_format.currentText())
+            output_format.currentTextChanged.connect(change_output_format)
 
         def output_ebook():
             if len(self.table.findItems(_('Translated'), Qt.MatchExactly)) < 1:
@@ -1099,7 +1103,7 @@ class AdvancedTranslation(QDialog):
             self.paragraph_sig.emit(paragraph)
             self.cache.update_paragraph(paragraph)
             self.progress_bar.emit()
-                
+
         self.trans_worker.callback.connect(translation_callback)
 
         def streaming_translation(data):
@@ -1128,7 +1132,7 @@ class AdvancedTranslation(QDialog):
         translation_text.textChanged.connect(modify_translation)
 
         self.editor_worker.show.connect(save_status.setText)
-        
+
         def save_translation():
             paragraph = self.table.current_paragraph()
 
@@ -1141,7 +1145,8 @@ class AdvancedTranslation(QDialog):
                 paragraph.engine_name = self.current_engine.name
                 paragraph.target_lang = self.ebook.target_lang
                 self.table.row.emit(paragraph.row)
-                self.cache.update_paragraph(paragraph)
+                if self.cache is not None:
+                    self.cache.update_paragraph(paragraph)
                 translation_text.setFocus(Qt.OtherFocusReason)
                 self.editor_worker.start[str].emit(
                     _('Your changes have been saved.'))
