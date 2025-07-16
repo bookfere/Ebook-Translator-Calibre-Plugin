@@ -873,6 +873,23 @@ epub:type="pagebreak"/>b</code></p></body>
         self.assertEqual('color:red', elements[1].get('style'))
         self.assertEqual('rtl', elements[1].get('dir'))
 
+    def test_add_translation_set_style_with_non_element_nodes(self):
+        xhtml = etree.XML(rb"""<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head><title>Test Document</title></head>
+    <body>
+        <p>a<!--test--></p>
+    </body>
+</html>""")
+
+        element = PageElement(xhtml.find('.//x:p[1]', namespaces=ns), 'p1')
+        element.original_color = 'green'
+        element.add_translation('A')
+
+        p = xhtml.find('.//x:p[2]', namespaces=ns)
+        self.assertEqual('A', p.text)
+
 
 class TestExtraction(unittest.TestCase):
     def setUp(self):

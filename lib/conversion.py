@@ -1,12 +1,12 @@
 import os
 import os.path
 from types import MethodType
-from typing import Callable, Any
+from typing import Callable
 from tempfile import gettempdir
 
 from calibre import sanitize_file_name
 from calibre.gui2 import Dispatcher
-from calibre.utils.logging import Log, Stream
+from calibre.utils.logging import default_log as log, Stream
 from calibre.constants import DEBUG, __version__
 from calibre.ebooks.conversion.plumber import (
     Plumber, CompositeProgressReporter)
@@ -26,8 +26,6 @@ from .exception import ConversionAbort
 
 
 load_translations()
-
-log = Log()
 
 
 class PrepareStream:
@@ -74,9 +72,9 @@ def convert_book(
         translation.handle(paragraphs)
         element_handler.add_translations(paragraphs)
 
-        log(sep())
-        log(_('Start to convert ebook format...'))
-        log(sep())
+        log.info(sep())
+        log.info(_('Start to convert ebook format...'))
+        log.info(sep())
 
         self.report_progress = CompositeProgressReporter(
             backup_progress, 1, notification)
@@ -102,14 +100,14 @@ def convert_srt(
     translation.handle(paragraphs)
     element_handler.add_translations(paragraphs)
 
-    log(sep())
-    log(_('Starting to output subtitles file...'))
-    log(sep())
+    log.info(sep())
+    log.info(_('Starting to output subtitles file...'))
+    log.info(sep())
 
     with open(output_path, 'w') as file:
         file.write('\n\n'.join([e.get_translation() for e in elements]))
 
-    log(_('The translation of the subtitles file was completed.'))
+    log.info(_('The translation of the subtitles file was completed.'))
 
 
 def convert_pgn(
@@ -127,9 +125,9 @@ def convert_pgn(
     translation.handle(paragraphs)
     element_handler.add_translations(paragraphs)
 
-    log(sep())
-    log(_('Starting to output PGN file...'))
-    log(sep())
+    log.info(sep())
+    log.info(_('Starting to output PGN file...'))
+    log.info(sep())
 
     pgn_content = open_file(input_path, encoding)
     for element in elements:
@@ -138,10 +136,10 @@ def convert_pgn(
     with open(output_path, 'w', encoding='utf-8') as file:
         file.write(pgn_content)
 
-    log(_('The translation of the PGN file was completed.'))
+    log.info(_('The translation of the PGN file was completed.'))
 
 
-extra_formats = {
+extra_formats: dict[str, dict[str, Callable]] = {
     'srt': {
         'extractor': get_srt_elements,
         'convertor': convert_srt,
@@ -156,8 +154,8 @@ extra_formats = {
 def extract_item(input_path, input_format, encoding, callback=None):
     if callback is not None:
         log.outputs = [Stream(PrepareStream(callback))]
-    handler = extra_formats.get(input_format)
-    extractor = extract_book if handler is None else handler.get('extractor')
+    handler = extra_formats[input_format]
+    extractor = extract_book if handler is None else handler['extractor']
     return extractor(input_path, encoding)
 
 
@@ -238,7 +236,7 @@ def convert_item(
     debug_info += '| Input Path: %s\n' % input_path
     debug_info += '| Output Path: %s' % output_path
 
-    handler = extra_formats.get(format)
+    handler: dict[str, Callable] | None = extra_formats.get(format)
     convertor = convert_book if handler is None else handler['convertor']
     convertor(
         input_path, output_path, translation, element_handler, cache,
