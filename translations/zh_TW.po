@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ebook Translator Calibre Plugin\n"
 "Report-Msgid-Bugs-To: bookfere@gmail.com\n"
-"POT-Creation-Date: 2025-06-27 11:59+0800\n"
+"POT-Creation-Date: 2025-07-29 21:17+0800\n"
 "PO-Revision-Date: 2023-04-25 15:36+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -187,6 +187,9 @@ msgstr ""
 
 msgid "&Save"
 msgstr "儲存(&S)"
+
+msgid "Word Wrap"
+msgstr ""
 
 msgid "Your changes have been saved."
 msgstr ""
@@ -912,6 +915,3 @@ msgstr ""
 
 msgid "Choose Translation Mode"
 msgstr "選擇翻譯模式"
-
-msgid "Word Wrap"
-msgstr ""

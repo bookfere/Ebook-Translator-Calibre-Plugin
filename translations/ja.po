@@ -1,0 +1,940 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the Ebook Translator Calibre Plugin package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Ebook Translator Calibre Plugin\n"
+"Report-Msgid-Bugs-To: bookfere@gmail.com\n"
+"POT-Creation-Date: 2025-07-29 21:17+0800\n"
+"PO-Revision-Date: 2025-07-29 15:30+0900\n"
+"Last-Translator: Gemini (AI)\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 3.4.4\n"
+
+msgid "Ebook Translator"
+msgstr "電子書籍翻訳"
+
+msgid ""
+"A Calibre plugin to translate ebook into a specified language (optionally "
+"keeping the original content)."
+msgstr ""
+"電子書籍を指定した言語に翻訳するCalibreプラグインです（オプションで原文の保持"
+"も可能）。"
+
+msgid "Extracting ebook content..."
+msgstr "電子書籍のコンテンツを抽出中..."
+
+msgid "Failed to extract ebook content"
+msgstr "電子書籍のコンテンツの抽出に失敗しました"
+
+msgid "Filtering ebook content..."
+msgstr "電子書籍のコンテンツをフィルタリング中..."
+
+msgid "Preparing user interface..."
+msgstr "ユーザーインターフェースを準備中..."
+
+msgid "&Start"
+msgstr "開始(&S)"
+
+msgid "Input Format"
+msgstr "入力形式"
+
+msgid "Output Format"
+msgstr "出力形式"
+
+msgid "Source Language"
+msgstr "翻訳元の言語"
+
+msgid "Target Language"
+msgstr "翻訳先の言語"
+
+msgid "Encoding"
+msgstr "エンコーディング"
+
+msgid "Target Directionality"
+msgstr "翻訳先の書字方向"
+
+msgid "Auto"
+msgstr "自動"
+
+msgid "Left to Right"
+msgstr "左から右へ"
+
+msgid "Right to Left"
+msgstr "右から左へ"
+
+msgid "Failed to translate {} paragraph(s), Would you like to retry?"
+msgstr "{}個の段落の翻訳に失敗しました。再試行しますか？"
+
+msgid "Translation completed."
+msgstr "翻訳が完了しました。"
+
+msgid "There is no content that needs to be translated."
+msgstr "翻訳が必要なコンテンツはありません。"
+
+msgid "Loading ebook data, please wait..."
+msgstr "電子書籍データを読み込み中です。しばらくお待ちください..."
+
+msgid "Review"
+msgstr "レビュー"
+
+msgid "Log"
+msgstr "ログ"
+
+msgid "Errors"
+msgstr "エラー"
+
+msgid "All"
+msgstr "すべて"
+
+msgid "Non-aligned"
+msgstr "不一致"
+
+msgid "Translated"
+msgstr "翻訳済み"
+
+msgid "Untranslated"
+msgstr "未翻訳"
+
+msgid "Original Text"
+msgstr "原文"
+
+msgid "Original Code"
+msgstr "原文のコード"
+
+msgid "Translation Text"
+msgstr "訳文"
+
+msgid "keyword for filtering"
+msgstr "フィルタリング用のキーワード"
+
+msgid "Reset"
+msgstr "リセット"
+
+msgid "Total items: {}"
+msgstr "合計項目数: {}"
+
+msgid "Character count: {}"
+msgstr "文字数: {}"
+
+msgid "Non-aligned items: {}"
+msgstr "不一致の項目: {}"
+
+msgid "Delete"
+msgstr "削除"
+
+msgid "Batch Translation"
+msgstr "一括翻訳"
+
+msgid "Beta"
+msgstr "ベータ版"
+
+msgid "Translate All"
+msgstr "すべて翻訳"
+
+msgid "Translate Selected"
+msgstr "選択項目を翻訳"
+
+msgid "Stop"
+msgstr "停止"
+
+msgid "Are you sure you want to stop the translation progress?"
+msgstr "翻訳プロセスを停止してもよろしいですか？"
+
+msgid "Stopping..."
+msgstr "停止中..."
+
+msgid "Cache Status"
+msgstr "キャッシュの状態"
+
+msgid "Disabled"
+msgstr "無効"
+
+msgid "Enabled"
+msgstr "有効"
+
+msgid "Translation Engine"
+msgstr "翻訳エンジン"
+
+msgid "Custom Ebook Title"
+msgstr "カスタム電子書籍タイトル"
+
+msgid "By default, title metadata will be translated."
+msgstr "デフォルトでは、タイトルのメタデータが翻訳されます。"
+
+msgid "Output Ebook"
+msgstr "電子書籍を出力"
+
+msgid "Output"
+msgstr "出力"
+
+msgid "The ebook has not been translated yet."
+msgstr "この電子書籍はまだ翻訳されていません。"
+
+msgid ""
+"The number of lines in some translation units differs between the original "
+"text and the translated text. Are you sure you want to output without "
+"checking alignment?"
+msgstr ""
+"一部の翻訳単位で、原文と訳文の行数が異なります。一致を確認せずに出力してもよ"
+"ろしいですか？"
+
+msgid "No translation yet"
+msgstr "まだ翻訳がありません"
+
+msgid "&Save"
+msgstr "保存(&S)"
+
+msgid "Word Wrap"
+msgstr ""
+
+msgid "Your changes have been saved."
+msgstr "変更は保存されました。"
+
+msgid "Translation log"
+msgstr "翻訳ログ"
+
+msgid "Error log"
+msgstr "エラーログ"
+
+msgid "Are you sure you want to translate all {:n} paragraphs?"
+msgstr "{:n}個の段落すべてを翻訳してもよろしいですか？"
+
+msgid "Are you sure you want to cancel the preparation progress?"
+msgstr "準備プロセスをキャンセルしてもよろしいですか？"
+
+msgid "Are you sure you want to cancel the translation progress?"
+msgstr "翻訳プロセスをキャンセルしてもよろしいですか？"
+
+msgid "Title"
+msgstr "タイトル"
+
+msgid "Default"
+msgstr "デフォルト"
+
+msgid "Translate"
+msgstr "翻訳"
+
+msgid "Unknown"
+msgstr "不明"
+
+msgid "The specified path does not exist."
+msgstr "指定されたパスが存在しません。"
+
+msgid "Choose a path to store cache files."
+msgstr "キャッシュファイルを保存するパスを選択してください。"
+
+msgid "Move"
+msgstr "移動"
+
+msgid "Reveal"
+msgstr "表示"
+
+msgid "Cache Path"
+msgstr "キャッシュパス"
+
+msgid "Clear All"
+msgstr "すべてクリア"
+
+msgid ""
+"All cache(s) will be moved to the default path. Are you sure to proceed?"
+msgstr ""
+"すべてのキャッシュがデフォルトパスに移動されます。続行してもよろしいですか？"
+
+msgid "All cache(s) will be moved to the new path. Are you sure to proceed?"
+msgstr ""
+"すべてのキャッシュが新しいパスに移動されます。続行してもよろしいですか？"
+
+msgid "Please choose an empty folder."
+msgstr "空のフォルダを選択してください。"
+
+msgid "Are you sure you want to clear all caches?"
+msgstr "すべてのキャッシュをクリアしてもよろしいですか？"
+
+msgid "No cache exists."
+msgstr "キャッシュは存在しません。"
+
+msgid "Total: {}"
+msgstr "合計: {}"
+
+msgid "Are you sure you want to delete the selected cache(s)?"
+msgstr "選択したキャッシュを削除してもよろしいですか？"
+
+msgid "Engine"
+msgstr "エンジン"
+
+msgid "Language"
+msgstr "言語"
+
+msgid "Merge Length"
+msgstr "統合する長さ"
+
+msgid "Filename"
+msgstr "ファイル名"
+
+msgid "Last Modification Time"
+msgstr "最終更新日時"
+
+msgid "Size (MB)"
+msgstr "サイズ (MB)"
+
+msgid "processing..."
+msgstr "処理中..."
+
+msgid "checking..."
+msgstr "確認中..."
+
+msgid "canceling..."
+msgstr "キャンセル中..."
+
+msgid "applying..."
+msgstr "適用中..."
+
+msgid "ChatGPT Batch Translation"
+msgstr "ChatGPT 一括翻訳"
+
+msgid "Create a new batch translation"
+msgstr "新しい一括翻訳を作成"
+
+msgid ""
+"All original content must be uploaded to OpenAI for batch translation, and "
+"you will need to wait up to 24 hours to continue the translation process.<a "
+"href=\"https://cookbook.openai.com/examples/batch_processing\">more details</"
+"a>"
+msgstr ""
+"一括翻訳のためには、すべての原文コンテンツをOpenAIにアップロードする必要があ"
+"り、翻訳プロセスを続行するには最大24時間待つ必要があります。<a "
+"href=\"https://cookbook.openai.com/examples/batch_processing\">詳細はこちら"
+
+msgid "Refresh"
+msgstr "更新"
+
+msgid "Cancel Batch Translation"
+msgstr "一括翻訳をキャンセル"
+
+msgid "Apply"
+msgstr "適用"
+
+msgid "Are you sure you want to cancel the batch translation?"
+msgstr "一括翻訳をキャンセルしてもよろしいですか？"
+
+msgid "Batch translation details"
+msgstr "一括翻訳の詳細"
+
+msgid "Status"
+msgstr "ステータス"
+
+msgid "Detail"
+msgstr "詳細"
+
+msgid "Translating..."
+msgstr "翻訳中..."
+
+msgid "Test Translation Engine"
+msgstr "翻訳エンジンをテスト"
+
+msgid "Usage: checking..."
+msgstr "使用状況: 確認中..."
+
+msgid "Usage: {}"
+msgstr "使用状況: {}"
+
+msgid "Custom Translation Engine"
+msgstr "カスタム翻訳エンジン"
+
+msgid "Add"
+msgstr "追加"
+
+msgid "Clear"
+msgstr "クリア"
+
+msgid "Restore"
+msgstr "復元"
+
+msgid "Verify"
+msgstr "検証"
+
+msgid "Valid engine data format."
+msgstr "有効なエンジンデータ形式です。"
+
+msgid "The engine name is already in use."
+msgstr "このエンジン名は既に使用されています。"
+
+msgid "The setting has been saved."
+msgstr "設定が保存されました。"
+
+msgid "Feedback"
+msgstr "フィードバック"
+
+msgid "Donate"
+msgstr "寄付"
+
+msgid "Ebook Specific"
+msgstr "電子書籍固有の設定"
+
+msgid "Failed translation"
+msgstr "翻訳失敗"
+
+msgid "Not selected"
+msgstr "未選択"
+
+msgid "Auto detect"
+msgstr "自動検出"
+
+msgid "Choose a translation mode for clicking the icon button."
+msgstr "アイコンボタンをクリックした際の翻訳モードを選択してください。"
+
+msgid "Advanced Mode"
+msgstr "詳細モード"
+
+msgid ""
+"This mode provides additional options for the translation process, allowing "
+"for more control and customization."
+msgstr ""
+"このモードでは、翻訳プロセスのための追加オプションが提供され、より詳細な制御"
+"とカスタマイズが可能です。"
+
+msgid "Choose"
+msgstr "選択"
+
+msgid "Batch Mode"
+msgstr "一括モード"
+
+msgid ""
+"This mode allows users to translate multiple ebooks at once, streamlining "
+"the translation process and saving time."
+msgstr ""
+"このモードでは、複数の電子書籍を一度に翻訳でき、翻訳プロセスを効率化し時間を"
+"節約できます。"
+
+msgid "Original"
+msgstr "原文"
+
+msgid ""
+"The number of lines differs between the original text and the translated "
+"text."
+msgstr "原文と訳文でテキストの行数が異なります。"
+
+msgid "Select the whole chapter"
+msgstr "章全体を選択"
+
+msgid "Select similar paragraphs: {}=\"{}\""
+msgstr "類似の段落を選択: {}=\"{}\""
+
+msgid "Retain at least one row."
+msgstr "少なくとも1行は残してください。"
+
+msgid "Can not parse returned response. Raw data: {}"
+msgstr "返却された応答を解析できません。生データ: {}"
+
+msgid "Invalid event type received: {}"
+msgstr "無効なイベントタイプを受信しました: {}"
+
+msgid "Error received: {}"
+msgstr "エラーを受信しました: {}"
+
+msgid "Baidu"
+msgstr "Baidu"
+
+msgid "API Keys"
+msgstr "APIキー"
+
+msgid "A correct key format \"{}\" is required."
+msgstr "正しいキー形式 \"{}\" が必要です。"
+
+msgid "Engine data must be in valid JSON format."
+msgstr "エンジンデータは有効なJSON形式である必要があります。"
+
+msgid "Invalid engine data."
+msgstr "無効なエンジンデータです。"
+
+msgid "Engine name is required."
+msgstr "エンジン名が必要です。"
+
+msgid "Engine name must be different from builtin engine name."
+msgstr "エンジン名は組み込みのエンジン名と異なる必要があります。"
+
+msgid "Language codes are required."
+msgstr "言語コードが必要です。"
+
+msgid "Source and target must be added in pair."
+msgstr "翻訳元と翻訳先はペアで追加する必要があります。"
+
+msgid "Request information is required."
+msgstr "リクエスト情報が必要です。"
+
+msgid "API URL is required."
+msgstr "APIのURLが必要です。"
+
+msgid "Placeholder <text> is required."
+msgstr ""
+
+msgid "Request headers must be an JSON object."
+msgstr "リクエストヘッダーはJSONオブジェクトである必要があります。"
+
+msgid "A appropriate Content-Type in headers is required."
+msgstr "ヘッダーに適切なContent-Typeが必要です。"
+
+msgid "Expression to parse response is required."
+msgstr "応答を解析するための式が必要です。"
+
+msgid "Response was parsed incorrectly."
+msgstr "応答が正しく解析されませんでした。"
+
+msgid "{} total, {} used, {} left"
+msgstr "合計 {}, 使用済み {}, 残り {}"
+
+msgid ""
+"This plugin uses Application Default Credentials (ADC) in your local "
+"environment to access your Google Translate service. To set up the ADC, "
+"follow these steps:\n"
+"1. Install the gcloud CLI by checking out its instructions {}.\n"
+"2. Run the command: gcloud auth application-default login.\n"
+"3. Sign in to your Google account and grant needed privileges."
+msgstr ""
+"このプラグインは、ローカル環境のアプリケーションのデフォルト認証情報（ADC）を"
+"使用してGoogle翻訳サービスにアクセスします。ADCを設定するには、次の手順に従っ"
+"てください:\n"
+"1. {} の指示を確認してgcloud CLIをインストールします。\n"
+"2. コマンドを実行します: gcloud auth application-default login\n"
+"3. Googleアカウントにサインインし、必要な権限を付与します。"
+
+msgid "Cannot run the command \"{}\"."
+msgstr "コマンド \"{}\" を実行できません。"
+
+msgid "Cannot find the command \"{}\"."
+msgstr "コマンド \"{}\" が見つかりません。"
+
+msgid "Failed get APP key due to an invalid Token."
+msgstr "無効なトークンのため、APPキーの取得に失敗しました。"
+
+msgid "Failed get APP key due to and invalid Base64 URL."
+msgstr "無効なBase64 URLのため、APPキーの取得に失敗しました。"
+
+msgid "Youdao"
+msgstr "Youdao"
+
+msgid "Start to convert ebook format..."
+msgstr "電子書籍の形式変換を開始します..."
+
+msgid "Outputting ebook file..."
+msgstr "電子書籍ファイルを出力中..."
+
+msgid "Starting to output subtitles file..."
+msgstr "字幕ファイルの出力を開始します..."
+
+msgid "The translation of the subtitles file was completed."
+msgstr "字幕ファイルの翻訳が完了しました。"
+
+msgid "Starting to output PGN file..."
+msgstr "PGNファイルの出力を開始します..."
+
+msgid "The translation of the PGN file was completed."
+msgstr "PGNファイルの翻訳が完了しました。"
+
+msgid "[{} > {}] Translating \"{}\""
+msgstr "[{} > {}] \"{}\"を翻訳中"
+
+msgid "Translation job failed"
+msgstr "翻訳ジョブに失敗しました"
+
+msgid "completed"
+msgstr "完了"
+
+msgid "Ebook Translation Log"
+msgstr "電子書籍翻訳ログ"
+
+msgid "Translation Completed"
+msgstr "翻訳完了"
+
+msgid "The translation of \"{}\" was completed. Do you want to open the book?"
+msgstr "\"{}\" の翻訳が完了しました。本を開きますか？"
+
+msgid "Translation canceled."
+msgstr "翻訳がキャンセルされました。"
+
+msgid "Failed to retrieve data from translate engine API."
+msgstr "翻訳エンジンAPIからのデータ取得に失敗しました。"
+
+msgid "Original: {}"
+msgstr "原文: {}"
+
+msgid "Status: Failed {} times / Sleeping for {} seconds"
+msgstr "ステータス: {} 回失敗 / {} 秒間スリープ中"
+
+msgid "Error: {}"
+msgstr "エラー: {}"
+
+msgid "Row: {}"
+msgstr "行: {}"
+
+msgid "Translating: {}/{}"
+msgstr "翻訳中: {}/{}"
+
+msgid "Translation: {}"
+msgstr "訳文: {}"
+
+msgid "Translation (Cached): {}"
+msgstr "訳文 (キャッシュ): {}"
+
+msgid "Start to translate ebook content"
+msgstr "電子書籍コンテンツの翻訳を開始"
+
+msgid "Item count: {}"
+msgstr "項目数: {}"
+
+msgid "There is no content need to translate."
+msgstr "翻訳が必要なコンテンツはありません。"
+
+msgid "Translation failed."
+msgstr "翻訳に失敗しました。"
+
+msgid "Time consuming: {} minutes"
+msgstr "所要時間: {} 分"
+
+msgid "General"
+msgstr "全般"
+
+msgid "Content"
+msgstr "コンテンツ"
+
+msgid "Preferred Mode"
+msgstr "優先モード"
+
+msgid "Output Path"
+msgstr "出力パス"
+
+msgid "Library"
+msgstr "ライブラリ"
+
+msgid "Path"
+msgstr "パス"
+
+msgid "Choose a path to store translated book(s)"
+msgstr "翻訳された本を保存するパスを選択してください"
+
+msgid "Preferred Format"
+msgstr "優先フォーマット"
+
+msgid "(Beta)"
+msgstr "(ベータ版)"
+
+msgid "Merge to Translate"
+msgstr "統合して翻訳"
+
+msgid "Enable"
+msgstr "有効化"
+
+msgid "The number of characters to translate at once."
+msgstr "一度に翻訳する文字数。"
+
+msgid "HTTP Proxy"
+msgstr "HTTPプロキシ"
+
+msgid "Host"
+msgstr "ホスト"
+
+msgid "Port"
+msgstr "ポート"
+
+msgid "Test"
+msgstr "テスト"
+
+msgid "Cache"
+msgstr "キャッシュ"
+
+msgid "Manage"
+msgstr "管理"
+
+msgid "Job Log"
+msgstr "ジョブログ"
+
+msgid "Show translation"
+msgstr "翻訳を表示"
+
+msgid "Notification"
+msgstr "通知"
+
+msgid "Search Paths"
+msgstr "検索パス"
+
+msgid "The plugin will search for external programs via these paths."
+msgstr "プラグインはこれらのパスを介して外部プログラムを検索します。"
+
+msgid "Custom"
+msgstr "カスタム"
+
+msgid "Usage Tip"
+msgstr "使用のヒント"
+
+msgid "Tip: "
+msgstr "ヒント: "
+
+msgid "API keys will auto-switch if the previous one is unavailable."
+msgstr "以前のAPIキーが利用できない場合、APIキーは自動的に切り替わります。"
+
+msgid "Preferred Language"
+msgstr "優先言語"
+
+msgid "HTTP Request"
+msgstr "HTTPリクエスト"
+
+msgid "Concurrency limit"
+msgstr "同時実行数制限"
+
+msgid "Interval (seconds)"
+msgstr "間隔 (秒)"
+
+msgid "Attempt times"
+msgstr "試行回数"
+
+msgid "Timeout (seconds)"
+msgstr "タイムアウト (秒)"
+
+msgid "Abort Translation"
+msgstr "翻訳を中止"
+
+msgid "Max errors"
+msgstr "最大エラー数"
+
+msgid "The number of consecutive errors to abort translation."
+msgstr "翻訳を中止するまでの連続エラー数。"
+
+msgid "Fine-tuning"
+msgstr "ファインチューニング"
+
+msgid "Prompt"
+msgstr "プロンプト"
+
+msgid "Endpoint"
+msgstr "エンドポイント"
+
+msgid "A model name"
+msgstr "モデル名"
+
+msgid "Model"
+msgstr "モデル"
+
+msgid "Sampling"
+msgstr "サンプリング"
+
+msgid "Enable streaming response"
+msgstr "ストリーミング応答を有効にする"
+
+msgid "Stream"
+msgstr "ストリーム"
+
+msgid "Fetching..."
+msgstr "取得中..."
+
+msgid "You need to provide an API key to proceed."
+msgstr "続行するにはAPIキーを提供する必要があります。"
+
+msgid "Can't fetch model list"
+msgstr "モデルリストを取得できません"
+
+msgid "Can't fetch model list, please check and try again."
+msgstr "モデルリストを取得できません。確認して再度お試しください。"
+
+msgid "The model depends on your Azure project."
+msgstr "モデルはご自身のAzureプロジェクトに依存します。"
+
+msgid "Below original"
+msgstr "原文の下"
+
+msgid "Above original"
+msgstr "原文の上"
+
+msgid "Right to original"
+msgstr "原文の右"
+
+msgid "Left to original"
+msgstr "原文の左"
+
+msgid "With no original"
+msgstr "原文なし"
+
+msgid "Translation"
+msgstr "翻訳"
+
+msgid "Column Gap"
+msgstr "列の間隔"
+
+msgid "Percentage"
+msgstr "パーセンテージ"
+
+msgid "Space count"
+msgstr "スペース数"
+
+msgid "Translation Position"
+msgstr "翻訳の配置"
+
+msgid "Original Text Color"
+msgstr "原文の文字色"
+
+msgid "e.g.,"
+msgstr "例:"
+
+msgid "Translation Text Color"
+msgstr "訳文の文字色"
+
+msgid "Translation Glossary"
+msgstr "翻訳グロッサリー"
+
+msgid "Choose a glossary file"
+msgstr "グロッサリーファイルを選択"
+
+msgid "Priority Element"
+msgstr "優先要素"
+
+msgid "CSS selectors for priority elements. One rule per line:"
+msgstr "優先要素のCSSセレクタ。1行に1ルール:"
+
+msgid "Stop further extraction once elements match these rules."
+msgstr "要素がこれらのルールに一致したら、それ以上の抽出を停止します。"
+
+msgid "Ignore Element"
+msgstr "無視する要素"
+
+msgid "CSS selectors to exclude elements. One rule per line:"
+msgstr "要素を除外するためのCSSセレクタ。1行に1ルール:"
+
+msgid "Do not translate elements that matches these rules."
+msgstr "これらのルールに一致する要素は翻訳しません。"
+
+msgid "Ignore Paragraph"
+msgstr "無視する段落"
+
+msgid "Scope"
+msgstr "スコープ"
+
+msgid "Text only"
+msgstr "テキストのみ"
+
+msgid "HTML element"
+msgstr "HTML要素"
+
+msgid "Mode"
+msgstr "モード"
+
+msgid "Normal"
+msgstr "通常"
+
+msgid "Normal (case-sensitive)"
+msgstr "通常 (大文字と小文字を区別)"
+
+msgid "Regular Expression"
+msgstr "正規表現"
+
+msgid "Do not translate extracted elements that contain these rules."
+msgstr "これらのルールを含む抽出された要素は翻訳しません。"
+
+msgid "Exclude paragraph by keyword. One keyword per line:"
+msgstr "キーワードで段落を除外。1行に1キーワード:"
+
+msgid "Exclude paragraph by case-sensitive keyword. One keyword per line:"
+msgstr "大文字と小文字を区別するキーワードで段落を除外。1行に1キーワード:"
+
+msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
+msgstr "正規表現パターンで段落を除外。1行に1パターン:"
+
+msgid "Reserve Element"
+msgstr "保持する要素"
+
+msgid "CSS selectors to reserve elements. One rule per line:"
+msgstr "要素を保持するためのCSSセレクタ。1行に1ルール:"
+
+msgid "Keep elements that match these rules for extraction."
+msgstr "抽出のためにこれらのルールに一致する要素を保持します。"
+
+msgid "Ebook Metadata"
+msgstr "電子書籍のメタデータ"
+
+msgid "Translate all of the metadata information"
+msgstr "すべてのメタデータ情報を翻訳する"
+
+msgid "Append target language to title metadata"
+msgstr "タイトルのメタデータに翻訳先の言語を追加する"
+
+msgid "Set target language code to language metadata"
+msgstr "言語のメタデータに翻訳先の言語コードを設定する"
+
+msgid "Subjects of ebook (one subject per line)"
+msgstr "電子書籍の主題 (1行に1主題)"
+
+msgid "Metadata Translation"
+msgstr "メタデータの翻訳"
+
+msgid "Language Mark"
+msgstr "言語マーク"
+
+msgid "Language Code"
+msgstr "言語コード"
+
+msgid "Append Subjects"
+msgstr "主題を追加"
+
+msgid "Proxy host or port is incorrect."
+msgstr "プロキシのホストまたはポートが正しくありません。"
+
+msgid "The proxy is available."
+msgstr "プロキシは利用可能です。"
+
+msgid "The proxy is not available."
+msgstr "プロキシは利用できません。"
+
+msgid "the prompt must include {}."
+msgstr "プロンプトには {} を含める必要があります。"
+
+msgid "Invalid color value."
+msgstr "無効な色の値です。"
+
+msgid "The specified glossary file does not exist."
+msgstr "指定されたグロッサリーファイルが存在しません。"
+
+msgid "{} is not a valid CSS selector."
+msgstr "{} は有効なCSSセレクタではありません。"
+
+msgid "{} is not a valid regular expression."
+msgstr "{} は有効な正規表現ではありません。"
+
+msgid "Translate Book"
+msgstr "本を翻訳"
+
+msgid "Translate Ebook Content"
+msgstr "電子書籍のコンテンツを翻訳"
+
+msgid "Setting"
+msgstr "設定"
+
+msgid "About"
+msgstr "概要"
+
+msgid "Please choose a book."
+msgstr "本を選択してください。"
+
+msgid "Please choose at least one book."
+msgstr "少なくとも1冊の本を選択してください。"
+
+msgid "Cannot change setting while book(s) are under translation."
+msgstr "本の翻訳中は設定を変更できません。"
+
+msgid "Cannot manage cache while book(s) are under translation."
+msgstr "本の翻訳中はキャッシュを管理できません。"
+
+msgid "Cache Manager"
+msgstr "キャッシュマネージャー"
+
+msgid "Choose Translation Mode"
+msgstr "翻訳モードを選択"
+
+#~ msgid "Placeholder is required."
+#~ msgstr "プレースホルダー が必要です。"
