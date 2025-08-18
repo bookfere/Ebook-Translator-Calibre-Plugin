@@ -149,8 +149,11 @@ class Base:
     def get_target_lang(self):
         return self.target_lang
 
-    def set_proxy(self, proxy_uri=None):
-        self.proxy_uri = proxy_uri
+    def set_proxy(self, proxy=[]):
+        if isinstance(proxy, list) and len(proxy) == 2:
+            self.proxy_uri = '%s:%s' % tuple(proxy)
+            if not self.proxy_uri.startswith('http'):
+                self.proxy_uri = 'http://%s' % self.proxy_uri
 
     def set_concurrency_limit(self, limit):
         self.concurrency_limit = limit
