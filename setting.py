@@ -788,8 +788,22 @@ class TranslationSetting(QDialog):
             self.current_engine.set_config(self.get_engine_config())
             translator = self.current_engine()
             translator.set_search_paths(self.get_search_paths())
-            self.proxy_enabled.isChecked() and translator.set_proxy(
-                [self.proxy_host.text(), self.proxy_port.text()])
+
+            proxy_uri = None
+            if self.proxy_enabled.isChecked():
+                host = self.proxy_host.text()
+                port = self.proxy_port.text()
+                if host and port:
+                    proxy_uri = 'http://%s:%s' % (host, port)
+            elif self.socks_proxy_enabled.isChecked():
+                host = self.socks_proxy_host.text()
+                port = self.socks_proxy_port.text()
+                if host and port:
+                    proxy_uri = 'socks5h://%s:%s' % (host, port)
+
+            if proxy_uri:
+                translator.set_proxy(proxy_uri)
+
             EngineTester(self, translator)
         engine_test.clicked.connect(make_test_translator)
 
