@@ -790,39 +790,18 @@ class TranslationSetting(QDialog):
             translator = self.current_engine()
             translator.set_search_paths(self.get_search_paths())
 
-            import socket
-            from .lib.translation import _original_socket
-
-            use_socks = self.socks_proxy_enabled.isChecked()
-
-            if use_socks:
+            if self.socks_proxy_enabled.isChecked():
                 host = self.socks_proxy_host.text()
                 port = self.socks_proxy_port.text()
                 if host and port:
-                    try:
-                        from .lib import socks
-                        socks.set_default_proxy(socks.SOCKS5, host, int(port), rdns=True)
-                        socket.socket = socks.socksocket
-                    except ImportError:
-                        log.error("PySocks library not found. SOCKS proxy will not work.")
+                    translator.set_proxy('SOCKS5', [host, port])
             elif self.proxy_enabled.isChecked():
                 host = self.proxy_host.text()
                 port = self.proxy_port.text()
                 if host and port:
-                    translator.set_proxy([host, port])
+                    translator.set_proxy('HTTP', [host, port])
 
-            tester = EngineTester(self, translator)
-
-            def restore_socket_on_finish(result_code):
-                socket.socket = _original_socket
-                try:
-                    from .lib import socks
-                    socks.set_default_proxy(None)
-                except ImportError:
-                    pass
-
-            if use_socks:
-                tester.finished.connect(restore_socket_on_finish)
+            EngineTester(self, translator)
         engine_test.clicked.connect(make_test_translator)
 
         layout.addStretch(1)
@@ -1258,14 +1237,13 @@ class TranslationSetting(QDialog):
         import socket
         from .lib.translation import _original_socket
 
-        original_socket = socket.socket
         try:
             from .lib import socks
             socks.set_default_proxy(socks.SOCKS5, host, int(port), rdns=True)
             socket.socket = socks.socksocket
             # Test connection to a known external host
             test_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            test_socket.settimeout(5)
+            test_socket.settimeout(10)
             test_socket.connect(("www.google.com", 80))
             test_socket.close()
             self.alert.pop(_('The proxy is available.'))
@@ -1273,7 +1251,12 @@ class TranslationSetting(QDialog):
             self.alert.pop(_('The proxy is not available.') + f'\nError: {e}', 'error')
         finally:
             # Restore original socket
-            socket.socket = original_socket
+            socket.socket = _original_socket
+            try:
+                from .lib import socks
+                socks.set_default_proxy(None)
+            except ImportError:
+                pass
 
     def is_valid_data(self, validator, value):
         state = validator.validate(value, 0)[0]

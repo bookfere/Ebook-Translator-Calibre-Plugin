@@ -267,21 +267,14 @@ def get_translator(engine_class=None):
     translator = engine_class()
     translator.set_search_paths(config.get('search_paths'))
 
-    # Reset socket to original state
-    socket.socket = _original_socket
-
     if config.get('socks_proxy_enabled'):
         setting = config.get('socks_proxy_setting')
         if setting and len(setting) == 2:
-            try:
-                from ..lib import socks
-                host, port = setting
-                socks.set_default_proxy(socks.SOCKS5, host, int(port), rdns=True)
-                socket.socket = socks.socksocket
-            except ImportError:
-                log.error("PySocks library not found. SOCKS proxy will not work.")
+            translator.set_proxy('SOCKS5', setting)
     elif config.get('proxy_enabled'):
-        translator.set_proxy(config.get('proxy_setting'))
+        setting = config.get('proxy_setting')
+        if setting and len(setting) == 2:
+            translator.set_proxy('HTTP', setting)
 
     translator.set_merge_enabled(config.get('merge_enabled'))
     return translator
