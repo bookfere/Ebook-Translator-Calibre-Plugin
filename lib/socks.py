@@ -794,9 +794,7 @@ class socksocket(_BaseSocket):
                 proxy_server = "{}:{}".format(proxy_addr, proxy_port)
                 printable_type = PRINTABLE_PROXY_TYPES[proxy_type]
 
-                msg = "Error connecting to {} proxy {}".format(printable_type,
-                                                                    proxy_server
-)
+                msg = "Error connecting to {} proxy {}".format(printable_type, proxy_server)
                 log.debug("%s due to: %s", msg, error)
                 raise ProxyConnectionError(msg, error)
             else:
@@ -822,20 +820,18 @@ class socksocket(_BaseSocket):
 
     @set_self_blocking
     def connect_ex(self, dest_pair):
-        """ https://docs.python.org/3/library/socket.html#socket.socket.connect_
-ex
+        """ https://docs.python.org/3/library/socket.html#socket.socket.connect_ex
         Like connect(address), but return an error indicator instead of raising
-an exception for errors returned by the C-level connect() call (other problems,
-such as "host not found" can still raise exceptions).
+        an exception for errors returned by the C-level connect() call (other
+        problems, such as "host not found" can still raise exceptions).
         """
         try:
             self.connect(dest_pair, catch_errors=True)
             return 0
         except OSError as e:
-            # If the error is numeric (socket errors are numeric), then return n
-umber as
-            # connect_ex expects. Otherwise raise the error again (socket timeou
-t for example)
+            # If the error is numeric (socket errors are numeric), then return
+            # number as connect_ex expects. Otherwise raise the error again
+            # (socket timeout for example)
             if e.errno:
                 return e.errno
             else:

@@ -1247,11 +1247,11 @@ class TranslationSetting(QDialog):
                 _('Proxy host or port is incorrect.'), level='warning')
 
         import socket
-        from ..lib.translation import _original_socket
+        from .lib.translation import _original_socket
 
         original_socket = socket.socket
         try:
-            from ..lib import socks
+            from .lib import socks
             socks.set_default_proxy(socks.SOCKS5, host, int(port), rdns=True)
             socket.socket = socks.socksocket
             # Test connection to a known external host
