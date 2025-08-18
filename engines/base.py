@@ -43,7 +43,8 @@ class Base:
     def __init__(self):
         self.source_lang: str | None = None
         self.target_lang: str | None = None
-        self.proxy_uri: str | None = None
+        self.proxy_type: str | None = None
+        self.proxy_args: list | None = None
         self.search_paths = []
 
         self.merge_enabled = False
@@ -149,11 +150,9 @@ class Base:
     def get_target_lang(self):
         return self.target_lang
 
-    def set_proxy(self, proxy=[]):
-        if isinstance(proxy, list) and len(proxy) == 2:
-            self.proxy_uri = '%s:%s' % tuple(proxy)
-            if not self.proxy_uri.startswith('http'):
-                self.proxy_uri = 'http://%s' % self.proxy_uri
+    def set_proxy(self, proxy_type, proxy_args):
+        self.proxy_type = proxy_type
+        self.proxy_args = proxy_args
 
     def set_concurrency_limit(self, limit):
         self.concurrency_limit = limit
@@ -177,11 +176,25 @@ class Base:
         return self._get_source_code() == 'auto'
 
     def translate(self, content):
+        import socket
+        from ..lib.translation import _original_socket
+
+        proxy_uri_for_http = None
+
         try:
+            if self.proxy_type == 'SOCKS5':
+                from ..lib import socks
+                host, port = self.proxy_args
+                socks.set_default_proxy(socks.SOCKS5, host, int(port), rdns=True)
+                socket.socket = socks.socksocket
+            elif self.proxy_type == 'HTTP':
+                host, port = self.proxy_args
+                proxy_uri_for_http = 'http://%s:%s' % (host, port)
+
             response = request(
                 url=self.get_endpoint(), data=self.get_body(content),
                 headers=self.get_headers(), method=self.method,
-                timeout=self.request_timeout, proxy_uri=self.proxy_uri,
+                timeout=self.request_timeout, proxy_uri=proxy_uri_for_http,
                 raw_object=self.stream)
             return self.get_result(response)
         except Exception as e:
@@ -197,6 +210,15 @@ class Base:
             raise UnexpectedResult(
                 _('Can not parse returned response. Raw data: {}')
                 .format('\n\n' + error_message))
+        finally:
+            # Always restore the original socket
+            socket.socket = _original_socket
+            if self.proxy_type == 'SOCKS5':
+                try:
+                    from ..lib import socks
+                    socks.set_default_proxy(None)
+                except ImportError:
+                    pass
 
     def get_endpoint(self):
         return self.endpoint
