@@ -790,12 +790,12 @@ class TranslationSetting(QDialog):
             translator = self.current_engine()
             translator.set_search_paths(self.get_search_paths())
 
-            # Temporarily patch socket for SOCKS test
             import socket
             from .lib.translation import _original_socket
-            socket.socket = _original_socket
 
-            if self.socks_proxy_enabled.isChecked():
+            use_socks = self.socks_proxy_enabled.isChecked()
+
+            if use_socks:
                 host = self.socks_proxy_host.text()
                 port = self.socks_proxy_port.text()
                 if host and port:
@@ -811,9 +811,18 @@ class TranslationSetting(QDialog):
                 if host and port:
                     translator.set_proxy([host, port])
 
-            EngineTester(self, translator)
-            # Restore socket after test
-            socket.socket = _original_socket
+            tester = EngineTester(self, translator)
+
+            def restore_socket_on_finish(result_code):
+                socket.socket = _original_socket
+                try:
+                    from .lib import socks
+                    socks.set_default_proxy(None)
+                except ImportError:
+                    pass
+
+            if use_socks:
+                tester.finished.connect(restore_socket_on_finish)
         engine_test.clicked.connect(make_test_translator)
 
         layout.addStretch(1)
