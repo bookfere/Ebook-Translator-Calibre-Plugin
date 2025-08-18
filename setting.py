@@ -792,7 +792,7 @@ class TranslationSetting(QDialog):
 
             # Temporarily patch socket for SOCKS test
             import socket
-            from ..lib.translation import _original_socket
+            from .lib.translation import _original_socket
             socket.socket = _original_socket
 
             if self.socks_proxy_enabled.isChecked():
@@ -800,7 +800,7 @@ class TranslationSetting(QDialog):
                 port = self.socks_proxy_port.text()
                 if host and port:
                     try:
-                        from ..lib import socks
+                        from .lib import socks
                         socks.set_default_proxy(socks.SOCKS5, host, int(port), rdns=True)
                         socket.socket = socks.socksocket
                     except ImportError:
