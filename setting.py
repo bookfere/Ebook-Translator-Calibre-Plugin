@@ -785,26 +785,35 @@ class TranslationSetting(QDialog):
         manage_engine.clicked.connect(manage_custom_translation_engine)
 
         def make_test_translator():
+            # This function needs to get the *current* UI settings, not saved config
             self.current_engine.set_config(self.get_engine_config())
             translator = self.current_engine()
             translator.set_search_paths(self.get_search_paths())
 
-            proxy_uri = None
-            if self.proxy_enabled.isChecked():
-                host = self.proxy_host.text()
-                port = self.proxy_port.text()
-                if host and port:
-                    proxy_uri = 'http://%s:%s' % (host, port)
-            elif self.socks_proxy_enabled.isChecked():
+            # Temporarily patch socket for SOCKS test
+            import socket
+            from ..lib.translation import _original_socket
+            socket.socket = _original_socket
+
+            if self.socks_proxy_enabled.isChecked():
                 host = self.socks_proxy_host.text()
                 port = self.socks_proxy_port.text()
                 if host and port:
-                    proxy_uri = 'socks5h://%s:%s' % (host, port)
-
-            if proxy_uri:
-                translator.set_proxy(proxy_uri)
+                    try:
+                        from ..lib import socks
+                        socks.set_default_proxy(socks.SOCKS5, host, int(port), rdns=True)
+                        socket.socket = socks.socksocket
+                    except ImportError:
+                        log.error("PySocks library not found. SOCKS proxy will not work.")
+            elif self.proxy_enabled.isChecked():
+                host = self.proxy_host.text()
+                port = self.proxy_port.text()
+                if host and port:
+                    translator.set_proxy([host, port])
 
             EngineTester(self, translator)
+            # Restore socket after test
+            socket.socket = _original_socket
         engine_test.clicked.connect(make_test_translator)
 
         layout.addStretch(1)
@@ -1236,9 +1245,26 @@ class TranslationSetting(QDialog):
         if not (host and port):
             return self.alert.pop(
                 _('Proxy host or port is incorrect.'), level='warning')
-        if is_proxy_available(host, port):
-            return self.alert.pop(_('The proxy is available.'))
-        return self.alert.pop(_('The proxy is not available.'), 'error')
+
+        import socket
+        from ..lib.translation import _original_socket
+
+        original_socket = socket.socket
+        try:
+            from ..lib import socks
+            socks.set_default_proxy(socks.SOCKS5, host, int(port), rdns=True)
+            socket.socket = socks.socksocket
+            # Test connection to a known external host
+            test_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            test_socket.settimeout(5)
+            test_socket.connect(("www.google.com", 80))
+            test_socket.close()
+            self.alert.pop(_('The proxy is available.'))
+        except Exception as e:
+            self.alert.pop(_('The proxy is not available.') + f'\nError: {e}', 'error')
+        finally:
+            # Restore original socket
+            socket.socket = original_socket
 
     def is_valid_data(self, validator, value):
         state = validator.validate(value, 0)[0]
