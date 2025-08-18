@@ -263,8 +263,22 @@ def get_translator(engine_class=None):
     engine_class = engine_class or get_engine_class()
     translator = engine_class()
     translator.set_search_paths(config.get('search_paths'))
+
+    proxy_uri = None
     if config.get('proxy_enabled'):
-        translator.set_proxy(config.get('proxy_setting'))
+        setting = config.get('proxy_setting')
+        if setting and len(setting) == 2:
+            host, port = setting
+            proxy_uri = 'http://%s:%s' % (host, port)
+    elif config.get('socks_proxy_enabled'):
+        setting = config.get('socks_proxy_setting')
+        if setting and len(setting) == 2:
+            host, port = setting
+            proxy_uri = 'socks5h://%s:%s' % (host, port)
+
+    if proxy_uri:
+        translator.set_proxy(proxy_uri)
+
     translator.set_merge_enabled(config.get('merge_enabled'))
     return translator
 

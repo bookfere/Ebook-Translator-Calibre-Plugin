@@ -19,6 +19,8 @@ defaults = {
     'engine_preferences': {},
     'proxy_enabled': False,
     'proxy_setting': [],
+    'socks_proxy_enabled': False,
+    'socks_proxy_setting': [],
     'cache_enabled': True,
     'cache_path': None,
     'log_translation': True,

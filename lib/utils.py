@@ -103,7 +103,7 @@ def is_str(data):
 
 def is_proxy_available(host, port, timeout=1):
     try:
-        host = host.replace('http://', '')
+        host = re.sub(r'^(http|socks5h)://', '', host)
         socket.create_connection((host, int(port)), timeout).close()
     except Exception:
         return False
