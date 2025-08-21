@@ -1,4 +1,5 @@
 import unittest
+from typing import Any
 from unittest.mock import call, Mock
 
 from ..lib.config import (
@@ -10,14 +11,15 @@ class TestFunction(unittest.TestCase):
         self.config = get_config()
 
     def test_default(self):
-        defaults = {
+        defaults: dict[str, Any] = {
             'preferred_mode': None,
             'to_library': True,
             'output_path': None,
             'translate_engine': None,
             'engine_preferences': {},
             'proxy_enabled': False,
-            'proxy_setting': [],
+            'proxy_type': 'http',
+            'proxy_setting': {},
             'cache_enabled': True,
             'cache_path': None,
             'log_translation': True,

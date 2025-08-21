@@ -4,13 +4,17 @@ import ssl
 import socket
 import hashlib
 import traceback
+from types import ModuleType
+from typing import Generator
 from subprocess import Popen
+from contextlib import contextmanager
 
 from calibre import get_proxies
 from mechanize import Browser, Request
 from mechanize._response import response_seek_wrapper as Response
 
-from ..lib.cssselect import GenericTranslator, SelectorError
+from . import socks
+from .cssselect import GenericTranslator, SelectorError
 
 
 ns = {'x': 'http://www.w3.org/1999/xhtml'}
@@ -159,3 +163,18 @@ def request(
     br.open(_request)
     response: Response = br.response()
     return response if raw_object else response.read().decode('utf-8').strip()
+
+
+@contextmanager
+def socks_proxy(host: str, port: int) -> Generator[ModuleType, None, None]:
+    """This is a monkey-patch approach to enforce Mechanize to use a SOCKS5
+    proxy. The context manager restores the original socket after it exits.
+    """
+    _original_socket = socket.socket
+    socks.set_default_proxy(socks.SOCKS5, host, int(port), rdns=True)
+    socket.socket = socks.socksocket
+    try:
+        yield socket
+    finally:
+        socket.socket = _original_socket
+        socks.set_default_proxy(None)

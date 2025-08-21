@@ -13,7 +13,7 @@ from calibre.utils.logging import default_log as log
 from calibre.gui2 import error_dialog
 
 from .lib.config import get_config
-from .lib.utils import css, is_proxy_available, traceback_error
+from .lib.utils import css, is_proxy_available, traceback_error, socks_proxy
 from .lib.translation import get_engine_class, get_translator
 from .engines import (
     builtin_engines, GeminiTranslate, ChatgptTranslate, AzureChatgptTranslate)
@@ -258,12 +258,19 @@ class TranslationSetting(QDialog):
             lambda checked: self.config.update(merge_enabled=checked))
 
         # Network Proxy
-        proxy_group = QGroupBox(_('HTTP Proxy'))
+        proxy_group = QGroupBox(_('Network Proxy'))
         proxy_layout = QHBoxLayout()
 
         self.proxy_enabled = QCheckBox(_('Enable'))
         self.proxy_enabled.setChecked(self.config.get('proxy_enabled'))
         proxy_layout.addWidget(self.proxy_enabled)
+
+        self.proxy_type = QComboBox()
+        self.proxy_type.addItems(['http', 'socks5'])
+        self.proxy_type.setStyleSheet('text-transform:uppercase;')
+        proxy_layout.addWidget(self.proxy_type)
+
+        self.proxy_type.setCurrentText(self.config.get('proxy_type'))
 
         self.proxy_host = QLineEdit()
         rule = r'^(http://|)([a-zA-Z\d]+:[a-zA-Z\d]+@|)' \
@@ -289,58 +296,27 @@ class TranslationSetting(QDialog):
         proxy_test.clicked.connect(self.test_proxy_connection)
         proxy_layout.addWidget(proxy_test)
 
-        proxy_setting = self.config.get('proxy_setting')
-        if len(proxy_setting) == 2:
-            self.proxy_host.setText(proxy_setting[0])
-            self.proxy_port.setText(str(proxy_setting[1]))
         proxy_group.setLayout(proxy_layout)
         layout.addWidget(proxy_group)
 
-        # SOCKS5 Proxy
-        socks_proxy_group = QGroupBox('%s (%s)' % (_('SOCKS5 Proxy'), _('TOR support')))
-        socks_proxy_layout = QHBoxLayout()
+        def fill_proxy_setting(proxy_type):
+            self.proxy_host.clear()
+            self.proxy_port.clear()
+            proxy_setting = self.config.get('proxy_setting')
+            # Compatible with old proxy settings stored as a list.
+            if isinstance(proxy_setting, list):
+                proxy_setting = {'http': proxy_setting}
+            host, port = proxy_setting.get(proxy_type) or ['', '']
+            self.proxy_host.setText(host)
+            self.proxy_port.setText(str(port))
+        fill_proxy_setting(self.proxy_type.currentText())
+        self.proxy_type.currentTextChanged.connect(fill_proxy_setting)
 
-        self.socks_proxy_enabled = QCheckBox(_('Enable'))
-        self.socks_proxy_enabled.setChecked(self.config.get('socks_proxy_enabled'))
-        socks_proxy_layout.addWidget(self.socks_proxy_enabled)
-
-        self.socks_proxy_host = QLineEdit()
-        self.socks_proxy_host.setPlaceholderText(_('Host') + ' (127.0.0.1)')
-        socks_proxy_layout.addWidget(self.socks_proxy_host, 4)
-        self.socks_proxy_port = QLineEdit()
-        self.socks_proxy_port.setPlaceholderText(_('Port'))
-        self.socks_proxy_port.setValidator(port_validator)
-        socks_proxy_layout.addWidget(self.socks_proxy_port, 1)
-
-        self.socks_proxy_port.textChanged.connect(
-            lambda num: self.socks_proxy_port.setText(
-                num if not num or int(num) < port_validator.top()
-                else str(port_validator.top())))
-
-        socks_proxy_test = QPushButton(_('Test'))
-        socks_proxy_test.clicked.connect(self.test_socks_proxy_connection)
-        socks_proxy_layout.addWidget(socks_proxy_test)
-
-        socks_proxy_setting = self.config.get('socks_proxy_setting')
-        if len(socks_proxy_setting) == 2:
-            self.socks_proxy_host.setText(socks_proxy_setting[0])
-            self.socks_proxy_port.setText(str(socks_proxy_setting[1]))
-        socks_proxy_group.setLayout(socks_proxy_layout)
-        layout.addWidget(socks_proxy_group)
-
-        def mutually_exclusive_proxies(checked, proxy_type):
-            if checked:
-                if proxy_type == 'http':
-                    self.socks_proxy_enabled.setChecked(False)
-                else:
-                    self.proxy_enabled.setChecked(False)
-            self.config.update(proxy_enabled=self.proxy_enabled.isChecked())
-            self.config.update(socks_proxy_enabled=self.socks_proxy_enabled.isChecked())
-
-        self.proxy_enabled.toggled.connect(
-            lambda checked: mutually_exclusive_proxies(checked, 'http'))
-        self.socks_proxy_enabled.toggled.connect(
-            lambda checked: mutually_exclusive_proxies(checked, 'socks'))
+        def enable_setting_editing(enable):
+            self.proxy_type.setEnabled(enable)
+            self.proxy_host.setEnabled(enable)
+            self.proxy_port.setEnabled(enable)
+        self.proxy_enabled.toggled.connect(enable_setting_editing)
 
         misc_widget = QWidget()
         misc_layout = QHBoxLayout(misc_widget)
@@ -785,22 +761,14 @@ class TranslationSetting(QDialog):
         manage_engine.clicked.connect(manage_custom_translation_engine)
 
         def make_test_translator():
-            # This function needs to get the *current* UI settings, not saved config
+            # This gets the current settings from the UI, not the saved ones.
             self.current_engine.set_config(self.get_engine_config())
             translator = self.current_engine()
             translator.set_search_paths(self.get_search_paths())
-
-            if self.socks_proxy_enabled.isChecked():
-                host = self.socks_proxy_host.text()
-                port = self.socks_proxy_port.text()
-                if host and port:
-                    translator.set_proxy('SOCKS5', [host, port])
-            elif self.proxy_enabled.isChecked():
-                host = self.proxy_host.text()
-                port = self.proxy_port.text()
-                if host and port:
-                    translator.set_proxy('HTTP', [host, port])
-
+            translator.set_proxy(
+                self.proxy_type.currentText(),
+                self.proxy_host.text(),
+                self.proxy_port.text())
             EngineTester(self, translator)
         engine_test.clicked.connect(make_test_translator)
 
@@ -1218,45 +1186,30 @@ class TranslationSetting(QDialog):
         return widget
 
     def test_proxy_connection(self):
+        proxy_type = self.proxy_type.currentText()
         host = self.proxy_host.text()
         port = self.proxy_port.text()
         if not (self.is_valid_data(self.host_validator, host) and port):
             return self.alert.pop(
                 _('Proxy host or port is incorrect.'), level='warning')
-        if is_proxy_available(host, port):
-            return self.alert.pop(_('The proxy is available.'))
-        return self.alert.pop(_('The proxy is not available.'), 'error')
-
-    def test_socks_proxy_connection(self):
-        host = self.socks_proxy_host.text()
-        port = self.socks_proxy_port.text()
-        if not (host and port):
-            return self.alert.pop(
-                _('Proxy host or port is incorrect.'), level='warning')
-
-        import socket
-        from .lib.translation import _original_socket
-
-        try:
-            from .lib import socks
-            socks.set_default_proxy(socks.SOCKS5, host, int(port), rdns=True)
-            socket.socket = socks.socksocket
-            # Test connection to a known external host
-            test_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            test_socket.settimeout(10)
-            test_socket.connect(("www.google.com", 80))
-            test_socket.close()
-            self.alert.pop(_('The proxy is available.'))
-        except Exception as e:
-            self.alert.pop(_('The proxy is not available.') + f'\nError: {e}', 'error')
-        finally:
-            # Restore original socket
-            socket.socket = _original_socket
+        if proxy_type == 'http':
+            if is_proxy_available(host, port):
+                return self.alert.pop(_('The proxy is available.'))
+            return self.alert.pop(_('The proxy is not available.'), 'error')
+        elif proxy_type == 'socks5':
             try:
-                from .lib import socks
-                socks.set_default_proxy(None)
-            except ImportError:
-                pass
+                with socks_proxy(host, port) as socket:
+                    # Test connection to a known external host
+                    test_socket = socket.socket(
+                        socket.AF_INET, socket.SOCK_STREAM)
+                    test_socket.settimeout(10)
+                    test_socket.connect(("www.google.com", 80))
+                    test_socket.close()
+                    self.alert.pop(_('The proxy is available.'))
+            except Exception as e:
+                self.alert.pop(
+                    _('The proxy is not available.') + f'\nError: {e}',
+                    'error')
 
     def is_valid_data(self, validator, value):
         state = validator.validate(value, 0)[0]
@@ -1280,7 +1233,8 @@ class TranslationSetting(QDialog):
         self.config.update(merge_length=self.merge_length.value())
 
         # Proxy setting
-        proxy_setting = []
+        proxy_setting = self.config.get('proxy_setting')
+        proxy_type = self.proxy_type.currentText()
         host = self.proxy_host.text()
         port = self.proxy_port.text()
         if self.config.get('proxy_enabled') or (host or port):
@@ -1288,24 +1242,14 @@ class TranslationSetting(QDialog):
                 self.alert.pop(
                     _('Proxy host or port is incorrect.'), level='warning')
                 return False
-            proxy_setting.append(host)
-            proxy_setting.append(int(port))
+            self.config.update(proxy_type=proxy_type)
+            # Compatible with old proxy settings stored as a list.
+            if isinstance(proxy_setting, list):
+                proxy_setting = {} if len(proxy_setting) < 1 else \
+                    {'http': proxy_setting}
+            proxy_setting[proxy_type] = [host, int(port)]
             self.config.update(proxy_setting=proxy_setting)
         len(proxy_setting) < 1 and self.config.delete('proxy_setting')
-
-        # SOCKS5 proxy setting
-        socks_proxy_setting = []
-        host = self.socks_proxy_host.text()
-        port = self.socks_proxy_port.text()
-        if self.config.get('socks_proxy_enabled') or (host or port):
-            if not (host and port):
-                self.alert.pop(
-                    _('Proxy host or port is incorrect.'), level='warning')
-                return False
-            socks_proxy_setting.append(host)
-            socks_proxy_setting.append(int(port))
-            self.config.update(socks_proxy_setting=socks_proxy_setting)
-        len(socks_proxy_setting) < 1 and self.config.delete('socks_proxy_setting')
 
         # Search paths
         search_paths = self.get_search_paths()

@@ -1,11 +1,13 @@
 import os.path
-from typing import Any
+from typing import Any, ContextManager
+from weakref import finalize
 
 from mechanize import HTTPError
 from mechanize._response import response_seek_wrapper as Response
 from calibre.utils.localization import lang_as_iso639_1
+from calibre.utils.logging import default_log as log
 
-from ..lib.utils import traceback_error, request
+from ..lib.utils import traceback_error, request, socks_proxy
 from ..lib.exception import UnexpectedResult
 
 from .languages import lang_directionality
@@ -25,6 +27,7 @@ class Base:
     method = 'POST'
     headers: dict[str, str] = {}
     stream = False
+
     need_api_key = True
     api_key_hint = _('API Keys')
     api_key_pattern = r'^[^\s]+$'
@@ -43,9 +46,9 @@ class Base:
     def __init__(self):
         self.source_lang: str | None = None
         self.target_lang: str | None = None
-        self.proxy_type: str | None = None
-        self.proxy_args: list | None = None
         self.search_paths = []
+
+        self.proxy_uri: str | None = None
 
         self.merge_enabled = False
         self.api_keys: list = self.config.get('api_keys', [])[:]
@@ -67,6 +70,9 @@ class Base:
         max_error_count = self.config.get('max_error_count')
         if max_error_count is not None:
             self.max_error_count = max_error_count
+
+        self.socks_proxy: ContextManager | None = None
+        finalize(self, self._unset_proxy)
 
     @classmethod
     def load_lang_codes(cls, codes):
@@ -150,9 +156,20 @@ class Base:
     def get_target_lang(self):
         return self.target_lang
 
-    def set_proxy(self, proxy_type, proxy_args):
-        self.proxy_type = proxy_type
-        self.proxy_args = proxy_args
+    def set_proxy(self, proxy_type: str, host: str, port: int):
+        log.info(f'Proxy - type: {proxy_type}, host: {host}, port: {port}')
+        match proxy_type:
+            case 'http':
+                self.proxy_uri = f'{host}:{port}'
+                if not self.proxy_uri.startswith('http'):
+                    self.proxy_uri = f'http://{self.proxy_uri}'
+            case 'socks5':
+                self.socks_proxy = socks_proxy(host, port)
+                self.socks_proxy.__enter__()
+
+    def _unset_proxy(self):
+        if self.socks_proxy is not None:
+            self.socks_proxy.__exit__(None, None, None)
 
     def set_concurrency_limit(self, limit):
         self.concurrency_limit = limit
@@ -176,25 +193,14 @@ class Base:
         return self._get_source_code() == 'auto'
 
     def translate(self, content):
-        import socket
-        from ..lib.translation import _original_socket
-
-        proxy_uri_for_http = None
-
         try:
-            if self.proxy_type == 'SOCKS5':
-                from ..lib import socks
-                host, port = self.proxy_args
-                socks.set_default_proxy(socks.SOCKS5, host, int(port), rdns=True)
-                socket.socket = socks.socksocket
-            elif self.proxy_type == 'HTTP':
-                host, port = self.proxy_args
-                proxy_uri_for_http = 'http://%s:%s' % (host, port)
-
             response = request(
-                url=self.get_endpoint(), data=self.get_body(content),
-                headers=self.get_headers(), method=self.method,
-                timeout=self.request_timeout, proxy_uri=proxy_uri_for_http,
+                url=self.get_endpoint(),
+                data=self.get_body(content),
+                headers=self.get_headers(),
+                method=self.method,
+                proxy_uri=self.proxy_uri,
+                timeout=self.request_timeout,
                 raw_object=self.stream)
             return self.get_result(response)
         except Exception as e:
@@ -210,15 +216,6 @@ class Base:
             raise UnexpectedResult(
                 _('Can not parse returned response. Raw data: {}')
                 .format('\n\n' + error_message))
-        finally:
-            # Always restore the original socket
-            socket.socket = _original_socket
-            if self.proxy_type == 'SOCKS5':
-                try:
-                    from ..lib import socks
-                    socks.set_default_proxy(None)
-                except ImportError:
-                    pass
 
     def get_endpoint(self):
         return self.endpoint

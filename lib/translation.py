@@ -1,7 +1,6 @@
 import re
 import time
 import json
-import socket
 from types import GeneratorType
 
 from ..engines import builtin_engines
@@ -16,8 +15,6 @@ from .handler import Handler
 
 
 load_translations()
-
-_original_socket = socket.socket
 
 
 class Glossary:
@@ -266,16 +263,15 @@ def get_translator(engine_class=None):
     engine_class = engine_class or get_engine_class()
     translator = engine_class()
     translator.set_search_paths(config.get('search_paths'))
-
-    if config.get('socks_proxy_enabled'):
-        setting = config.get('socks_proxy_setting')
-        if setting and len(setting) == 2:
-            translator.set_proxy('SOCKS5', setting)
-    elif config.get('proxy_enabled'):
-        setting = config.get('proxy_setting')
-        if setting and len(setting) == 2:
-            translator.set_proxy('HTTP', setting)
-
+    if config.get('proxy_enabled'):
+        proxy_type: str = config.get('proxy_type')
+        proxy_setting: dict[str, list] = config.get('proxy_setting')
+        if proxy_type is not None and proxy_setting is not None:
+            # Compatible with old proxy settings stored as a list.
+            if isinstance(proxy_setting, list):
+                proxy_setting = {'http': proxy_setting}
+            host, port = proxy_setting.get(proxy_type) or ['', '']
+            translator.set_proxy(proxy_type, host, port)
     translator.set_merge_enabled(config.get('merge_enabled'))
     return translator
 
