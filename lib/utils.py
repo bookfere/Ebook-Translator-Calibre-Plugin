@@ -1,4 +1,5 @@
 import re
+import os
 import sys
 import ssl
 import socket
@@ -10,6 +11,8 @@ from subprocess import Popen
 from contextlib import contextmanager
 
 from calibre import get_proxies
+from calibre.constants import DEBUG
+from calibre.utils.logging import Log
 from mechanize import Browser, Request
 from mechanize._response import response_seek_wrapper as Response
 
@@ -19,6 +22,7 @@ from .cssselect import GenericTranslator, SelectorError
 
 ns = {'x': 'http://www.w3.org/1999/xhtml'}
 is_test = 'unittest' in sys.modules
+log = Log(level=Log.DEBUG if DEBUG else Log.INFO)
 
 
 def dummy(*args, **kwargs):
@@ -148,7 +152,8 @@ def request(
     # Do not verify SSL certificates
     br.set_ca_data(
         context=ssl._create_unverified_context(cert_reqs=ssl.CERT_NONE))
-    # Set up proxy
+    # Set up a proxy; use the proxy settings if available, otherwise read from
+    # the environment.
     proxies: dict = {}
     if proxy_uri is not None:
         proxies.update(http=proxy_uri, https=proxy_uri)
@@ -170,11 +175,24 @@ def socks_proxy(host: str, port: int) -> Generator[ModuleType, None, None]:
     """This is a monkey-patch approach to enforce Mechanize to use a SOCKS5
     proxy. The context manager restores the original socket after it exits.
     """
+    # Temporarily remove environment proxies to prevent conflicts with the
+    # SOCKS5 proxy, which might otherwise send connections through an HTTP
+    # proxy, causing a "General SOCKS server failure" error.
+    backup_http = os.environ.pop("http_proxy", None)
+    backup_https = os.environ.pop("https_proxy", None)
     _original_socket = socket.socket
+    log.debug('Backup original socket: ', id(_original_socket))
     socks.set_default_proxy(socks.SOCKS5, host, int(port), rdns=True)
     socket.socket = socks.socksocket
+    log.debug('Patched changed socket: ', id(socket.socket))
     try:
         yield socket
     finally:
+        log.debug('Restore original socket: ', id(_original_socket))
         socket.socket = _original_socket
         socks.set_default_proxy(None)
+        # Restore the environment proxies if any exist.
+        if backup_http is not None:
+            os.environ['http_proxy'] = backup_http
+        if backup_https is not None:
+            os.environ['https_proxy'] = backup_https
