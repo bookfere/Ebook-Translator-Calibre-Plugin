@@ -264,7 +264,14 @@ def get_translator(engine_class=None):
     translator = engine_class()
     translator.set_search_paths(config.get('search_paths'))
     if config.get('proxy_enabled'):
-        translator.set_proxy(config.get('proxy_setting'))
+        proxy_type: str = config.get('proxy_type')
+        proxy_setting: dict[str, list] = config.get('proxy_setting')
+        if proxy_type is not None and proxy_setting is not None:
+            # Compatible with old proxy settings stored as a list.
+            if isinstance(proxy_setting, list):
+                proxy_setting = {'http': proxy_setting}
+            host, port = proxy_setting.get(proxy_type) or ['', '']
+            translator.set_proxy(proxy_type, host, port)
     translator.set_merge_enabled(config.get('merge_enabled'))
     return translator
 

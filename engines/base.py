@@ -1,11 +1,13 @@
+import socket
 import os.path
-from typing import Any
+from typing import Any, ContextManager, ClassVar
+from weakref import finalize
 
 from mechanize import HTTPError
 from mechanize._response import response_seek_wrapper as Response
 from calibre.utils.localization import lang_as_iso639_1
 
-from ..lib.utils import traceback_error, request
+from ..lib.utils import log, traceback_error, request, socks_proxy
 from ..lib.exception import UnexpectedResult
 
 from .languages import lang_directionality
@@ -25,6 +27,7 @@ class Base:
     method = 'POST'
     headers: dict[str, str] = {}
     stream = False
+
     need_api_key = True
     api_key_hint = _('API Keys')
     api_key_pattern = r'^[^\s]+$'
@@ -40,11 +43,14 @@ class Base:
     request_timeout: float = 10.0
     max_error_count: int = 10
 
+    socks_proxy: ClassVar[ContextManager | None] = None
+
     def __init__(self):
         self.source_lang: str | None = None
         self.target_lang: str | None = None
-        self.proxy_uri: str | None = None
         self.search_paths = []
+
+        self.proxy_uri: str | None = None
 
         self.merge_enabled = False
         self.api_keys: list = self.config.get('api_keys', [])[:]
@@ -66,6 +72,8 @@ class Base:
         max_error_count = self.config.get('max_error_count')
         if max_error_count is not None:
             self.max_error_count = max_error_count
+
+        finalize(self, Base._unset_proxy)
 
     @classmethod
     def load_lang_codes(cls, codes):
@@ -149,11 +157,22 @@ class Base:
     def get_target_lang(self):
         return self.target_lang
 
-    def set_proxy(self, proxy=[]):
-        if isinstance(proxy, list) and len(proxy) == 2:
-            self.proxy_uri = '%s:%s' % tuple(proxy)
-            if not self.proxy_uri.startswith('http'):
-                self.proxy_uri = 'http://%s' % self.proxy_uri
+    def set_proxy(self, proxy_type: str, host: str, port: int):
+        log.debug(f'Proxy - type: {proxy_type}, host: {host}, port: {port}')
+        match proxy_type:
+            case 'http':
+                self.proxy_uri = f'{host}:{port}'
+                if not self.proxy_uri.startswith('http'):
+                    self.proxy_uri = f'http://{self.proxy_uri}'
+            case 'socks5':
+                Base.socks_proxy = socks_proxy(host, port)
+                Base.socks_proxy.__enter__()
+
+    @classmethod
+    def _unset_proxy(cls):
+        if cls.socks_proxy is not None:
+            cls.socks_proxy.__exit__(None, None, None)
+            log.debug('Clear socks5 proxy.')
 
     def set_concurrency_limit(self, limit):
         self.concurrency_limit = limit
@@ -178,10 +197,14 @@ class Base:
 
     def translate(self, content):
         try:
+            log.debug('Used socket: ', id(socket.socket))
             response = request(
-                url=self.get_endpoint(), data=self.get_body(content),
-                headers=self.get_headers(), method=self.method,
-                timeout=self.request_timeout, proxy_uri=self.proxy_uri,
+                url=self.get_endpoint(),
+                data=self.get_body(content),
+                headers=self.get_headers(),
+                method=self.method,
+                proxy_uri=self.proxy_uri,
+                timeout=self.request_timeout,
                 raw_object=self.stream)
             return self.get_result(response)
         except Exception as e:
@@ -194,6 +217,7 @@ class Base:
             # Swap a valid API key if necessary.
             if self.need_swap_api_key(error_message) and self.swap_api_key():
                 return self.translate(content)
+            self._unset_proxy()
             raise UnexpectedResult(
                 _('Can not parse returned response. Raw data: {}')
                 .format('\n\n' + error_message))

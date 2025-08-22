@@ -1,6 +1,7 @@
 import os
 import os.path
 import shutil
+from typing import Any
 
 from calibre.constants import config_dir
 from calibre.utils.config_base import plugin_dir
@@ -11,14 +12,15 @@ from ..engines import (
     GoogleFreeTranslateNew, ChatgptTranslate, AzureChatgptTranslate)
 
 
-defaults = {
+defaults: dict[str, Any] = {
     'preferred_mode': None,
     'to_library': True,
     'output_path': None,
     'translate_engine': None,
     'engine_preferences': {},
     'proxy_enabled': False,
-    'proxy_setting': [],
+    'proxy_type': 'http',
+    'proxy_setting': {},
     'cache_enabled': True,
     'cache_path': None,
     'log_translation': True,

@@ -6,7 +6,7 @@ from tempfile import gettempdir
 
 from calibre import sanitize_file_name
 from calibre.gui2 import Dispatcher
-from calibre.utils.logging import default_log as log, Stream
+from calibre.utils.logging import Stream
 from calibre.constants import DEBUG, __version__
 from calibre.ebooks.conversion.plumber import (
     Plumber, CompositeProgressReporter)
@@ -16,7 +16,7 @@ from calibre.ebooks.metadata.meta import get_metadata, set_metadata
 from .. import EbookTranslator
 
 from .config import get_config
-from .utils import sep, uid, open_path, open_file
+from .utils import log, sep, uid, open_path, open_file
 from .cache import get_cache
 from .element import (
     get_element_handler, get_srt_elements, get_toc_elements, get_page_elements,
