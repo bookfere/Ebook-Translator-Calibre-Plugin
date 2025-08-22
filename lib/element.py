@@ -5,10 +5,10 @@ from typing import Any
 
 from lxml import etree
 from calibre import prepare_string_for_xml as xml_escape
-from calibre.utils.logging import default_log as log
 
 from .utils import (
-    ns, uid, trim, sorted_mixed_keys, open_file, css_to_xpath, create_xpath)
+    log, ns, uid, trim, sorted_mixed_keys, open_file, css_to_xpath,
+    create_xpath)
 from .config import get_config
 
 

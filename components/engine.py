@@ -3,10 +3,10 @@ import uuid
 from types import GeneratorType
 
 from qt.core import (
-    pyqtSignal, pyqtSlot, QDialog, QThread, QGridLayout, QPushButton,
+    Qt, pyqtSignal, pyqtSlot, QDialog, QThread, QGridLayout, QPushButton,
     QPlainTextEdit, QObject, QTextCursor, QLabel, QComboBox, QSpacerItem)
 
-from ..lib.utils import sorted_mixed_keys, traceback_error
+from ..lib.utils import log, sorted_mixed_keys, traceback_error
 from ..lib.config import get_config
 from ..engines.custom import (
     create_engine_template, load_engine_data, CustomTranslate)
@@ -80,7 +80,9 @@ class EngineWorker(QObject):
             self.complete.emit()
         except Exception:
             self.clear.emit()
-            self.result.emit(traceback_error())
+            error_message = traceback_error()
+            self.result.emit(error_message)
+            log.error(error_message)
 
     @pyqtSlot()
     def check_usage(self):
@@ -95,6 +97,7 @@ class EngineTester(QDialog):
         QDialog.__init__(self, parent)
         self.parent = parent
         self.translator = translator
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.setWindowTitle(_('Test Translation Engine'))
         self.setModal(True)
         self.setMinimumWidth(500)
@@ -127,8 +130,9 @@ class EngineTester(QDialog):
         source_lang.currentTextChanged.connect(change_source_lang)
 
         target_lang = TargetLang()
-        target_lang.set_codes(self.translator.lang_codes.get('target'),
-                              self.parent.target_lang.currentText())
+        target_lang.set_codes(
+            self.translator.lang_codes.get('target'),
+            self.parent.target_lang.currentText())
         layout.addWidget(target_lang, 2, 1)
 
         def change_target_lang(lang):
@@ -174,9 +178,11 @@ class EngineTester(QDialog):
         translate.clicked.connect(test_translate)
 
     def done(self, result):
-        self.usage_thread.terminate()
-        self.translation_thread.terminate()
         QDialog.done(self, result)
+        self.usage_thread.quit()
+        self.usage_thread.wait()
+        self.translation_thread.quit()
+        self.translation_thread.wait()
 
 
 class ManageCustomEngine(QDialog):

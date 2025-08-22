@@ -9,11 +9,11 @@ from qt.core import (
     QButtonGroup, QColorDialog, QSpinBox, QPalette, QApplication, QFrame,
     QComboBox, QRegularExpression, pyqtSignal, QFormLayout, QDoubleSpinBox,
     QSpacerItem, QRegularExpressionValidator, QBoxLayout, QThread, pyqtSlot)
-from calibre.utils.logging import default_log as log
 from calibre.gui2 import error_dialog
 
 from .lib.config import get_config
-from .lib.utils import css, is_proxy_available, traceback_error, socks_proxy
+from .lib.utils import (
+    log, css, is_proxy_available, traceback_error, socks_proxy)
 from .lib.translation import get_engine_class, get_translator
 from .engines import (
     builtin_engines, GeminiTranslate, ChatgptTranslate, AzureChatgptTranslate)
