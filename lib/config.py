@@ -3,9 +3,9 @@ import os.path
 import shutil
 from typing import Any
 
-from calibre.constants import config_dir
-from calibre.utils.config_base import plugin_dir
-from calibre.utils.config import JSONConfig
+from calibre.constants import config_dir  # type: ignore
+from calibre.utils.config_base import plugin_dir  # type: ignore
+from calibre.utils.config import JSONConfig  # type: ignore
 
 from .. import EbookTranslator
 from ..engines import (
@@ -109,10 +109,14 @@ def get_config():
 def upgrade_config():
     config = get_config()
     version = EbookTranslator.version
-    version >= (2, 0, 0) and ver200_upgrade(config)
-    version >= (2, 0, 3) and ver203_upgrade(config)
-    version >= (2, 0, 5) and ver205_upgrade(config)
-    version >= (2, 4, 0) and ver240_upgrade()
+    if version >= (2, 0, 0):  # type: ignore
+        ver200_upgrade(config)
+    if version >= (2, 0, 3):  # type: ignore
+        ver203_upgrade(config)
+    if version >= (2, 0, 5):  # type: ignore
+        ver205_upgrade(config)
+    if version >= (2, 4, 0):  # type: ignore
+        ver240_upgrade()
 
 
 def ver200_upgrade(config):
@@ -132,7 +136,7 @@ def ver200_upgrade(config):
         if len(chatgpt_prompt) > 0:
             preference = get_engine_preference(ChatgptTranslate.name)
             prompts = config.get('chatgpt_prompt')
-            if 'lang' in chatgpt_prompt:
+            if preference is not None and 'lang' in chatgpt_prompt:
                 preference.update(prompt=prompts.get('lang'))
         config.delete('chatgpt_prompt')
 
@@ -140,14 +144,16 @@ def ver200_upgrade(config):
     if languages is not None:
         for engine_name, language in languages.items():
             preference = get_engine_preference(engine_name)
-            preference.update(target_lang=language)
+            if preference is not None:
+                preference.update(target_lang=language)
         config.delete('preferred_language')
 
     api_keys = config.get('api_key')
     if api_keys is not None:
         for engine_name, api_key in api_keys.items():
             preference = get_engine_preference(engine_name)
-            preference.update(api_keys=[api_key])
+            if preference is not None:
+                preference.update(api_keys=[api_key])
         config.delete('api_key')
 
     if len(engine_preferences) > 0:

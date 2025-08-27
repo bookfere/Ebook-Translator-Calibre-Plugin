@@ -1,9 +1,9 @@
-from qt.core import QWidget, QHBoxLayout, QLabel
-from calibre.utils.localization import get_lang
-from calibre_plugins.ebook_translator import EbookTranslator
+from qt.core import QWidget, QHBoxLayout, QLabel  # type: ignore
+from calibre.utils.localization import get_lang  # type: ignore
+from calibre_plugins.ebook_translator import EbookTranslator  # type: ignore
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class Footer(QWidget):

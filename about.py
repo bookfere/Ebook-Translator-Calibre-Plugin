@@ -1,16 +1,16 @@
 import re
 import zipfile
 
-from qt.core import (
+from qt.core import ( # type: ignore
     Qt, QLabel, QDialog, QWidget, QVBoxLayout, QTextBrowser, QTextDocument)
-from calibre.library.comments import markdown
-from calibre.utils.localization import get_lang
+from calibre.library.comments import markdown # type: ignore
+from calibre.utils.localization import get_lang # type: ignore
 
 from . import EbookTranslator
 from .components import Footer
 
 
-load_translations()
+load_translations() # type: ignore
 
 
 class AboutDialog(QDialog):
@@ -63,7 +63,7 @@ class AboutDialog(QDialog):
         default = 'README.md'
         foreign = default.replace('.', '.%s.' % get_lang().replace('_', '-'))
         resource = self.get_resource(foreign) or self.get_resource(default)
-        return resource.decode('utf-8')
+        return '' if resource is None else resource.decode('utf-8')
 
     def get_resource(self, filename):
         """Replace the built-in get_resources function because it cannot

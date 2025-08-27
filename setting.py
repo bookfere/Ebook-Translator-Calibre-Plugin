@@ -2,14 +2,15 @@ import re
 import os
 import os.path
 
-from qt.core import (
+from qt.core import (  # type: ignore
     Qt, QLabel, QDialog, QWidget, QLineEdit, QPushButton, QPlainTextEdit,
     QTabWidget, QHBoxLayout, QVBoxLayout, QGroupBox, QFileDialog, QColor,
     QIntValidator, QScrollArea, QRadioButton, QGridLayout, QCheckBox, QObject,
     QButtonGroup, QColorDialog, QSpinBox, QPalette, QApplication, QFrame,
     QComboBox, QRegularExpression, pyqtSignal, QFormLayout, QDoubleSpinBox,
     QSpacerItem, QRegularExpressionValidator, QBoxLayout, QThread, pyqtSlot)
-from calibre.gui2 import error_dialog
+from calibre.gui2 import error_dialog  # type: ignore
+from calibre.utils.localization import _  # type: ignore
 
 from .lib.config import get_config
 from .lib.utils import (
@@ -24,7 +25,7 @@ from .components import (
     ManageCustomEngine, InputFormat, OutputFormat, set_shortcut)
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class ModelWorker(QObject):
@@ -41,6 +42,8 @@ class ModelWorker(QObject):
     def get_models(self, engine_class):
         try:
             engine = get_translator(engine_class)
+            if not isinstance(engine, GenAI):
+                raise Exception(f'{engine.__class__} is not a GenAI instance.')
             engine_class.models = engine.get_models()
             self.success.emit(True, '')
         except Exception:
@@ -302,7 +305,7 @@ class TranslationSetting(QDialog):
         def fill_proxy_setting(proxy_type):
             self.proxy_host.clear()
             self.proxy_port.clear()
-            proxy_setting = self.config.get('proxy_setting')
+            proxy_setting = self.config.get('proxy_setting') or {}
             # Compatible with old proxy settings stored as a list.
             if isinstance(proxy_setting, list):
                 proxy_setting = {'http': proxy_setting}
@@ -377,7 +380,8 @@ class TranslationSetting(QDialog):
         path_layout.addWidget(path_desc)
         path_layout.addWidget(self.path_list)
 
-        self.path_list.setPlainText('\n'.join(self.config.get('search_paths')))
+        self.path_list.setPlainText(
+            '\n'.join(self.config.get('search_paths') or []))
 
         layout.addWidget(path_group)
 
@@ -560,6 +564,8 @@ class TranslationSetting(QDialog):
 
         # Setup genAI model
         def init_ai_models(model=None):
+            if not isinstance(self.current_engine, GenAI):
+                return
             try:
                 genai_model_list.currentTextChanged.disconnect()
             except TypeError:
@@ -612,7 +618,8 @@ class TranslationSetting(QDialog):
         genai_model_refresh.clicked.connect(man_fetch_ai_models)
 
         def auto_fetch_ai_models():
-            if self.tabs.currentIndex() != 0 \
+            if issubclass(self.current_engine, GenAI) \
+                    and self.tabs.currentIndex() != 0 \
                     and len(self.current_engine.models) < 1 \
                     and self.api_keys.toPlainText().strip() != '':
                 fetch_ai_models()
@@ -629,6 +636,8 @@ class TranslationSetting(QDialog):
         self.model_worker.success.connect(handle_worker_status)
 
         def show_genai_preferences(config):
+            if not issubclass(self.current_engine, GenAI):
+                return
             genai_group.setVisible(True)
             is_gemini = issubclass(self.current_engine, GeminiTranslate)
             top_p_label.setText('topP' if is_gemini else 'top_p')
@@ -702,7 +711,8 @@ class TranslationSetting(QDialog):
             # show use notice
             show_tip = self.current_engine.using_tip is not None
             self.tip_group.setVisible(show_tip)
-            show_tip and self.using_tip.setText(self.current_engine.using_tip)
+            if show_tip:
+                self.using_tip.setText(self.current_engine.using_tip)
             # show api key setting
             self.reformat_api_keys()
             # Request setting
@@ -851,7 +861,8 @@ class TranslationSetting(QDialog):
         column_gap_type.addItem(_('Percentage'), 'percentage')
         column_gap_type.addItem(_('Space count'), 'space_count')
 
-        column_gap_config = self.config.get('column_gap').copy()
+        column_gap_config = self.config.get('column_gap') or {}
+        column_gap_config = column_gap_config.copy()
 
         current_type = column_gap_config.get('_type')
         current_index = column_gap_type.findData(current_type)
@@ -901,7 +912,7 @@ class TranslationSetting(QDialog):
         position_btn_group.addButton(left_to_original, 3)
         position_btn_group.addButton(delete_original, 4)
 
-        map_key = self.config.get('translation_position', 'below')
+        map_key = self.config.get('translation_position') or 'below'
         if map_key not in position_rmap.keys():
             map_key = 'below'
         position_btn_group.button(position_rmap.get(map_key)).setChecked(True)
@@ -1027,7 +1038,7 @@ class TranslationSetting(QDialog):
             '%s %s' % (_('e.g.,'), 'section, #content, div.portion'))
         self.priority_rules.setMinimumHeight(100)
         self.priority_rules.insertPlainText(
-            '\n'.join(self.config.get('priority_rules')))
+            '\n'.join(self.config.get('priority_rules') or []))
         priority_layout.addWidget(QLabel(
             _('CSS selectors for priority elements. One rule per line:')))
         priority_layout.addWidget(self.priority_rules)
@@ -1043,9 +1054,11 @@ class TranslationSetting(QDialog):
         self.ignore_rules.setPlaceholderText(
             '%s %s' % (_('e.g.,'), 'table, table#report, table.list'))
         self.ignore_rules.setMinimumHeight(100)
-        self.ignore_rules.insertPlainText(
-            '\n'.join(self.config.get(
-                'ignore_rules', self.config.get('element_rules'))))
+        element_rules = self.config.get('element_rules')
+        if element_rules is not None:
+            self.ignore_rules.insertPlainText(
+                '\n'.join(self.config.get(
+                    'ignore_rules', element_rules) or []))
         element_layout.addWidget(QLabel(
             _('CSS selectors to exclude elements. One rule per line:')))
         element_layout.addWidget(self.ignore_rules)
@@ -1085,7 +1098,7 @@ class TranslationSetting(QDialog):
         self.filter_rules = QPlainTextEdit()
         self.filter_rules.setMinimumHeight(100)
         self.filter_rules.insertPlainText(
-            '\n'.join(self.config.get('filter_rules')))
+            '\n'.join(self.config.get('filter_rules') or []))
 
         filter_layout.addWidget(scope_group)
         filter_layout.addWidget(mode_group)
@@ -1103,8 +1116,10 @@ class TranslationSetting(QDialog):
         scope_btn_group.addButton(scope_text, 0)
         scope_btn_group.addButton(scope_element, 1)
 
-        scope_btn_group.button(scope_rmap.get(
-            self.config.get('filter_scope'))).setChecked(True)
+        filter_scope = self.config.get('filter_scope')
+        if filter_scope is not None:
+            scope_btn_group.button(
+                scope_rmap.get(filter_scope)).setChecked(True)
 
         scope_btn_group.idClicked.connect(
             lambda btn_id: self.config.update(
@@ -1128,9 +1143,10 @@ class TranslationSetting(QDialog):
             tip.setText(tips[btn_id])
             self.config.update(rule_mode=mode_map.get(btn_id))
 
-        mode_btn_group.button(mode_rmap.get(
-            self.config.get('rule_mode'))).setChecked(True)
-        tip.setText(tips[mode_btn_group.checkedId()])
+        rule_mode = self.config.get('rule_mode')
+        if rule_mode is not None:
+            mode_btn_group.button(mode_rmap.get(rule_mode)).setChecked(True)
+            tip.setText(tips[mode_btn_group.checkedId()])
 
         mode_btn_group.idClicked.connect(choose_filter_mode)
 
@@ -1142,7 +1158,7 @@ class TranslationSetting(QDialog):
             '%s %s' % (_('e.g.,'), 'span.footnote, a#footnote'))
         self.reserve_rules.setMinimumHeight(100)
         self.reserve_rules.insertPlainText(
-            '\n'.join(self.config.get('reserve_rules')))
+            '\n'.join(self.config.get('reserve_rules') or []))
         reserve_layout.addWidget(QLabel(
             _('CSS selectors to reserve elements. One rule per line:')))
         reserve_layout.addWidget(self.reserve_rules)
@@ -1179,7 +1195,7 @@ class TranslationSetting(QDialog):
             'ebook_metadata.lang_code',
             self.config.get('ebook_metadata.language', False)))  # old key
         self.metadata_subject.setPlainText(
-            '\n'.join(self.config.get('ebook_metadata.subjects', [])))
+            '\n'.join(self.config.get('ebook_metadata.subjects') or []))
 
         layout.addStretch(1)
 
@@ -1233,7 +1249,7 @@ class TranslationSetting(QDialog):
         self.config.update(merge_length=self.merge_length.value())
 
         # Proxy setting
-        proxy_setting = self.config.get('proxy_setting')
+        proxy_setting = self.config.get('proxy_setting') or {}
         proxy_type = self.proxy_type.currentText()
         host = self.proxy_host.text()
         port = self.proxy_port.text()
@@ -1249,7 +1265,8 @@ class TranslationSetting(QDialog):
                     {'http': proxy_setting}
             proxy_setting[proxy_type] = [host, int(port)]
             self.config.update(proxy_setting=proxy_setting)
-        len(proxy_setting) < 1 and self.config.delete('proxy_setting')
+        if len(proxy_setting) < 1:
+            self.config.delete('proxy_setting')
 
         # Search paths
         search_paths = self.get_search_paths()
@@ -1292,6 +1309,8 @@ class TranslationSetting(QDialog):
         return config
 
     def update_prompt(self, widget, config):
+        if not issubclass(self.current_engine, GenAI):
+            return
         prompt = widget.toPlainText().strip()
         if prompt and '<tlang>' not in prompt:
             self.alert.pop(
@@ -1306,11 +1325,13 @@ class TranslationSetting(QDialog):
     def update_engine_config(self):
         config = self.get_engine_config()
         # Do not update directly as you may get default preferences!
-        engine_config = self.config.get('engine_preferences').copy()
+        engine_config = self.config.get('engine_preferences') or {}
+        engine_config = engine_config.copy()
         engine_config.update({self.current_engine.name: config})
         # Cleanup unused engine preferences
         engine_names = [engine.name for engine in builtin_engines]
-        engine_names += self.config.get('custom_engines').keys()
+        if custom_engine_names := self.config.get('custom_engines'):
+            engine_names += custom_engine_names.keys()
         for name in engine_config.copy():
             if name not in engine_names:
                 engine_config.pop(name)
@@ -1353,7 +1374,8 @@ class TranslationSetting(QDialog):
                     .format(rule), 'warning')
                 return False
         self.config.delete('priority_rules')
-        priority_rules and self.config.update(priority_rules=priority_rules)
+        if priority_rules:
+            self.config.update(priority_rules=priority_rules)
 
         # Filter rules
         rule_content = self.filter_rules.toPlainText()
@@ -1366,7 +1388,8 @@ class TranslationSetting(QDialog):
                         .format(rule), 'warning')
                     return False
         self.config.delete('filter_rules')
-        filter_rules and self.config.update(filter_rules=filter_rules)
+        if filter_rules:
+            self.config.update(filter_rules=filter_rules)
 
         # Element rules
         rule_content = self.ignore_rules.toPlainText()
@@ -1379,7 +1402,8 @@ class TranslationSetting(QDialog):
                 return False
         self.config.delete('element_rules')
         self.config.delete('ignore_rules')
-        ignore_rules and self.config.update(ignore_rules=ignore_rules)
+        if ignore_rules:
+            self.config.update(ignore_rules=ignore_rules)
 
         # Reserve rules
         rule_content = self.reserve_rules.toPlainText()
@@ -1391,10 +1415,12 @@ class TranslationSetting(QDialog):
                     .format(rule), 'warning')
                 return False
         self.config.delete('reserve_rules')
-        reserve_rules and self.config.update(reserve_rules=reserve_rules)
+        if reserve_rules:
+            self.config.update(reserve_rules=reserve_rules)
 
         # Ebook metadata
-        ebook_metadata = self.config.get('ebook_metadata').copy()
+        ebook_metadata = self.config.get('ebook_metadata') or {}
+        ebook_metadata = ebook_metadata.copy()
         ebook_metadata.clear()
         ebook_metadata.update(
             metadata_translation=self.metadata_translation.isChecked())

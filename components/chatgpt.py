@@ -1,6 +1,6 @@
 from functools import wraps
 
-from qt.core import (
+from qt.core import (  # type: ignore
     pyqtSignal, pyqtSlot, Qt, QLabel, QDialog, QVBoxLayout, QStackedLayout,
     QWidget, QPushButton, QProgressBar, QFormLayout, QGroupBox, QObject,
     QThread, QHBoxLayout, QPlainTextEdit, QEvent)
@@ -10,7 +10,7 @@ from ..lib.utils import log, traceback_error
 from .alert import AlertMessage
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 def request(func):

@@ -10,19 +10,22 @@ from typing import Generator
 from subprocess import Popen
 from contextlib import contextmanager
 
-from calibre import get_proxies
-from calibre.constants import DEBUG
-from calibre.utils.logging import Log
 from mechanize import Browser, Request
 from mechanize._response import response_seek_wrapper as Response
 
-from . import socks
-from .cssselect import GenericTranslator, SelectorError
+from calibre import get_proxies  # type: ignore
+from calibre.utils.logging import Log  # type: ignore
+
+from ..vendor import socks
+from ..vendor.cssselect import GenericTranslator, SelectorError
 
 
 ns = {'x': 'http://www.w3.org/1999/xhtml'}
 is_test = 'unittest' in sys.modules
-log = Log(level=Log.DEBUG if DEBUG else Log.INFO)
+log = Log(level=Log.DEBUG if os.environ.get('CALIBRE_DEBUG') else Log.INFO)
+
+log.debug('Backup original socket: ', id(socket.socket))
+original_socket = socket.socket
 
 
 def dummy(*args, **kwargs):
@@ -146,7 +149,7 @@ def traceback_error():
 
 def request(
         url, data=None, headers={}, method='GET', timeout=30, proxy_uri=None,
-        raw_object=False) -> Response | str:
+        raw_object=False) -> Response | str | None:
     br = Browser()
     br.set_handle_robots(False)
     # Do not verify SSL certificates
@@ -159,15 +162,20 @@ def request(
         proxies.update(http=proxy_uri, https=proxy_uri)
     else:
         http = get_proxies(False).get('http')
-        http and proxies.update(http=http, https=http)
+        if http is not None:
+            proxies.update(http=http, https=http)
         https = get_proxies(False).get('https')
-        https and proxies.update(https=https)
-    proxies and br.set_proxies(proxies)
+        if https is not None:
+            proxies.update(https=https)
+    if len(proxies) > 0:
+        br.set_proxies(proxies)
     _request = Request(
         url, data, headers=headers, timeout=timeout, method=method)
     br.open(_request)
-    response: Response = br.response()
-    return response if raw_object else response.read().decode('utf-8').strip()
+    response: Response | None = br.response()
+    if response is None or raw_object:
+        return response
+    return response.read().decode('utf-8').strip()
 
 
 @contextmanager
@@ -180,17 +188,21 @@ def socks_proxy(host: str, port: int) -> Generator[ModuleType, None, None]:
     # proxy, causing a "General SOCKS server failure" error.
     backup_http = os.environ.pop("http_proxy", None)
     backup_https = os.environ.pop("https_proxy", None)
-    _original_socket = socket.socket
-    log.debug('Backup original socket: ', id(_original_socket))
-    socks.set_default_proxy(socks.SOCKS5, host, int(port), rdns=True)
-    socket.socket = socks.socksocket
-    log.debug('Patched changed socket: ', id(socket.socket))
+    if socket.socket is not original_socket:
+        log.debug('Socket already patched: ', id(socket.socket))
+    else:
+        # TODO: There is a bug in asyncio environments where the socket may be
+        # patched multiple times due to race conditions.
+        log.debug('Patch socket: ', id(socks.socksocket))
+        socks.set_default_proxy(socks.SOCKS5, host, int(port), rdns=True)
+        socket.socket = socks.socksocket
     try:
         yield socket
     finally:
-        log.debug('Restore original socket: ', id(_original_socket))
-        socket.socket = _original_socket
-        socks.set_default_proxy(None)
+        if socket.socket is not original_socket:
+            log.debug('Restore original socket: ', id(original_socket))
+            socket.socket = original_socket
+            socks.set_default_proxy(None)
         # Restore the environment proxies if any exist.
         if backup_http is not None:
             os.environ['http_proxy'] = backup_http

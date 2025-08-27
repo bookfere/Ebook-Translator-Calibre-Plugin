@@ -11,7 +11,7 @@ from .base import Base
 from .languages import youdao
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class YoudaoTranslate(Base):
@@ -40,13 +40,14 @@ class YoudaoTranslate(Base):
 
     def get_body(self, text):
         try:
-            app_key, app_secret = re.split(r'[:\|]', self.api_key)
+            app_key, app_secret = re.split(r'[:\|]', self.api_key or '')
         except Exception:
             raise BadApiKeyFormat(self.api_key_error_message())
 
         curtime = str(int(time.time()))
         salt = str(uuid.uuid1())
-        sign_str = app_key + self._truncate(text) + salt + curtime + app_secret
+        sign_str = (app_key or '') + (self._truncate(text) or '') \
+            + salt + curtime + app_secret
         sign = self._encrypt(sign_str)
 
         return {
