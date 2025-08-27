@@ -1,11 +1,11 @@
-from qt.core import QComboBox
-from calibre.ebooks.conversion.plumber import supported_input_formats
-from calibre.ebooks.conversion.config import get_output_formats
+from qt.core import QComboBox  # type: ignore
+from calibre.ebooks.conversion.plumber import supported_input_formats  # type: ignore
+from calibre.ebooks.conversion.config import get_output_formats  # type: ignore
 
 from ..lib.config import get_config
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class InputFormat(QComboBox):
@@ -22,7 +22,8 @@ class InputFormat(QComboBox):
             self.addItem(format)
             self.setStyleSheet('text-transform:uppercase;')
         input_format = config.get('input_format')
-        input_format and self.setCurrentText(input_format)
+        if input_format:
+            self.setCurrentText(input_format)
 
 
 class OutputFormat(QComboBox):

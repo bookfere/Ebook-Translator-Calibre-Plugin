@@ -4,14 +4,16 @@ from types import MethodType
 from typing import Callable
 from tempfile import gettempdir
 
-from calibre import sanitize_file_name
-from calibre.gui2 import Dispatcher
-from calibre.utils.logging import Stream
-from calibre.constants import DEBUG, __version__
-from calibre.ebooks.conversion.plumber import (
+from calibre import sanitize_file_name  # type: ignore
+from calibre.gui2 import Dispatcher  # type: ignore
+from calibre.constants import DEBUG, __version__  # type: ignore
+from calibre.utils.localization import _  # type: ignore
+from calibre.utils.logging import Stream  # type: ignore
+from calibre.ebooks.conversion.plumber import (  # type: ignore
     Plumber, CompositeProgressReporter)
-from calibre.ptempfile import PersistentTemporaryFile
-from calibre.ebooks.metadata.meta import get_metadata, set_metadata
+from calibre.ptempfile import PersistentTemporaryFile  # type: ignore
+from calibre.ebooks.metadata.meta import (  # type: ignore
+    get_metadata, set_metadata)
 
 from .. import EbookTranslator
 
@@ -25,7 +27,7 @@ from .translation import get_translator, get_translation
 from .exception import ConversionAbort
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class PrepareStream:
@@ -257,9 +259,12 @@ class ConversionWorker:
         input_path = ebook.get_input_path()
         if not self.config.get('to_library'):
             filename = sanitize_file_name(ebook.title[:200])
+            output_path = self.config.get('output_path')
+            if output_path is None or not os.path.isdir(output_path):
+                raise Exception(
+                    _('Please set a valid output path.'))
             output_path = os.path.join(
-                self.config.get('output_path'),
-                '%s.%s' % (filename, ebook.output_format))
+                output_path, f'{filename}.{ebook.output_format}')
         else:
             output_path = PersistentTemporaryFile(
                 suffix='.' + ebook.output_format).name
@@ -280,12 +285,13 @@ class ConversionWorker:
         ebook, output_path = self.working_jobs.pop(job)
 
         if job.failed:
-            DEBUG or self.gui.job_exception(
-                job, dialog_title=_('Translation job failed'))
+            if not DEBUG:
+                self.gui.job_exception(
+                    job, dialog_title=_('Translation job failed'))
             return
 
         # TODO: Try to use the calibre generated metadata file.
-        ebook_metadata_config = self.config.get('ebook_metadata')
+        ebook_metadata_config = self.config.get('ebook_metadata') or {}
         if not ebook.is_extra_format():
             with open(output_path, 'r+b') as file:
                 metadata = get_metadata(file, ebook.output_format)

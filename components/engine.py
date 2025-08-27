@@ -2,7 +2,7 @@ import time
 import uuid
 from types import GeneratorType
 
-from qt.core import (
+from qt.core import (  # type: ignore
     Qt, pyqtSignal, pyqtSlot, QDialog, QThread, QGridLayout, QPushButton,
     QPlainTextEdit, QObject, QTextCursor, QLabel, QComboBox, QSpacerItem)
 
@@ -17,7 +17,7 @@ from .alert import AlertMessage
 from .shortcut import set_shortcut
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class EngineList(QComboBox):
@@ -34,12 +34,13 @@ class EngineList(QComboBox):
             if not engine.free and engines[previous_index].free:
                 self.insertSeparator(previous_index + 1)
             self.addItem(_(engine.alias), engine.name)
-        custom_engines = get_config().get('custom_engines')
+        custom_engines = get_config().get('custom_engines') or {}
         if len(custom_engines) > 0:
             self.insertSeparator(len(builtin_engines) + 1)
         for name in sorted(custom_engines.keys(), key=sorted_mixed_keys):
             self.addItem(name, name)
-        self.default and self.setCurrentIndex(self.findData(self.default))
+        if self.default:
+            self.setCurrentIndex(self.findData(self.default))
 
     def refresh(self):
         self.clear()
@@ -264,7 +265,7 @@ class ManageCustomEngine(QDialog):
                 if not valid:
                     return self.alert.pop(data, 'warning')
                 # Check if the engine name exists
-                new_name = data.get('name')
+                new_name = data.get('name') or ''
                 if new_name.lower() != current_name.lower():
                     exist_names = [
                         name.lower() for name in self.custom_engines]

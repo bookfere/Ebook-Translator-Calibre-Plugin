@@ -4,7 +4,7 @@ import copy
 from typing import Any
 
 from lxml import etree
-from calibre import prepare_string_for_xml as xml_escape
+from calibre import prepare_string_for_xml as xml_escape  # type: ignore
 
 from .utils import (
     log, ns, uid, trim, sorted_mixed_keys, open_file, css_to_xpath,
@@ -76,14 +76,14 @@ class Element:
     def set_reserve_pattern(self, pattern):
         self.reserve_pattern = pattern
 
-    def get_name(self):
+    def get_name(self) -> str | None:
         return None
 
-    def get_attributes(self):
+    def get_attributes(self) -> str | None:
         return None
 
     def delete(self):
-        pass
+        return None
 
     def get_raw(self):
         raise NotImplementedError()
@@ -97,8 +97,8 @@ class Element:
     def add_translation(self, translation=None):
         raise NotImplementedError()
 
-    def get_translation(self):
-        pass
+    def get_translation(self) -> str | None:
+        return None
 
 
 class SrtElement(Element):
@@ -862,14 +862,14 @@ def get_page_elements(pages):
 def get_element_handler(placeholder, separator, direction):
     config = get_config()
     position_alias = {'before': 'above', 'after': 'below'}
-    position = config.get('translation_position', 'below')
+    position = config.get('translation_position') or 'below'
     position = position_alias.get(position) or position
     handler = ElementHandler(placeholder, separator, position)
     if config.get('merge_enabled'):
         handler = ElementHandlerMerge(placeholder, separator, position)
         handler.set_merge_length(config.get('merge_length'))
     handler.set_target_direction(direction)
-    column_gap = config.get('column_gap')
+    column_gap = config.get('column_gap') or {}
     gap_type = column_gap.get('_type')
     if gap_type is not None and gap_type in column_gap.keys():
         handler.set_column_gap((gap_type, column_gap.get(gap_type)))

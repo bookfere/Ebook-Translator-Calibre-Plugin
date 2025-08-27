@@ -1,4 +1,4 @@
-from qt.core import QMessageBox
+from qt.core import QMessageBox  # type: ignore
 
 
 class AlertMessage:

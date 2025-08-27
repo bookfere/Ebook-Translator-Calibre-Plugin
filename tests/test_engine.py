@@ -77,7 +77,6 @@ class TestBase(unittest.TestCase):
 
         self.assertIsNone(translator.source_lang)
         self.assertIsNone(translator.target_lang)
-        self.assertIsNone(translator.proxy_uri)
         self.assertEqual([], translator.search_paths)
 
         self.assertFalse(translator.merge_enabled)

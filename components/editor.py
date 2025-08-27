@@ -1,4 +1,4 @@
-from qt.core import (
+from qt.core import (  # type: ignore
     Qt, QWidget, QSize, QPlainTextEdit, QPaintEvent, QPainter, QTextEdit,
     QColor, QTextFormat)
 

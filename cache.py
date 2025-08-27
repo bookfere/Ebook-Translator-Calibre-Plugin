@@ -1,10 +1,12 @@
 import os
 import os.path
 
-from qt.core import (
+from qt.core import (  # type: ignore
     Qt, QDialog, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
     QTableView, QAbstractTableModel, QAbstractItemView, pyqtSignal,
     QLineEdit, QFileDialog, QModelIndex, QMenu, QCursor)
+
+from calibre.utils.localization import _  # type: ignore
 
 from .lib.utils import open_path
 from .lib.cache import default_cache_path, TranslationCache
@@ -12,7 +14,7 @@ from .lib.config import get_config
 from .components import Footer, AlertMessage
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class CacheManager(QDialog):
@@ -191,7 +193,16 @@ class CacheTableView(QTableView):
             TranslationCache.remove(filename)
             self.model().delete(row.row())
         self.clearSelection()
-        self.parent.cache_count.emit()
+        if self.parent is not None:
+            self.parent.cache_count.emit()
+
+
+def update_cache(func):
+    def wrapper(self, *args):
+        self.layoutAboutToBeChanged.emit()
+        func(self, *args)
+        self.layoutChanged.emit()
+    return wrapper
 
 
 class CacheTableModel(QAbstractTableModel):
@@ -203,13 +214,6 @@ class CacheTableModel(QAbstractTableModel):
     def __init__(self):
         QAbstractTableModel.__init__(self)
         self.refresh()
-
-    def update(func):
-        def wrapper(self, *args):
-            self.layoutAboutToBeChanged.emit()
-            func(self, *args)
-            self.layoutChanged.emit()
-        return wrapper
 
     def headerData(self, section, orientation, role):
         if role != Qt.DisplayRole:
@@ -227,19 +231,19 @@ class CacheTableModel(QAbstractTableModel):
         if role == Qt.UserRole:
             return self.caches[index.row()][-1]
 
-    @update
+    @update_cache
     def refresh(self):
         self.caches = TranslationCache.get_list()
 
-    @update
+    @update_cache
     def delete(self, row):
         del self.caches[row]
 
-    @update
+    @update_cache
     def clear(self):
         del self.caches[:]
 
-    @update
+    @update_cache
     def sort(self, column, order):
         self.caches = sorted(self.caches, key=lambda item: item[column])
         if order == Qt.DescendingOrder:

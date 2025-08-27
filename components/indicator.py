@@ -1,8 +1,8 @@
-from qt.core import (
+from qt.core import (  # type: ignore
     Qt, QPen, QWidget, QPainter, QColor, QHBoxLayout, QLabel)
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class StatusColor:

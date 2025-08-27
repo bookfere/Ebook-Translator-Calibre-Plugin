@@ -3,18 +3,20 @@ import time
 import json
 from types import GeneratorType
 
+from calibre.utils.localization import _  # type: ignore
+
 from ..engines import builtin_engines
 from ..engines import GoogleFreeTranslateNew
 from ..engines.base import Base
 from ..engines.custom import CustomTranslate
 
-from .utils import sep, trim, dummy, traceback_error
+from .utils import log, sep, trim, dummy, traceback_error
 from .config import get_config
 from .exception import TranslationFailed, TranslationCanceled
 from .handler import Handler
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class Glossary:
@@ -243,17 +245,18 @@ def get_engine_class(engine_name=None):
     config = get_config()
     engine_name = engine_name or config.get('translate_engine')
     engines: dict[str, type[Base]] = {
-        engine.name: engine for engine in builtin_engines}
-    custom_engines = config.get('custom_engines')
+        engine.name: engine for engine in builtin_engines
+        if engine.name is not None}
+    custom_engines = config.get('custom_engines') or {}
     if engine_name in engines:
         engine_class = engines[engine_name]
     elif engine_name in custom_engines:
         engine_class = CustomTranslate
-        engine_data = json.loads(custom_engines.get(engine_name))
+        engine_data = json.loads(custom_engines[engine_name])
         engine_class.set_engine_data(engine_data)
     else:
         engine_class = GoogleFreeTranslateNew
-    engine_preferences = config.get('engine_preferences')
+    engine_preferences = config.get('engine_preferences') or {}
     engine_class.set_config(engine_preferences.get(engine_class.name) or {})
     return engine_class
 
@@ -264,8 +267,8 @@ def get_translator(engine_class=None):
     translator = engine_class()
     translator.set_search_paths(config.get('search_paths'))
     if config.get('proxy_enabled'):
-        proxy_type: str = config.get('proxy_type')
-        proxy_setting: dict[str, list] = config.get('proxy_setting')
+        proxy_type: str | None = config.get('proxy_type')
+        proxy_setting: dict[str, list] | None = config.get('proxy_setting')
         if proxy_type is not None and proxy_setting is not None:
             # Compatible with old proxy settings stored as a list.
             if isinstance(proxy_setting, list):

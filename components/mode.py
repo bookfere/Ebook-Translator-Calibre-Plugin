@@ -1,11 +1,11 @@
-from qt.core import (
+from qt.core import (  # type: ignore
     pyqtSignal, QDialog, QPushButton, QPlainTextEdit, QHBoxLayout,
     QGridLayout, QGroupBox, QLabel, Qt)
 
 from ..lib.config import get_config
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class ModeSelection(QDialog):

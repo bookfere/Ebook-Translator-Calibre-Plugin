@@ -1,3 +1,4 @@
+from .base import Base
 from .google import (
     GoogleFreeTranslateNew, GoogleFreeTranslateHtml, GoogleFreeTranslate,
     GoogleBasicTranslate, GoogleBasicTranslateADC, GoogleAdvancedTranslate,
@@ -10,7 +11,7 @@ from .baidu import BaiduTranslate
 from .microsoft import MicrosoftEdgeTranslate, AzureChatgptTranslate
 from .deepseek import DeepseekTranslate
 
-builtin_engines = (
+builtin_engines: tuple[type[Base], ...] = (
     GoogleFreeTranslateNew, GoogleFreeTranslateHtml, GoogleFreeTranslate,
     GoogleBasicTranslate, GoogleBasicTranslateADC, GoogleAdvancedTranslate,
     ChatgptTranslate, AzureChatgptTranslate, GeminiTranslate, ClaudeTranslate,

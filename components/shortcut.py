@@ -1,4 +1,4 @@
-from qt.core import QShortcut, QKeySequence
+from qt.core import QShortcut, QKeySequence  # type: ignore
 
 
 def get_standard_key(key):
