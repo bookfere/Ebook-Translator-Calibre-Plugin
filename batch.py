@@ -1,9 +1,11 @@
 import os
 import os.path
 
-from qt.core import (
+from qt.core import (  # type: ignore
     QDialog, QWidget, QPushButton, QHeaderView, QVBoxLayout, QTableWidget,
     QTableWidgetItem, Qt, QComboBox, QHBoxLayout, QApplication)
+
+from calibre.utils.localization import _  # type: ignore
 
 from .lib.config import get_config
 from .lib.translation import get_engine_class
@@ -16,7 +18,7 @@ from .components import (
     OutputFormat)
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class BatchTranslation(QDialog):
@@ -209,7 +211,8 @@ class BatchTranslation(QDialog):
     def translate_ebooks(self, ebooks):
         to_library = self.config.get('to_library')
         output_path = self.config.get('output_path')
-        if not to_library and not os.path.exists(output_path):
+        if output_path is None or (
+                not to_library and not os.path.exists(output_path)):
             return self.alert.pop(
                 _('The specified path does not exist.'), 'warning')
         ebooks = ebooks if isinstance(ebooks, list) else [ebooks]

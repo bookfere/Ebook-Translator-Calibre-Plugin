@@ -8,7 +8,7 @@ from .base import Base
 from .languages import deepl
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class DeeplTranslate(Base):

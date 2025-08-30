@@ -3,13 +3,15 @@ from typing import Any
 
 from lxml import etree
 
+from calibre.utils.localization import _  # type: ignore
+
 from ..lib.utils import is_str
 
 from . import builtin_engines
 from .base import Base
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 def create_engine_template(name):
@@ -52,7 +54,9 @@ def load_engine_data(text):
     name = json_data.get('name')
     if not name:
         return (False, _('Engine name is required.'))
-    if name.lower() in [engine.name.lower() for engine in builtin_engines]:
+    if name.lower() in [
+            engine.name.lower() for engine in builtin_engines
+            if engine.name is not None]:
         return (False, _(
             'Engine name must be different from builtin engine name.'))
     # language codes
@@ -91,10 +95,12 @@ def load_engine_data(text):
 class CustomTranslate(Base):
     name = 'Custom'
     alias = 'Custom'
+
     need_api_key = False
-    engine_data: dict[str, Any] = {}
-    request: dict[str, Any] = {}
-    response: dict[str, Any] = {}
+
+    engine_data: dict[str, Any]
+    request: dict[str, Any]
+    response: str
 
     @classmethod
     def set_engine_data(cls, data):
@@ -105,7 +111,7 @@ class CustomTranslate(Base):
 
     def __init__(self):
         super().__init__()
-        self.endpoint = self.request.get('url')
+        self.endpoint = self.request.get('url') or ''
         self.method = self.request.get('method') or 'GET'
 
     def get_headers(self):

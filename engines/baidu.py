@@ -10,7 +10,7 @@ from .base import Base
 from .languages import baidu
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class BaiduTranslate(Base):
@@ -27,7 +27,7 @@ class BaiduTranslate(Base):
 
     def get_body(self, text):
         try:
-            app_id, app_key = re.split(r'[:\|]', self.api_key)
+            app_id, app_key = re.split(r'[:\|]', self.api_key or '')
         except Exception:
             raise BadApiKeyFormat(self.api_key_error_message())
 

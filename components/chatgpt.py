@@ -1,17 +1,16 @@
 from functools import wraps
 
-from qt.core import (
+from qt.core import (  # type: ignore
     pyqtSignal, pyqtSlot, Qt, QLabel, QDialog, QVBoxLayout, QStackedLayout,
     QWidget, QPushButton, QProgressBar, QFormLayout, QGroupBox, QObject,
     QThread, QHBoxLayout, QPlainTextEdit, QEvent)
-from calibre.utils.logging import default_log as log
 
-from ..lib.utils import traceback_error
+from ..lib.utils import log, traceback_error
 
 from .alert import AlertMessage
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 def request(func):
@@ -75,10 +74,10 @@ class ChatgptBatchTranslationWorker(QObject):
         self.stack_index.emit(1)
         if self._file_id is None:
             self._file_id = self._batch_translator.upload(self._paragraphs)
-            log.info('A new file was uploaded: %s' % self._file_id)
+            log.debug('A new file was uploaded: %s' % self._file_id)
             self.save_file_id.emit(self._file_id)
         self._batch_id = self._batch_translator.create(self._file_id)
-        log.info('A batch translation was created: %s' % self._batch_id)
+        log.debug('A batch translation was created: %s' % self._batch_id)
         self.save_batch_id.emit(self._batch_id)
         self.check.emit()
 
@@ -87,7 +86,7 @@ class ChatgptBatchTranslationWorker(QObject):
     def check_details(self):
         self.process_tip.emit(_('checking...'))
         self.stack_index.emit(1)
-        log.info('Checking the batch translation: %s' % self._batch_id)
+        log.debug('Checking the batch translation: %s' % self._batch_id)
         self._batch_info = self._batch_translator.check(self._batch_id)
         if self._batch_info.get('status') == 'completed':
             self.enable_apply_button.emit(True)
@@ -158,8 +157,8 @@ class ChatgptBatchTranslationManager(QDialog):
         self.batch_id = self.cache.get_info('chatgpt_batch_id')
         self.file_id = self.cache.get_info('chatgpt_file_id')
 
-        log.info('Initialized batch id: %s' % self.batch_id)
-        log.info('Initialized file id: %s' % self.file_id)
+        log.debug('Initialized batch id: %s' % self.batch_id)
+        log.debug('Initialized file id: %s' % self.file_id)
 
         self.batch_worker.set_paragraphs(
             self.table.get_selected_paragraphs(True, True))
@@ -169,20 +168,20 @@ class ChatgptBatchTranslationManager(QDialog):
         def set_batch_id(batch_id):
             self.batch_id = batch_id
             self.cache.set_info('chatgpt_batch_id', batch_id)
-            log.info('A new batch id was stored: %s' % batch_id)
+            log.debug('A new batch id was stored: %s' % batch_id)
         self.batch_worker.save_batch_id.connect(set_batch_id)
 
         def set_file_id(file_id):
             self.file_id = file_id
             self.cache.set_info('chatgpt_file_id', file_id)
-            log.info('A new file id was stored: %s' % file_id)
+            log.debug('A new file id was stored: %s' % file_id)
         self.batch_worker.save_file_id.connect(set_file_id)
 
         def remove_batch():
             self.file_id = None
             self.cache.del_info('chatgpt_batch_id')
             self.cache.del_info('chatgpt_file_id')
-            log.info('The batch information was deleted.')
+            log.debug('The batch information was deleted.')
         self.batch_worker.remove_batch.connect(remove_batch)
 
         def apply_paragraph(paragraph):

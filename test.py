@@ -3,7 +3,7 @@ import unittest
 from pkgutil import iter_modules
 from importlib import import_module
 
-from calibre.utils.run_tests import run_cli
+from calibre.utils.run_tests import run_cli  # type: ignore
 
 
 def get_tests(module):

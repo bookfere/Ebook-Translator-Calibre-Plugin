@@ -3,6 +3,8 @@ import base64
 from datetime import datetime
 from urllib.parse import urlencode
 
+from calibre.utils.localization import _  # type: ignore
+
 from ..lib.utils import request
 
 from .base import Base
@@ -10,7 +12,7 @@ from .languages import microsoft
 from .openai import ChatgptTranslate
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class MicrosoftEdgeTranslate(Base):

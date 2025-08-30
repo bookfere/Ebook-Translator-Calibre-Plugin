@@ -2,11 +2,11 @@ import time
 import uuid
 from types import GeneratorType
 
-from qt.core import (
-    pyqtSignal, pyqtSlot, QDialog, QThread, QGridLayout, QPushButton,
+from qt.core import (  # type: ignore
+    Qt, pyqtSignal, pyqtSlot, QDialog, QThread, QGridLayout, QPushButton,
     QPlainTextEdit, QObject, QTextCursor, QLabel, QComboBox, QSpacerItem)
 
-from ..lib.utils import sorted_mixed_keys, traceback_error
+from ..lib.utils import log, sorted_mixed_keys, traceback_error
 from ..lib.config import get_config
 from ..engines.custom import (
     create_engine_template, load_engine_data, CustomTranslate)
@@ -17,7 +17,7 @@ from .alert import AlertMessage
 from .shortcut import set_shortcut
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class EngineList(QComboBox):
@@ -34,12 +34,13 @@ class EngineList(QComboBox):
             if not engine.free and engines[previous_index].free:
                 self.insertSeparator(previous_index + 1)
             self.addItem(_(engine.alias), engine.name)
-        custom_engines = get_config().get('custom_engines')
+        custom_engines = get_config().get('custom_engines') or {}
         if len(custom_engines) > 0:
             self.insertSeparator(len(builtin_engines) + 1)
         for name in sorted(custom_engines.keys(), key=sorted_mixed_keys):
             self.addItem(name, name)
-        self.default and self.setCurrentIndex(self.findData(self.default))
+        if self.default:
+            self.setCurrentIndex(self.findData(self.default))
 
     def refresh(self):
         self.clear()
@@ -80,7 +81,9 @@ class EngineWorker(QObject):
             self.complete.emit()
         except Exception:
             self.clear.emit()
-            self.result.emit(traceback_error())
+            error_message = traceback_error()
+            self.result.emit(error_message)
+            log.error(error_message)
 
     @pyqtSlot()
     def check_usage(self):
@@ -95,6 +98,7 @@ class EngineTester(QDialog):
         QDialog.__init__(self, parent)
         self.parent = parent
         self.translator = translator
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.setWindowTitle(_('Test Translation Engine'))
         self.setModal(True)
         self.setMinimumWidth(500)
@@ -127,8 +131,9 @@ class EngineTester(QDialog):
         source_lang.currentTextChanged.connect(change_source_lang)
 
         target_lang = TargetLang()
-        target_lang.set_codes(self.translator.lang_codes.get('target'),
-                              self.parent.target_lang.currentText())
+        target_lang.set_codes(
+            self.translator.lang_codes.get('target'),
+            self.parent.target_lang.currentText())
         layout.addWidget(target_lang, 2, 1)
 
         def change_target_lang(lang):
@@ -174,9 +179,11 @@ class EngineTester(QDialog):
         translate.clicked.connect(test_translate)
 
     def done(self, result):
-        self.usage_thread.terminate()
-        self.translation_thread.terminate()
         QDialog.done(self, result)
+        self.usage_thread.quit()
+        self.usage_thread.wait()
+        self.translation_thread.quit()
+        self.translation_thread.wait()
 
 
 class ManageCustomEngine(QDialog):
@@ -258,7 +265,7 @@ class ManageCustomEngine(QDialog):
                 if not valid:
                     return self.alert.pop(data, 'warning')
                 # Check if the engine name exists
-                new_name = data.get('name')
+                new_name = data.get('name') or ''
                 if new_name.lower() != current_name.lower():
                     exist_names = [
                         name.lower() for name in self.custom_engines]
