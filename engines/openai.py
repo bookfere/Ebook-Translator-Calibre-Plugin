@@ -15,7 +15,7 @@ from .genai import GenAI
 from .languages import google
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class ChatgptTranslate(GenAI):
@@ -62,7 +62,7 @@ class ChatgptTranslate(GenAI):
         self.model = self.config.get('model', self.model)
 
     def get_models(self):
-        domain_name = '://'.join(urlsplit(self.endpoint, 'https')[:2])
+        domain_name = '://'.join(urlsplit(self.endpoint or '', 'https')[:2])
         model_endpoint = '%s/v1/models' % domain_name
         response = request(
             model_endpoint, headers=self.get_headers(),
@@ -96,7 +96,8 @@ class ChatgptTranslate(GenAI):
                 {'role': 'user', 'content': text}
             ],
         }
-        self.stream and body.update(stream=True)
+        if self.stream:
+            body.update(stream=True)
         sampling_value = getattr(self, self.sampling)
         body.update({self.sampling: sampling_value})
         return json.dumps(body)

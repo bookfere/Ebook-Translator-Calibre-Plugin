@@ -1,6 +1,6 @@
 from .openai import ChatgptTranslate
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class DeepseekTranslate(ChatgptTranslate):

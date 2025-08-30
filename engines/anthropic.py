@@ -13,7 +13,7 @@ from .languages import anthropic
 from .prompt_extensions import anthropic as anthropic_prompt_extension
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class ClaudeTranslate(GenAI):

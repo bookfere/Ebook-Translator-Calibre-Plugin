@@ -1,13 +1,15 @@
 import time
 from types import MethodType
 
-from qt.core import (
+from qt.core import (  # type: ignore
     Qt, QObject, QDialog, QGroupBox, QWidget, QVBoxLayout, QHBoxLayout,
     QPlainTextEdit, QPushButton, QSplitter, QLabel, QThread, QLineEdit,
     QGridLayout, QProgressBar, pyqtSignal, pyqtSlot, QPixmap, QEvent,
     QStackedWidget, QSpacerItem, QTabWidget, QCheckBox,
     QComboBox, QSizePolicy)
-from calibre.constants import __version__
+from calibre.constants import __version__  # type: ignore
+from calibre.gui2 import I  # type: ignore
+from calibre.utils.localization import _  # type: ignore
 
 from . import EbookTranslator
 from .lib.utils import uid, traceback_error
@@ -26,7 +28,7 @@ from .components import (
 from .components.editor import CodeEditor
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class EditorWorker(QObject):
@@ -46,7 +48,8 @@ class EditorWorker(QObject):
         self.show.emit(message)
         time.sleep(1)
         self.show.emit('')
-        callback and callback()
+        if callback is not None:
+            callback()
         self.finished.emit()
 
 
@@ -69,7 +72,8 @@ class PreparationWorker(QObject):
         self.start.connect(self.prepare_ebook_data)
 
     def clean_cache(self, cache):
-        cache.is_fresh() and cache.destroy()
+        if cache.is_fresh():
+            cache.destroy()
         self.on_working = False
         self.close.emit(1)
 
@@ -436,7 +440,8 @@ class AdvancedTranslation(QDialog):
 
         def prepare_table_layout(cache_id):
             self.cache = get_cache(cache_id)
-            self.merge_enabled = int(self.cache.get_info('merge_length')) > 0
+            merge_length = self.cache.get_info('merge_length') or 0
+            self.merge_enabled = int(merge_length) > 0
             paragraphs = self.cache.all_paragraphs()
             if len(paragraphs) < 1:
                 self.alert.pop(
@@ -796,11 +801,13 @@ class AdvancedTranslation(QDialog):
         cache_group = QGroupBox(_('Cache Status'))
         cache_layout = QVBoxLayout(cache_group)
         cache_status = QLabel(
-            _('Enabled') if self.cache.is_persistence() else _('Disabled'))
+            _('Enabled') if self.cache and self.cache.is_persistence()
+            else _('Disabled'))
         cache_status.setAlignment(Qt.AlignCenter)
         cache_status.setStyleSheet(
             'border-radius:2px;color:white;background-color:%s;'
-            % ('green' if self.cache.is_persistence() else 'grey'))
+            % ('green' if self.cache and self.cache.is_persistence()
+               else 'grey'))
         cache_layout.addWidget(cache_status)
 
         engine_group = QGroupBox(_('Translation Engine'))
@@ -923,7 +930,8 @@ class AdvancedTranslation(QDialog):
         output_button.clicked.connect(output_ebook)
 
         def working_start():
-            self.translate_all and widget.setVisible(False)
+            if self.translate_all:
+                widget.setVisible(False)
             widget.setDisabled(True)
         self.trans_worker.start.connect(working_start)
 
@@ -1031,8 +1039,6 @@ class AdvancedTranslation(QDialog):
         # Try different approaches for different Qt versions
         try:
             # Method 1: Modern Qt with LineWrapMode enum
-            from qt.core import QPlainTextEdit
-
             wrap_enabled = QPlainTextEdit.LineWrapMode.WidgetWidth
             wrap_disabled = QPlainTextEdit.LineWrapMode.NoWrap
         except AttributeError:
@@ -1101,7 +1107,8 @@ class AdvancedTranslation(QDialog):
         def translation_callback(paragraph):
             self.table.row.emit(paragraph.row)
             self.paragraph_sig.emit(paragraph)
-            self.cache.update_paragraph(paragraph)
+            if self.cache is not None:
+                self.cache.update_paragraph(paragraph)
             self.progress_bar.emit()
 
         self.trans_worker.callback.connect(translation_callback)
@@ -1210,7 +1217,8 @@ class AdvancedTranslation(QDialog):
     def install_widget_event(
             self, source, target, action, callback, stop=False):
         def eventFilter(self, object, event):
-            event.type() == action and callback()
+            if event.type() == action:
+                callback()
             return stop
         source.eventFilter = MethodType(eventFilter, source)
         target.installEventFilter(source)

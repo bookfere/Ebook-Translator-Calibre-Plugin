@@ -1,7 +1,9 @@
-from qt.core import (
+from qt.core import (  # type: ignore
     Qt, QTableWidget, QHeaderView, QMenu, QAbstractItemView, QCursor,
     QBrush, QTableWidgetItem, pyqtSignal, QTableWidgetSelectionRange,
     QColor, QPalette, QT_VERSION_STR)
+
+from calibre.utils.localization import _   # type: ignore
 
 from ..lib.utils import group
 from ..lib.translation import get_engine_class
@@ -9,7 +11,7 @@ from ..lib.translation import get_engine_class
 from .alert import AlertMessage
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class AdvancedTranslationTable(QTableWidget):
@@ -76,7 +78,8 @@ class AdvancedTranslationTable(QTableWidget):
         items = [original, '--', '--', _('Untranslated')]
         if paragraph.translation:
             before_aligned = paragraph.aligned
-            self.parent.merge_enabled and self.check_line_alignment(paragraph)
+            if self.parent.merge_enabled:
+                self.check_line_alignment(paragraph)
             # If the alignment of before and after is the same, do nothing.
             if before_aligned and not paragraph.aligned:
                 self.non_aligned_count += 1
@@ -157,16 +160,18 @@ class AdvancedTranslationTable(QTableWidget):
         menu.addAction(_('Delete'), self.delete_selected_rows)
         menu.addSeparator()
 
-        if not self.parent.merge_enabled:
-            menu.addAction(
-                _('Select the whole chapter'),
-                lambda: self.select_by_page(self.current_paragraph().page))
+        current_paragraph = self.current_paragraph()
+        if current_paragraph is not None:
+            if not self.parent.merge_enabled:
+                menu.addAction(
+                    _('Select the whole chapter'),
+                    lambda: self.select_by_page(current_paragraph.page))
 
-        attributes = self.current_paragraph().get_attributes()
-        for name, value in attributes.items():
-            menu.addAction(
-                _('Select similar paragraphs: {}="{}"').format(name, value),
-                lambda: self.select_by_attribute(name, value))
+            attributes = current_paragraph.get_attributes()
+            for name, value in attributes.items():
+                menu.addAction(
+                    _('Select similar paragraphs: {}="{}"').format(name, value),
+                    lambda: self.select_by_attribute(name, value))
 
         menu.setMinimumSize(menu.sizeHint())
         menu.setMaximumSize(menu.sizeHint())

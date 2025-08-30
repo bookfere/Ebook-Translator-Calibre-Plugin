@@ -1,9 +1,9 @@
-from qt.core import pyqtSignal, pyqtSlot, QComboBox
-from calibre.utils.filenames import ascii_text
-from calibre.utils.localization import get_lang, lang_as_iso639_1
+from qt.core import pyqtSignal, pyqtSlot, QComboBox  # type: ignore
+from calibre.utils.filenames import ascii_text  # type: ignore
+from calibre.utils.localization import get_lang, lang_as_iso639_1  # type: ignore
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class SourceLang(QComboBox):

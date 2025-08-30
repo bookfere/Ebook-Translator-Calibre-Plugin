@@ -2,22 +2,13 @@ import sys
 import asyncio
 import concurrent.futures
 
-from .utils import traceback_error
+from .utils import log, traceback_error
 from .exception import TranslationCanceled
 
 
 class Handler:
     def __init__(self, paragraphs, concurrency_limit, translate_paragraph,
                  process_translation, request_interval):
-        if sys.platform == 'win32':
-            asyncio.set_event_loop_policy(
-                asyncio.WindowsSelectorEventLoopPolicy())
-        try:
-            self.loop = asyncio.get_event_loop()
-        except Exception:
-            self.loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(self.loop)
-
         self.queue = asyncio.Queue()
         self.done_queue = asyncio.Queue()
 
@@ -31,8 +22,8 @@ class Handler:
 
     async def translation_worker(self):
         while True:
+            paragraph = await self.queue.get()
             try:
-                paragraph = await self.queue.get()
                 await asyncio.get_running_loop().run_in_executor(
                     None, self.translate_paragraph, paragraph)
                 paragraph.error = None
@@ -41,13 +32,7 @@ class Handler:
                 self.done_queue.put_nowait(paragraph)
                 self.queue.task_done()
             except TranslationCanceled:
-                self.queue.task_done()
-                while not self.queue.empty():
-                    await self.queue.get()
-                    self.queue.task_done()
-                while not self.done_queue.empty():
-                    await self.done_queue.get()
-                    self.done_queue.task_done()
+                await self.cancel_tasks()
                 break
             except Exception:
                 paragraph.error = traceback_error()
@@ -60,6 +45,15 @@ class Handler:
             with concurrent.futures.ThreadPoolExecutor() as pool:
                 await asyncio.get_running_loop().run_in_executor(
                     pool, self.process_translation, paragraph)
+            self.done_queue.task_done()
+
+    async def cancel_tasks(self):
+        self.queue.task_done()
+        while not self.queue.empty():
+            await self.queue.get()
+            self.queue.task_done()
+        while not self.done_queue.empty():
+            await self.done_queue.get()
             self.done_queue.task_done()
 
     async def create_tasks(self):
@@ -82,4 +76,12 @@ class Handler:
             pass
 
     def handle(self):
-        self.loop.run_until_complete(self.process_tasks())
+        if sys.platform == 'win32':
+            asyncio.set_event_loop_policy(
+                asyncio.WindowsProactorEventLoopPolicy())
+        try:
+            loop = asyncio.get_event_loop()
+        except Exception:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+        loop.run_until_complete(self.process_tasks())

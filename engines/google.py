@@ -13,7 +13,7 @@ from .genai import GenAI
 from .languages import google, gemini
 
 
-load_translations()
+load_translations()  # type: ignore
 
 
 class GoogleFreeTranslateNew(Base):
@@ -21,7 +21,7 @@ class GoogleFreeTranslateNew(Base):
     alias = 'Google (Free) - New'
     free = True
     lang_codes = Base.load_lang_codes(google)
-    endpoint: str = 'https://translate-pa.googleapis.com/v1/translate'
+    endpoint = 'https://translate-pa.googleapis.com/v1/translate'
     need_api_key = False
 
     def get_headers(self):
@@ -58,7 +58,7 @@ class GoogleFreeTranslateHtml(Base):
     alias = 'Google (Free) - HTML'
     free = True
     lang_codes = Base.load_lang_codes(google)
-    endpoint: str = 'https://translate-pa.googleapis.com/v1/translateHtml'
+    endpoint = 'https://translate-pa.googleapis.com/v1/translateHtml'
     need_api_key = False
     support_html = True
 
@@ -205,8 +205,9 @@ class GoogleTranslate(Base):
         if old_api_key is not None and time.time() - timestamp < 3600:
             return old_api_key
         # Temporarily add existing proxies.
-        self.proxy_uri and os.environ.update(
-            http_proxy=self.proxy_uri, https_proxy=self.proxy_uri)
+        if self.proxy_uri:
+            os.environ.update(
+                http_proxy=self.proxy_uri, https_proxy=self.proxy_uri)
         new_api_key = self._run_command([
             self._get_gcloud_command(), 'auth', 'application-default',
             'print-access-token'])
@@ -276,8 +277,9 @@ class GoogleAdvancedTranslate(GoogleTranslate):
     need_api_key = False
 
     def get_endpoint(self):
-        return self.endpoint.format(
-            '%s:translateText' % self._get_project_id())
+        if self.endpoint is not None:
+            return self.endpoint.format(
+                '%s:translateText' % self._get_project_id())
 
     def get_headers(self):
         return {
@@ -359,7 +361,8 @@ class GeminiTranslate(GenAI):
     def get_models(self):
         endpoint = f'{self.endpoint}?key={self.api_key}'
         response = request(
-            endpoint, timeout=self.request_timeout, proxy_uri=self.proxy_uri)
+            endpoint, timeout=int(self.request_timeout),
+            proxy_uri=self.proxy_uri)
         models = []
         for model in json.loads(response)['models']:
             model_name = model['name'].split('/')[-1]

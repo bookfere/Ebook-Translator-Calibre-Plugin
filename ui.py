@@ -1,10 +1,11 @@
 import os.path
 
-from qt.core import QMenu, QSettings
-from calibre.gui2.actions import InterfaceAction
-from calibre.utils.config_base import plugin_dir
-from calibre.ebooks.conversion.config import get_input_format_for_book
-
+from qt.core import QMenu, QSettings  # type: ignore
+from calibre.utils.localization import _  # type: ignore
+from calibre.gui2.actions import InterfaceAction  # type: ignore
+from calibre.utils.config_base import plugin_dir  # type: ignore
+from calibre.ebooks.conversion.config import get_input_format_for_book  # type: ignore
+from calibre.utils.localization import _  # type: ignore
 from . import EbookTranslator
 from .lib.utils import uid
 from .lib.ebook import Ebooks
@@ -19,7 +20,8 @@ from .components import AlertMessage, ModeSelection
 from .advanced import CreateTranslationProject, AdvancedTranslation
 
 
-load_translations()
+load_translations()  # type: ignore
+
 upgrade_config()
 
 
@@ -38,9 +40,9 @@ class EbookTranslatorGui(InterfaceAction):
 
     def genesis(self):
         try:
-            self.icon = get_icons('images/icon.png', self.name)
+            self.icon = get_icons('images/icon.png', self.name)  # type: ignore
         except Exception:
-            self.icon = get_icons('images/icon.png')
+            self.icon = get_icons('images/icon.png')  # type: ignore
 
         menu = QMenu(self.gui)
         menu.addAction(
@@ -173,11 +175,13 @@ class EbookTranslatorGui(InterfaceAction):
 
         window_size = 'window_size/%s' % identifier
         size = self.settings.value(window_size)
-        size and window.resize(size)
+        if size:
+            window.resize(size)
 
         window_position = 'window_position/%s' % identifier
         position = self.settings.value(window_position)
-        position and window.restoreGeometry(position)
+        if position:
+            window.restoreGeometry(position)
 
         windows = self.gui.bookfere_ebook_translator.windows
         windows[name] = window

@@ -1,14 +1,16 @@
 import os
+import sys
 
-from calibre.constants import DEBUG
-from calibre.customize import InterfaceActionBase
+from calibre.constants import DEBUG  # type: ignore
+from calibre.customize import InterfaceActionBase # type: ignore
+from calibre.utils.localization import _  # type: ignore
 
 
 __license__ = 'GPL v3'
 __copyright__ = '2023, bookfere.com <bookfere@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-load_translations()
+load_translations()  # type: ignore
 
 
 # To prevent update errors, avoid importing anything from plugin modules.
@@ -37,7 +39,8 @@ class EbookTranslator(InterfaceActionBase):
 
     # The DEBUG constant cannot be shared with new worker processes.
     # To ensure that it is available, add it to the OS environment.
-    DEBUG and os.environ.update(CALIBRE_DEBUG=str(DEBUG))
+    if DEBUG:
+        os.environ.update(CALIBRE_DEBUG=str(DEBUG))
 
     def is_customizable(self):
         return False
