@@ -48,8 +48,8 @@ class Base:
     proxy_port: int = 9050
 
     def __init__(self):
-        self.source_lang: str | None = None
-        self.target_lang: str | None = None
+        self.source_lang: str
+        self.target_lang: str
         self.search_paths: list = []
 
         self.merge_enabled = False
@@ -85,15 +85,15 @@ class Base:
 
     @classmethod
     def get_source_code(cls, lang) -> str:
-        source_codes: dict = cls.lang_codes.get('source') or {}
+        source_codes: dict = cls.lang_codes['source']
         if lang == _('Auto detect'):
             return 'auto'
-        return source_codes.get(lang) or 'auto'
+        return source_codes[lang]
 
     @classmethod
     def get_target_code(cls, lang) -> str:
-        target_codes: dict = cls.lang_codes.get('target') or {}
-        return target_codes.get(lang) or 'en'
+        target_codes: dict = cls.lang_codes['target']
+        return target_codes[lang]
 
     @classmethod
     def get_iso639_target_code(cls, lang):
@@ -137,7 +137,7 @@ class Base:
     def set_search_paths(self, paths):
         self.search_paths = paths
 
-    def get_external_program(self, name, paths=[]):
+    def get_external_program(self, name: str, paths: list = []) -> str | None:
         for path in paths + self.search_paths:
             if not path.endswith('%s%s' % (os.path.sep, name)):
                 path = os.path.join(path, name)
@@ -148,13 +148,13 @@ class Base:
     def set_merge_enabled(self, enable):
         self.merge_enabled = enable
 
-    def set_source_lang(self, source_lang):
+    def set_source_lang(self, source_lang: str) -> None:
         self.source_lang = source_lang
 
-    def set_target_lang(self, target_lang):
+    def set_target_lang(self, target_lang: str) -> None:
         self.target_lang = target_lang
 
-    def get_target_lang(self):
+    def get_target_lang(self) -> str:
         return self.target_lang
 
     def set_proxy(self, proxy_type: str, host: str, port: int):
@@ -164,7 +164,7 @@ class Base:
         self.proxy_port = port
 
     @property
-    def proxy_uri(self):
+    def proxy_uri(self) -> str:
         uri = f'{self.proxy_host}:{self.proxy_port}'
         if not uri.startswith('http'):
             uri = f'http://{uri}'
