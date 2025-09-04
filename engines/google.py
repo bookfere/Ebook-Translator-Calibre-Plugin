@@ -439,7 +439,6 @@ class GeminiTranslate(GenAI):
         while True:
             try:
                 line = response.readline().decode('utf-8').strip()
-                print(line)
             except IncompleteRead:
                 continue
             except Exception as e:

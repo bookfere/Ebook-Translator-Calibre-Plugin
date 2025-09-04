@@ -492,6 +492,15 @@ class PageElement(Element):
 
 
 class Extraction:
+    # List the necessary non-inline-level elements according to the HTML spec:
+    # https://html.spec.whatwg.org/multipage/rendering.html#non-replaced-elements
+    non_inline_elements = (
+        'address', 'blockquote', 'dialog', 'div', 'figure', 'figcaption',
+        'footer', 'header', 'legend', 'main', 'p', 'pre', 'search', 'article',
+        'aside', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hgroup', 'nav',
+        'section', 'dd', 'dl', 'dt', 'menu', 'ol', 'ul', 'table', 'caption',
+        'colgroup', 'col', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th')
+
     def __init__(
             self, pages, priority_rules, rule_mode, filter_scope, filter_rules,
             ignore_rules):
@@ -551,11 +560,21 @@ class Extraction:
             elements.extend(self.extract_elements(page.id, body, []))
         return filter(self.filter_content, elements)
 
-    def is_priority(self, element):
+    def is_priority(self, element: etree._Element):
         for pattern in self.priority_patterns:
             if element.xpath(pattern, namespaces=ns):
                 return True
         return False
+
+    def is_inline_only(self, element: etree._Element):
+        """The purpose of this method is to ensure that if the element contains
+        only inline-level elements, it is regarded as a whole paragraph; there
+        is no need to further separate its children.
+        """
+        for tag in self.non_inline_elements:
+            if element.find(f'./x:{tag}', namespaces=ns) is not None:
+                return False
+        return True
 
     def need_ignore(self, element):
         for pattern in self.ignore_patterns:
@@ -574,7 +593,7 @@ class Extraction:
                 elements.append(PageElement(element, page_id, True))
                 continue
             element_has_content = False
-            if self.is_priority(element) or (
+            if self.is_priority(element) or self.is_inline_only(element) or (
                     element.text is not None and trim(element.text) != ''):
                 element_has_content = True
             else:
