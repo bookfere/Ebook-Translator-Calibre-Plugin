@@ -564,7 +564,7 @@ class TranslationSetting(QDialog):
 
         # Setup genAI model
         def init_ai_models(model=None):
-            if not isinstance(self.current_engine, GenAI):
+            if not issubclass(self.current_engine, GenAI):
                 return
             try:
                 genai_model_list.currentTextChanged.disconnect()
@@ -703,11 +703,13 @@ class TranslationSetting(QDialog):
             # Refresh preferred language
             source_lang = config.get('source_lang')
             self.source_lang.refresh.emit(
-                self.current_engine.lang_codes.get('source'), source_lang,
+                self.current_engine.lang_codes.get('source'),
+                source_lang,
                 not issubclass(self.current_engine, CustomTranslate))
             target_lang = config.get('target_lang')
             self.target_lang.refresh.emit(
-                self.current_engine.lang_codes.get('target'), target_lang)
+                self.current_engine.lang_codes.get('target'),
+                target_lang)
             # show use notice
             show_tip = self.current_engine.using_tip is not None
             self.tip_group.setVisible(show_tip)
