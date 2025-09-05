@@ -1,9 +1,8 @@
 import socket
 import os.path
-from typing import Any, ContextManager, ClassVar
+from typing import Any
 
 from mechanize import HTTPError
-from mechanize._response import response_seek_wrapper as Response
 
 from calibre.utils.localization import _, lang_as_iso639_1  # type: ignore
 
