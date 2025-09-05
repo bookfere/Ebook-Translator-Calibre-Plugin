@@ -966,10 +966,10 @@ class AdvancedTranslation(QDialog):
         self.review_splitter.addWidget(raw_text)
         self.review_splitter.addWidget(original_text)
         self.review_splitter.addWidget(translation_text)
+        _size = [0] + [int(self.review_splitter.width() / 2)] * 2
         if self.review_splitter.orientation() == Qt.Vertical:
-            self.review_splitter.setSizes([0] + [int(self.review_splitter.height() / 2)] * 2)
-        else:
-            self.review_splitter.setSizes([0] + [int(self.review_splitter.width() / 2)] * 2)
+            _size = [0] + [int(self.review_splitter.height() / 2)] * 2
+        self.review_splitter.setSizes(_size)
 
         def synchronizeScrollbars(editors):
             for editor in editors:
@@ -1017,7 +1017,9 @@ class AdvancedTranslation(QDialog):
             self.review_splitter.setSizes(sizes)
 
         self.install_widget_event(
-            self.review_splitter, self.review_splitter.handle(1), QEvent.MouseButtonDblClick,
+            self.review_splitter,
+            self.review_splitter.handle(1),
+            QEvent.MouseButtonDblClick,
             auto_open_close_splitter)
 
         self.table.itemDoubleClicked.connect(
@@ -1070,8 +1072,12 @@ class AdvancedTranslation(QDialog):
 
         word_wrap_button.clicked.connect(toggle_word_wrap)
 
-        layout_button = QPushButton(_("Toggle Layout"))
-        layout_button.clicked.connect(self.toggle_review_layout)
+        layout_button = QPushButton(_("Horizontal Split"))
+        layout_button.setCheckable(True)
+        is_horizontal = self.config.get(
+            'review_layout_orientation', 'vertical') == 'horizontal'
+        layout_button.setChecked(is_horizontal)
+        layout_button.toggled.connect(self.toggle_review_layout)
 
         status_indicator = TranslationStatus()
 
@@ -1173,8 +1179,8 @@ class AdvancedTranslation(QDialog):
 
         return widget
 
-    def toggle_review_layout(self):
-        if self.review_splitter.orientation() == Qt.Vertical:
+    def toggle_review_layout(self, checked):
+        if checked:
             self.review_splitter.setOrientation(Qt.Horizontal)
             self.config.set('review_layout_orientation', 'horizontal')
         else:

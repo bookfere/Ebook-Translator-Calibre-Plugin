@@ -190,9 +190,8 @@ msgstr "保存(&S)"
 msgid "Word Wrap"
 msgstr "自动换行"
 
-#: advanced.py:1073
-msgid "Toggle Layout"
-msgstr "切换布局"
+msgid "Horizontal Split"
+msgstr "水平分隔"
 
 
 msgid "Your changes have been saved."
