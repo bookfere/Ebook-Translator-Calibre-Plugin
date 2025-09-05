@@ -305,6 +305,8 @@ class CreateTranslationProject(QDialog):
 
         def change_target_lang(lang):
             self.ebook.set_target_lang(lang)
+            self.ebook.set_lang_code(
+                engine_class.get_iso639_target_code(lang))
         change_target_lang(target_lang.currentText())
         target_lang.currentTextChanged.connect(change_target_lang)
 
@@ -878,15 +880,10 @@ class AdvancedTranslation(QDialog):
         layout.addWidget(title_group, 1)
         layout.addWidget(output_group)
 
-        def on_source_lang_change(lang):
-            self.ebook.set_source_lang(lang)
-            self.trans_worker.set_source_lang(lang)
-        source_lang.currentTextChanged.connect(on_source_lang_change)
-
-        def on_target_lang_change(lang):
-            self.ebook.set_target_lang(lang)
-            self.trans_worker.set_target_lang(lang)
-        target_lang.currentTextChanged.connect(on_target_lang_change)
+        source_lang.currentTextChanged.connect(
+            self.trans_worker.set_source_lang)
+        target_lang.currentTextChanged.connect(
+            self.trans_worker.set_target_lang)
 
         def refresh_languages():
             source_lang.refresh.emit(
@@ -897,8 +894,7 @@ class AdvancedTranslation(QDialog):
                 self.current_engine.lang_codes.get('target'),
                 self.ebook.target_lang)
         refresh_languages()
-        on_source_lang_change(source_lang.currentText())
-        on_target_lang_change(target_lang.currentText())
+        self.ebook.set_source_lang(source_lang.currentText())
 
         def choose_engine(index):
             engine_name = engine_list.itemData(index)
@@ -906,8 +902,6 @@ class AdvancedTranslation(QDialog):
             self.trans_worker.set_engine_class(self.current_engine)
             self.batch_translation.emit()
             refresh_languages()
-            on_source_lang_change(source_lang.currentText())
-            on_target_lang_change(target_lang.currentText())
         engine_list.currentIndexChanged.connect(choose_engine)
 
         output_format.setCurrentText(self.ebook.output_format)
@@ -932,9 +926,6 @@ class AdvancedTranslation(QDialog):
                     'you sure you want to output without checking alignment?')
                 if self.alert.ask(message) != 'yes':
                     return
-            lang_code = self.current_engine.get_iso639_target_code(
-                self.ebook.target_lang)
-            self.ebook.set_lang_code(lang_code)
             self.worker.translate_ebook(self.ebook, cache_only=True)
             self.done(1)
         output_button.clicked.connect(output_ebook)
