@@ -876,10 +876,15 @@ class AdvancedTranslation(QDialog):
         layout.addWidget(title_group, 1)
         layout.addWidget(output_group)
 
-        source_lang.currentTextChanged.connect(
-            self.trans_worker.set_source_lang)
-        target_lang.currentTextChanged.connect(
-            self.trans_worker.set_target_lang)
+        def on_source_lang_change(lang):
+            self.ebook.set_source_lang(lang)
+            self.trans_worker.set_source_lang(lang)
+        source_lang.currentTextChanged.connect(on_source_lang_change)
+
+        def on_target_lang_change(lang):
+            self.ebook.set_target_lang(lang)
+            self.trans_worker.set_target_lang(lang)
+        target_lang.currentTextChanged.connect(on_target_lang_change)
 
         def refresh_languages():
             source_lang.refresh.emit(
@@ -890,7 +895,8 @@ class AdvancedTranslation(QDialog):
                 self.current_engine.lang_codes.get('target'),
                 self.ebook.target_lang)
         refresh_languages()
-        self.ebook.set_source_lang(source_lang.currentText())
+        on_source_lang_change(source_lang.currentText())
+        on_target_lang_change(target_lang.currentText())
 
         def choose_engine(index):
             engine_name = engine_list.itemData(index)
@@ -898,6 +904,8 @@ class AdvancedTranslation(QDialog):
             self.trans_worker.set_engine_class(self.current_engine)
             self.batch_translation.emit()
             refresh_languages()
+            on_source_lang_change(source_lang.currentText())
+            on_target_lang_change(target_lang.currentText())
         engine_list.currentIndexChanged.connect(choose_engine)
 
         output_format.setCurrentText(self.ebook.output_format)
