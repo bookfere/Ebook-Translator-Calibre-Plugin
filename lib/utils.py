@@ -10,7 +10,7 @@ from typing import Generator
 from subprocess import Popen
 from contextlib import contextmanager
 
-from mechanize import Browser, Request
+from mechanize import Browser, Request, HTTPError
 from mechanize._response import response_seek_wrapper as Response
 
 from calibre import get_proxies  # type: ignore
@@ -169,13 +169,16 @@ def request(
             proxies.update(https=https)
     if len(proxies) > 0:
         br.set_proxies(proxies)
-    _request = Request(
-        url, data, headers=headers, timeout=timeout, method=method)
-    br.open(_request)
-    response: Response | None = br.response()
-    if response is None or raw_object:
-        return response
-    return response.read().decode('utf-8').strip()
+    try:
+        _request = Request(
+            url, data, headers=headers, timeout=timeout, method=method)
+        br.open(_request)
+        response: Response | None = br.response()
+        if response is None or raw_object:
+            return response
+        return response.read().decode('utf-8').strip()
+    except HTTPError as e:
+        raise Exception(traceback_error() + '\n\n' + e.read().decode('utf-8'))
 
 
 @contextmanager
