@@ -190,6 +190,10 @@ msgstr "保存(&S)"
 msgid "Word Wrap"
 msgstr "自动换行"
 
+msgid "Horizontal Split"
+msgstr "水平分隔"
+
+
 msgid "Your changes have been saved."
 msgstr "更改已保存。"
 

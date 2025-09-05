@@ -1,8 +1,7 @@
 import os
-import sys
 
 from calibre.constants import DEBUG  # type: ignore
-from calibre.customize import InterfaceActionBase # type: ignore
+from calibre.customize import InterfaceActionBase  # type: ignore
 from calibre.utils.localization import _  # type: ignore
 
 

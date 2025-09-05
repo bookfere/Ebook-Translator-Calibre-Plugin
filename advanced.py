@@ -305,6 +305,8 @@ class CreateTranslationProject(QDialog):
 
         def change_target_lang(lang):
             self.ebook.set_target_lang(lang)
+            self.ebook.set_lang_code(
+                engine_class.get_iso639_target_code(lang))
         change_target_lang(target_lang.currentText())
         target_lang.currentTextChanged.connect(change_target_lang)
 
@@ -364,12 +366,14 @@ class AdvancedTranslation(QDialog):
     trans_thread = QThread()
     editor_thread = QThread()
 
-    def __init__(self, parent, icon, worker, ebook):
+    def __init__(self, plugin, parent, worker, ebook):
         QDialog.__init__(self, parent)
+
+        self.ui_settings = plugin.ui_settings
         self.api = parent.current_db.new_api
-        self.icon = icon
         self.worker = worker
         self.ebook = ebook
+
         self.config = get_config()
         self.alert = AlertMessage(self)
         self.footer = Footer()
@@ -922,9 +926,6 @@ class AdvancedTranslation(QDialog):
                     'you sure you want to output without checking alignment?')
                 if self.alert.ask(message) != 'yes':
                     return
-            lang_code = self.current_engine.get_iso639_target_code(
-                self.ebook.target_lang)
-            self.ebook.set_lang_code(lang_code)
             self.worker.translate_ebook(self.ebook, cache_only=True)
             self.done(1)
         output_button.clicked.connect(output_ebook)
@@ -946,8 +947,11 @@ class AdvancedTranslation(QDialog):
         widget = QWidget()
         layout = QVBoxLayout(widget)
 
-        splitter = QSplitter(Qt.Vertical)
-        splitter.setContentsMargins(0, 0, 0, 0)
+        orientation = self.ui_settings.value(
+            'review/layout_orientation', 'vertical')
+        self.review_splitter = QSplitter(
+            Qt.Horizontal if orientation == 'horizontal' else Qt.Vertical)
+        self.review_splitter.setContentsMargins(0, 0, 0, 0)
         raw_text = CodeEditor()
         raw_text.setReadOnly(True)
         original_text = CodeEditor()
@@ -960,10 +964,13 @@ class AdvancedTranslation(QDialog):
             option.setAlignment(Qt.AlignRight)
             document.setDefaultTextOption(option)
         translation_text.setPlaceholderText(_('No translation yet'))
-        splitter.addWidget(raw_text)
-        splitter.addWidget(original_text)
-        splitter.addWidget(translation_text)
-        splitter.setSizes([0] + [int(splitter.height() / 2)] * 2)
+        self.review_splitter.addWidget(raw_text)
+        self.review_splitter.addWidget(original_text)
+        self.review_splitter.addWidget(translation_text)
+        _size = [0] + [int(self.review_splitter.width() / 2)] * 2
+        if self.review_splitter.orientation() == Qt.Vertical:
+            _size = [0] + [int(self.review_splitter.height() / 2)] * 2
+        self.review_splitter.setSizes(_size)
 
         def synchronizeScrollbars(editors):
             for editor in editors:
@@ -1004,14 +1011,16 @@ class AdvancedTranslation(QDialog):
         #     disable_translation_text)
 
         def auto_open_close_splitter():
-            if splitter.sizes()[0] > 0:
-                sizes = [0] + [int(splitter.height() / 2)] * 2
+            if self.review_splitter.sizes()[0] > 0:
+                sizes = [0] + [int(self.review_splitter.height() / 2)] * 2
             else:
-                sizes = [int(splitter.height() / 3)] * 3
-            splitter.setSizes(sizes)
+                sizes = [int(self.review_splitter.height() / 3)] * 3
+            self.review_splitter.setSizes(sizes)
 
         self.install_widget_event(
-            splitter, splitter.handle(1), QEvent.MouseButtonDblClick,
+            self.review_splitter,
+            self.review_splitter.handle(1),
+            QEvent.MouseButtonDblClick,
             auto_open_close_splitter)
 
         self.table.itemDoubleClicked.connect(
@@ -1033,7 +1042,10 @@ class AdvancedTranslation(QDialog):
         # Word Wrap toggle button
         word_wrap_button = QPushButton(_("Word Wrap"))
         word_wrap_button.setCheckable(True)
-        word_wrap_button.setChecked(True)  # Default to enabled
+
+        word_wrap_enabled = self.ui_settings.value(
+            'review/word_wrap', True, type=bool)  # Default to enabled
+        word_wrap_button.setChecked(word_wrap_enabled)
 
         # Set initial word wrap state for all editors
         # Try different approaches for different Qt versions
@@ -1055,24 +1067,32 @@ class AdvancedTranslation(QDialog):
         original_text.setLineWrapMode(wrap_enabled)
         translation_text.setLineWrapMode(wrap_enabled)
 
-        def toggle_word_wrap():
-            is_wrapped = word_wrap_button.isChecked()
-            wrap_mode = wrap_enabled if is_wrapped else wrap_disabled
+        def toggle_word_wrap(checked):
+            self.ui_settings.setValue('review/word_wrap', checked)
+            wrap_mode = wrap_enabled if checked else wrap_disabled
             raw_text.setLineWrapMode(wrap_mode)
             original_text.setLineWrapMode(wrap_mode)
             translation_text.setLineWrapMode(wrap_mode)
 
         word_wrap_button.clicked.connect(toggle_word_wrap)
 
+        layout_button = QPushButton(_("Horizontal Split"))
+        layout_button.setCheckable(True)
+        is_horizontal = self.ui_settings.value(
+            'review/layout_orientation', 'vertical') == 'horizontal'
+        layout_button.setChecked(is_horizontal)
+        layout_button.toggled.connect(self.toggle_review_layout)
+
         status_indicator = TranslationStatus()
 
         control_layout.addWidget(status_indicator)
         control_layout.addWidget(word_wrap_button)
+        control_layout.addWidget(layout_button)
         control_layout.addStretch(1)
         control_layout.addWidget(save_status)
         control_layout.addWidget(save_button)
 
-        layout.addWidget(splitter)
+        layout.addWidget(self.review_splitter, 1)
         layout.addWidget(control)
 
         def update_translation_status(row):
@@ -1162,6 +1182,14 @@ class AdvancedTranslation(QDialog):
         set_shortcut(save_button, 'save', save_translation, save_button.text())
 
         return widget
+
+    def toggle_review_layout(self, checked):
+        if checked:
+            self.review_splitter.setOrientation(Qt.Horizontal)
+            self.ui_settings.setValue('review/layout_orientation', 'horizontal')
+        else:
+            self.review_splitter.setOrientation(Qt.Vertical)
+            self.ui_settings.setValue('review/layout_orientation', 'vertical')
 
     def layout_log(self):
         widget = QWidget()
