@@ -990,9 +990,7 @@ class TestExtraction(unittest.TestCase):
         items = [
             '<p xmlns="http://www.w3.org/1999/xhtml">abc</p>',
             '<pre xmlns="http://www.w3.org/1999/xhtml">abc</pre>',
-            '<div xmlns="http://www.w3.org/1999/xhtml" class="test">'
-            'abc</div>']
-
+            '<div xmlns="http://www.w3.org/1999/xhtml" class="test">abc</div>']
         for item in items:
             with self.subTest(item=item):
                 self.assertTrue(self.extraction.is_priority(etree.XML(item)))
@@ -1000,10 +998,16 @@ class TestExtraction(unittest.TestCase):
         items = [
             '<sub xmlns="http://www.w3.org/1999/xhtml">abc</sub>',
             '<div xmlns="http://www.w3.org/1999/xhtml" id="a">abc</div>']
-
         for item in items:
             with self.subTest(item=item):
                 self.assertFalse(self.extraction.is_priority(etree.XML(item)))
+
+    def test_is_inline_only(self):
+        div = '<div xmlns="http://www.w3.org/1999/xhtml"><span>a</span></div>'
+        self.assertTrue(self.extraction.is_inline_only(etree.XML(div)))
+
+        div = '<div xmlns="http://www.w3.org/1999/xhtml"><div>a</div></div>'
+        self.assertFalse(self.extraction.is_inline_only(etree.XML(div)))
 
     def test_need_ignore(self):
         self.extraction.ignore_rules = ['table', 'p.a']
@@ -1109,6 +1113,19 @@ class TestExtraction(unittest.TestCase):
         self.assertEqual(
             xhtml.find('.//x:div[3]/x:p', namespaces=ns), elements[2].element)
         self.assertTrue(elements[3].ignored)
+
+    def test_extract_elements_with_sole_block_level_element(self):
+        xhtml = etree.XML(b"""<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head><title>Document</title></head>
+<body class="test"><div><span>a </span><span>, b</span></div></body>
+</html>""")
+        root = xhtml.find('.//x:body', namespaces=ns)
+        self.extraction.load_ignore_patterns()
+        elements = self.extraction.extract_elements('test', root, [])
+        self.assertEqual(1, len(elements))
+        self.assertEqual('div', elements[0].get_name())
 
     def test_filter_content(self):
         def elements(markups):

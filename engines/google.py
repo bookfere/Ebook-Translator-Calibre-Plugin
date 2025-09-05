@@ -141,7 +141,7 @@ class GoogleTranslate(Base):
                 '</a></sup>').replace('\n', '<br />')
 
     def _run_command(self, command, silence=False):
-        message = _('Cannot run the command "{}".')
+        error_msg = _('Cannot run the command "{}".').format(command)
         try:
             startupinfo = None
             # Prevent the popping console window on Windows.
@@ -155,14 +155,16 @@ class GoogleTranslate(Base):
         except Exception:
             if silence:
                 return None
-            raise Exception(
-                message.format(command, '\n\n%s' % traceback_error()))
+            error_msg += '\n\n%s' % traceback_error()
+            raise Exception(error_msg)
         if process.wait() != 0:
             if silence:
                 return None
-            raise Exception(
-                message.format(command, '\n\n%s' % process.stderr.read()))
-        return process.stdout.read().strip()
+            stderr = process.stderr
+            error_msg += f'\n\n{stderr.read()}' if stderr is not None else ''
+            raise Exception(error_msg)
+        stdout = process.stdout
+        return stdout.read().strip() if stdout is not None else ''
 
     def _get_gcloud_command(self):
         if self.gcloud is not None:
@@ -224,19 +226,7 @@ class GoogleBasicTranslateADC(GoogleTranslate):
     alias = 'Google (Basic) ADC'
     lang_codes = Base.load_lang_codes(google)
     endpoint = 'https://translation.googleapis.com/language/translate/v2'
-    api_key_hint = 'API key'
     need_api_key = False
-
-    def _create_body(self, text):
-        body = {
-            'format': 'html',
-            'model': 'nmt',
-            'target': self._get_target_code(),
-            'q': text
-        }
-        if not self._is_auto_lang():
-            body.update(source=self._get_source_code())
-        return body
 
     def get_headers(self):
         return {
@@ -246,16 +236,27 @@ class GoogleBasicTranslateADC(GoogleTranslate):
         }
 
     def get_body(self, text):
-        return json.dumps(self._create_body(text))
+        body = {
+            'format': 'html',
+            'model': 'nmt',
+            'target': self._get_target_code(),
+            'q': text
+        }
+        if not self._is_auto_lang():
+            body.update(source=self._get_source_code())
+        return json.dumps(body)
 
-    def get_result(self, data):
-        translations = json.loads(data)['data']['translations']
+    def get_result(self, response):
+        translations = json.loads(response)['data']['translations']
         return ''.join(unescape(i['translatedText']) for i in translations)
 
 
-class GoogleBasicTranslate(GoogleBasicTranslateADC):
+class GoogleBasicTranslate(GoogleTranslate):
     name = 'Google(Basic)'
     alias = 'Google (Basic)'
+    lang_codes = Base.load_lang_codes(google)
+    endpoint = 'https://translation.googleapis.com/language/translate/v2'
+    api_key_hint = 'API key'
     need_api_key = True
     using_tip = None
 
@@ -263,12 +264,24 @@ class GoogleBasicTranslate(GoogleBasicTranslateADC):
         return {'Content-Type': 'application/x-www-form-urlencoded'}
 
     def get_body(self, text):
-        body = self._create_body(text)
-        body.update(key=self.api_key)
+        body = {
+            'key': self.api_key,
+            'format': 'html',
+            'model': 'nmt',
+            'target': self._get_target_code(),
+            'q': text
+        }
+        if not self._is_auto_lang():
+            body.update(source=self._get_source_code())
         return body
+
+    def get_result(self, response):
+        translations = json.loads(response)['data']['translations']
+        return ''.join(unescape(i['translatedText']) for i in translations)
 
 
 class GoogleAdvancedTranslate(GoogleTranslate):
+
     name = 'Google(Advanced)'
     alias = 'Google (Advanced) ADC'
     lang_codes = Base.load_lang_codes(google)
@@ -364,12 +377,13 @@ class GeminiTranslate(GenAI):
             endpoint, timeout=int(self.request_timeout),
             proxy_uri=self.proxy_uri)
         models = []
-        for model in json.loads(response)['models']:
-            model_name = model['name'].split('/')[-1]
-            if model_name.startswith('gemini'):
-                model_desc = model['description']
-                if 'deprecated' not in model_desc:
-                    models.append(model_name)
+        if isinstance(response, str):
+            for model in json.loads(response)['models']:
+                model_name = model['name'].split('/')[-1]
+                if model_name.startswith('gemini'):
+                    model_desc = model['description']
+                    if 'deprecated' not in model_desc:
+                        models.append(model_name)
         return models
 
     def get_endpoint(self):
