@@ -30,7 +30,7 @@ class EbookTranslatorGui(InterfaceAction):
     action_spec = (
         _('Translate Book'), None, _('Translate Ebook Content'), None)
     title = '%s - %s' % (EbookTranslator.title, EbookTranslator.__version__)
-    settings = QSettings(os.path.join(
+    ui_settings = QSettings(os.path.join(
         plugin_dir, EbookTranslator.identifier, 'settings.ini'),
         QSettings.Format.IniFormat)
 
@@ -68,8 +68,7 @@ class EbookTranslatorGui(InterfaceAction):
         if self.show_window(name):
             return
         worker = ConversionWorker(self.gui, self.icon)
-        window = AdvancedTranslation(
-            self.gui, self.qaction.icon(), worker, ebook)
+        window = AdvancedTranslation(self, self.gui, worker, ebook)
         window.setMinimumWidth(1200)
         window.setMinimumHeight(680)
         window.setWindowTitle(
@@ -174,12 +173,12 @@ class EbookTranslatorGui(InterfaceAction):
         identifier = name.split('_')[0]
 
         window_size = 'window_size/%s' % identifier
-        size = self.settings.value(window_size)
+        size = self.ui_settings.value(window_size)
         if size:
             window.resize(size)
 
         window_position = 'window_position/%s' % identifier
-        position = self.settings.value(window_position)
+        position = self.ui_settings.value(window_position)
         if position:
             window.restoreGeometry(position)
 
@@ -187,8 +186,8 @@ class EbookTranslatorGui(InterfaceAction):
         windows[name] = window
 
         def setup_window():
-            self.settings.setValue(window_size, window.size())
-            self.settings.setValue(window_position, window.saveGeometry())
+            self.ui_settings.setValue(window_size, window.size())
+            self.ui_settings.setValue(window_position, window.saveGeometry())
             windows.pop(name)
         window.finished.connect(setup_window)
 

@@ -364,12 +364,14 @@ class AdvancedTranslation(QDialog):
     trans_thread = QThread()
     editor_thread = QThread()
 
-    def __init__(self, parent, icon, worker, ebook):
+    def __init__(self, plugin, parent, worker, ebook):
         QDialog.__init__(self, parent)
+
+        self.ui_settings = plugin.ui_settings
         self.api = parent.current_db.new_api
-        self.icon = icon
         self.worker = worker
         self.ebook = ebook
+
         self.config = get_config()
         self.alert = AlertMessage(self)
         self.footer = Footer()
@@ -954,8 +956,8 @@ class AdvancedTranslation(QDialog):
         widget = QWidget()
         layout = QVBoxLayout(widget)
 
-        orientation = self.config.get(
-            'review_layout_orientation', 'vertical')
+        orientation = self.ui_settings.value(
+            'review/layout_orientation', 'vertical')
         self.review_splitter = QSplitter(
             Qt.Horizontal if orientation == 'horizontal' else Qt.Vertical)
         self.review_splitter.setContentsMargins(0, 0, 0, 0)
@@ -1049,7 +1051,10 @@ class AdvancedTranslation(QDialog):
         # Word Wrap toggle button
         word_wrap_button = QPushButton(_("Word Wrap"))
         word_wrap_button.setCheckable(True)
-        word_wrap_button.setChecked(True)  # Default to enabled
+
+        word_wrap_enabled = self.ui_settings.value(
+            'review/word_wrap', True, type=bool)  # Default to enabled
+        word_wrap_button.setChecked(word_wrap_enabled)
 
         # Set initial word wrap state for all editors
         # Try different approaches for different Qt versions
@@ -1071,9 +1076,9 @@ class AdvancedTranslation(QDialog):
         original_text.setLineWrapMode(wrap_enabled)
         translation_text.setLineWrapMode(wrap_enabled)
 
-        def toggle_word_wrap():
-            is_wrapped = word_wrap_button.isChecked()
-            wrap_mode = wrap_enabled if is_wrapped else wrap_disabled
+        def toggle_word_wrap(checked):
+            self.ui_settings.setValue('review/word_wrap', checked)
+            wrap_mode = wrap_enabled if checked else wrap_disabled
             raw_text.setLineWrapMode(wrap_mode)
             original_text.setLineWrapMode(wrap_mode)
             translation_text.setLineWrapMode(wrap_mode)
@@ -1082,8 +1087,8 @@ class AdvancedTranslation(QDialog):
 
         layout_button = QPushButton(_("Horizontal Split"))
         layout_button.setCheckable(True)
-        is_horizontal = self.config.get(
-            'review_layout_orientation', 'vertical') == 'horizontal'
+        is_horizontal = self.ui_settings.value(
+            'review/layout_orientation', 'vertical') == 'horizontal'
         layout_button.setChecked(is_horizontal)
         layout_button.toggled.connect(self.toggle_review_layout)
 
@@ -1190,10 +1195,10 @@ class AdvancedTranslation(QDialog):
     def toggle_review_layout(self, checked):
         if checked:
             self.review_splitter.setOrientation(Qt.Horizontal)
-            self.config.set('review_layout_orientation', 'horizontal')
+            self.ui_settings.setValue('review/layout_orientation', 'horizontal')
         else:
             self.review_splitter.setOrientation(Qt.Vertical)
-            self.config.set('review_layout_orientation', 'vertical')
+            self.ui_settings.setValue('review/layout_orientation', 'vertical')
 
     def layout_log(self):
         widget = QWidget()
