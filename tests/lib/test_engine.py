@@ -6,18 +6,19 @@ from pathlib import Path
 from types import GeneratorType
 from unittest.mock import patch, Mock
 
-from mechanize import HTTPError
-from mechanize._response import closeable_response as mechanize_response
+from mechanize import HTTPError  # type: ignore
+from mechanize._response import (  # type: ignore
+    closeable_response as mechanize_response)
 
-from ..lib.cache import Paragraph
-from ..lib.exception import UnexpectedResult, UnsupportedModel
-from ..engines.base import Base
-from ..engines.genai import GenAI
-from ..engines.deepl import DeeplTranslate
-from ..engines.openai import ChatgptTranslate, ChatgptBatchTranslate
-from ..engines.microsoft import AzureChatgptTranslate
-from ..engines.anthropic import ClaudeTranslate
-from ..engines.custom import (
+from ...lib.cache import Paragraph
+from ...engines.base import Base
+from ...lib.exception import UnexpectedResult, UnsupportedModel
+from ...engines.genai import GenAI
+from ...engines.deepl import DeeplTranslate
+from ...engines.openai import ChatgptTranslate, ChatgptBatchTranslate
+from ...engines.microsoft import AzureChatgptTranslate
+from ...engines.anthropic import ClaudeTranslate
+from ...engines.custom import (
     create_engine_template, load_engine_data, CustomTranslate)
 
 

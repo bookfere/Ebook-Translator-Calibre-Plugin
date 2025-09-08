@@ -1,15 +1,18 @@
 import unittest
 from unittest.mock import patch, Mock, call
 
-from ..lib.utils import dummy
-from ..lib.translation import Glossary, ProgressBar, Translation
-from ..lib.exception import TranslationCanceled, TranslationFailed
-from ..engines.base import Base
-from ..engines.deepl import DeeplTranslate
+from ...lib.utils import dummy
+from ...lib.translation import Glossary, ProgressBar, Translation
+from ...lib.exception import TranslationCanceled, TranslationFailed
+from ...engines.base import Base
+from ...engines.deepl import DeeplTranslate
+
+
+module_name = 'calibre_plugins.ebook_translator.lib.translation'
 
 
 class TestGlossary(unittest.TestCase):
-    @patch('calibre_plugins.ebook_translator.lib.translation.open')
+    @patch(f'{module_name}.open')
     def test_load_from_file(self, mock_open):
         def mock_open_function(path, mode, newline=None):
             if path == '/path/to/glossary.txt':
@@ -171,8 +174,8 @@ class TestTranslation(unittest.TestCase):
             TranslationCanceled, self.translation.translate_text, 0, 'text')
 
     @patch.object(Translation, 'need_stop', lambda self: False)
-    @patch('calibre_plugins.ebook_translator.lib.translation.traceback_error')
-    @patch('calibre_plugins.ebook_translator.lib.translation.time')
+    @patch(f'{module_name}.traceback_error')
+    @patch(f'{module_name}.time')
     def test_translate_text_retry_failed_translation(self, mock_time, mock_te):
         mock_te.return_value = 'test error trackback'
         self.translation.translator.match_error.return_value = False
@@ -239,7 +242,7 @@ class TestTranslation(unittest.TestCase):
         self.assertEqual('zh', self.paragraph.target_lang)
         self.assertFalse(self.paragraph.is_cache)
 
-    @patch('calibre_plugins.ebook_translator.lib.translation.time')
+    @patch(f'{module_name}.time')
     def test_translate_paragraph_streaming(self, mock_time):
         self.translation.set_streaming(self.streaming)
         self.translator.translate.return_value = (i for i in '你好世界')

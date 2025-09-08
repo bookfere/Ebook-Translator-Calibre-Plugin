@@ -9,25 +9,23 @@ from calibre.utils.localization import _  # type: ignore
 
 from .lib.config import get_config
 from .lib.translation import get_engine_class
-from .lib.conversion import extra_formats
+from .lib.conversion import extra_formats, ConversionWorker
 from .lib.encodings import encoding_list
 from .lib.ebook import Ebooks, Ebook
 from .engines.custom import CustomTranslate
 from .components import (
-    Footer, AlertMessage, SourceLang, TargetLang, InputFormat,
-    OutputFormat)
+    Footer, AlertMessage, SourceLang, TargetLang, InputFormat, OutputFormat)
 
 
 load_translations()  # type: ignore
 
 
 class BatchTranslation(QDialog):
-    def __init__(self, parent, worker, ebooks: Ebooks):
+    def __init__(self, parent, worker: ConversionWorker, ebooks: Ebooks):
         QDialog.__init__(self, parent)
 
-        self.gui = parent
-        self.worker = worker
-        self.ebooks = ebooks
+        self.worker: ConversionWorker = worker
+        self.ebooks: Ebooks = ebooks
         self.alert = AlertMessage(self)
 
         self.config = get_config()
@@ -180,7 +178,6 @@ class BatchTranslation(QDialog):
                 ebook.set_lang_code(
                     translation_engine.get_iso639_target_code(lang))
                 target_lang.setToolTip(lang)
-            print(target_lang.currentText())
             change_target_lang(target_lang.currentText(), row)
             target_lang.currentTextChanged.connect(change_target_lang)
 
@@ -197,8 +194,7 @@ class BatchTranslation(QDialog):
         start_button.setStyleSheet(
             f'padding:0;height:48;font-size:20px;color:{btn_text_color};'
             'text-transform:uppercase;')
-        start_button.clicked.connect(
-            lambda: self.translate_ebooks(self.ebooks))
+        start_button.clicked.connect(self.translate_ebooks)
         layout.addWidget(start_button)
 
         # Change the book title
@@ -208,14 +204,13 @@ class BatchTranslation(QDialog):
 
         return widget
 
-    def translate_ebooks(self, ebooks):
+    def translate_ebooks(self):
         output_path = self.config.get('output_path')
         if not self.config.get('to_library', False) and (
                 output_path is None or not os.path.exists(output_path)):
             self.alert.pop(
                 _('The specified path does not exist.'), 'warning')
             return
-        ebooks = ebooks if isinstance(ebooks, list) else [ebooks]
         for ebook in self.ebooks:
             self.worker.translate_ebook(ebook, is_batch=True)
         self.ebooks.clear()
