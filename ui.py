@@ -60,7 +60,7 @@ class EbookTranslatorGui(InterfaceAction):
 
         self.alert = AlertMessage(self.gui)
 
-        if not getattr(self.gui, 'bookfere_ebook_translator', None):
+        if not getattr(self.gui, 'bookfere_ebook_translator', False):
             self.gui.bookfere_ebook_translator = self.Status()
 
     def advanced_translation_window(self, ebook):

@@ -31,9 +31,8 @@ class BatchTranslation(QDialog):
         self.alert = AlertMessage(self)
 
         self.config = get_config()
-        self.jobs = {}
-        self.source_langs = []
-        self.target_langs = []
+        self.source_langs: list[str] = []
+        self.target_langs: list[str] = []
 
         self.main_layout()
 
@@ -128,15 +127,6 @@ class BatchTranslation(QDialog):
             table.setCellWidget(row, 5, self._cell_widget(target_lang))
             self.target_langs.append(target_lang)
 
-            def change_target_lang(lang, row=row):
-                ebook = self.ebooks[row]
-                ebook.set_target_lang(lang)
-                ebook.set_lang_code(
-                    translation_engine.get_iso639_target_code(lang))
-                target_lang.setToolTip(lang)
-            change_target_lang(target_lang.currentText(), row)
-            target_lang.currentTextChanged.connect(change_target_lang)
-
             target_lang.refresh.emit(
                 translation_engine.lang_codes.get('target'),
                 translation_engine.config.get('target_lang'))
@@ -184,6 +174,16 @@ class BatchTranslation(QDialog):
 
                 table.setCellWidget(row, 6, self._cell_widget(direction_list))
 
+            def change_target_lang(lang, row=row):
+                ebook = self.ebooks[row]
+                ebook.set_target_lang(lang)
+                ebook.set_lang_code(
+                    translation_engine.get_iso639_target_code(lang))
+                target_lang.setToolTip(lang)
+            print(target_lang.currentText())
+            change_target_lang(target_lang.currentText(), row)
+            target_lang.currentTextChanged.connect(change_target_lang)
+
             table.resizeRowsToContents()
             table.resizeColumnsToContents()
 
@@ -209,12 +209,12 @@ class BatchTranslation(QDialog):
         return widget
 
     def translate_ebooks(self, ebooks):
-        to_library = self.config.get('to_library')
         output_path = self.config.get('output_path')
-        if output_path is None or (
-                not to_library and not os.path.exists(output_path)):
-            return self.alert.pop(
+        if not self.config.get('to_library', False) and (
+                output_path is None or not os.path.exists(output_path)):
+            self.alert.pop(
                 _('The specified path does not exist.'), 'warning')
+            return
         ebooks = ebooks if isinstance(ebooks, list) else [ebooks]
         for ebook in self.ebooks:
             self.worker.translate_ebook(ebook, is_batch=True)
