@@ -4,17 +4,17 @@ from unittest.mock import patch, Mock
 
 from lxml import etree
 
-from calibre.ebooks.oeb.base import TOC, Metadata
+from calibre.ebooks.oeb.base import TOC, Metadata  # type: ignore
 
-from ..lib.utils import ns, create_xpath
-from ..lib.cache import Paragraph
-from ..lib.element import (
+from ...lib.utils import ns, create_xpath
+from ...lib.cache import Paragraph
+from ...lib.element import (
     get_string, get_name, Extraction, ElementHandler, ElementHandlerMerge,
     Element, SrtElement, PgnElement, TocElement, PageElement, MetadataElement,
     get_srt_elements, get_pgn_elements, get_toc_elements,
     get_metadata_elements)
-from ..engines import DeeplFreeTranslate
-from ..engines.base import Base
+from ...engines import DeeplFreeTranslate
+from ...engines.base import Base
 
 
 module_name = 'calibre_plugins.ebook_translator.lib.element'

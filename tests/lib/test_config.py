@@ -2,7 +2,7 @@ import unittest
 from typing import Any
 from unittest.mock import call, Mock
 
-from ..lib.config import (
+from ...lib.config import (
     Configuration, get_config, ver200_upgrade, ver203_upgrade)
 
 

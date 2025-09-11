@@ -347,7 +347,7 @@ class GeminiTranslate(GenAI):
 
     models: list[str] = []
     # TODO: Handle the default model more appropriately.
-    model: str | None = 'gemini-2.0-flash'
+    model: str | None = 'gemini-2.5-flash'
 
     def __init__(self):
         super().__init__()

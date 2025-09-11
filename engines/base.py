@@ -42,14 +42,14 @@ class Base:
     request_timeout: float = 10.0
     max_error_count: int = 10
 
-    proxy_type: str | None = None  # http ,socks5
-    proxy_host: str = '127.0.0.1'
-    proxy_port: int = 9050
-
     def __init__(self):
         self.source_lang: str
         self.target_lang: str
         self.search_paths: list = []
+
+        self.proxy_type: str | None = None  # http, socks5
+        self.proxy_host: str | None = None
+        self.proxy_port: int | None = None
 
         self.merge_enabled = False
         self.api_keys: list = self.config.get('api_keys', [])[:]
@@ -163,7 +163,9 @@ class Base:
         self.proxy_port = port
 
     @property
-    def proxy_uri(self) -> str:
+    def proxy_uri(self) -> str | None:
+        if not all((self.proxy_type, self.proxy_host, self.proxy_port)):
+            return None
         uri = f'{self.proxy_host}:{self.proxy_port}'
         if not uri.startswith('http'):
             uri = f'http://{uri}'
@@ -197,12 +199,13 @@ class Base:
                 'url': self.get_endpoint(),
                 'data': self.get_body(content),
                 'headers': self.get_headers(),
-                'method' : self.method,
+                'method': self.method,
                 'proxy_uri': None,
                 'timeout': int(self.request_timeout),
                 'raw_object': self.stream
             }
-            if self.proxy_type == 'socks5':
+            if self.proxy_type == 'socks5' and self.proxy_host is not None \
+                    and self.proxy_port is not None:
                 with socks_proxy(self.proxy_host, self.proxy_port):
                     log.debug('Used socket: ', id(socket.socket))
                     response = request(**params)
@@ -213,10 +216,8 @@ class Base:
             return self.get_result(response)
         except Exception as e:
             # Combine the error messages for investigation.
-            error_message = traceback_error()
-            if isinstance(e, HTTPError):
-                error_message += '\n\n' + e.read().decode('utf-8')
-            elif not self.stream and isinstance(response, str):
+            error_message = traceback_error() + '\n\n' + str(e)
+            if not self.stream and isinstance(response, str):
                 error_message += '\n\n' + response
             # Swap a valid API key if necessary.
             if self.need_swap_api_key(error_message) and self.swap_api_key():
