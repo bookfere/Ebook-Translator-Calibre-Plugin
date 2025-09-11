@@ -27,4 +27,5 @@ jobs:
           sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
       - name: Test with calibre-debug
         run: |
-          export CALIBRE_OVERRIDE_LANG=en; calibre-customize -b .; calibre-debug test.py
+          export CALIBRE_OVERRIDE_LANG=en QT_QPA_PLATFORM=offscreen
+          calibre-customize -b .; calibre-debug test.py

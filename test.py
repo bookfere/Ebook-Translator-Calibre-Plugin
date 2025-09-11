@@ -1,30 +1,40 @@
 import sys
 import unittest
-from pkgutil import iter_modules
+from pathlib import Path
 from importlib import import_module
 
 from calibre.utils.run_tests import run_cli  # type: ignore
 
 
-def get_tests(module):
-    return unittest.defaultTestLoader.loadTestsFromModule(module)
-
-
-def get_test_suite():
+def get_test_suite(filenames=[]):
     suite = unittest.TestSuite()
-    for module in iter_modules(['tests']):
-        test_module = import_module(
-            f'calibre_plugins.ebook_translator.tests.{module.name}')
-        suite.addTests(get_tests(test_module))
+    patterns = ['test_*.py']
+    if len(filenames) > 0:
+        patterns = []
+        for filename in filenames:
+            patterns.append(filename)
+    for pattern in patterns:
+        for path in Path('tests').rglob(pattern):
+            module_name = '.'.join(path.with_suffix('').parts)
+            test_module = import_module(
+                f'calibre_plugins.ebook_translator.{module_name}')
+            suite.addTests(
+                unittest.defaultTestLoader.loadTestsFromModule(test_module))
     return suite
 
 
 if __name__ == '__main__':
-    args = sys.argv[1:]
-    patterns = None if len(args) < 1 else ['*%s' % p for p in args]
+    filenames, methods = [], []
+    for arg in sys.argv[1:]:
+        if Path(arg).suffix == '.py':
+            filenames.append(arg)
+        else:
+            methods.append(arg)
+    patterns = [f'*{m}' for m in methods] if len(methods) > 0 else None
     unittest.defaultTestLoader.testNamePatterns = patterns
-    runner = unittest.TextTestRunner(verbosity=1, failfast=True)
-    # result = runner.run(get_test_suite())
+    suite = get_test_suite(filenames)
+    # runner = unittest.TextTestRunner(verbosity=1, failfast=True)
+    # result = runner.run(suite)
     # if not result.wasSuccessful():
     #     exit(1)
-    run_cli(get_test_suite(), buffer=False)
+    run_cli(suite, verbosity=4, buffer=False)

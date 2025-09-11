@@ -1,6 +1,6 @@
 import unittest
 
-from ..lib.cache import Paragraph
+from ...lib.cache import Paragraph
 
 
 class TestParagraph(unittest.TestCase):

@@ -264,16 +264,21 @@ class TranslationSetting(QDialog):
         proxy_group = QGroupBox(_('Network Proxy'))
         proxy_layout = QHBoxLayout()
 
+        is_proxy_enabled = self.config.get('proxy_enabled', False)
+
         self.proxy_enabled = QCheckBox(_('Enable'))
-        self.proxy_enabled.setChecked(self.config.get('proxy_enabled'))
+        self.proxy_enabled.setChecked(is_proxy_enabled)
         proxy_layout.addWidget(self.proxy_enabled)
 
         self.proxy_type = QComboBox()
         self.proxy_type.addItems(['http', 'socks5'])
         self.proxy_type.setStyleSheet('text-transform:uppercase;')
+        self.proxy_type.setEnabled(is_proxy_enabled)
         proxy_layout.addWidget(self.proxy_type)
 
-        self.proxy_type.setCurrentText(self.config.get('proxy_type'))
+        current_proxy_type = self.config.get('proxy_type')
+        if current_proxy_type is not None:
+            self.proxy_type.setCurrentText(current_proxy_type)
 
         self.proxy_host = QLineEdit()
         rule = r'^(http://|)([a-zA-Z\d]+:[a-zA-Z\d]+@|)' \
@@ -282,12 +287,15 @@ class TranslationSetting(QDialog):
             QRegularExpression(rule))
         self.proxy_host.setPlaceholderText(
             _('Host') + ' (127.0.0.1, user:pass@127.0.0.1)')
+        self.proxy_host.setEnabled(is_proxy_enabled)
         proxy_layout.addWidget(self.proxy_host, 4)
+
         self.proxy_port = QLineEdit()
         self.proxy_port.setPlaceholderText(_('Port'))
         port_validator = QIntValidator()
         port_validator.setRange(0, 65536)
         self.proxy_port.setValidator(port_validator)
+        self.proxy_port.setEnabled(is_proxy_enabled)
         proxy_layout.addWidget(self.proxy_port, 1)
 
         self.proxy_port.textChanged.connect(
@@ -315,11 +323,12 @@ class TranslationSetting(QDialog):
         fill_proxy_setting(self.proxy_type.currentText())
         self.proxy_type.currentTextChanged.connect(fill_proxy_setting)
 
-        def enable_setting_editing(enable):
+        def enable_network_proxy(enable):
             self.proxy_type.setEnabled(enable)
             self.proxy_host.setEnabled(enable)
             self.proxy_port.setEnabled(enable)
-        self.proxy_enabled.toggled.connect(enable_setting_editing)
+            self.config.update(proxy_enabled=enable)
+        self.proxy_enabled.toggled.connect(enable_network_proxy)
 
         misc_widget = QWidget()
         misc_layout = QHBoxLayout(misc_widget)
@@ -580,7 +589,7 @@ class TranslationSetting(QDialog):
             genai_model_list.addItem(_('Custom'))
             # Fill data according to the passed model or the default model
             if model is None:
-                model = config.get('model')
+                model = config.get('model', self.current_engine.model)
             elif model != _('Custom'):
                 config.update(model=model)
             if model in models:
@@ -608,14 +617,15 @@ class TranslationSetting(QDialog):
             genai_model_list.addItem(_('Fetching...'))
             genai_model_list.setDisabled(True)
             genai_model_input.setVisible(False)
+            self.current_engine.set_config(self.get_engine_config())
             self.model_worker.start.emit(self.current_engine)
 
-        def man_fetch_ai_models():
+        def manual_fetch_ai_models():
             if self.api_keys.toPlainText().strip() != '':
                 fetch_ai_models()
             else:
                 self.alert.pop(_('You need to provide an API key to proceed.'))
-        genai_model_refresh.clicked.connect(man_fetch_ai_models)
+        genai_model_refresh.clicked.connect(manual_fetch_ai_models)
 
         def auto_fetch_ai_models():
             if issubclass(self.current_engine, GenAI) \

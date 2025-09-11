@@ -3,8 +3,8 @@ from pathlib import Path
 from typing import Callable
 from unittest.mock import patch, Mock
 
-from ..lib.conversion import ConversionWorker
-from ..lib.ebook import Ebook
+from ...lib.conversion import ConversionWorker
+from ...lib.ebook import Ebook
 
 
 module_name = 'calibre_plugins.ebook_translator.lib.conversion'

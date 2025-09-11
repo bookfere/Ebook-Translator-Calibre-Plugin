@@ -4,8 +4,8 @@ from qt.core import QMenu, QSettings  # type: ignore
 from calibre.utils.localization import _  # type: ignore
 from calibre.gui2.actions import InterfaceAction  # type: ignore
 from calibre.utils.config_base import plugin_dir  # type: ignore
-from calibre.ebooks.conversion.config import get_input_format_for_book  # type: ignore
-from calibre.utils.localization import _  # type: ignore
+from calibre.ebooks.conversion.config import (  # type: ignore
+    get_input_format_for_book)
 from . import EbookTranslator
 from .lib.utils import uid
 from .lib.ebook import Ebooks
@@ -60,7 +60,7 @@ class EbookTranslatorGui(InterfaceAction):
 
         self.alert = AlertMessage(self.gui)
 
-        if not getattr(self.gui, 'bookfere_ebook_translator', None):
+        if not getattr(self.gui, 'bookfere_ebook_translator', False):
             self.gui.bookfere_ebook_translator = self.Status()
 
     def advanced_translation_window(self, ebook):

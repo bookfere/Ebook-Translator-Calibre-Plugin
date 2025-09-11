@@ -6,18 +6,19 @@ from pathlib import Path
 from types import GeneratorType
 from unittest.mock import patch, Mock
 
-from mechanize import HTTPError
-from mechanize._response import closeable_response as mechanize_response
+from mechanize import HTTPError  # type: ignore
+from mechanize._response import (  # type: ignore
+    closeable_response as mechanize_response)
 
-from ..lib.cache import Paragraph
-from ..lib.exception import UnexpectedResult, UnsupportedModel
-from ..engines.base import Base
-from ..engines.genai import GenAI
-from ..engines.deepl import DeeplTranslate
-from ..engines.openai import ChatgptTranslate, ChatgptBatchTranslate
-from ..engines.microsoft import AzureChatgptTranslate
-from ..engines.anthropic import ClaudeTranslate
-from ..engines.custom import (
+from ...lib.cache import Paragraph
+from ...engines.base import Base
+from ...lib.exception import UnexpectedResult, UnsupportedModel
+from ...engines.genai import GenAI
+from ...engines.deepl import DeeplTranslate
+from ...engines.openai import ChatgptTranslate, ChatgptBatchTranslate
+from ...engines.microsoft import AzureChatgptTranslate
+from ...engines.anthropic import ClaudeTranslate
+from ...engines.custom import (
     create_engine_template, load_engine_data, CustomTranslate)
 
 
@@ -49,6 +50,7 @@ class TestBase(unittest.TestCase):
         self.assertIsNone(Base.endpoint)
         self.assertEqual('POST', Base.method)
         self.assertFalse(Base.stream)
+
         self.assertTrue(Base.need_api_key)
         self.assertEqual('API Keys', Base.api_key_hint)
         self.assertEqual(r'^[^\s]+$', Base.api_key_pattern)
@@ -78,6 +80,10 @@ class TestBase(unittest.TestCase):
         # self.assertIsNone(translator.source_lang)
         # self.assertIsNone(translator.target_lang)
         self.assertEqual([], translator.search_paths)
+
+        self.assertIsNone(translator.proxy_type)
+        self.assertIsNone(translator.proxy_host)
+        self.assertIsNone(translator.proxy_port)
 
         self.assertFalse(translator.merge_enabled)
         self.assertEqual(['b', 'c'], translator.api_keys)
@@ -213,9 +219,8 @@ class TestBase(unittest.TestCase):
 
     @patch(module_name + '.base.request')
     def test_translate_with_http_error(self, mock_request):
-        mock_request.side_effect = HTTPError(
-            'https://example.com/api', 409, 'Too many requests', {},
-            io.BytesIO(b'{"error": "any error"}'))
+        mock_request.side_effect = Exception(
+            'HTTP Error 409: Too many requests\n\n{"error": "any error"}')
 
         with self.assertRaises(Exception) as cm:
             self.translator.translate('Hello World')

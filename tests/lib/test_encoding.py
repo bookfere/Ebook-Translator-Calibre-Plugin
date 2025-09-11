@@ -1,7 +1,7 @@
 import codecs
 import unittest
 
-from ..lib.encodings import encoding_list
+from ...lib.encodings import encoding_list
 
 
 class TestEncodingList(unittest.TestCase):

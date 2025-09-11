@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch
 from types import GeneratorType
 
-from ..lib.utils import (
+from ...lib.utils import (
     css_to_xpath, uid, trim, chunk, group, open_file, request)
 
 
