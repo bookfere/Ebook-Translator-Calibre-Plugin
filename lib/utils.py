@@ -150,67 +150,45 @@ def traceback_error():
 def request(
         url, data=None, headers={}, method='GET', timeout=30, proxy_uri=None,
         raw_object=False) -> Response | str | None:
-    max_retries = 3
-    retry_delay = 1
-    
-    for attempt in range(max_retries):
-        br = Browser()
-        br.set_handle_robots(False)
-        
-        # Create a more robust SSL context
-        try:
-            # Try with proper SSL verification first
-            ssl_context = ssl.create_default_context()
-            ssl_context.check_hostname = True
-            ssl_context.verify_mode = ssl.CERT_REQUIRED
-            br.set_ca_data(context=ssl_context)
-        except Exception:
-            # Fallback to unverified context if needed
-            br.set_ca_data(
-                context=ssl._create_unverified_context(cert_reqs=ssl.CERT_NONE))
-        
-        # Set up a proxy; use the proxy settings if available, otherwise read from
-        # the environment.
-        proxies: dict = {}
-        if proxy_uri is not None:
-            proxies.update(http=proxy_uri, https=proxy_uri)
-        else:
-            http = get_proxies(False).get('http')
-            if http is not None:
-                proxies.update(http=http, https=http)
-            https = get_proxies(False).get('https')
-            if https is not None:
-                proxies.update(https=https)
-        if len(proxies) > 0:
-            br.set_proxies(proxies)
-        
-        try:
-            _request = Request(
-                url, data, headers=headers, timeout=timeout, method=method)
-            br.open(_request)
-            response: Response | None = br.response()
-            if response is None or raw_object:
-                return response
-            return response.read().decode('utf-8').strip()
-            
-        except HTTPError as e:
-            raise Exception(traceback_error() + '\n\n' + e.read().decode('utf-8'))
-            
-        except (socket.error, OSError) as e:
-            # Handle connection errors with retry logic
-            if attempt < max_retries - 1:
-                log.debug(f'Connection error on attempt {attempt + 1}: {e}. Retrying in {retry_delay}s...')
-                import time
-                time.sleep(retry_delay)
-                retry_delay *= 2  # Exponential backoff
-                continue
-            else:
-                # Re-raise the original exception on final attempt
-                raise
-                
-        except Exception as e:
-            # For other exceptions, don't retry
-            raise
+    br = Browser()
+    br.set_handle_robots(False)
+
+    # Create a more robust SSL context
+    try:
+        # Try with proper SSL verification first
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = True
+        ssl_context.verify_mode = ssl.CERT_REQUIRED
+        br.set_ca_data(context=ssl_context)
+    except Exception:
+        # Fallback to unverified context if needed
+        br.set_ca_data(
+            context=ssl._create_unverified_context(cert_reqs=ssl.CERT_NONE))
+    # Set up a proxy; use the proxy settings if available, otherwise read from
+    # the environment.
+    proxies: dict = {}
+    if proxy_uri is not None:
+        proxies.update(http=proxy_uri, https=proxy_uri)
+    else:
+        http = get_proxies(False).get('http')
+        if http is not None:
+            proxies.update(http=http, https=http)
+        https = get_proxies(False).get('https')
+        if https is not None:
+            proxies.update(https=https)
+    if len(proxies) > 0:
+        br.set_proxies(proxies)
+    # Make Mechanize raise detailed information when an HTTP error occurs.
+    try:
+        _request = Request(
+            url, data, headers=headers, timeout=timeout, method=method)
+        br.open(_request)
+        response: Response | None = br.response()
+        if response is None or raw_object:
+            return response
+        return response.read().decode('utf-8').strip()
+    except HTTPError as e:
+        raise Exception(traceback_error() + '\n\n' + e.read().decode('utf-8'))
 
 
 @contextmanager
