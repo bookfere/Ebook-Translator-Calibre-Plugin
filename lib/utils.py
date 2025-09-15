@@ -152,9 +152,18 @@ def request(
         raw_object=False) -> Response | str | None:
     br = Browser()
     br.set_handle_robots(False)
-    # Do not verify SSL certificates
-    br.set_ca_data(
-        context=ssl._create_unverified_context(cert_reqs=ssl.CERT_NONE))
+
+    # Create a more robust SSL context
+    try:
+        # Try with proper SSL verification first
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = True
+        ssl_context.verify_mode = ssl.CERT_REQUIRED
+        br.set_ca_data(context=ssl_context)
+    except Exception:
+        # Fallback to unverified context if needed
+        br.set_ca_data(
+            context=ssl._create_unverified_context(cert_reqs=ssl.CERT_NONE))
     # Set up a proxy; use the proxy settings if available, otherwise read from
     # the environment.
     proxies: dict = {}
@@ -169,6 +178,7 @@ def request(
             proxies.update(https=https)
     if len(proxies) > 0:
         br.set_proxies(proxies)
+    # Make Mechanize raise detailed information when an HTTP error occurs.
     try:
         _request = Request(
             url, data, headers=headers, timeout=timeout, method=method)

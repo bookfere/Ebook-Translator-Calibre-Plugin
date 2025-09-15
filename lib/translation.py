@@ -132,8 +132,7 @@ class Translation:
             if self.cancel_request() or self.need_stop():
                 raise TranslationCanceled(_('Translation canceled.'))
             self.abort_count += 1
-            message = _(
-                'Failed to retrieve data from translate engine API.')
+            message = _('Failed to retrieve data from translate engine API.')
             if retry >= self.translator.request_attempt:
                 raise TranslationFailed('{}\n{}'.format(message, str(e)))
             retry += 1

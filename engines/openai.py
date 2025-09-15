@@ -30,7 +30,7 @@ class ChatgptTranslate(GenAI):
 
     concurrency_limit = 1
     request_interval = 20.0
-    request_timeout = 30.0
+    request_timeout = 60.0
 
     prompt = (
         'You are a meticulous translator who translates any given content. '
@@ -40,7 +40,8 @@ class ChatgptTranslate(GenAI):
         'answer do not add any prefix or suffix to the translated content. '
         'Websites\' URLs/addresses should be preserved as is in the '
         'translation\'s output. Do not omit any part of the content, even if '
-        'it seems unimportant. ')
+        'it seems unimportant. RESPOND ONLY with the translation text, no '
+        'formatting, no explanations, no additional commentary whatsoever. ')
 
     samplings = ['temperature', 'top_p']
     sampling = 'temperature'
@@ -106,7 +107,34 @@ class ChatgptTranslate(GenAI):
     def get_result(self, response):
         if self.stream:
             return self._parse_stream(response)
-        return json.loads(response)['choices'][0]['message']['content']
+        # Parse JSON response with robust schema handling
+        try:
+            data = json.loads(response)
+            # Handle different response schemas
+            if 'choices' in data and len(data['choices']) > 0:
+                choice = data['choices'][0]
+                # Standard chat/completions format
+                if 'message' in choice and 'content' in choice['message']:
+                    return choice['message']['content']
+                # Alternative format (some nano models)
+                elif 'content' in choice:
+                    if isinstance(choice['content'], list) \
+                            and len(choice['content']) > 0:
+                        return choice['content'][0].get('text', '')
+                    elif isinstance(choice['content'], str):
+                        return choice['content']
+                # Direct text format
+                elif 'text' in choice:
+                    return choice['text']
+            # Fallback: try to find content anywhere in the response
+            if 'content' in data:
+                return data['content']
+            raise KeyError('No content found in response')
+        except (json.JSONDecodeError, KeyError, IndexError) as e:
+            raise Exception(
+                _('Can not parse returned response. Raw data: {}\nError: {}')
+                .format(response[:500] + '...' if len(response) > 500 \
+                        else response, str(e)))
 
     def _parse_stream(self, response):
         while True:
@@ -118,13 +146,39 @@ class ChatgptTranslate(GenAI):
                 raise Exception(
                     _('Can not parse returned response. Raw data: {}')
                     .format(str(e)))
+            if not line:
+                continue
             if line.startswith('data:'):
                 chunk = line.split('data: ')[1]
                 if chunk == '[DONE]':
                     break
-                delta = json.loads(chunk)['choices'][0]['delta']
-                if 'content' in delta:
-                    yield str(delta['content'])
+                try:
+                    data = json.loads(chunk)
+                    # Handle different streaming response schemas
+                    if 'choices' in data and len(data['choices']) > 0:
+                        choice = data['choices'][0]
+                        # Standard streaming format
+                        if 'delta' in choice and 'content' in choice['delta']:
+                            content = choice['delta']['content']
+                            if content:
+                                yield str(content)
+                        # Alternative streaming format
+                        elif 'content' in choice:
+                            content = choice['content']
+                            if isinstance(content, list) and len(content) > 0:
+                                text = content[0].get('text', '')
+                                if text:
+                                    yield str(text)
+                            elif isinstance(content, str) and content:
+                                yield str(content)
+                        # Direct text format
+                        elif 'text' in choice:
+                            text = choice['text']
+                            if text:
+                                yield str(text)
+                except json.JSONDecodeError:
+                    # Skip malformed JSON chunks
+                    continue
 
 
 class ChatgptBatchTranslate:
