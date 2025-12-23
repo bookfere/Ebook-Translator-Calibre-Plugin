@@ -46,6 +46,31 @@ def get_name(element):
     return etree.QName(element).localname
 
 
+def validate_inner_xml(content, element_name='p'):
+    """Validate if inner HTML content can be parsed as valid XML.
+
+    Args:
+        content: The inner HTML content to validate
+        element_name: The element name to wrap the content in (default: 'p')
+
+    Returns:
+        tuple: (is_valid: bool, error_message: str or None)
+    """
+    if not content or not content.strip():
+        return (True, None)
+
+    try:
+        # Try to create an XML element with the content
+        # This mimics what _create_new_element does
+        test_xml = '<{0}>{1}</{0}>'.format(element_name, trim(content))
+        etree.XML(test_xml)
+        return (True, None)
+    except etree.XMLSyntaxError as e:
+        return (False, str(e))
+    except Exception as e:
+        return (False, str(e))
+
+
 class Element:
     def __init__(self, element, page_id=None, ignored=False):
         self.element = element
