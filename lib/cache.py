@@ -69,21 +69,15 @@ class Paragraph:
 
 
 def default_cache_path():
-    """Get the default cache path based on the platform.
-
-    On Windows: %LOCALAPPDATA%\\calibre\\ebook-translator-plugin
-    On other platforms: tempdir/com.bookfere.Calibre.EbookTranslator
-    """
-
     if sys.platform == 'win32':
         # Use LOCALAPPDATA for Windows to avoid temp directory changes
         local_appdata = os.environ.get('LOCALAPPDATA')
         if local_appdata:
-            path = os.path.join(local_appdata, 'calibre', 'ebook-translator-plugin')
+            path = os.path.join(local_appdata, 'calibre-cache', 'ebook-translator-calibre-plugin')
         else:
             # Fallback to user profile if LOCALAPPDATA is not available
             path = os.path.join(
-                os.path.expanduser('~'), 'AppData', 'Local', 'calibre', 'ebook-translator-plugin')
+                os.path.expanduser('~'), 'AppData', 'Local', 'calibre-cache', 'ebook-translator-calibre-plugin')
     else:
         # For macOS and Linux, keep using temp directory
         path = os.path.join(
