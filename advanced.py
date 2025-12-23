@@ -12,6 +12,7 @@ from calibre.gui2 import I  # type: ignore
 from calibre.utils.localization import _  # type: ignore
 
 from . import EbookTranslator
+from .lib.ebook import Ebook
 from .lib.utils import uid, traceback_error
 from .lib.config import get_config
 from .lib.encodings import encoding_list
@@ -61,7 +62,7 @@ class PreparationWorker(QObject):
     close = pyqtSignal(int)
     finished = pyqtSignal(str)
 
-    def __init__(self, engine_class, ebook):
+    def __init__(self, engine_class, ebook: Ebook):
         QObject.__init__(self)
         self.engine_class = engine_class
         self.ebook = ebook
@@ -89,14 +90,13 @@ class PreparationWorker(QObject):
         input_path = self.ebook.get_input_path()
         element_handler = get_element_handler(
             self.engine_class.placeholder, self.engine_class.separator,
-            self.ebook.target_direction)
+            self.ebook.target_direction, self.ebook.is_inner_html_tags)
         merge_length = str(element_handler.get_merge_length())
         encoding = ''
         if self.ebook.encoding.lower() != 'utf-8':
             encoding = self.ebook.encoding.lower()
-        cache_id = uid(
-            input_path + self.engine_class.name + self.ebook.target_lang
-            + merge_length + encoding)
+        cache_id = uid(f'{input_path}{self.engine_class.name}{self.ebook.target_lang}'
+                       f'{merge_length}{encoding}{"inner_html_tags" if self.ebook.is_inner_html_tags else ""}')
         cache = get_cache(cache_id)
 
         if cache.is_fresh() or not cache.is_persistence():
@@ -106,6 +106,7 @@ class PreparationWorker(QObject):
             cache.set_info('engine_name', self.engine_class.name)
             cache.set_info('target_lang', self.ebook.target_lang)
             cache.set_info('merge_length', merge_length)
+            cache.set_info('is_inner_html_tags', str(self.ebook.is_inner_html_tags))
             cache.set_info('plugin_version', EbookTranslator.__version__)
             cache.set_info('calibre_version', __version__)
             # --------------------------
@@ -347,6 +348,24 @@ class CreateTranslationProject(QDialog):
                     target_lang_code)
                 index = direction_list.findData(direction)
                 direction_list.setCurrentIndex(index)
+
+        # Add inner HTML tags option (row 2)
+        inner_html_group = QGroupBox(_('Advanced Options'))
+        inner_html_layout = QVBoxLayout(inner_html_group)
+        inner_html_checkbox = QCheckBox(_('Preserve inner HTML tags (e.g., <strong>, <em>)'))
+        inner_html_checkbox.setToolTip(
+            _('When enabled, inner formatting tags like <strong> and <em> will be '
+              'sent to the translation engine and preserved in the output. '
+              'Recommended for AI translation engines (ChatGPT, Claude, Gemini).'))
+        inner_html_checkbox.setChecked(True)
+        inner_html_layout.addWidget(inner_html_checkbox)
+        layout.addWidget(inner_html_group, 2, 0, 1, 6)
+
+        def change_inner_html_tags(state):
+            self.ebook.set_inner_html_tags(state == Qt.Checked)
+        inner_html_checkbox.stateChanged.connect(change_inner_html_tags)
+        # Initialize the ebook setting
+        change_inner_html_tags(inner_html_checkbox.checkState())
 
         return widget
 

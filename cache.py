@@ -208,7 +208,7 @@ def update_cache(func):
 class CacheTableModel(QAbstractTableModel):
     headers = [
         _('Title'), _('Engine'), _('Language'), _('Merge Length'),
-        _('Size (MB)'), _('Last Modification Time'), _('Filename'),
+        _('Inner HTML Tags'), _('Size (MB)'), _('Last Modification Time'), _('Filename'),
     ]
 
     def __init__(self):

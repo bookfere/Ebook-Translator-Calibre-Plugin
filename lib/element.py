@@ -19,6 +19,29 @@ def get_string(element, remove_ns=False):
     return re.sub(r'\sxmlns="[^"]+"', '', markup) if remove_ns else markup
 
 
+def get_inner_html(element, remove_ns=False):
+    """Get the inner HTML of an element (without the outer tag).
+
+    Example:
+        <p>This is <strong>important</strong> text.</p>
+        Returns: "This is <strong>important</strong> text."
+    """
+    # Get the opening text
+    parts = []
+    if element.text:
+        parts.append(element.text)
+
+    # Get all child elements with their tails
+    for child in element:
+        child_html = etree.tostring(
+            child, encoding='utf-8', with_tail=True).decode('utf-8')
+        if remove_ns:
+            child_html = re.sub(r'\sxmlns="[^"]+"', '', child_html)
+        parts.append(child_html)
+
+    return trim(''.join(parts))
+
+
 def get_name(element):
     return etree.QName(element).localname
 
@@ -39,6 +62,7 @@ class Element:
         self.translation_lang = None
         self.original_color = None
         self.translation_color = None
+        self.is_inner_html_tags = False
 
         self.remove_pattern = None
         self.reserve_pattern = None
@@ -235,6 +259,10 @@ class PageElement(Element):
                     elements[eid] = element = parent
             self.reserve_elements.append(get_string(element, True))
             self._safe_remove(element, replacement)
+
+        # Return inner HTML or plain text based on flag
+        if self.is_inner_html_tags:
+            return get_inner_html(element_copy, True)
         return trim(''.join(element_copy.itertext()))
 
     def _polish_translation(self, translation):
@@ -288,15 +316,24 @@ class PageElement(Element):
                 self._safe_remove(self.element)
             return
 
-        # Escape the markups (<m id=1 />) to replace escaped markups.
-        translation = xml_escape(translation)
-        for rid, element in enumerate(self.reserve_elements):
-            pattern = self.placeholder[1].format(
-                r'\s*'.join(format(rid, '05')))
-            # Prevent processe any backslash escapes in the replacement.
-            translation = re.sub(
-                xml_escape(pattern), lambda _: element, translation)
-        translation = self._polish_translation(translation)
+        # Handle inner HTML tags mode differently
+        if self.is_inner_html_tags:
+            # Don't escape HTML tags, only replace reserve elements
+            for rid, element in enumerate(self.reserve_elements):
+                pattern = self.placeholder[1].format(
+                    r'\s*'.join(format(rid, '05')))
+                translation = re.sub(pattern, lambda _: element, translation)
+            translation = self._polish_translation(translation)
+        else:
+            # Original behavior: escape all HTML
+            translation = xml_escape(translation)
+            for rid, element in enumerate(self.reserve_elements):
+                pattern = self.placeholder[1].format(
+                    r'\s*'.join(format(rid, '05')))
+                # Prevent processe any backslash escapes in the replacement.
+                translation = re.sub(
+                    xml_escape(pattern), lambda _: element, translation)
+            translation = self._polish_translation(translation)
 
         element_name = get_name(self.element)
         new_element = self._create_new_element(element_name, translation)
@@ -641,6 +678,7 @@ class ElementHandler:
 
         self.merge_length = 0
         self.target_direction = None
+        self.is_inner_html_tags = False
 
         self.translation_lang = None
         self.original_color = None
@@ -661,6 +699,9 @@ class ElementHandler:
 
     def set_target_direction(self, direction):
         self.target_direction = direction
+
+    def set_inner_html_tags(self, enabled):
+        self.is_inner_html_tags = enabled
 
     def set_translation_lang(self, lang):
         self.translation_lang = lang
@@ -696,6 +737,7 @@ class ElementHandler:
             element.set_translation_lang(self.translation_lang)
             element.set_original_color(self.original_color)
             element.set_translation_color(self.translation_color)
+            element.is_inner_html_tags = self.is_inner_html_tags
             if self.column_gap is not None:
                 element.set_column_gap(self.column_gap)
             element.set_remove_pattern(self.remove_pattern)
@@ -878,7 +920,7 @@ def get_page_elements(pages):
     return extraction.get_elements()
 
 
-def get_element_handler(placeholder, separator, direction):
+def get_element_handler(placeholder, separator, direction, is_inner_html_tags):
     config = get_config()
     position_alias = {'before': 'above', 'after': 'below'}
     position = config.get('translation_position') or 'below'
@@ -888,6 +930,7 @@ def get_element_handler(placeholder, separator, direction):
         handler = ElementHandlerMerge(placeholder, separator, position)
         handler.set_merge_length(config.get('merge_length'))
     handler.set_target_direction(direction)
+    handler.set_inner_html_tags(is_inner_html_tags)
     column_gap = config.get('column_gap') or {}
     gap_type = column_gap.get('_type')
     if gap_type is not None and gap_type in column_gap.keys():
