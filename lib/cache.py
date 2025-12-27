@@ -73,11 +73,20 @@ def default_cache_path():
         # Use LOCALAPPDATA for Windows to avoid temp directory changes
         local_appdata = os.environ.get('LOCALAPPDATA')
         if local_appdata:
-            path = os.path.join(local_appdata, 'calibre-cache', 'ebook-translator-calibre-plugin')
+            path = os.path.join(
+                local_appdata,
+                'calibre-cache',
+                'plugins',
+                'ebook-translator')
         else:
             # Fallback to user profile if LOCALAPPDATA is not available
             path = os.path.join(
-                os.path.expanduser('~'), 'AppData', 'Local', 'calibre-cache', 'ebook-translator-calibre-plugin')
+                os.path.expanduser('~'),
+                'AppData',
+                'Local',
+                'calibre-cache',
+                'plugins',
+                'ebook-translator')
     else:
         # For macOS and Linux, keep using temp directory
         path = os.path.join(
