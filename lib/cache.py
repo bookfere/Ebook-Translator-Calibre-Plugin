@@ -3,6 +3,7 @@ import re
 import json
 import shutil
 import sqlite3
+import sys
 import os.path
 import tempfile
 from datetime import datetime
@@ -68,10 +69,31 @@ class Paragraph:
 
 
 def default_cache_path():
-    path = os.path.join(
-        tempfile.gettempdir(), 'com.bookfere.Calibre.EbookTranslator')
+    if sys.platform == 'win32':
+        # Use LOCALAPPDATA for Windows to avoid temp directory changes
+        local_appdata = os.environ.get('LOCALAPPDATA')
+        if local_appdata:
+            path = os.path.join(
+                local_appdata,
+                'calibre-cache',
+                'plugins',
+                'ebook-translator')
+        else:
+            # Fallback to user profile if LOCALAPPDATA is not available
+            path = os.path.join(
+                os.path.expanduser('~'),
+                'AppData',
+                'Local',
+                'calibre-cache',
+                'plugins',
+                'ebook-translator')
+    else:
+        # For macOS and Linux, keep using temp directory
+        path = os.path.join(
+            tempfile.gettempdir(), 'com.bookfere.Calibre.EbookTranslator')
+
     if not os.path.exists(path):
-        os.mkdir(path)
+        os.makedirs(path, exist_ok=True)
     return path
 
 
