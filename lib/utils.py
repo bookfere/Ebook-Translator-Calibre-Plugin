@@ -53,7 +53,18 @@ def css_to_xpath(selectors):
 
 def create_xpath(selectors):
     selectors = (selectors,) if isinstance(selectors, str) else selectors
-    return './/*[%s]' % ' or '.join(css_to_xpath(selectors))
+    simple_tag = re.compile(r'^[A-Za-z][\w-]*$')
+    patterns = []
+    for selector in selectors:
+        rule = css(selector)
+        if rule is None:
+            continue
+        if simple_tag.match(selector):
+            rule = '(%s or self::*[local-name()="%s"])' % (rule, selector)
+        patterns.append(rule)
+    if not patterns:
+        return './/*'
+    return './/*[%s]' % ' or '.join(patterns)
 
 
 def uid(*args):
