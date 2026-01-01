@@ -19,7 +19,7 @@ from .. import EbookTranslator
 
 from .config import get_config
 from .utils import log, sep, uid, open_path, open_file
-from .cache import get_cache
+from .cache import TranslationCache, get_cache
 from .element import (
     get_element_handler, get_srt_elements, get_toc_elements, get_page_elements,
     get_metadata_elements, get_pgn_elements)
@@ -48,8 +48,8 @@ class PrepareStream:
 
 
 def convert_book(
-        input_path, output_path, translation, element_handler, cache,
-        debug_info, encoding, notification) -> None:
+        input_path, output_path, translation, element_handler,
+        cache: TranslationCache, debug_info, encoding, notification) -> None:
     """Process ebooks that Calibre supported."""
     plumber = Plumber(
         input_path, output_path, log=log, report_progress=notification)
@@ -188,7 +188,7 @@ def extract_book(input_path, encoding):
 
 def convert_item(
         ebook_title, input_path, output_path, source_lang, target_lang,
-        cache_only, is_batch, format, encoding, direction, notification):
+        cache_only, is_batch, format, encoding, direction, is_inner_html_tags, notification):
     """The following parameters need attention:
     :cache_only: Only use the translation which exists in the cache.
     :notification: It is automatically added by arbitrary_n.
@@ -198,7 +198,7 @@ def convert_item(
     translator.set_target_lang(target_lang)
 
     element_handler = get_element_handler(
-        translator.placeholder, translator.separator, direction)
+        translator.placeholder, translator.separator, direction, is_inner_html_tags)
     element_handler.set_translation_lang(
         translator.get_iso639_target_code(target_lang))
 
@@ -206,14 +206,15 @@ def convert_item(
     _encoding = ''
     if encoding.lower() != 'utf-8':
         _encoding = encoding.lower()
-    cache_id = uid(
-        input_path + translator.name + target_lang + merge_length + _encoding)
+    cache_id = uid(f'{input_path}{translator.name}{target_lang}'
+                       f'{merge_length}{_encoding}{"inner_html_tags" if element_handler.is_inner_html_tags else ""}')
     cache = get_cache(cache_id)
     cache.set_cache_only(cache_only)
     cache.set_info('title', ebook_title)
     cache.set_info('engine_name', translator.name)
     cache.set_info('target_lang', target_lang)
     cache.set_info('merge_length', merge_length)
+    cache.set_info('is_inner_html_tags', str(element_handler.is_inner_html_tags))
     cache.set_info('plugin_version', EbookTranslator.__version__)
     cache.set_info('calibre_version', __version__)
 
@@ -276,7 +277,7 @@ class ConversionWorker:
                 'convert_item',
                 (ebook.title, input_path, output_path, ebook.source_lang,
                  ebook.target_lang, cache_only, is_batch, ebook.input_format,
-                 ebook.encoding, ebook.target_direction)),
+                 ebook.encoding, ebook.target_direction, ebook.is_inner_html_tags)),
             description=(_('[{} > {}] Translating "{}"').format(
                 ebook.source_lang, ebook.target_lang, ebook.title)))
         self.working_jobs[job] = (ebook, output_path)

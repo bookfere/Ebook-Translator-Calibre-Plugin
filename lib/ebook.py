@@ -18,6 +18,7 @@ class Ebook:
         self.custom_title = None
         self.encoding = 'utf-8'
         self.target_direction = 'auto'
+        self.is_inner_html_tags = False
 
     def set_input_format(self, format):
         self.input_format = format
@@ -42,6 +43,9 @@ class Ebook:
 
     def set_target_direction(self, direction):
         self.target_direction = direction
+
+    def set_inner_html_tags(self, enabled):
+        self.is_inner_html_tags = enabled
 
     def get_input_path(self):
         return self.files.get(self.input_format)

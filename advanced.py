@@ -6,18 +6,19 @@ from qt.core import (  # type: ignore
     QPlainTextEdit, QPushButton, QSplitter, QLabel, QThread, QLineEdit,
     QGridLayout, QProgressBar, pyqtSignal, pyqtSlot, QPixmap, QEvent,
     QStackedWidget, QSpacerItem, QTabWidget, QCheckBox,
-    QComboBox, QSizePolicy)
+    QComboBox, QSizePolicy, QBrush, QColor)
 from calibre.constants import __version__  # type: ignore
 from calibre.gui2 import I  # type: ignore
 from calibre.utils.localization import _  # type: ignore
 
 from . import EbookTranslator
+from .lib.ebook import Ebook
 from .lib.utils import uid, traceback_error
 from .lib.config import get_config
 from .lib.encodings import encoding_list
 from .lib.cache import Paragraph, get_cache
 from .lib.translation import get_engine_class, get_translator, get_translation
-from .lib.element import get_element_handler
+from .lib.element import get_element_handler, validate_inner_xml
 from .lib.conversion import extract_item, extra_formats
 from .engines.openai import ChatgptTranslate, ChatgptBatchTranslate
 from .engines.custom import CustomTranslate
@@ -61,7 +62,7 @@ class PreparationWorker(QObject):
     close = pyqtSignal(int)
     finished = pyqtSignal(str)
 
-    def __init__(self, engine_class, ebook):
+    def __init__(self, engine_class, ebook: Ebook):
         QObject.__init__(self)
         self.engine_class = engine_class
         self.ebook = ebook
@@ -89,14 +90,13 @@ class PreparationWorker(QObject):
         input_path = self.ebook.get_input_path()
         element_handler = get_element_handler(
             self.engine_class.placeholder, self.engine_class.separator,
-            self.ebook.target_direction)
+            self.ebook.target_direction, self.ebook.is_inner_html_tags)
         merge_length = str(element_handler.get_merge_length())
         encoding = ''
         if self.ebook.encoding.lower() != 'utf-8':
             encoding = self.ebook.encoding.lower()
-        cache_id = uid(
-            input_path + self.engine_class.name + self.ebook.target_lang
-            + merge_length + encoding)
+        cache_id = uid(f'{input_path}{self.engine_class.name}{self.ebook.target_lang}'
+                       f'{merge_length}{encoding}{"inner_html_tags" if self.ebook.is_inner_html_tags else ""}')
         cache = get_cache(cache_id)
 
         if cache.is_fresh() or not cache.is_persistence():
@@ -106,6 +106,7 @@ class PreparationWorker(QObject):
             cache.set_info('engine_name', self.engine_class.name)
             cache.set_info('target_lang', self.ebook.target_lang)
             cache.set_info('merge_length', merge_length)
+            cache.set_info('is_inner_html_tags', str(self.ebook.is_inner_html_tags))
             cache.set_info('plugin_version', EbookTranslator.__version__)
             cache.set_info('calibre_version', __version__)
             # --------------------------
@@ -347,6 +348,24 @@ class CreateTranslationProject(QDialog):
                     target_lang_code)
                 index = direction_list.findData(direction)
                 direction_list.setCurrentIndex(index)
+
+        # Add inner HTML tags option (row 2)
+        inner_html_group = QGroupBox(_('Advanced Options'))
+        inner_html_layout = QVBoxLayout(inner_html_group)
+        inner_html_checkbox = QCheckBox(_('Preserve inner HTML tags (e.g., <strong>, <em>)'))
+        inner_html_checkbox.setToolTip(
+            _('When enabled, inner formatting tags like <strong> and <em> will be '
+              'sent to the translation engine and preserved in the output. '
+              'Recommended for AI translation engines (ChatGPT, Claude, Gemini).'))
+        inner_html_checkbox.setChecked(True)
+        inner_html_layout.addWidget(inner_html_checkbox)
+        layout.addWidget(inner_html_group, 2, 0, 1, 6)
+
+        def change_inner_html_tags(state):
+            self.ebook.set_inner_html_tags(state == Qt.Checked)
+        inner_html_checkbox.stateChanged.connect(change_inner_html_tags)
+        # Initialize the ebook setting
+        change_inner_html_tags(inner_html_checkbox.checkState())
 
         return widget
 
@@ -718,6 +737,8 @@ class AdvancedTranslation(QDialog):
 
         delete_button = QPushButton(_('Delete'))
         delete_button.setToolTip(delete_button.text() + ' [Del]')
+        validate_all_xml_button = QPushButton(_('Validate All Translations'))
+        validate_all_xml_button.setVisible(self.ebook.is_inner_html_tags)
         batch_translation = QPushButton(
             ' %s (%s)' % (_('Batch Translation'), _('Beta')))
         translate_all = QPushButton('  %s  ' % _('Translate All'))
@@ -727,7 +748,70 @@ class AdvancedTranslation(QDialog):
         translate_all.clicked.connect(self.translate_all_paragraphs)
         translate_selected.clicked.connect(self.translate_selected_paragraph)
 
+        def validate_all_translations():
+            """Validate all translations and highlight rows with errors."""
+            paragraphs = self.table.get_selected_paragraphs(select_all=True)
+            translated_paragraphs = [p for p in paragraphs if p.translation and p.translation.strip()]
+
+            if not translated_paragraphs:
+                self.alert.pop(_('No translations to validate.'), 'warning')
+                return
+
+            errors = []
+            error_rows = []
+            valid_rows = []
+
+            for paragraph in translated_paragraphs:
+                element_name = paragraph.element_name if hasattr(paragraph, 'element_name') else 'p'
+                is_valid, error_message = validate_inner_xml(paragraph.translation, element_name)
+
+                if not is_valid:
+                    errors.append({
+                        'row': paragraph.row,
+                        'error': error_message
+                    })
+                    error_rows.append(paragraph.row)
+                else:
+                    valid_rows.append(paragraph.row)
+
+            # Get normal background colors
+            vh_bg_normal, vh_fg_normal, bg_normal = self.table._normal_row_background_color()
+
+            # Clear red background for valid rows
+            for row in valid_rows:
+                self.table.set_row_background_color(row, vh_bg_normal, vh_fg_normal, bg_normal, '')
+
+            if errors:
+                # Highlight error rows with red background
+                vh_bg_error = QBrush(
+                    QColor(255, 100, 100) if self.table._is_light_theme() else
+                    QColor(100, 0, 0))
+                vh_fg_error = QBrush(
+                    Qt.black if self.table._is_light_theme() else Qt.white)
+                bg_error = QBrush(QColor(255, 0, 0, 100))
+
+                for err in errors:
+                    row = err['row']
+                    tip = err['error']
+                    self.table.set_row_background_color(row, vh_bg_error, vh_fg_error, bg_error, tip)
+
+                # Show error log dialog
+                error_log = '\n\n'.join([
+                    _('Row {}: {}').format(err['row'], err['error'])
+                    for err in errors
+                ])
+                self.alert.pop(
+                    _('Found {} invalid translation(s):\n\n{}').format(len(errors), error_log),
+                    'error')
+            else:
+                self.alert.pop(
+                    _('All {} translation(s) are valid.').format(len(translated_paragraphs)),
+                    'info')
+
+        validate_all_xml_button.clicked.connect(validate_all_translations)
+
         action_layout.addWidget(delete_button)
+        action_layout.addWidget(validate_all_xml_button)
         action_layout.addStretch(1)
         action_layout.addWidget(batch_translation)
         action_layout.addWidget(translate_all)
@@ -1036,6 +1120,8 @@ class AdvancedTranslation(QDialog):
             lambda: control.setVisible(True))
 
         save_status = QLabel()
+        validate_xml_button = QPushButton(_('Validate Translation'))
+        validate_xml_button.setVisible(self.ebook.is_inner_html_tags)
         save_button = QPushButton(_('&Save'))
         save_button.setDisabled(True)
 
@@ -1090,6 +1176,7 @@ class AdvancedTranslation(QDialog):
         control_layout.addWidget(layout_button)
         control_layout.addStretch(1)
         control_layout.addWidget(save_status)
+        control_layout.addWidget(validate_xml_button)
         control_layout.addWidget(save_button)
 
         layout.addWidget(self.review_splitter, 1)
@@ -1177,6 +1264,32 @@ class AdvancedTranslation(QDialog):
                 translation_text.setFocus(Qt.OtherFocusReason)
                 self.editor_worker.start[str].emit(
                     _('Your changes have been saved.'))
+
+        def validate_current_translation():
+            paragraph = self.table.current_paragraph()
+            if paragraph is None:
+                return
+
+            translation = translation_text.toPlainText()
+            if not translation or not translation.strip():
+                self.alert.pop(_('No translation to validate.'), 'warning')
+                return
+
+            # Get the element name from the paragraph
+            element_name = paragraph.element_name if hasattr(paragraph, 'element_name') else 'p'
+            is_valid, error_message = validate_inner_xml(translation, element_name)
+
+            if is_valid:
+                # Clear red background if validation succeeds
+                vh_bg, vh_fg, bg = self.table._normal_row_background_color()
+                self.table.set_row_background_color(paragraph.row, vh_bg, vh_fg, bg, '')
+                self.alert.pop(_('Translation XML is valid.'), 'info')
+            else:
+                self.alert.pop(
+                    _('Translation XML is invalid:\n\n{}').format(error_message),
+                    'error')
+
+        validate_xml_button.clicked.connect(validate_current_translation)
 
         save_button.clicked.connect(save_translation)
         set_shortcut(save_button, 'save', save_translation, save_button.text())

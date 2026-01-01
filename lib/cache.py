@@ -175,10 +175,11 @@ class TranslationCache:
             engine = cache.get_info('engine_name')
             lang = cache.get_info('target_lang')
             merge = int(cache.get_info('merge_length') or 0)
+            is_inner_html_tags = cache.get_info('is_inner_html_tags') or 'False'
             size = size_by_unit(os.path.getsize(file_path), 'MB')
             time = datetime.fromtimestamp(os.path.getmtime(file_path)) \
                 .strftime('%Y-%m-%d %H:%M:%S')
-            names.append((title, engine, lang, merge, size, time, name))
+            names.append((title, engine, lang, merge, is_inner_html_tags, size, time, name))
             cache.close()
         return names
 
