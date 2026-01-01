@@ -10,8 +10,8 @@ from typing import Generator
 from subprocess import Popen
 from contextlib import contextmanager
 
-from mechanize import Browser, Request, HTTPError
-from mechanize._response import response_seek_wrapper as Response
+from mechanize import Browser, Request, HTTPError  # type: ignore
+from mechanize._response import response_seek_wrapper as Response  # type: ignore
 
 from calibre import get_proxies  # type: ignore
 from calibre.utils.logging import Log  # type: ignore
@@ -23,8 +23,6 @@ from ..vendor.cssselect import GenericTranslator, SelectorError
 ns = {'x': 'http://www.w3.org/1999/xhtml'}
 is_test = 'unittest' in sys.modules
 log = Log(level=Log.DEBUG if os.environ.get('CALIBRE_DEBUG') else Log.INFO)
-
-log.debug('Backup original socket: ', id(socket.socket))
 original_socket = socket.socket
 
 
@@ -36,24 +34,32 @@ def sep(char='═', count=38):
     return char * count
 
 
-def css(selector):
+def css(selector: str) -> str | None:
     try:
         return GenericTranslator().css_to_xpath(selector, prefix='self::x:')
     except SelectorError:
         return None
 
 
-def css_to_xpath(selectors):
+def css_to_xpath(selectors: tuple | list) -> list:
     patterns = []
+    simple_tag = re.compile(r'^[A-Za-z][\w-]*$')
     for selector in selectors:
-        if rule := css(selector):
-            patterns.append(rule)
+        rule = css(selector)
+        if rule is None:
+            continue
+        # Add support for matching elements that use their own namespaces.
+        if simple_tag.match(selector):
+            rule = f'({rule} or self::*[local-name()="{selector}"])'
+        patterns.append(rule)
     return patterns
 
 
-def create_xpath(selectors):
+def create_xpath(selectors: tuple | str) -> str | None:
     selectors = (selectors,) if isinstance(selectors, str) else selectors
-    return './/*[%s]' % ' or '.join(css_to_xpath(selectors))
+    if patterns := css_to_xpath(selectors):
+        return './/*[%s]' % ' or '.join(patterns)
+    return None
 
 
 def uid(*args):
@@ -196,6 +202,7 @@ def socks_proxy(host: str, port: int) -> Generator[ModuleType, None, None]:
     """This is a monkey-patch approach to enforce Mechanize to use a SOCKS5
     proxy. The context manager restores the original socket after it exits.
     """
+    log.debug('Backup original socket: ', id(socket.socket))
     # Temporarily remove environment proxies to prevent conflicts with the
     # SOCKS5 proxy, which might otherwise send connections through an HTTP
     # proxy, causing a "General SOCKS server failure" error.

@@ -2,16 +2,71 @@ import unittest
 from unittest.mock import patch
 from types import GeneratorType
 
+from lxml import etree  # type: ignore
+
+from ...vendor.cssselect import SelectorError
+
 from ...lib.utils import (
-    css_to_xpath, uid, trim, chunk, group, open_file, request)
+    ns, css, css_to_xpath, create_xpath, uid, trim, chunk, group, open_file,
+    request)
 
 
 module_name = 'calibre_plugins.ebook_translator.lib.utils'
 
 
 class TestUtils(unittest.TestCase):
+    def test_css(self):
+        self.assertEqual("self::x:div[@id = 'id']", css('div#id'))
+        self.assertIsNone(css('div>>p'))  # omit invalid selector
+
     def test_css_to_xpath(self):
-        self.assertEqual(["self::x:*[@id = 'id']"], css_to_xpath(['#id']))
+        self.assertEqual([], css_to_xpath([]))
+        self.assertEqual([], css_to_xpath(['div>>p']))  # omit invalid selector
+        self.assertEqual(["self::x:*[@id = 'test']"], css_to_xpath(['#test']))
+        self.assertEqual(
+            [
+                "self::x:div[@id = 'test']",
+                "(self::x:span or self::*[local-name()=\"span\"])"
+            ],
+            css_to_xpath(["div>>p", 'div#test', 'span']))
+
+    def test_create_xpath(self):
+        pattern = create_xpath(('p', 'math',))
+        self.assertEqual(
+            pattern,
+            './/*[(self::x:p or self::*[local-name()="p"]) or '
+            '(self::x:math or self::*[local-name()="math"])]')
+
+        # A sample code to test XPath pattern matching with MathML elements
+        # that have independent namespaces.
+        xhtml = etree.XML("""<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head><title>Document</title></head>
+<body>
+    <p>Test MathML element</p>
+    <math xmlns="http://www.w3.org/1998/Math/MathML">
+        <munder>
+            <mo>∑</mo>
+            <mi>A</mi>
+        </munder>
+        <munder displaystyle="true">
+            <mo>∑</mo>
+            <mi>A</mi>
+        </munder>
+        <munder>
+            <mo>∑</mo>
+            <mi scriptlevel="0">A</mi>
+        </munder>
+    </math>
+</body>
+</html>""".encode())
+        body = xhtml.find('./x:body', namespaces=ns)
+        elements = body.xpath(pattern, namespaces=ns)
+
+        self.assertEqual(2, len(elements))
+        self.assertEqual('p', etree.QName(elements[0]).localname)
+        self.assertEqual('math', etree.QName(elements[1]).localname)
 
     def test_uid(self):
         self.assertEqual('202cb962ac59075b964b07152d234b70', uid('123'))

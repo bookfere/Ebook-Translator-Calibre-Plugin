@@ -3,7 +3,8 @@ import json
 import copy
 from typing import Any
 
-from lxml import etree
+from lxml import etree  # type: ignore
+
 from calibre import prepare_string_for_xml as xml_escape  # type: ignore
 
 from .utils import (
@@ -684,7 +685,7 @@ class ElementHandler:
         # conflicts with the mechanism of merge translation.
         default_rules = (
             'img', 'code', 'br', 'hr', 'sub', 'sup', 'kbd', 'abbr', 'wbr',
-            'var', 'canvas', 'svg', 'script', 'style')
+            'var', 'canvas', 'svg', 'script', 'style', 'math')
         self.reserve_pattern = create_xpath(default_rules + tuple(rules))
 
     def prepare_original(self, elements):
