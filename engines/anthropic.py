@@ -47,6 +47,8 @@ class ClaudeTranslate(GenAI):
     top_p = 1.0
     top_k = 1
     stream = True
+    enable_extended_output = False  # 128K output for Claude 3.7 Sonnet
+    enable_extended_context = False  # 1M context for Claude Sonnet 4.0/4.5
 
     # event types for streaming are listed here:
     # https://docs.anthropic.com/en/api/messages-streaming
@@ -61,10 +63,7 @@ class ClaudeTranslate(GenAI):
         'message_stop']
 
     models: list[str] = []
-    # TODO: better handle setting the default model
-    # (e.g. fetch programmatically) by default use the latest version of the
-    # most intelligent model available (currently this is claude-3-7-sonnet)
-    model: str | None = 'claude-3-7-sonnet-latest'
+    model: str | None = 'claude-sonnet-4-5'
 
     def __init__(self):
         super().__init__()
@@ -76,6 +75,10 @@ class ClaudeTranslate(GenAI):
         self.top_k = self.config.get('top_k', self.top_k)
         self.stream = self.config.get('stream', self.stream)
         self.model = self.config.get('model', self.model)
+        self.enable_extended_output = self.config.get(
+            'enable_extended_output', self.enable_extended_output)
+        self.enable_extended_context = self.config.get(
+            'enable_extended_context', self.enable_extended_context)
 
     def _get_prompt(self):
         prompt = self.prompt.replace('<tlang>', self.target_lang)
@@ -107,14 +110,34 @@ class ClaudeTranslate(GenAI):
             'User-Agent': 'Ebook-Translator/%s' % EbookTranslator.__version__,
         }
 
-        # NOTE: Claude 3.7 Sonnet can produce substantially longer responses
-        # than previous models with support for up to 128K output tokens (beta)
-        # this feature can be enabled by passing an anthropic-beta header of
-        # "output-128k-2025-02-19", more here:
-        # https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking#extended-output-capabilities-beta
-        if self.model is not None and \
-                self.model.startswith('claude-3-7-sonnet-'):
-            headers['anthropic-beta'] = 'output-128k-2025-02-19'
+        # Enable beta features based on user configuration
+        # More info: https://platform.claude.com/docs/en/about-claude/models/overview
+        if self.model is not None:
+            # For Claude Sonnet 3.7 - enable 128K output tokens
+            # (requires user to enable this option)
+            if self.enable_extended_output and self.model.startswith('claude-3-7-sonnet-'):
+                headers['anthropic-beta'] = 'output-128k-2025-02-19'
+
+            # For Claude Sonnet 4/4.5 - enable 1M token context window
+            # (requires user to enable this option)
+            # More info: https://platform.claude.com/docs/en/about-claude/pricing#long-context-pricing
+            #
+            # NOTE: When the 1M token context window is enabled, requests that exceed 200K input tokens
+            #       are automatically charged at premium long context rates. The 1M token context window
+            #       is currently in beta for organizations in usage tier 4 and organizations with custom
+            #       rate limits.
+            #
+            #       Even with the beta flag enabled, requests with fewer than 200K input tokens are
+            #       charged at standard rates. If your request exceeds 200K input tokens, all tokens
+            #       incur premium pricing.
+            #
+            #       The 200K threshold is based solely on input tokens (including cache reads/writes).
+            #       Output token count does not affect pricing tier selection, though output tokens are
+            #       charged at the higher rate when the input threshold is exceeded.
+            elif self.enable_extended_context and (
+                    self.model.startswith('claude-sonnet-4-0') or
+                    self.model.startswith('claude-sonnet-4-5')):
+                headers['anthropic-beta'] = 'context-1m-2025-08-07'
 
         return headers
 
