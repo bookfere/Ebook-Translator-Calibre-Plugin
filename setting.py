@@ -18,6 +18,7 @@ from .lib.utils import (
 from .lib.translation import get_engine_class, get_translator
 from .engines import (
     builtin_engines, GeminiTranslate, ChatgptTranslate, AzureChatgptTranslate)
+from .engines.anthropic import ClaudeTranslate
 from .engines.genai import GenAI
 from .engines.custom import CustomTranslate
 from .components import (
@@ -242,15 +243,27 @@ class TranslationSetting(QDialog):
         # Merge Translate
         merge_group = QGroupBox(
             '%s %s' % (_('Merge to Translate'), _('(Beta)')))
-        merge_layout = QHBoxLayout(merge_group)
+        merge_layout = QVBoxLayout(merge_group)
+
+        # First row: controls
+        merge_controls = QWidget()
+        merge_controls_layout = QHBoxLayout(merge_controls)
+        merge_controls_layout.setContentsMargins(0, 0, 0, 0)
         merge_enabled = QCheckBox(_('Enable'))
         self.merge_length = QSpinBox()
         self.merge_length.setRange(1, 999999)
-        merge_layout.addWidget(merge_enabled)
-        merge_layout.addWidget(self.merge_length)
-        merge_layout.addWidget(QLabel(_(
+        merge_controls_layout.addWidget(merge_enabled)
+        merge_controls_layout.addWidget(self.merge_length)
+        merge_controls_layout.addWidget(QLabel(_(
             'The number of characters to translate at once.')))
-        merge_layout.addStretch(1)
+        merge_controls_layout.addStretch(1)
+        merge_layout.addWidget(merge_controls)
+
+        # Second row: Token estimate helper (Claude only)
+        self.merge_token_estimate = QLabel()
+        self.merge_token_estimate.setVisible(False)
+        merge_layout.addWidget(self.merge_token_estimate)
+
         layout.addWidget(merge_group)
 
         self.disable_wheel_event(self.merge_length)
@@ -259,6 +272,9 @@ class TranslationSetting(QDialog):
         merge_enabled.setChecked(self.config.get('merge_enabled'))
         merge_enabled.clicked.connect(
             lambda checked: self.config.update(merge_enabled=checked))
+        self.merge_length.valueChanged.connect(
+            lambda: self.update_merge_token_estimate())
+        # Note: source_lang connection added later after widget is created
 
         # Network Proxy
         proxy_group = QGroupBox(_('Network Proxy'))
@@ -453,6 +469,10 @@ class TranslationSetting(QDialog):
         language_layout.addRow(_('Target Language'), self.target_lang)
         layout.addWidget(language_group)
 
+        # Connect source language changes to token estimate update
+        self.source_lang.currentTextChanged.connect(
+            lambda: self.update_merge_token_estimate())
+
         self.apply_form_layout_policy(language_layout)
 
         # Network Request
@@ -557,6 +577,21 @@ class TranslationSetting(QDialog):
         stream_enabled = QCheckBox(_('Enable streaming response'))
         genai_layout.addRow(_('Stream'), stream_enabled)
 
+        # Claude-specific beta features - store as instance variables for access in methods
+        extended_output_label = QLabel(_('Extended Output'))
+        self.extended_output_enabled = QCheckBox(_(
+            'Enable 128K output tokens'))
+        extended_output_label.setVisible(False)
+        self.extended_output_enabled.setVisible(False)
+        genai_layout.addRow(extended_output_label, self.extended_output_enabled)
+
+        extended_context_label = QLabel(_('Extended Context'))
+        self.extended_context_enabled = QCheckBox(_(
+            'Enable 1M context window'))
+        extended_context_label.setVisible(False)
+        self.extended_context_enabled.setVisible(False)
+        genai_layout.addRow(extended_context_label, self.extended_context_enabled)
+
         sampling_btn_group = QButtonGroup(sampling_widget)
         sampling_btn_group.addButton(temperature, 0)
         sampling_btn_group.addButton(top_p, 1)
@@ -570,6 +605,49 @@ class TranslationSetting(QDialog):
             .update(sampling=labels[button]))
 
         layout.addWidget(genai_group)
+
+        # Update Claude beta feature visibility based on selected model
+        def update_claude_beta_features():
+            if not issubclass(self.current_engine, ClaudeTranslate):
+                extended_output_label.setVisible(False)
+                self.extended_output_enabled.setVisible(False)
+                extended_context_label.setVisible(False)
+                self.extended_context_enabled.setVisible(False)
+                return
+
+            # Get the current model
+            model = None
+            if genai_model_input.isVisible():
+                model = genai_model_input.text().strip()
+            else:
+                model = genai_model_list.currentText()
+
+            if not model or model == _('Custom'):
+                # If no model selected or Custom without text, hide both
+                extended_output_label.setVisible(False)
+                self.extended_output_enabled.setVisible(False)
+                extended_context_label.setVisible(False)
+                self.extended_context_enabled.setVisible(False)
+                return
+
+            # Show extended output for Claude 3.7 Sonnet models
+            if model.startswith('claude-3-7-sonnet-'):
+                extended_output_label.setVisible(True)
+                self.extended_output_enabled.setVisible(True)
+                extended_context_label.setVisible(False)
+                self.extended_context_enabled.setVisible(False)
+            # Show extended context for Claude Sonnet 4.0/4.5 models
+            elif model.startswith('claude-sonnet-4-0') or model.startswith('claude-sonnet-4-5'):
+                extended_output_label.setVisible(False)
+                self.extended_output_enabled.setVisible(False)
+                extended_context_label.setVisible(True)
+                self.extended_context_enabled.setVisible(True)
+            else:
+                # Hide both for other models
+                extended_output_label.setVisible(False)
+                self.extended_output_enabled.setVisible(False)
+                extended_context_label.setVisible(False)
+                self.extended_context_enabled.setVisible(False)
 
         # Setup genAI model
         def init_ai_models(model=None):
@@ -602,10 +680,15 @@ class TranslationSetting(QDialog):
                 if model in models or model == _('Custom'):
                     genai_model_input.clear()
             genai_model_list.currentTextChanged.connect(init_ai_models)
+            # Update Claude beta features visibility after model change
+            update_claude_beta_features()
         self.model_worker.finished.connect(init_ai_models)
-        genai_model_input.textChanged.connect(
-            lambda model: self.current_engine.config.update(
-                model=model.strip()))
+
+        def on_custom_model_changed(model):
+            self.current_engine.config.update(model=model.strip())
+            update_claude_beta_features()
+
+        genai_model_input.textChanged.connect(on_custom_model_changed)
 
         def fetch_ai_models():
             try:
@@ -703,6 +786,36 @@ class TranslationSetting(QDialog):
                 config.get('stream', self.current_engine.stream))
             stream_enabled.toggled.connect(
                 lambda checked: config.update(stream=checked))
+
+            # Claude-specific beta features
+            # Hide by default, will be shown based on model selection
+            extended_output_label.setVisible(False)
+            self.extended_output_enabled.setVisible(False)
+            extended_context_label.setVisible(False)
+            self.extended_context_enabled.setVisible(False)
+
+            if issubclass(self.current_engine, ClaudeTranslate):
+                # Load configuration values
+                self.extended_output_enabled.setChecked(
+                    config.get('enable_extended_output',
+                               self.current_engine.enable_extended_output))
+                self.extended_context_enabled.setChecked(
+                    config.get('enable_extended_context',
+                               self.current_engine.enable_extended_context))
+                # Connect to config updates
+                try:
+                    self.extended_output_enabled.toggled.disconnect()
+                    self.extended_context_enabled.toggled.disconnect()
+                except TypeError:
+                    pass
+                self.extended_output_enabled.toggled.connect(
+                    lambda checked: config.update(enable_extended_output=checked))
+                self.extended_context_enabled.toggled.connect(
+                    lambda checked: config.update(enable_extended_context=checked))
+                # Update token estimate when context setting changes
+                self.extended_context_enabled.toggled.connect(
+                    lambda: self.update_merge_token_estimate())
+
             genai_group.setVisible(True)
 
         def choose_default_engine(index):
@@ -763,6 +876,8 @@ class TranslationSetting(QDialog):
             if issubclass(self.current_engine, GenAI):
                 genai_group.setVisible(True)
                 show_genai_preferences(config)
+            # Update merge token estimate when engine changes
+            self.update_merge_token_estimate()
         choose_default_engine(engine_list.findData(self.current_engine.name))
         engine_list.currentIndexChanged.connect(choose_default_engine)
 
@@ -1459,6 +1574,96 @@ class TranslationSetting(QDialog):
         layout.setFieldGrowthPolicy(
             QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
         layout.setLabelAlignment(Qt.AlignRight)
+
+    def update_merge_token_estimate(self):
+        """Update token estimate for Claude merge translation feature."""
+        if not issubclass(self.current_engine, ClaudeTranslate):
+            self.merge_token_estimate.setVisible(False)
+            return
+
+        chars = self.merge_length.value()
+
+        # Get current source language from widget (not config, for real-time updates)
+        source_lang_name = self.source_lang.currentText()
+        if source_lang_name == _('Auto detect'):
+            source_lang_code = 'auto'
+        else:
+            # Look up language code from display name
+            lang_codes = self.current_engine.lang_codes.get('source', {})
+            source_lang_code = lang_codes.get(source_lang_name, 'auto')
+
+        # Character-to-token ratios by language family
+        # Based on Claude tokenizer characteristics
+        if source_lang_code in ['zh-CN', 'zh-TW', 'ja', 'ko']:
+            # CJK languages: ~1.5 chars per token
+            chars_per_token = 1.5
+            lang_note = 'CJK'
+        elif source_lang_code in ['ar', 'he', 'iw']:
+            # Arabic/Hebrew: ~3 chars per token (iw is legacy code for Hebrew)
+            chars_per_token = 3
+            lang_note = 'Arabic/Hebrew'
+        else:
+            # English and most Western languages: ~4 chars per token
+            chars_per_token = 4
+            lang_note = source_lang_name if source_lang_code != 'auto' else 'Western languages'
+
+        tokens = int(chars / chars_per_token)
+
+        # Determine context window size based on model and settings
+        model = self.current_engine.config.get('model', self.current_engine.model)
+
+        # Model-specific context windows (in tokens)
+        # Note: This cannot be fetched from the API - the /v1/models endpoint
+        # only returns id, display_name, created_at, and type fields.
+        # Source: https://platform.claude.com/docs/en/about-claude/models/overview
+        model_context_windows = {
+            # Claude 4.5 models (current)
+            'claude-sonnet-4-5': 200_000,    # 1M with beta flag
+            'claude-haiku-4-5': 200_000,
+            'claude-opus-4-5': 200_000,
+            # Claude 4.x legacy models
+            'claude-opus-4-1': 200_000,
+            'claude-sonnet-4-0': 200_000,    # 1M with beta flag
+            'claude-opus-4-0': 200_000,
+            # Claude 3.x models
+            'claude-3-7-sonnet': 200_000,
+            'claude-3-5-sonnet': 200_000,
+            'claude-3-5-haiku': 200_000,
+            'claude-3-opus': 200_000,
+            'claude-3-sonnet': 200_000,
+            'claude-3-haiku': 200_000,
+        }
+
+        # Find matching model prefix
+        context_window = None
+        model_matched = False
+        if model:
+            for model_prefix, window_size in model_context_windows.items():
+                if model.startswith(model_prefix):
+                    context_window = window_size
+                    model_matched = True
+                    break
+
+        # Fallback to default if model not recognized
+        if context_window is None:
+            context_window = 200_000
+            model_matched = False
+
+        # Apply extended context if enabled for supported models
+        if model and (model.startswith('claude-sonnet-4-0') or model.startswith('claude-sonnet-4-5')) \
+                and self.extended_context_enabled.isChecked():
+            context_window = 1_000_000
+
+        context_pct = (tokens / context_window) * 100
+        context_label = f'{context_window // 1000}K' if context_window < 1_000_000 else '1M'
+
+        # Add note if using default context window
+        default_note = _(' (estimated default)') if not model_matched else ''
+
+        estimate_text = _('Estimated: ~{} tokens for {} (~{:.2f}% of {} context{})').format(
+            f'{tokens:,}', lang_note, context_pct, context_label, default_note)
+        self.merge_token_estimate.setText(estimate_text)
+        self.merge_token_estimate.setVisible(True)
 
     def done(self, result):
         self.model_thread.quit()
