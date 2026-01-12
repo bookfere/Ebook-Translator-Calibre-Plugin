@@ -1,3 +1,22 @@
+## v2.4.2
+
+Added RTL/LTR ebook formatting support and general improvements:
+
+**RTL/LTR Formatting:**
+1. feat: Add page-progression-direction and primary-writing-mode to EPUB output for RTL/LTR languages
+2. feat: Add target directionality selector (Auto/LTR/RTL) in translation UI
+3. feat: Add conditional text-align styling for translated content based on target direction
+4. feat: Expand language directionality mappings for Arabic, Hebrew, Farsi, Urdu, and more
+5. fix: Fix Hebrew language code mapping (iw → he) for Calibre compatibility
+
+**General Improvements:**
+1. feat: Extract get_cache_id() utility for consistent cache ID calculation
+2. feat: Add log_content setting to control original/translated content verbosity in logs
+3. fix: Fix cache deletion with multiple selections (index shifting bug)
+4. refactor: Rename engine_class to current_engine for consistency
+
+---
+
 ## v2.4.1
 
 Added features and fixed bugs as follows:

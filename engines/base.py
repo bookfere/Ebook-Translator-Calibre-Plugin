@@ -96,7 +96,11 @@ class Base:
 
     @classmethod
     def get_iso639_target_code(cls, lang):
-        return lang_as_iso639_1(cls.get_target_code(lang))
+        code = cls.get_target_code(lang)
+        # Handle legacy Hebrew code: iw → he (Calibre doesn't recognize 'iw')
+        if code == 'iw':
+            return 'he'
+        return lang_as_iso639_1(code)
 
     @classmethod
     def set_config(cls, config):
