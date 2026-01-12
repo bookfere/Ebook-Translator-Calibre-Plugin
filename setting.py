@@ -357,8 +357,14 @@ class TranslationSetting(QDialog):
         # Job Log
         log_group = QGroupBox(_('Job Log'))
         log_translation = QCheckBox(_('Show translation'))
+        log_content = QCheckBox(_('Show original/translated content'))
+        log_content.setToolTip(_(
+            'Show the full original and translated text for each paragraph in the log.\n'
+            'Disable to reduce log verbosity.\n'
+            'Default: ON'))
         log_layout = QVBoxLayout(log_group)
         log_layout.addWidget(log_translation)
+        log_layout.addWidget(log_content)
         log_layout.addStretch(1)
         misc_layout.addWidget(log_group, 1)
 
@@ -374,6 +380,10 @@ class TranslationSetting(QDialog):
         log_translation.setChecked(self.config.get('log_translation', True))
         log_translation.toggled.connect(
             lambda checked: self.config.update(log_translation=checked))
+
+        log_content.setChecked(self.config.get('log_content', True))
+        log_content.toggled.connect(
+            lambda checked: self.config.update(log_content=checked))
 
         notice.setChecked(self.config.get('show_notification', True))
         notice.toggled.connect(
