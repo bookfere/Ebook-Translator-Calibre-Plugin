@@ -18,7 +18,7 @@ from calibre.ebooks.metadata.meta import (  # type: ignore
 from .. import EbookTranslator
 
 from .config import get_config
-from .utils import log, sep, uid, open_path, open_file
+from .utils import log, sep, open_path, open_file, get_cache_id
 from .cache import get_cache
 from .element import (
     get_element_handler, get_srt_elements, get_toc_elements, get_page_elements,
@@ -201,13 +201,12 @@ def convert_item(
         translator.placeholder, translator.separator, direction)
     element_handler.set_translation_lang(
         translator.get_iso639_target_code(target_lang))
+    element_handler.set_source_lang(
+        translator.get_source_code(translator.source_lang))
 
-    merge_length = str(element_handler.get_merge_length())
-    _encoding = ''
-    if encoding.lower() != 'utf-8':
-        _encoding = encoding.lower()
-    cache_id = uid(
-        input_path + translator.name + target_lang + merge_length + _encoding)
+    merge_length = element_handler.get_merge_length()
+    cache_id = get_cache_id(
+        input_path, translator.name, target_lang, merge_length, encoding)
     cache = get_cache(cache_id)
     cache.set_cache_only(cache_only)
     cache.set_info('title', ebook_title)
@@ -216,6 +215,8 @@ def convert_item(
     cache.set_info('merge_length', merge_length)
     cache.set_info('plugin_version', EbookTranslator.__version__)
     cache.set_info('calibre_version', __version__)
+    cache.set_info('source_lang', source_lang)
+    cache.set_info('target_direction', direction)
 
     translation = get_translation(
         translator, lambda text, error=False: log.info(text))
@@ -301,16 +302,74 @@ class ConversionWorker:
                 if ebook_metadata_config.get('lang_mark'):
                     ebook_title = '%s [%s]' % (ebook_title, ebook.target_lang)
                 metadata.title = ebook_title
-                if ebook_metadata_config.get('lang_code'):
+                if ebook_metadata_config.get('lang_code', True):
                     metadata.language = ebook.lang_code
                 subjects = ebook_metadata_config.get('subjects')
                 metadata.tags += (subjects or []) + [
                     'Translated by Ebook Translator: '
                     'https://translator.bookfere.com']
                 # metadata.authors = ['bookfere.com']
-                # metadata.author_sort = 'bookfere.com'
                 # metadata.book_producer = 'Ebook Translator'
                 set_metadata(file, metadata, ebook.output_format)
+
+            # Add RTL/LTR OPF metadata by modifying the EPUB after write
+            if ebook.output_format.lower() == 'epub' and ebook.target_direction:
+                from ..engines.languages import lang_directionality
+
+                target_direction = ebook.target_direction.lower()
+                translator = get_translator()
+                source_lang_code = translator.get_source_code(
+                    ebook.source_lang)
+                source_lang_base = (
+                    source_lang_code.split('-')[0]
+                    if source_lang_code else None)
+                source_direction = lang_directionality.get(
+                    source_lang_code) or (
+                    lang_directionality.get(source_lang_base)
+                    if source_lang_base else None) or 'ltr'
+
+                if (target_direction in ('rtl', 'ltr')
+                        and source_direction != target_direction):
+                    try:
+                        from lxml import etree
+                        from calibre.ebooks.oeb.polish.container import (
+                            get_container)
+
+                        container = get_container(
+                            output_path, tweak_mode=True)
+                        opf_root = container.opf
+                        ns = {'opf': 'http://www.idpf.org/2007/opf'}
+
+                        # Set spine page-progression-direction
+                        spine_elem = opf_root.xpath(
+                            '//opf:spine', namespaces=ns)[0]
+                        spine_elem.set(
+                            'page-progression-direction', target_direction)
+
+                        # Add primary-writing-mode meta
+                        writing_mode = (
+                            'horizontal-rl' if target_direction == 'rtl'
+                            else 'horizontal-lr')
+                        metadata_elem = opf_root.xpath(
+                            '//opf:metadata', namespaces=ns)[0]
+                        etree.SubElement(
+                            metadata_elem,
+                            '{http://www.idpf.org/2007/opf}meta',
+                            attrib={
+                                'name': 'primary-writing-mode',
+                                'content': writing_mode,
+                            })
+
+                        container.dirty(container.opf_name)
+                        container.commit()
+                        log.info(
+                            'Added RTL metadata: '
+                            'primary-writing-mode=%s, '
+                            'page-progression-direction=%s'
+                            % (writing_mode, target_direction))
+                    except Exception as e:
+                        log.warn(
+                            'Failed to add RTL metadata to EPUB: %s' % e)
         else:
             metadata = self.api.get_metadata(ebook.id)
             ebook_title = ebook.title

@@ -69,6 +69,27 @@ def uid(*args):
     return md5.hexdigest()
 
 
+def get_cache_id(input_path, engine_name, target_lang, merge_length, encoding='utf-8'):
+    """Calculate cache ID consistently across codebase.
+
+    Cache ID is based on: input file + engine + target language + merge length + encoding.
+    This ensures separate caches for different translation configurations.
+
+    Args:
+        input_path: Path to input ebook file
+        engine_name: Translation engine name (e.g., 'Claude', 'ChatGPT')
+        target_lang: Target language display name (e.g., 'Hebrew', 'Spanish')
+        merge_length: Merge length value (int or str)
+        encoding: File encoding (default: 'utf-8')
+
+    Returns:
+        Cache ID string (MD5 hash)
+    """
+    merge_length_str = str(merge_length)
+    encoding_suffix = '' if encoding.lower() == 'utf-8' else encoding.lower()
+    return uid(input_path + engine_name + target_lang + merge_length_str + encoding_suffix)
+
+
 def trim(text):
     # Replace \xa0 with whitespace to be compatible with Python 2.x.
     text = re.sub(u'\u00a0|\u3000', ' ', text)

@@ -1044,10 +1044,25 @@ baidu = {
 }
 
 lang_directionality = {
-    'iw': 'rtl',
-    'ar': 'rtl',
-    'en': 'ltr',
-    'es': 'ltr',
-    'it': 'ltr',
-    'de': 'ltr'
+    # RTL (Right-to-Left) languages
+    'ar': 'rtl',      # Arabic
+    'iw': 'rtl',      # Hebrew (legacy code)
+    'he': 'rtl',      # Hebrew (modern code)
+    'fa': 'rtl',      # Farsi/Persian
+    'fa-AF': 'rtl',   # Dari (Afghan Persian)
+    'ur': 'rtl',      # Urdu
+    'yi': 'rtl',      # Yiddish
+    'ps': 'rtl',      # Pashto
+    # LTR (Left-to-Right) languages - common examples
+    'en': 'ltr',      # English
+    'es': 'ltr',      # Spanish
+    'fr': 'ltr',      # French
+    'de': 'ltr',      # German
+    'it': 'ltr',      # Italian
+    'pt': 'ltr',      # Portuguese
+    'ru': 'ltr',      # Russian
+    'zh-CN': 'ltr',   # Chinese Simplified
+    'zh-TW': 'ltr',   # Chinese Traditional
+    'ja': 'ltr',      # Japanese
+    'ko': 'ltr',      # Korean
 }

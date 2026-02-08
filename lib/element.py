@@ -37,6 +37,7 @@ class Element:
 
         self.position = None
         self.target_direction = None
+        self.source_lang = None
         self.translation_lang = None
         self.original_color = None
         self.translation_color = None
@@ -61,6 +62,9 @@ class Element:
 
     def set_target_direction(self, direction):
         self.target_direction = direction
+
+    def set_source_lang(self, lang):
+        self.source_lang = lang
 
     def set_translation_lang(self, lang):
         self.translation_lang = lang
@@ -262,13 +266,43 @@ class PageElement(Element):
         new_element.set('dir', self.target_direction or 'auto')
         if self.translation_lang is not None:
             new_element.set('lang', self.translation_lang)
+
+        # Build style attribute with color and conditional text-align
+        style_parts = []
         if self.translation_color is not None:
-            new_element.set('style', 'color:%s' % self.translation_color)
+            style_parts.append('color:%s' % self.translation_color)
+
+        # Add text-align only if source and target directions differ
+        if self.source_lang and self.target_direction in ('rtl', 'ltr'):
+            # Import to get directionality function
+            from ..engines.languages import lang_directionality
+            source_direction = lang_directionality.get(self.source_lang, 'ltr')
+
+            # Only add text-align if directions differ
+            if source_direction != self.target_direction:
+                if self.target_direction == 'rtl':
+                    style_parts.append('text-align:right')
+                elif self.target_direction == 'ltr':
+                    style_parts.append('text-align:left')
+
+        if style_parts:
+            new_element.set('style', ';'.join(style_parts))
+
         return new_element
 
     def add_translation(self, translation=None):
         # self.element.tail = None  # Make sure the element has no tail
-        if self.original_color is not None:
+        if self.original_color is not None or (self.source_lang and self.target_direction in ('rtl', 'ltr')):
+            # Check if text-align should be added (only if directions differ)
+            add_text_align = False
+            text_align_value = None
+            if self.source_lang and self.target_direction in ('rtl', 'ltr'):
+                from ..engines.languages import lang_directionality
+                source_direction = lang_directionality.get(self.source_lang, 'ltr')
+                if source_direction != self.target_direction:
+                    add_text_align = True
+                    text_align_value = 'right' if self.target_direction == 'rtl' else 'left'
+
             for element in self.element.iter():
                 if element.text is not None or len(list(element)) > 0:
                     # Some users encountered errors when trying to set the
@@ -278,7 +312,13 @@ class PageElement(Element):
                     # since comment and processing instruction nodes do not
                     # have string tags, e.g., etree.Comment and etree.PI.
                     try:
-                        element.set('style', 'color:%s' % self.original_color)
+                        style_parts = []
+                        if self.original_color is not None:
+                            style_parts.append('color:%s' % self.original_color)
+                        if add_text_align:
+                            style_parts.append('text-align:%s' % text_align_value)
+                        if style_parts:
+                            element.set('style', ';'.join(style_parts))
                     except TypeError:
                         log.warn(
                             'Failed to set style on element:',
@@ -642,6 +682,7 @@ class ElementHandler:
 
         self.merge_length = 0
         self.target_direction = None
+        self.source_lang = None
 
         self.translation_lang = None
         self.original_color = None
@@ -662,6 +703,9 @@ class ElementHandler:
 
     def set_target_direction(self, direction):
         self.target_direction = direction
+
+    def set_source_lang(self, lang):
+        self.source_lang = lang
 
     def set_translation_lang(self, lang):
         self.translation_lang = lang
@@ -694,6 +738,7 @@ class ElementHandler:
             element.set_placeholder(self.placeholder)
             element.set_position(self.position)
             element.set_target_direction(self.target_direction)
+            element.set_source_lang(self.source_lang)
             element.set_translation_lang(self.translation_lang)
             element.set_original_color(self.original_color)
             element.set_translation_color(self.translation_color)
@@ -750,6 +795,7 @@ class ElementHandlerMerge(ElementHandler):
             element.set_placeholder(self.placeholder)
             element.set_position(self.position)
             element.set_target_direction(self.target_direction)
+            element.set_source_lang(self.source_lang)
             element.set_translation_lang(self.translation_lang)
             element.set_original_color(self.original_color)
             element.set_translation_color(self.translation_color)
