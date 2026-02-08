@@ -1013,6 +1013,7 @@ class TestClaudeTranslate(unittest.TestCase):
         self.translator.model = model
         result = self.translator.translate('Hello World!')
 
+        # Dynamic timeout is disabled by default, so uses default 30s
         mock_request.assert_called_with(
             url=url, data=data, headers=headers, method='POST', timeout=30.0,
             proxy_uri=None, raw_object=False)
@@ -1090,6 +1091,7 @@ data: {"type":"message_stop"}
         self.translator.model = model
         result = self.translator.translate('Hello World!')
 
+        # Dynamic timeout is disabled by default, so uses default 30s
         mock_request.assert_called_with(
             url=url, data=data, headers=headers, method='POST', timeout=30.0,
             proxy_uri=None, raw_object=True)
