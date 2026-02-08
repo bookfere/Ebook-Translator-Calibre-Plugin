@@ -6,7 +6,7 @@ from qt.core import (  # type: ignore
     QPlainTextEdit, QPushButton, QSplitter, QLabel, QThread, QLineEdit,
     QGridLayout, QProgressBar, pyqtSignal, pyqtSlot, QPixmap, QEvent,
     QStackedWidget, QSpacerItem, QTabWidget, QCheckBox,
-    QComboBox, QSizePolicy)
+    QComboBox, QSizePolicy, QTextCursor)
 from calibre.constants import __version__  # type: ignore
 from calibre.gui2 import I  # type: ignore
 from calibre.utils.localization import _  # type: ignore
@@ -20,6 +20,7 @@ from .lib.translation import get_engine_class, get_translator, get_translation
 from .lib.element import get_element_handler
 from .lib.conversion import extract_item, extra_formats
 from .engines.openai import ChatgptTranslate, ChatgptBatchTranslate
+from .engines.anthropic import ClaudeTranslate
 from .engines.custom import CustomTranslate
 from .components import (
     EngineList, Footer, SourceLang, TargetLang, InputFormat, OutputFormat,
@@ -973,6 +974,7 @@ class AdvancedTranslation(QDialog):
         self.review_splitter.setSizes(_size)
 
         def synchronizeScrollbars(editors):
+            """Sync scrollbars between editors using simple pixel-based approach."""
             for editor in editors:
                 for other_editor in editors:
                     if editor != other_editor:
@@ -1139,7 +1141,31 @@ class AdvancedTranslation(QDialog):
             elif isinstance(data, Paragraph):
                 self.table.setCurrentItem(self.table.item(data.row, 0))
             else:
-                translation_text.insertPlainText(data)
+                # Check if user is at bottom (watching stream)
+                scrollbar = translation_text.verticalScrollBar()
+                was_at_bottom = scrollbar.value() >= scrollbar.maximum() - 10
+
+                # Disable updates to prevent auto-scroll/flicker
+                translation_text.setUpdatesEnabled(False)
+                saved_position = scrollbar.value()
+
+                # Append to document using cursor at end
+                doc = translation_text.document()
+                cursor = QTextCursor(doc)
+                end_position = getattr(QTextCursor.MoveOperation, 'End', None) or QTextCursor.End
+                cursor.movePosition(end_position)
+                cursor.insertText(data)
+
+                # Restore scroll position before re-enabling updates
+                if not was_at_bottom:
+                    scrollbar.setValue(saved_position)
+
+                # Re-enable updates - this triggers repaint
+                translation_text.setUpdatesEnabled(True)
+
+                # Scroll to bottom only if user was watching
+                if was_at_bottom:
+                    scrollbar.setValue(scrollbar.maximum())
         self.trans_worker.streaming.connect(streaming_translation)
 
         def modify_translation():
@@ -1216,6 +1242,56 @@ class AdvancedTranslation(QDialog):
     def get_progress_step(self, total):
         return int(round(100.0 / (total or 1), 100) * 1000000)
 
+    def check_max_tokens_capacity(self):
+        """Check if merge length might exceed model's max output tokens."""
+        if not issubclass(self.current_engine, ClaudeTranslate):
+            return True  # Only check for Claude models
+
+        config = get_config()
+        merge_length = config.get('merge_length', 1800)
+        merge_enabled = config.get('merge_enabled', False)
+
+        if not merge_enabled:
+            return True  # No merge, chunks will be small
+
+        # Get model and settings from engine
+        engine_config = self.current_engine.config
+        model = engine_config.get('model', self.current_engine.model)
+        enable_extended_output = engine_config.get('enable_extended_output', False)
+
+        # Estimate output tokens (conservative: 3 chars per token, +10% buffer)
+        estimated_output_tokens = int((merge_length / 3) * 1.1)
+
+        # Determine model's max output (same logic as in anthropic.py get_body)
+        if not model:
+            model_max_output = 4_096
+        elif model.startswith('claude-3-7-sonnet-') and enable_extended_output:
+            model_max_output = 128_000
+        elif model.startswith('claude-3-7-sonnet-'):
+            model_max_output = 64_000
+        elif model.startswith('claude-sonnet-4-') or model.startswith('claude-haiku-4-') or \
+             model.startswith('claude-opus-4-5') or model.startswith('claude-opus-4-1'):
+            model_max_output = 64_000
+        elif model.startswith('claude-opus-4-0'):
+            model_max_output = 32_000
+        elif model.startswith('claude-3-haiku-'):
+            model_max_output = 4_000
+        else:
+            model_max_output = 32_000
+
+        # Check if estimated output exceeds model capacity
+        if estimated_output_tokens > model_max_output:
+            message = _(
+                'Warning: Merge length ({:,} chars ≈ {:,} tokens) may exceed model max output ({:,} tokens).\n\n'
+                'This could result in incomplete translations. Consider:\n'
+                '• Reducing merge length\n'
+                '• Enabling "Extended Output" (Claude 3.7 Sonnet: 128K tokens)\n\n'
+                'Continue anyway?'
+            ).format(merge_length, estimated_output_tokens, model_max_output)
+            return self.alert.ask(message) == 'yes'
+
+        return True
+
     def translate_all_paragraphs(self):
         """Translate the untranslated paragraphs when at least one is selected.
         Otherwise, retranslate all paragraphs regardless of prior translation.
@@ -1225,6 +1301,11 @@ class AdvancedTranslation(QDialog):
         if is_fresh:
             paragraphs = self.table.get_selected_paragraphs(False, True)
         self.progress_step = self.get_progress_step(len(paragraphs))
+
+        # Check max_tokens capacity before starting
+        if not self.check_max_tokens_capacity():
+            return
+
         if not self.translate_all:
             message = _(
                 'Are you sure you want to translate all {:n} paragraphs?')
@@ -1239,6 +1320,9 @@ class AdvancedTranslation(QDialog):
         if len(paragraphs) == self.table.rowCount():
             self.translate_all_paragraphs()
         else:
+            # Check max_tokens capacity before starting
+            if not self.check_max_tokens_capacity():
+                return
             self.progress_step = self.get_progress_step(len(paragraphs))
             self.trans_worker.translate.emit(paragraphs, True)
 

@@ -169,6 +169,9 @@ class Translation:
                 temp = ''
                 clear = True
                 for char in translation:
+                    # Check for cancellation during streaming
+                    if self.cancel_request():
+                        raise TranslationCanceled(_('Translation canceled.'))
                     if clear:
                         self.streaming('')
                         clear = False
@@ -176,7 +179,13 @@ class Translation:
                     time.sleep(0.05)
                     temp += char
             else:
-                temp = ''.join([char for char in translation])
+                # For batch mode, still check cancellation periodically
+                temp_chars = []
+                for char in translation:
+                    if self.cancel_request():
+                        raise TranslationCanceled(_('Translation canceled.'))
+                    temp_chars.append(char)
+                temp = ''.join(temp_chars)
             translation = temp
         translation = self.glossary.restore(translation)
         paragraph.translation = translation.strip()
@@ -198,15 +207,18 @@ class Translation:
         row = paragraph.row
         original = paragraph.original.strip()
         if paragraph.error is None:
-            self.log(sep())
-            if row >= 0:
-                self.log(_('Row: {}').format(row))
-            self.log(_('Original: {}').format(original))
-            self.log(sep('┈'))
-            message = _('Translation: {}')
-            if paragraph.is_cache:
-                message = _('Translation (Cached): {}')
-            self.log(message.format(paragraph.translation.strip()))
+            # Only log verbose content if log_content setting is enabled
+            from .config import get_config
+            if get_config().get('log_content', True):
+                self.log(sep())
+                if row >= 0:
+                    self.log(_('Row: {}').format(row))
+                self.log(_('Original: {}').format(original))
+                self.log(sep('┈'))
+                message = _('Translation: {}')
+                if paragraph.is_cache:
+                    message = _('Translation (Cached): {}')
+                self.log(message.format(paragraph.translation.strip()))
 
     def handle(self, paragraphs=[]):
         start_time = time.time()
@@ -214,6 +226,15 @@ class Translation:
         for paragraph in paragraphs:
             self.total += 1
             char_count += len(paragraph.original)
+
+        # Set up prompt caching if enabled
+        # Collect full book context for caching (Claude only)
+        if hasattr(self.translator, 'enable_prompt_caching') and self.translator.enable_prompt_caching:
+            full_context = '\n\n'.join([p.original for p in paragraphs])
+            self.translator.full_book_context = full_context
+            self.log(sep())
+            self.log(_('Prompt caching enabled - using full book context'))
+            self.log(_('Context size: {} characters').format(len(full_context)))
 
         self.log(sep())
         self.log(_('Start to translate ebook content'))
