@@ -242,23 +242,80 @@ class TranslationSetting(QDialog):
         # Merge Translate
         merge_group = QGroupBox(
             '%s %s' % (_('Merge to Translate'), _('(Beta)')))
-        merge_layout = QHBoxLayout(merge_group)
+        merge_layout = QVBoxLayout(merge_group)
+
+        # First row: enable checkbox and mode selection
+        merge_row1 = QHBoxLayout()
         merge_enabled = QCheckBox(_('Enable'))
+        self.merge_mode = QComboBox()
+        self.merge_mode.addItems(['Legacy (Length)', 'Paragraph Merge'])
+        self.merge_mode.setStyleSheet('text-transform:none;')
+        merge_row1.addWidget(merge_enabled)
+        merge_row1.addWidget(QLabel(_('Mode:')))
+        merge_row1.addWidget(self.merge_mode)
+        merge_row1.addStretch(1)
+        merge_layout.addLayout(merge_row1)
+
+        # Second row: character limit
+        merge_row2 = QHBoxLayout()
         self.merge_length = QSpinBox()
         self.merge_length.setRange(1, 999999)
-        merge_layout.addWidget(merge_enabled)
-        merge_layout.addWidget(self.merge_length)
-        merge_layout.addWidget(QLabel(_(
+        merge_row2.addWidget(QLabel(_('Character limit:')))
+        merge_row2.addWidget(self.merge_length)
+        merge_row2.addWidget(QLabel(_(
             'The number of characters to translate at once.')))
-        merge_layout.addStretch(1)
+        merge_row2.addStretch(1)
+        merge_layout.addLayout(merge_row2)
+
+        # Third row: max paragraphs (for paragraph merge mode)
+        merge_row3 = QHBoxLayout()
+        self.merge_max_paragraphs = QSpinBox()
+        self.merge_max_paragraphs.setRange(1, 500)
+        self.merge_max_paragraphs.setValue(50)
+        merge_row3.addWidget(QLabel(_('Max paragraphs:')))
+        merge_row3.addWidget(self.merge_max_paragraphs)
+        merge_row3.addWidget(QLabel(_(
+            'Maximum number of paragraphs per translation request.')))
+        merge_row3.addStretch(1)
+        merge_layout.addLayout(merge_row3)
+
+        # Fourth row: format preservation
+        merge_row4 = QHBoxLayout()
+        merge_format_preservation = QCheckBox(_('Enable Format Preservation'))
+        merge_row4.addWidget(merge_format_preservation)
+        merge_row4.addWidget(QLabel(_(
+            '(Preserve italics, bold, and other formatting through translation)')))
+        merge_row4.addStretch(1)
+        merge_layout.addLayout(merge_row4)
+
         layout.addWidget(merge_group)
 
         self.disable_wheel_event(self.merge_length)
+        self.disable_wheel_event(self.merge_max_paragraphs)
 
-        self.merge_length.setValue(self.config.get('merge_length'))
+        # Set current values
         merge_enabled.setChecked(self.config.get('merge_enabled'))
+        self.merge_length.setValue(self.config.get('merge_length'))
+
+        current_mode = self.config.get('merge_mode', 'length')
+        mode_index = 0 if current_mode == 'length' else 1
+        self.merge_mode.setCurrentIndex(mode_index)
+
+        self.merge_max_paragraphs.setValue(
+            self.config.get('merge_max_paragraphs', 50))
+        merge_format_preservation.setChecked(
+            self.config.get('merge_format_preservation', False))
+
+        # Connect signals
         merge_enabled.clicked.connect(
             lambda checked: self.config.update(merge_enabled=checked))
+        self.merge_mode.currentTextChanged.connect(
+            lambda mode: self.config.update(
+                merge_mode='length' if mode.startswith('Legacy') else 'paragraph'))
+        self.merge_max_paragraphs.valueChanged.connect(
+            lambda value: self.config.update(merge_max_paragraphs=value))
+        merge_format_preservation.clicked.connect(
+            lambda checked: self.config.update(merge_format_preservation=checked))
 
         # Network Proxy
         proxy_group = QGroupBox(_('Network Proxy'))
