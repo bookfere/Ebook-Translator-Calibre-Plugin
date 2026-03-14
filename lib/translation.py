@@ -198,21 +198,25 @@ class Translation:
 
             # Check for content refusal (e.g., Claude refusing to translate
             # content it identifies as copyrighted). Retry if detected.
-            if refusal_attempt < refusal_retries and \
-               hasattr(self.translator, 'is_translation_refusal') and \
+            if hasattr(self.translator, 'is_translation_refusal') and \
                self.translator.is_translation_refusal(translation):
                 logged = translation[:200]
                 if len(translation) > 200:
                     logged += '...'
-                self.log('\n'.join([
-                    sep(),
-                    _('Translation refusal detected, retrying ({}/{})').format(
-                        refusal_attempt + 1, refusal_retries),
-                    sep('┈'),
-                    _('Response: {}').format(logged),
-                ]), True)
-                time.sleep(2)
-                continue
+                if refusal_attempt < refusal_retries:
+                    self.log('\n'.join([
+                        sep(),
+                        _('Translation refusal detected, retrying ({}/{})').format(
+                            refusal_attempt + 1, refusal_retries),
+                        sep('┈'),
+                        _('Response: {}').format(logged),
+                    ]), True)
+                    time.sleep(2)
+                    continue
+                # All retries exhausted — fail instead of saving refusal text
+                raise TranslationFailed(
+                    _('Translation refused after {} retries. '
+                      'Response: {}').format(refusal_retries, logged))
             break
 
         paragraph.translation = translation.strip()
