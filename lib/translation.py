@@ -158,36 +158,63 @@ class Translation:
         if paragraph.translation and not self.fresh:
             paragraph.is_cache = True
             return
-        self.streaming('')
-        self.streaming(_('Translating...'))
+
         text = self.glossary.replace(paragraph.original)
-        translation = self.translate_text(paragraph.row, text)
-        # Process streaming text
-        if isinstance(translation, GeneratorType):
-            if self.total == 1:
-                # Only for a single translation.
-                temp = ''
-                clear = True
-                for char in translation:
-                    # Check for cancellation during streaming
-                    if self.cancel_request():
-                        raise TranslationCanceled(_('Translation canceled.'))
-                    if clear:
-                        self.streaming('')
-                        clear = False
-                    self.streaming(char)
-                    time.sleep(0.05)
-                    temp += char
-            else:
-                # For batch mode, still check cancellation periodically
-                temp_chars = []
-                for char in translation:
-                    if self.cancel_request():
-                        raise TranslationCanceled(_('Translation canceled.'))
-                    temp_chars.append(char)
-                temp = ''.join(temp_chars)
-            translation = temp
-        translation = self.glossary.restore(translation)
+        refusal_retries = getattr(
+            self.translator, 'refusal_max_retries', 0)
+
+        for refusal_attempt in range(refusal_retries + 1):
+            self.streaming('')
+            self.streaming(_('Translating...'))
+            translation = self.translate_text(paragraph.row, text)
+            # Process streaming text
+            if isinstance(translation, GeneratorType):
+                if self.total == 1:
+                    # Only for a single translation.
+                    temp = ''
+                    clear = True
+                    for char in translation:
+                        # Check for cancellation during streaming
+                        if self.cancel_request():
+                            raise TranslationCanceled(
+                                _('Translation canceled.'))
+                        if clear:
+                            self.streaming('')
+                            clear = False
+                        self.streaming(char)
+                        time.sleep(0.05)
+                        temp += char
+                else:
+                    # For batch mode, still check cancellation periodically
+                    temp_chars = []
+                    for char in translation:
+                        if self.cancel_request():
+                            raise TranslationCanceled(
+                                _('Translation canceled.'))
+                        temp_chars.append(char)
+                    temp = ''.join(temp_chars)
+                translation = temp
+            translation = self.glossary.restore(translation)
+
+            # Check for content refusal (e.g., Claude refusing to translate
+            # content it identifies as copyrighted). Retry if detected.
+            if refusal_attempt < refusal_retries and \
+               hasattr(self.translator, 'is_translation_refusal') and \
+               self.translator.is_translation_refusal(translation):
+                logged = translation[:200]
+                if len(translation) > 200:
+                    logged += '...'
+                self.log('\n'.join([
+                    sep(),
+                    _('Translation refusal detected, retrying ({}/{})').format(
+                        refusal_attempt + 1, refusal_retries),
+                    sep('┈'),
+                    _('Response: {}').format(logged),
+                ]), True)
+                time.sleep(2)
+                continue
+            break
+
         paragraph.translation = translation.strip()
         # Apply aligment checking and processing.
         if self.translator.merge_enabled:
