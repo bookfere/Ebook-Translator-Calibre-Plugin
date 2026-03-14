@@ -53,7 +53,7 @@ class ClaudeTranslate(GenAI):
     enable_extended_context = False  # 1M context for Claude Sonnet 4.0/4.5
     enable_dynamic_timeout = False  # Dynamic timeout based on content length
     enable_prompt_caching = False  # Prompt caching for parallel sections with full context
-    refusal_max_retries = 3  # Max retries when Claude refuses to translate (copyright concerns)
+    refusal_max_retries = 5  # Max retries when Claude refuses to translate (copyright concerns)
 
     # event types for streaming are listed here:
     # https://docs.anthropic.com/en/api/messages-streaming
@@ -93,19 +93,30 @@ class ClaudeTranslate(GenAI):
     # Patterns that indicate Claude refused to translate due to copyright concerns.
     # Requires 2+ matches to avoid false positives from legitimate translations.
     _refusal_indicators = [
+        # Direct refusal patterns
         "can't translate",
         "cannot translate",
         "not able to translate",
         "unable to translate",
+        # Copyright identification
         "copyrighted material",
         "copyrighted book",
         "copyrighted content",
         "copyrighted text",
+        "from a copyrighted",
+        # Offering alternatives
         "I'd be happy to help",
         "I would be happy to help",
         "How can I help you instead",
         "How would you like me to help",
+        "Would you like me to continue",
+        # Partial translation / scope limiting
         "rather than a full translation",
+        "a reasonable excerpt",
+        "shorter portion",
+        "translate a shorter",
+        "a very long passage",
+        # Legal framing
         "substantial portion",
         "derivative work",
         "reproducing copyrighted",
