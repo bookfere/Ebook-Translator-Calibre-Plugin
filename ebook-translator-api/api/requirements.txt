@@ -1,0 +1,11 @@
+fastapi==0.116.1
+uvicorn[standard]==0.35.0
+pydantic==2.11.7
+pydantic-settings==2.10.1
+asyncpg==0.30.0
+boto3==1.40.11
+celery==5.5.3
+PyJWT[crypto]==2.10.1
+redis==5.3.1
+python-multipart==0.0.20
+httpx==0.28.1

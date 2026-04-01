@@ -1,0 +1,25 @@
+{{- if .Values.cleanupCron.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "ebook-translator.fullname" . }}-cleanup
+  labels:
+    {{- include "ebook-translator.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.cleanupCron.schedule | quote }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: cleanup
+              image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}"
+              imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+              command: ["python", "-m", "worker_app.cleanup"]
+              envFrom:
+                - configMapRef:
+                    name: {{ include "ebook-translator.fullname" . }}-config
+                - secretRef:
+                    name: {{ include "ebook-translator.fullname" . }}-secret
+{{- end }}

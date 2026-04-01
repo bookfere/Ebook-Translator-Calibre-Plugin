@@ -1,0 +1,8 @@
+celery==5.5.3
+boto3==1.40.11
+psycopg[binary]==3.2.9
+pydantic==2.11.7
+pydantic-settings==2.10.1
+mechanize==0.4.10
+lxml==6.0.0
+redis==5.3.1

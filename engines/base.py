@@ -79,6 +79,25 @@ class Base:
         return codes
 
     @classmethod
+    def _resolve_lang_code(cls, codes: dict[str, str], lang: str) -> str:
+        if lang in codes:
+            return codes[lang]
+
+        normalized = str(lang).strip()
+
+        # Allow passing ISO style codes directly (ex: "ja", "EN-US").
+        for code in codes.values():
+            if str(code).lower() == normalized.lower():
+                return code
+
+        # Accept case-insensitive language names (ex: "japanese").
+        for name, code in codes.items():
+            if str(name).lower() == normalized.lower():
+                return code
+
+        raise KeyError(lang)
+
+    @classmethod
     def get_lang_directionality(cls, lang_code):
         return lang_directionality.get(lang_code, 'auto')
 
@@ -87,12 +106,12 @@ class Base:
         source_codes: dict = cls.lang_codes['source']
         if lang == _('Auto detect'):
             return 'auto'
-        return source_codes[lang]
+        return cls._resolve_lang_code(source_codes, lang)
 
     @classmethod
     def get_target_code(cls, lang) -> str:
         target_codes: dict = cls.lang_codes['target']
-        return target_codes[lang]
+        return cls._resolve_lang_code(target_codes, lang)
 
     @classmethod
     def get_iso639_target_code(cls, lang):

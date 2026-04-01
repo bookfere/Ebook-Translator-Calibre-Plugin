@@ -1,0 +1,16 @@
+{{- if .Values.ui.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ebook-translator.fullname" . }}-ui
+  labels:
+    {{- include "ebook-translator.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.ui.service.type }}
+  selector:
+    app: {{ include "ebook-translator.fullname" . }}-ui
+  ports:
+    - name: http
+      port: {{ .Values.ui.service.port }}
+      targetPort: 3000
+{{- end }}

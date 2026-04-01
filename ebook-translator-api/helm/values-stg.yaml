@@ -1,0 +1,8 @@
+global:
+  environment: stg
+api:
+  replicaCount: 2
+worker:
+  replicaCount: 3
+ui:
+  replicaCount: 2

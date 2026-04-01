@@ -1,0 +1,22 @@
+{{- if and .Values.ui.enabled .Values.ui.hpa.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "ebook-translator.fullname" . }}-ui
+  labels:
+    {{- include "ebook-translator.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "ebook-translator.fullname" . }}-ui
+  minReplicas: {{ .Values.ui.hpa.minReplicas }}
+  maxReplicas: {{ .Values.ui.hpa.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.ui.hpa.cpuUtilizationPercentage }}
+{{- end }}

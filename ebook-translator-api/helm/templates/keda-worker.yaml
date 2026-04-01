@@ -1,0 +1,21 @@
+{{- if and .Values.worker.enabled .Values.worker.keda.enabled }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "ebook-translator.fullname" . }}-worker
+  labels:
+    {{- include "ebook-translator.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    name: {{ include "ebook-translator.fullname" . }}-worker
+  pollingInterval: 30
+  cooldownPeriod: 120
+  minReplicaCount: {{ .Values.worker.keda.minReplicaCount }}
+  maxReplicaCount: {{ .Values.worker.keda.maxReplicaCount }}
+  triggers:
+    - type: redis
+      metadata:
+        address: {{ regexReplaceAll "^redis://([^/]+).*$" .Values.config.REDIS_URL "${1}" | quote }}
+        listName: {{ .Values.config.CELERY_QUEUE_NAME | quote }}
+        listLength: {{ .Values.worker.keda.queueLength | quote }}
+{{- end }}

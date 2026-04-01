@@ -137,6 +137,13 @@ class TranslationCache:
             'target_lang DEFAULT NULL)')
         self.cursor.execute(
             'CREATE TABLE IF NOT EXISTS info(key UNIQUE, value)')
+        self.cursor.execute(
+            'CREATE TABLE IF NOT EXISTS review_status('
+            'id PRIMARY KEY, error_message DEFAULT NULL, '
+            'edited_at DEFAULT NULL)')
+        self.cursor.execute(
+            'CREATE TABLE IF NOT EXISTS artifact_meta('
+            'key PRIMARY KEY, value DEFAULT NULL)')
 
     @classmethod
     def move(cls, dest):
@@ -225,6 +232,27 @@ class TranslationCache:
             'DELETE FROM info WHERE key=?', (key,))
         self.connection.commit()
 
+    def set_artifact_meta(self, key, value):
+        self.cursor.execute(
+            'INSERT INTO artifact_meta VALUES (?1, ?2) '
+            'ON CONFLICT (KEY) DO UPDATE SET value=excluded.value',
+            (key, value))
+        self.connection.commit()
+
+    def get_artifact_meta(self, key):
+        resource = self.cursor.execute(
+            'SELECT value FROM artifact_meta WHERE key=?', (key,))
+        result = resource.fetchone()
+        return result[0] if result else None
+
+    def update_review_status(self, id, error_message=None):
+        self.cursor.execute(
+            'INSERT INTO review_status (id, error_message, edited_at) '
+            'VALUES (?1, ?2, NULL) '
+            'ON CONFLICT(id) DO UPDATE SET error_message=excluded.error_message',
+            (id, error_message))
+        self.connection.commit()
+
     def save(self, original_group):
         if self.is_fresh():
             for original_unit in original_group:
@@ -311,6 +339,7 @@ class TranslationCache:
             paragraph.id, translation=paragraph.translation,
             engine_name=paragraph.engine_name,
             target_lang=paragraph.target_lang)
+        self.update_review_status(paragraph.id, paragraph.error)
 
     def delete_paragraphs(self, paragraphs):
         self.delete([paragraph.id for paragraph in paragraphs])

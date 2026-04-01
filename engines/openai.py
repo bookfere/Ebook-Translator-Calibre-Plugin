@@ -72,11 +72,15 @@ class ChatgptTranslate(GenAI):
         return [item['id'] for item in json.loads(response).get('data')]
 
     def get_prompt(self):
-        prompt = self.prompt.replace('<tlang>', self.target_lang)
+        prompt = self.prompt
+        prompt = prompt.replace('<tlang>', self.target_lang)
+        prompt = prompt.replace('<target>', self.target_lang)
         if self._is_auto_lang():
-            prompt = prompt.replace('<slang>', 'detected language')
+            source = 'detected language'
         else:
-            prompt = prompt.replace('<slang>', self.source_lang)
+            source = self.source_lang
+        prompt = prompt.replace('<slang>', source)
+        prompt = prompt.replace('<source>', source)
         # Recommend setting temperature to 0.5 for retaining the placeholder.
         if self.merge_enabled:
             prompt += (' Ensure that placeholders matching the pattern '

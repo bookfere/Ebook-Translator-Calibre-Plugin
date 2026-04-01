@@ -1,0 +1,321 @@
+:root {
+  color-scheme: light;
+  --bg: #f4f7f8;
+  --fg: #142122;
+  --card: #ffffff;
+  --accent: #05668d;
+  --border: #dde6e8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top right, #eaf8ff, var(--bg));
+  color: var(--fg);
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+  background: color-mix(in srgb, #eaf8ff 88%, #ffffff 12%);
+  border-bottom: 1px solid var(--border);
+}
+
+.topbar-inner {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 12px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+}
+
+.topbar-link-button {
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  padding: 0;
+  border-radius: 0;
+  font-weight: 600;
+}
+
+.topbar-link-button:disabled {
+  opacity: 0.7;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+main {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+input,
+button,
+select,
+textarea {
+  font: inherit;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: var(--accent);
+  color: #fff;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  padding: 10px 8px;
+  font-size: 14px;
+}
+
+.table th {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #4d6668;
+}
+
+.form-grid-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.hint {
+  margin: 8px 0 0;
+  color: #4d6668;
+  font-size: 13px;
+}
+
+.progress {
+  width: 100%;
+  height: 10px;
+  background: #e8eff2;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.2s ease;
+}
+
+.button-secondary {
+  background: #0a7f5a;
+}
+
+.button-muted {
+  background: #596d70;
+}
+
+.page-title-row,
+.toolbar-row,
+.filter-row,
+.job-meta-grid,
+.stats-grid,
+.review-grid,
+.tab-row {
+  display: grid;
+  gap: 12px;
+}
+
+.page-title-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  margin-bottom: 16px;
+}
+
+.toolbar-row {
+  grid-auto-flow: column;
+  align-items: center;
+}
+
+.tab-row {
+  grid-auto-flow: column;
+  justify-content: start;
+}
+
+.job-meta-grid,
+.stats-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 16px;
+}
+
+.meta-card,
+.stat-card,
+.review-row {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fbfdfd;
+}
+
+.meta-card,
+.stat-card {
+  padding: 14px;
+}
+
+.meta-card {
+  display: grid;
+  gap: 4px;
+}
+
+.stat-card strong {
+  font-size: 28px;
+}
+
+.meta-label {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #587073;
+}
+
+.pill-tab {
+  background: #e8eff2;
+  color: var(--fg);
+}
+
+.pill-tab.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.review-list {
+  display: grid;
+  gap: 16px;
+}
+
+.review-row {
+  padding: 16px;
+}
+
+.review-row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.review-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.review-textarea {
+  min-height: 140px;
+  resize: vertical;
+  font-family: "IBM Plex Mono", "Consolas", monospace;
+}
+
+.review-message {
+  margin: 0 0 16px;
+  color: #32585d;
+}
+
+.error-message {
+  color: #a03c2b;
+  white-space: pre-wrap;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-succeeded,
+.status-translated {
+  background: #d6f4ea;
+  color: #0a7f5a;
+}
+
+.status-failed,
+.status-error {
+  background: #fde0dc;
+  color: #a03c2b;
+}
+
+.status-canceled,
+.status-untranslated {
+  background: #f4e5c4;
+  color: #8d5c00;
+}
+
+.status-queued,
+.status-processing {
+  background: #dbeff8;
+  color: #0d5f86;
+}
+
+.status-expired {
+  background: #eceff1;
+  color: #596d70;
+}
+
+@media (max-width: 760px) {
+  .form-grid-two {
+    grid-template-columns: 1fr;
+  }
+
+  .page-title-row,
+  .review-grid,
+  .job-meta-grid,
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar-row {
+    grid-auto-flow: row;
+  }
+}

@@ -1,0 +1,132 @@
+global:
+  environment: dev
+  region: us-central1
+
+imagePullSecrets: []
+
+api:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: gcr.io/your-project/ebook-translator-api
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8000
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    cpuUtilizationPercentage: 70
+
+worker:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: gcr.io/your-project/ebook-translator-worker
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+  keda:
+    enabled: true
+    minReplicaCount: 1
+    maxReplicaCount: 20
+    queueLength: "10"
+
+ui:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: gcr.io/your-project/ebook-translator-ui
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+    cpuUtilizationPercentage: 70
+
+ingress:
+  enabled: true
+  className: gce
+  host: ebook.example.com
+  annotations: {}
+  tls:
+    enabled: false
+
+cleanupCron:
+  enabled: true
+  schedule: "0 * * * *"
+
+config:
+  DATABASE_URL: ""
+  REDIS_URL: "redis://memorystore:6379/0"
+  CELERY_QUEUE_NAME: "ebook.jobs.default"
+  SUPABASE_URL: "https://your-project.supabase.co"
+  SUPABASE_JWKS_URL: "https://your-project.supabase.co/auth/v1/.well-known/jwks.json"
+  SUPABASE_JWT_ISSUER: "https://your-project.supabase.co/auth/v1"
+  SUPABASE_JWT_AUDIENCE: "authenticated"
+  SUPABASE_ADMIN_ROLE: "admin"
+  R2_REGION: "auto"
+  R2_RAW_BUCKET: "ebook-raw"
+  R2_RESULT_BUCKET: "ebook-result"
+  MAX_UPLOAD_BYTES: "104857600"
+  DAILY_JOBS_LIMIT_PER_USER: "20"
+  PRESIGNED_PUT_EXPIRES_SECONDS: "900"
+  PRESIGNED_GET_EXPIRES_SECONDS: "600"
+  OBJECT_TTL_HOURS: "24"
+  ALLOWED_ENGINES_CSV: "openai,deepl,google,deepinfra"
+  OPENAI_MODEL: "gpt-4o"
+  DEEPINFRA_MODEL: "deepseek-ai/DeepSeek-V3.2"
+  DEEPINFRA_ENDPOINT: "https://api.deepinfra.com/v1/openai/chat/completions"
+  NEXT_PUBLIC_SUPABASE_URL: "https://your-project.supabase.co"
+  NEXT_PUBLIC_API_BASE_URL: "https://ebook.example.com"
+
+secretEnv:
+  R2_ACCOUNT_ID: ""
+  R2_ACCESS_KEY_ID: ""
+  R2_SECRET_ACCESS_KEY: ""
+  OPENAI_API_KEYS_CSV: ""
+  DEEPL_API_KEYS_CSV: ""
+  GOOGLE_API_KEYS_CSV: ""
+  DEEPINFRA_API_KEYS_CSV: ""
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: ""
+
+externalSecrets:
+  enabled: false
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: gcp-secret-manager
+  remoteKeys:
+    R2_ACCOUNT_ID: "ebook-translator/r2/account-id"
+    R2_ACCESS_KEY_ID: "ebook-translator/r2/access-key-id"
+    R2_SECRET_ACCESS_KEY: "ebook-translator/r2/secret-access-key"
+    OPENAI_API_KEYS_CSV: "ebook-translator/openai/api-keys"
+    DEEPL_API_KEYS_CSV: "ebook-translator/deepl/api-keys"
+    GOOGLE_API_KEYS_CSV: "ebook-translator/google/api-keys"
+    DEEPINFRA_API_KEYS_CSV: "ebook-translator/deepinfra/api-keys"
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: "ebook-translator/supabase/anon-key"

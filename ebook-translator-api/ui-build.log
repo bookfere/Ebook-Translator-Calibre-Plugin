@@ -1,0 +1,123 @@
+ Image ebook-translator-api-ui Building 
+ Image ebook-translator-api-api Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.45kB 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 694B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/node:20-alpine
+#3 DONE 0.3s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [deps 1/4] FROM docker.io/library/node:20-alpine@sha256:f598378b5240225e6beab68fa9f356db1fb8efe55173e6d4d8153113bb8f333c
+#5 DONE 0.0s
+
+#6 [deps 2/4] WORKDIR /app
+#6 CACHED
+
+#7 [internal] load build context
+#7 transferring context: 1.22kB done
+#7 DONE 0.0s
+
+#8 [deps 3/4] COPY ebook-translator-api/ui/package.json ./
+#8 DONE 0.0s
+
+#9 [deps 4/4] RUN npm install
+#9 14.13 npm warn deprecated next@14.2.25: This version has a security vulnerability. Please upgrade to a patched version. See https://nextjs.org/blog/security-update-2025-12-11 for more details.
+#9 14.17 
+#9 14.17 added 43 packages, and audited 44 packages in 14s
+#9 14.17 
+#9 14.17 3 packages are looking for funding
+#9 14.17   run `npm fund` for details
+#9 14.23 
+#9 14.23 1 high severity vulnerability
+#9 14.23 
+#9 14.23 To address all issues, run:
+#9 14.23   npm audit fix --force
+#9 14.23 
+#9 14.23 Run `npm audit` for details.
+#9 14.23 npm notice
+#9 14.23 npm notice New major version of npm available! 10.8.2 -> 11.12.1
+#9 14.23 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+#9 14.23 npm notice To update run: npm install -g npm@11.12.1
+#9 14.23 npm notice
+#9 DONE 14.8s
+
+#10 [builder 3/5] COPY --from=deps /app/node_modules ./node_modules
+#10 DONE 2.8s
+
+#11 [builder 4/5] COPY ebook-translator-api/ui .
+#11 DONE 0.1s
+
+#12 [builder 5/5] RUN npm run build
+#12 0.647 
+#12 0.647 > ebook-translator-admin-ui@0.1.0 build
+#12 0.647 > next build
+#12 0.647 
+#12 1.410 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+#12 1.411 This information is used to shape Next.js' roadmap and prioritize features.
+#12 1.411 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+#12 1.411 https://nextjs.org/telemetry
+#12 1.411 
+#12 1.508   笆ｲ Next.js 14.2.25
+#12 1.509 
+#12 1.611    Creating an optimized production build ...
+#12 13.37 Failed to compile.
+#12 13.37 
+#12 13.37 ./node_modules/sql.js/dist/sql-wasm.js
+#12 13.37 Module not found: Can't resolve 'fs'
+#12 13.37 
+#12 13.37 https://nextjs.org/docs/messages/module-not-found
+#12 13.37 
+#12 13.37 Import trace for requested module:
+#12 13.37 ./app/jobs/[jobId]/page.tsx
+#12 13.37 
+#12 13.39 
+#12 13.39 > Build failed because of webpack errors
+#12 13.41 npm notice
+#12 13.41 npm notice New major version of npm available! 10.8.2 -> 11.12.1
+#12 13.41 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+#12 13.41 npm notice To update run: npm install -g npm@11.12.1
+#12 13.41 npm notice
+#12 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+------
+ > [builder 5/5] RUN npm run build:
+13.37 Import trace for requested module:
+13.37 ./app/jobs/[jobId]/page.tsx
+13.37 
+13.39 
+13.39 > Build failed because of webpack errors
+13.41 npm notice
+13.41 npm notice New major version of npm available! 10.8.2 -> 11.12.1
+13.41 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+13.41 npm notice To update run: npm install -g npm@11.12.1
+13.41 npm notice
+------
+Dockerfile:16
+
+--------------------
+
+  14 |     COPY --from=deps /app/node_modules ./node_modules
+
+  15 |     COPY ebook-translator-api/ui .
+
+  16 | >>> RUN npm run build
+
+  17 |     
+
+  18 |     FROM node:20-alpine AS runner
+
+--------------------
+
+failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+
+
+
+View build details: docker-desktop://dashboard/build/default/default/dvc81jf69ac6vywdg3ig1p7k0
+

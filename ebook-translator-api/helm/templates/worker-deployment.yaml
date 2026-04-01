@@ -1,0 +1,33 @@
+{{- if .Values.worker.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ebook-translator.fullname" . }}-worker
+  labels:
+    {{- include "ebook-translator.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.worker.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "ebook-translator.fullname" . }}-worker
+  template:
+    metadata:
+      labels:
+        app: {{ include "ebook-translator.fullname" . }}-worker
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: worker
+          image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}"
+          imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "ebook-translator.fullname" . }}-config
+            - secretRef:
+                name: {{ include "ebook-translator.fullname" . }}-secret
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}
+{{- end }}
