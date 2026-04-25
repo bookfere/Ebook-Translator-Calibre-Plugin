@@ -531,6 +531,21 @@ class TestChatgptTranslate(unittest.TestCase):
 
         self.assertEqual('你好世界！', result)
 
+    @patch(module_name + '.base.request')
+    def test_translate_stream_without_space_after_data(self, mock_request):
+        mock_response = Mock()
+        mock_response.readline.side_effect = [
+            b'data:',
+            b'data:{"choices":[{"delta":{"content":"\xe4\xbd\xa0"}}]}',
+            b'data: [DONE]',
+        ]
+        mock_request.return_value = mock_response
+
+        result = self.translator.translate('Hello World!')
+
+        self.assertIsInstance(result, GeneratorType)
+        self.assertEqual('你', ''.join(result))
+
 
 class TestChatgptBatchTranslate(unittest.TestCase):
     def setUp(self):

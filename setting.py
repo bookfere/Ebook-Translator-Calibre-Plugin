@@ -1464,3 +1464,4 @@ class TranslationSetting(QDialog):
         self.model_thread.quit()
         self.model_thread.wait()
         QDialog.done(self, result)
+    

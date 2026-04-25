@@ -149,7 +149,9 @@ class ChatgptTranslate(GenAI):
             if not line:
                 continue
             if line.startswith('data:'):
-                chunk = line.split('data: ')[1]
+                chunk = line[len('data:'):].strip()
+                if not chunk:
+                    continue
                 if chunk == '[DONE]':
                     break
                 try:
