@@ -1,0 +1,1164 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the Ebook Translator Calibre Plugin package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Ebook Translator Calibre Plugin\n"
+"Report-Msgid-Bugs-To: bookfere@gmail.com\n"
+"POT-Creation-Date: 2025-08-22 02:34+0800\n"
+"PO-Revision-Date: 2024-05-15 16:21+0300\n"
+"Last-Translator: DogancanYr <EMAIL@ADDRESS>\n"
+"Language-Team: Turkish <LL@li.org>\n"
+"Language: vi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "This plugin uses Application Default Credentials (ADC) in your local environment to access your Google Translate service. To set up the ADC, follow these steps:\n1. Install the gcloud CLI by checking out its instructions {}.\n2. Run the command: gcloud auth application-default login.\n3. Sign in to your Google account and grant needed privileges."
+msgstr ""
+
+#: __init__.py:23
+msgid "Ebook Translator"
+msgstr "Bộ Dịch Ebook"
+
+#: advanced.py:110
+msgid "Extracting ebook content..."
+msgstr "Đang trích xuất nội dung ebook..."
+
+#: advanced.py:117
+msgid "Failed to extract ebook content"
+msgstr "Không thể trích xuất nội dung ebook"
+
+#: advanced.py:132
+msgid "Filtering ebook content..."
+msgstr "Đang lọc nội dung ebook..."
+
+#: advanced.py:141
+msgid "Preparing user interface..."
+msgstr "Đang chuẩn bị giao diện người dùng..."
+
+#: advanced.py:231
+msgid "&Start"
+msgstr "&Bắt đầu"
+
+#: advanced.py:246 batch.py:67 setting.py:221
+msgid "Input Format"
+msgstr "Định dạng đầu vào"
+
+#: advanced.py:253 batch.py:67 setting.py:222
+msgid "Output Format"
+msgstr "Định dạng đầu ra"
+
+#: advanced.py:260 advanced.py:812 batch.py:68 setting.py:439
+msgid "Source Language"
+msgstr "Ngôn ngữ nguồn"
+
+#: advanced.py:267 advanced.py:818 batch.py:68 setting.py:440
+msgid "Target Language"
+msgstr "Ngôn ngữ đích"
+
+#: advanced.py:308 batch.py:67
+msgid "Encoding"
+msgstr "Mã hóa"
+
+#: advanced.py:320 batch.py:69
+msgid "Target Directionality"
+msgstr "Hướng mục tiêu"
+
+#: advanced.py:324 batch.py:163
+msgid "Auto"
+msgstr "Tự động"
+
+#: advanced.py:325 batch.py:164
+msgid "Left to Right"
+msgstr "Trái sang Phải"
+
+#: advanced.py:326 batch.py:165
+msgid "Right to Left"
+msgstr "Phải sang Trái"
+
+#: advanced.py:422
+msgid "Failed to translate {} paragraph(s), Would you like to retry?"
+msgstr "Không thể dịch {} đoạn văn, bạn có muốn thử lại không?"
+
+#: advanced.py:428 lib/translation.py:238 lib/translation.py:239
+msgid "Translation completed."
+msgstr "Bản dịch đã hoàn thành."
+
+#: advanced.py:443
+msgid "There is no content that needs to be translated."
+msgstr "Không có nội dung nào cần được dịch."
+
+#: advanced.py:491
+msgid "Loading ebook data, please wait..."
+msgstr "Đang tải dữ liệu ebook, vui lòng chờ..."
+
+#: advanced.py:520
+msgid "Review"
+msgstr "Xem lại"
+
+#: advanced.py:521
+msgid "Log"
+msgstr "Nhật ký"
+
+#: advanced.py:522
+msgid "Errors"
+msgstr "Lỗi"
+
+#: advanced.py:549
+msgid "All"
+msgstr "Tất cả"
+
+#: advanced.py:551 components/indicator.py:11
+msgid "Non-aligned"
+msgstr "Không căn chỉnh"
+
+#: advanced.py:552 advanced.py:908 components/indicator.py:10
+#: components/table.py:85
+msgid "Translated"
+msgstr "Đã dịch"
+
+#: advanced.py:553 components/indicator.py:12 components/table.py:76
+msgid "Untranslated"
+msgstr "Chưa dịch"
+
+#: advanced.py:556
+msgid "Original Text"
+msgstr "Văn bản gốc"
+
+#: advanced.py:557
+msgid "Original Code"
+msgstr "Mã gốc"
+
+#: advanced.py:558
+msgid "Translation Text"
+msgstr "Văn bản dịch"
+
+#: advanced.py:561
+msgid "keyword for filtering"
+msgstr "từ khóa để lọc"
+
+#: advanced.py:566 cache.py:72
+msgid "Reset"
+msgstr "Đặt lại"
+
+#: advanced.py:667
+msgid "Total items: {}"
+msgstr "Tổng số mục: {}"
+
+#: advanced.py:668 lib/translation.py:221
+msgid "Character count: {}"
+msgstr "Số ký tự: {}"
+
+#: advanced.py:677
+msgid "Non-aligned items: {}"
+msgstr "Các mục không căn chỉnh: {}"
+
+#: advanced.py:710 cache.py:90 cache.py:179 components/engine.py:202
+#: components/table.py:157
+msgid "Delete"
+msgstr "Xóa"
+
+#: advanced.py:713
+msgid "Batch Translation"
+msgstr "Dịch hàng loạt"
+
+#: advanced.py:713 setting.py:802 setting.py:804
+msgid "Beta"
+msgstr "Beta"
+
+#: advanced.py:714
+msgid "Translate All"
+msgstr "Dịch tất cả"
+
+#: advanced.py:715
+msgid "Translate Selected"
+msgstr "Dịch đã chọn"
+
+#: advanced.py:731 advanced.py:771
+msgid "Stop"
+msgstr "Dừng"
+
+#: advanced.py:761
+msgid "Are you sure you want to stop the translation progress?"
+msgstr "Bạn có chắc chắn muốn dừng tiến trình dịch không?"
+
+#: advanced.py:765
+msgid "Stopping..."
+msgstr "Đang dừng..."
+
+#: advanced.py:796
+msgid "Cache Status"
+msgstr "Trạng thái bộ nhớ đệm"
+
+#: advanced.py:799
+msgid "Disabled"
+msgstr "Đã vô hiệu hóa"
+
+#: advanced.py:799
+msgid "Enabled"
+msgstr "Đã bật"
+
+#: advanced.py:806 setting.py:394
+msgid "Translation Engine"
+msgstr "Bộ dịch thuật"
+
+#: advanced.py:824
+msgid "Custom Ebook Title"
+msgstr "Tiêu đề Ebook tùy chỉnh"
+
+#: advanced.py:829
+msgid "By default, title metadata will be translated."
+msgstr "Theo mặc định, siêu dữ liệu tiêu đề sẽ được dịch."
+
+#: advanced.py:858
+msgid "Output Ebook"
+msgstr "Sách điện tử đầu ra"
+
+#: advanced.py:860
+msgid "Output"
+msgstr "Đầu ra"
+
+#: advanced.py:909
+msgid "The ebook has not been translated yet."
+msgstr "Sách điện tử chưa được dịch."
+
+#: advanced.py:954
+msgid "No translation yet"
+msgstr "Chưa có bản dịch"
+
+#: advanced.py:1022 components/engine.py:208 setting.py:66
+msgid "&Save"
+msgstr "&Lưu"
+
+#: advanced.py:1026
+msgid "Word Wrap"
+msgstr "Tự động ngắt dòng"
+
+#: advanced.py:1152
+msgid "Your changes have been saved."
+msgstr "Các thay đổi của bạn đã được lưu."
+
+#: advanced.py:1164
+msgid "Translation log"
+msgstr "Nhật ký dịch thuật"
+
+#: advanced.py:1175
+msgid "Error log"
+msgstr "Nhật ký lỗi"
+
+#: advanced.py:1195
+msgid "Are you sure you want to translate all {:n} paragraphs?"
+msgstr "Bạn có chắc chắn muốn dịch tất cả các {:n} đoạn văn?"
+
+#: advanced.py:1223
+msgid "Are you sure you want to cancel the preparation progress?"
+msgstr "Bạn có chắc chắn muốn hủy tiến trình chuẩn bị?"
+
+#: advanced.py:1234
+msgid "Are you sure you want to cancel the translation progress?"
+msgstr "Bạn có chắc chắn muốn hủy tiến trình dịch?"
+
+#: batch.py:67 cache.py:199
+msgid "Title"
+msgstr "Tiêu đề"
+
+#: batch.py:153 batch.py:157
+msgid "Default"
+msgstr "Mặc định"
+
+#: batch.py:190 components/engine.py:139 components/table.py:155
+msgid "Translate"
+msgstr "Dịch"
+
+#: batch.py:205 lib/cache.py:146
+msgid "Unknown"
+msgstr "Không xác định"
+
+#: batch.py:214 cache.py:127 setting.py:1228
+msgid "The specified path does not exist."
+msgstr "Đường dẫn được chỉ định không tồn tại."
+
+#: cache.py:70
+msgid "Choose a path to store cache files."
+msgstr "Chọn một đường dẫn để lưu trữ các tệp cache."
+
+#: cache.py:71
+msgid "Move"
+msgstr "Di chuyển"
+
+#: cache.py:73
+msgid "Reveal"
+msgstr "Hiển thị"
+
+#: cache.py:75
+msgid "Cache Path"
+msgstr "Đường dẫn Cache"
+
+#: cache.py:88
+msgid "Clear All"
+msgstr "Xóa tất cả"
+
+#: cache.py:122
+msgid "All cache(s) will be moved to the new path. Are you sure to proceed?"
+msgstr "Tất cả cache sẽ được di chuyển đến đường dẫn mới. Bạn có chắc chắn muốn tiếp tục?"
+
+#: cache.py:130
+msgid "Please choose an empty folder."
+msgstr "Vui lòng chọn một thư mục trống."
+
+#: cache.py:140
+msgid "Are you sure you want to clear all caches?"
+msgstr "Bạn có chắc chắn muốn xóa tất cả bộ nhớ cache?"
+
+#: cache.py:150
+msgid "No cache exists."
+msgstr "Không có bộ nhớ cache nào tồn tại."
+
+#: cache.py:155
+msgid "Total: {}"
+msgstr "Tổng: {}"
+
+#: cache.py:186
+msgid "Are you sure you want to delete the selected cache(s)?"
+msgstr "Bạn có chắc chắn muốn xóa các bộ nhớ cache đã chọn?"
+
+#: cache.py:199 components/table.py:34 setting.py:113
+msgid "Engine"
+msgstr "Động cơ"
+
+#: cache.py:199 components/table.py:34
+msgid "Language"
+msgstr "Ngôn ngữ"
+
+#: cache.py:199
+msgid "Merge Length"
+msgstr "Chiều dài hợp nhất"
+
+#: cache.py:200
+msgid "Filename"
+msgstr "Tên tệp"
+
+#: cache.py:200
+msgid "Last Modification Time"
+msgstr "Thời gian sửa đổi cuối cùng"
+
+#: cache.py:200
+msgid "Size (MB)"
+msgstr "Kích thước (MB)"
+
+#: components/chatgpt.py:74
+msgid "processing..."
+msgstr "đang xử lý..."
+
+#: components/chatgpt.py:88
+msgid "checking..."
+msgstr "đang kiểm tra..."
+
+#: components/chatgpt.py:100
+msgid "canceling..."
+msgstr "đang hủy..."
+
+#: components/chatgpt.py:114
+msgid "applying..."
+msgstr "đang áp dụng..."
+
+#: components/chatgpt.py:134
+msgid "ChatGPT Batch Translation"
+msgstr "Bản dịch hàng loạt ChatGPT"
+
+#: components/chatgpt.py:199
+msgid "Create a new batch translation"
+msgstr "Tạo bản dịch hàng loạt mới"
+
+#: components/chatgpt.py:253 setting.py:498
+msgid "Refresh"
+msgstr "Làm mới"
+
+#: components/chatgpt.py:254
+msgid "Cancel Batch Translation"
+msgstr "Hủy dịch hàng loạt"
+
+#: components/chatgpt.py:255
+msgid "Apply"
+msgstr "Áp dụng"
+
+#: components/chatgpt.py:273
+msgid "Are you sure you want to cancel the batch translation?"
+msgstr "Bạn có chắc chắn muốn hủy dịch hàng loạt không?"
+
+#: components/chatgpt.py:297
+msgid "Batch translation details"
+msgstr "Chi tiết bản dịch hàng loạt"
+
+#: components/chatgpt.py:299 components/table.py:34
+msgid "Status"
+msgstr "Trạng thái"
+
+#: components/chatgpt.py:300
+msgid "Detail"
+msgstr "Chi tiết"
+
+#: components/engine.py:66 lib/translation.py:161
+msgid "Translating..."
+msgstr "Đang dịch..."
+
+#: components/engine.py:98
+msgid "Test Translation Engine"
+msgstr "Kiểm tra Bộ dịch thuật"
+
+#: components/engine.py:144
+msgid "Usage: checking..."
+msgstr "Sử dụng: đang kiểm tra..."
+
+#: components/engine.py:155
+msgid "Usage: {}"
+msgstr "Sử dụng: {}"
+
+#: components/engine.py:193
+msgid "Custom Translation Engine"
+msgstr "Bộ dịch thuật tùy chỉnh"
+
+#: components/engine.py:201
+msgid "Add"
+msgstr "Thêm"
+
+#: components/engine.py:205
+msgid "Clear"
+msgstr "Xóa"
+
+#: components/engine.py:206
+msgid "Restore"
+msgstr "Khôi phục"
+
+#: components/engine.py:207
+msgid "Verify"
+msgstr "Xác nhận"
+
+#: components/engine.py:248
+msgid "Valid engine data format."
+msgstr "Định dạng dữ liệu động cơ hợp lệ."
+
+#: components/engine.py:267
+msgid "The engine name is already in use."
+msgstr "Tên động cơ đã được sử dụng."
+
+#: components/engine.py:289 setting.py:128
+msgid "The setting has been saved."
+msgstr "Cài đặt đã được lưu."
+
+#: components/footer.py:27
+msgid "Feedback"
+msgstr "Phản hồi"
+
+#: components/footer.py:28
+msgid "Donate"
+msgstr "Ủng hộ"
+
+#: components/format.py:19 setting.py:231
+msgid "Ebook Specific"
+msgstr "Cụ thể cho Ebook"
+
+#: components/indicator.py:13
+msgid "Failed translation"
+msgstr "Bản dịch thất bại"
+
+#: components/indicator.py:14
+msgid "Not selected"
+msgstr "Chưa được chọn"
+
+#: components/lang.py:30 engines/base.py:90 setting.py:1284
+msgid "Auto detect"
+msgstr "Tự động phát hiện"
+
+#: components/mode.py:23 setting.py:162
+msgid "Choose a translation mode for clicking the icon button."
+msgstr "Chọn chế độ dịch khi nhấp vào nút biểu tượng."
+
+#: components/mode.py:28 setting.py:152 ui.py:47 ui.py:74 ui.py:87
+msgid "Advanced Mode"
+msgstr "Chế độ nâng cao"
+
+#: components/mode.py:36 components/mode.py:46 setting.py:193 setting.py:939
+#: setting.py:958 setting.py:1005
+msgid "Choose"
+msgstr "Chọn"
+
+#: components/mode.py:38 setting.py:153 ui.py:48 ui.py:103
+msgid "Batch Mode"
+msgstr "Chế độ hàng loạt"
+
+#: components/table.py:34 setting.py:817
+msgid "Original"
+msgstr "Bản gốc"
+
+#: components/table.py:162
+msgid "Select the whole chapter"
+msgstr "Chọn cả chương"
+
+#: components/table.py:168
+msgid "Select similar paragraphs: {}=\"{}\""
+msgstr "Chọn các đoạn văn tương tự: {}=\"{}\""
+
+#: components/table.py:256
+msgid "Retain at least one row."
+msgstr "Giữ lại ít nhất một hàng."
+
+#: engines/anthropic.py:151 engines/base.py:217 engines/google.py:429
+#: engines/openai.py:117
+msgid "Can not parse returned response. Raw data: {}"
+msgstr "Không thể phân tích phản hồi trả về. D liệu thô: {}"
+
+#: engines/anthropic.py:160
+msgid "Invalid event type received: {}"
+msgstr "Nhận được loại sự kiện không hợp lệ: {}"
+
+#: engines/anthropic.py:171
+msgid "Error received: {}"
+msgstr "Lỗi nhận được: {}"
+
+#: engines/baidu.py:18
+msgid "Baidu"
+msgstr "Baidu"
+
+#: engines/base.py:32 setting.py:420
+msgid "API Keys"
+msgstr "Khóa API"
+
+#: engines/base.py:107
+msgid "A correct key format \"{}\" is required."
+msgstr "Định dạng khóa \"{}\" chính xác là bắt buộc."
+
+#: engines/custom.py:47
+msgid "Engine data must be in valid JSON format."
+msgstr "Dữ liệu động cơ phải ở định dạng JSON hợp lệ."
+
+#: engines/custom.py:50
+msgid "Invalid engine data."
+msgstr "Dữ liệu động cơ không hợp lệ."
+
+#: engines/custom.py:54
+msgid "Engine name is required."
+msgstr "Tên động cơ là bắt buộc."
+
+#: engines/custom.py:57
+msgid "Engine name must be different from builtin engine name."
+msgstr "Tên động cơ phải khác với tên động cơ tích hợp sẵn."
+
+#: engines/custom.py:61
+msgid "Language codes are required."
+msgstr "Mã ngôn ngữ là bắt buộc."
+
+#: engines/custom.py:65
+msgid "Source and target must be added in pair."
+msgstr "Nguồn và đích phải được thêm theo cặp."
+
+#: engines/custom.py:69
+msgid "Request information is required."
+msgstr "Thông tin yêu cầu là bắt buộc."
+
+#: engines/custom.py:71
+msgid "API URL is required."
+msgstr "API URL là bắt buộc."
+
+#: engines/custom.py:75
+msgid "Placeholder <text> is required."
+msgstr "Placeholder <text> là bắt buộc."
+
+#: engines/custom.py:79
+msgid "Request headers must be an JSON object."
+msgstr "Tiêu đề yêu cầu phải là một đối tượng JSON."
+
+#: engines/custom.py:82
+msgid "A appropriate Content-Type in headers is required."
+msgstr "Cần có Content-Type phù hợp trong tiêu đề."
+
+#: engines/custom.py:86
+msgid "Expression to parse response is required."
+msgstr "Cần có biểu thức để phân tích phản hồi."
+
+#: engines/custom.py:139
+msgid "Response was parsed incorrectly."
+msgstr "Phản hồi đã được phân tích không chính xác."
+
+#: engines/deepl.py:37
+msgid "{} total, {} used, {} left"
+msgstr "{} tổng cộng, {} đã sử dụng, {} còn lại"
+
+#: engines/google.py:144
+msgid "Cannot run the command \"{}\"."
+msgstr "Không thể thực thi lệnh \"{}\"."
+
+#: engines/google.py:189
+msgid "Cannot find the command \"{}\"."
+msgstr "Không thể tìm thấy lệnh \"{}\"."
+
+#: engines/microsoft.py:28
+msgid "Failed get APP key due to an invalid Token."
+msgstr "Lấy khóa APP thất bại do Token không hợp lệ."
+
+#: engines/microsoft.py:32
+msgid "Failed get APP key due to and invalid Base64 URL."
+msgstr "Không thể lấy khóa APP do URL Base64 không hợp lệ."
+
+#: engines/youdao.py:19
+msgid "Youdao"
+msgstr "Youdao"
+
+#: lib/conversion.py:76
+msgid "Start to convert ebook format..."
+msgstr "Bắt đầu chuyển đổi định dạng ebook..."
+
+#: lib/conversion.py:81
+msgid "Outputting ebook file..."
+msgstr "Đang xuất tệp ebook..."
+
+#: lib/conversion.py:104
+msgid "Starting to output subtitles file..."
+msgstr "Đang bắt đầu xuất file phụ đề..."
+
+#: lib/conversion.py:110
+msgid "The translation of the subtitles file was completed."
+msgstr "Bản dịch file phụ đề đã hoàn thành."
+
+#: lib/conversion.py:129
+msgid "Starting to output PGN file..."
+msgstr "Đang bắt đầu xuất file PGN..."
+
+#: lib/conversion.py:139
+msgid "The translation of the PGN file was completed."
+msgstr "Bản dịch file PGN đã hoàn thành."
+
+#: lib/conversion.py:275
+msgid "[{} > {}] Translating \"{}\""
+msgstr "[{} > {}] Đang dịch \"{}\""
+
+#: lib/conversion.py:284
+msgid "Translation job failed"
+msgstr "Công việc dịch thuật thất bại"
+
+#: lib/conversion.py:332
+msgid "completed"
+msgstr "hoàn thành"
+
+#: lib/conversion.py:346
+msgid "Ebook Translation Log"
+msgstr "Nhật ký dịch Ebook"
+
+#: lib/conversion.py:346
+msgid "Translation Completed"
+msgstr "Hoàn thành dịch thuật"
+
+#: lib/conversion.py:347
+msgid "The translation of \"{}\" was completed. Do you want to open the book?"
+msgstr "Dịch \"{}\" đã hoàn thành. Bạn có muốn mở cuốn sách không?"
+
+#: lib/translation.py:124 lib/translation.py:131 lib/translation.py:150
+#: lib/translation.py:156
+msgid "Translation canceled."
+msgstr "Đã hủy dịch thuật."
+
+#: lib/translation.py:134
+msgid "Failed to retrieve data from translate engine API."
+msgstr "Không thể lấy dữ liệu từ API dịch thuật."
+
+#: lib/translation.py:142 lib/translation.py:203
+msgid "Original: {}"
+msgstr "Bản gốc: {}"
+
+#: lib/translation.py:143
+msgid "Status: Failed {} times / Sleeping for {} seconds"
+msgstr "Trạng thái: Thất bại {} lần / Ngủ trong {} giây"
+
+#: lib/translation.py:144
+msgid "Error: {}"
+msgstr "Lỗi: {}"
+
+#: lib/translation.py:147 lib/translation.py:202
+msgid "Row: {}"
+msgstr "Dòng: {}"
+
+#: lib/translation.py:191
+msgid "Translating: {}/{}"
+msgstr "Đang dịch: {}/{}"
+
+#: lib/translation.py:205
+msgid "Translation: {}"
+msgstr "Bản dịch: {}"
+
+#: lib/translation.py:207
+msgid "Translation (Cached): {}"
+msgstr "Bản dịch (Đã lưu trong cache): {}"
+
+#: lib/translation.py:218
+msgid "Start to translate ebook content"
+msgstr "Bắt đầu dịch nội dung ebook"
+
+#: lib/translation.py:220
+msgid "Item count: {}"
+msgstr "Số lượng mục: {}"
+
+#: lib/translation.py:224
+msgid "There is no content need to translate."
+msgstr "Không có nội dung cần dịch."
+
+#: lib/translation.py:235
+msgid "Translation failed."
+msgstr "Dịch thất bại."
+
+#: lib/translation.py:237
+msgid "Time consuming: {} minutes"
+msgstr "Thời gian sử dụng: {} phút"
+
+#: setting.py:112
+msgid "General"
+msgstr "Tổng quan"
+
+#: setting.py:114
+msgid "Content"
+msgstr "Nội dung"
+
+#: setting.py:150
+msgid "Preferred Mode"
+msgstr "Chế độ ưa thích"
+
+#: setting.py:182
+msgid "Output Path"
+msgstr "Đường dẫn đầu ra"
+
+#: setting.py:184
+msgid "Library"
+msgstr "Thư viện"
+
+#: setting.py:185
+msgid "Path"
+msgstr "Đường dẫn"
+
+#: setting.py:190
+msgid "Choose a path to store translated book(s)"
+msgstr "Chọn đường dẫn để lưu sách đã dịch"
+
+#: setting.py:217
+msgid "Preferred Format"
+msgstr "Định dạng ưa thích"
+
+#: setting.py:241
+msgid "(Beta)"
+msgstr "(Beta)"
+
+#: setting.py:241
+msgid "Merge to Translate"
+msgstr "Hợp nhất để Dịch"
+
+#: setting.py:243 setting.py:264 setting.py:328 setting.py:356 setting.py:1002
+msgid "Enable"
+msgstr "Bật"
+
+#: setting.py:249
+msgid "The number of characters to translate at once."
+msgstr "Số lượng ký tự để dịch cùng một lúc."
+
+#: setting.py:261
+msgid "Network Proxy"
+msgstr "Mạng Proxy"
+
+#: setting.py:281
+msgid "Host"
+msgstr "Máy chủ"
+
+#: setting.py:284
+msgid "Port"
+msgstr "Cổng"
+
+#: setting.py:295 setting.py:397
+msgid "Test"
+msgstr "Kiểm tra"
+
+#: setting.py:326 ui.py:50
+msgid "Cache"
+msgstr "Bộ nhớ đệm"
+
+#: setting.py:329
+msgid "Manage"
+msgstr "Quản lý"
+
+#: setting.py:346
+msgid "Job Log"
+msgstr "Nhật ký công việc"
+
+#: setting.py:347
+msgid "Show translation"
+msgstr "Hiển thị bản dịch"
+
+#: setting.py:354
+msgid "Notification"
+msgstr "Thông báo"
+
+#: setting.py:371
+msgid "Search Paths"
+msgstr "Đường dẫn tìm kiếm"
+
+#: setting.py:374
+msgid "The plugin will search for external programs via these paths."
+msgstr "Plugin sẽ tìm kiếm các chương trình bên ngoài thông qua các đường dẫn này."
+
+#: setting.py:398 setting.py:574 setting.py:578 setting.py:584 setting.py:587
+msgid "Custom"
+msgstr "Tùy chỉnh"
+
+#: setting.py:410
+msgid "Usage Tip"
+msgstr "Mẹo sử dụng"
+
+#: setting.py:424 setting.py:1035 setting.py:1053 setting.py:1096
+#: setting.py:1150
+msgid "Tip: "
+msgstr "Mẹo: "
+
+#: setting.py:425
+msgid "API keys will auto-switch if the previous one is unavailable."
+msgstr "Các khóa API sẽ tự động chuyển đổi nếu khóa trước đó không khả dụng."
+
+#: setting.py:435
+msgid "Preferred Language"
+msgstr "Ngôn ngữ ưa thích"
+
+#: setting.py:446
+msgid "HTTP Request"
+msgstr "Yêu cầu HTTP"
+
+#: setting.py:458
+msgid "Concurrency limit"
+msgstr "Giới hạn đồng thời"
+
+#: setting.py:459
+msgid "Interval (seconds)"
+msgstr "Khoảng cách (giây)"
+
+#: setting.py:460
+msgid "Attempt times"
+msgstr "Số lần thử"
+
+#: setting.py:461
+msgid "Timeout (seconds)"
+msgstr "Thời gian chờ (giây)"
+
+#: setting.py:465
+msgid "Abort Translation"
+msgstr "Hủy dịch thuật"
+
+#: setting.py:469
+msgid "Max errors"
+msgstr "Số lỗi tối đa"
+
+#: setting.py:472
+msgid "The number of consecutive errors to abort translation."
+msgstr "Số lượng lỗi liên tiếp để hủy dịch thuật."
+
+#: setting.py:484
+msgid "Fine-tuning"
+msgstr "Tinh chỉnh"
+
+#: setting.py:491
+msgid "Prompt"
+msgstr "Gợi ý"
+
+#: setting.py:493
+msgid "Endpoint"
+msgstr "Điểm cuối"
+
+#: setting.py:501
+msgid "A model name"
+msgstr "Tên mô hình"
+
+#: setting.py:506
+msgid "Model"
+msgstr "Mô hình"
+
+#: setting.py:539
+msgid "Sampling"
+msgstr "Lấy mẫu"
+
+#: setting.py:544
+msgid "Enable streaming response"
+msgstr "Bật phản hồi luồng"
+
+#: setting.py:545
+msgid "Stream"
+msgstr "Luồng"
+
+#: setting.py:602
+msgid "Fetching..."
+msgstr "Đang tải..."
+
+#: setting.py:611
+msgid "You need to provide an API key to proceed."
+msgstr "Bạn cần cung cấp khóa API để tiếp tục."
+
+#: setting.py:626
+msgid "Can't fetch model list"
+msgstr "Không thể lấy danh sách mô hình"
+
+#: setting.py:627
+msgid "Can't fetch model list, please check and try again."
+msgstr "Không thể lấy danh sách mô hình, vui lòng kiểm tra và thử lại."
+
+#: setting.py:655
+msgid "The model depends on your Azure project."
+msgstr "Mô hình phụ thuộc vào dự án Azure của bạn."
+
+#: setting.py:798
+msgid "Below original"
+msgstr "Dưới bản gốc"
+
+#: setting.py:800
+msgid "Above original"
+msgstr "Trên bản gốc"
+
+#: setting.py:802
+msgid "Right to original"
+msgstr "Bên phải bản gốc"
+
+#: setting.py:804
+msgid "Left to original"
+msgstr "Bên gốc"
+
+#: setting.py:805
+msgid "With no original"
+msgstr "Không có gốc"
+
+#: setting.py:824
+msgid "Translation"
+msgstr "Bản dịch"
+
+#: setting.py:841
+msgid "Column Gap"
+msgstr "Khoảng cột"
+
+#: setting.py:851
+msgid "Percentage"
+msgstr "Phần trăm"
+
+#: setting.py:852
+msgid "Space count"
+msgstr "Số lượng khoảng trắng"
+
+#: setting.py:883
+msgid "Translation Position"
+msgstr "Vị trí dịch thuật"
+
+#: setting.py:927
+msgid "Original Text Color"
+msgstr "Màu văn bản gốc"
+
+#: setting.py:932 setting.py:950 setting.py:1027 setting.py:1044
+#: setting.py:1142
+msgid "e.g.,"
+msgstr "ví dụ,"
+
+#: setting.py:946
+msgid "Translation Text Color"
+msgstr "Màu sắc văn bản dịch"
+
+#: setting.py:1000
+msgid "Translation Glossary"
+msgstr "Bảng thuật ngữ dịch thuật"
+
+#: setting.py:1004
+msgid "Choose a glossary file"
+msgstr "Chọn một tệp bảng thuật ngữ"
+
+#: setting.py:1023
+msgid "Priority Element"
+msgstr "Yếu tố ưu tiên"
+
+#: setting.py:1032
+msgid "CSS selectors for priority elements. One rule per line:"
+msgstr "Bộ chọn CSS cho các yếu tố ưu tiên. Một quy tắc trên mỗi dòng:"
+
+#: setting.py:1036
+msgid "Stop further extraction once elements match these rules."
+msgstr "Dừng việc trích xuất thêm khi các yếu tố khớp với các quy tắc này."
+
+#: setting.py:1040
+msgid "Ignore Element"
+msgstr "Bỏ qua Yếu tố"
+
+#: setting.py:1050
+msgid "CSS selectors to exclude elements. One rule per line:"
+msgstr "Bộ chọn CSS để loại bỏ các phần tử. Một quy tắc trên mỗi dòng:"
+
+#: setting.py:1054
+msgid "Do not translate elements that matches these rules."
+msgstr "Không dịch các phần tử khớp với các quy tắc này."
+
+#: setting.py:1058
+msgid "Ignore Paragraph"
+msgstr "Bỏ qua Đoạn văn"
+
+#: setting.py:1064
+msgid "Scope"
+msgstr "Phạm vi"
+
+#: setting.py:1065
+msgid "Text only"
+msgstr "Chỉ văn bản"
+
+#: setting.py:1067
+msgid "HTML element"
+msgstr "Phần tử HTML"
+
+#: setting.py:1074
+msgid "Mode"
+msgstr "Chế độ"
+
+#: setting.py:1075
+msgid "Normal"
+msgstr "Bình thường"
+
+#: setting.py:1077
+msgid "Normal (case-sensitive)"
+msgstr "Bình thường (phân biệt chữ hoa/thường)"
+
+#: setting.py:1078
+msgid "Regular Expression"
+msgstr "Biểu thức chính quy"
+
+#: setting.py:1096
+msgid "Do not translate extracted elements that contain these rules."
+msgstr "Không dịch các phần tử trích xuất chứa các quy tắc này."
+
+#: setting.py:1121
+msgid "Exclude paragraph by keyword. One keyword per line:"
+msgstr "Loại bỏ đoạn từ từ khóa. Một từ khóa trên mỗi dòng:"
+
+#: setting.py:1122
+msgid "Exclude paragraph by case-sensitive keyword. One keyword per line:"
+msgstr "Loại bỏ đoạn văn từ từ khóa phân biệt chữ hoa/thường. Một từ khóa trên mỗi dòng:"
+
+#: setting.py:1124
+msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
+msgstr "Loại bỏ đoạn văn bằng biểu thức chính quy. Một mẫu trên mỗi dòng:"
+
+#: setting.py:1138
+msgid "Reserve Element"
+msgstr "Đặt trước Phần tử"
+
+#: setting.py:1147
+msgid "CSS selectors to reserve elements. One rule per line:"
+msgstr "Bộ chọn CSS để dành riêng các phần tử. Một quy tắc trên mỗi dòng:"
+
+#: setting.py:1151
+msgid "Keep elements that match these rules for extraction."
+msgstr "Giữ các phần tử phù hợp với các quy tắc trích xuất này."
+
+#: setting.py:1155
+msgid "Ebook Metadata"
+msgstr "Siêu dữ liệu Ebook"
+
+#: setting.py:1159
+msgid "Translate all of the metadata information"
+msgstr "Dịch tất cả thông tin siêu dữ liệu"
+
+#: setting.py:1161
+msgid "Append target language to title metadata"
+msgstr "Thêm ngôn ngữ đích vào siêu dữ liệu tiêu đề"
+
+#: setting.py:1163
+msgid "Set target language code to language metadata"
+msgstr "Đặt mã ngôn ngữ mục tiêu vào siêu dữ liệu ngôn ngữ"
+
+#: setting.py:1166
+msgid "Subjects of ebook (one subject per line)"
+msgstr "Chủ đề của ebook (một chủ đề trên mỗi dòng)"
+
+#: setting.py:1168
+msgid "Metadata Translation"
+msgstr "Bản dịch siêu dữ liệu"
+
+#: setting.py:1169
+msgid "Language Mark"
+msgstr "Đánh dấu ngôn ngữ"
+
+#: setting.py:1170
+msgid "Language Code"
+msgstr "Mã ngôn ngữ"
+
+#: setting.py:1171
+msgid "Append Subjects"
+msgstr "Thêm chủ đề"
+
+#: setting.py:1194 setting.py:1243
+msgid "Proxy host or port is incorrect."
+msgstr "Chủ máy proxy hoặc cổng không chính xác."
+
+#: setting.py:1197 setting.py:1208
+msgid "The proxy is available."
+msgstr "Proxy có sẵn."
+
+#: setting.py:1198 setting.py:1211
+msgid "The proxy is not available."
+msgstr "Proxy không khả dụng."
+
+#: setting.py:1294
+msgid "the prompt must include {}."
+msgstr "câu hỏi phải bao gồm {}."
+
+#: setting.py:1321 setting.py:1328
+msgid "Invalid color value."
+msgstr "Giá trị màu không hợp lệ."
+
+#: setting.py:1337
+msgid "The specified glossary file does not exist."
+msgstr "Tệp từ điển được chỉ định không tồn tại."
+
+#: setting.py:1348 setting.py:1373 setting.py:1386
+msgid "{} is not a valid CSS selector."
+msgstr "{} không phải là một bộ chọn CSS hợp lệ."
+
+#: setting.py:1361
+msgid "{} is not a valid regular expression."
+msgstr "{} không phải là một biểu thức chính quy hợp lệ."
+
+#: ui.py:29
+msgid "Translate Book"
+msgstr "Dịch Sách"
+
+#: ui.py:29
+msgid "Translate Ebook Content"
+msgstr "Dịch Nội dung Sách điện tử"
+
+#: ui.py:52 ui.py:120
+msgid "Setting"
+msgstr "Cài đặt"
+
+#: ui.py:53 ui.py:148
+msgid "About"
+msgstr "Giới thiệu"
+
+#: ui.py:82
+msgid "Please choose a book."
+msgstr "Vui lòng chọn một cuốn sách."
+
+#: ui.py:97
+msgid "Please choose at least one book."
+msgstr "Vui lòng chọn ít nhất một cuốn sách."
+
+#: ui.py:111
+msgid "Cannot change setting while book(s) are under translation."
+msgstr "Không thể thay đổi cài đặt khi sách đang được dịch."
+
+#: ui.py:128
+msgid "Cannot manage cache while book(s) are under translation."
+msgstr "Không thể quản lý bộ nhớ cache khi sách đang được dịch."
+
+#: ui.py:137
+msgid "Cache Manager"
+msgstr "Trình quản lý bộ nhớ cache"
+
+#: ui.py:166
+msgid "Choose Translation Mode"
+msgstr "Chọn Chế độ Dịch"
+
