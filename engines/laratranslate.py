@@ -10,8 +10,8 @@ class LaraTranslate(GenAI):
     lang_codes = GenAI.load_lang_codes(google)
     need_api_key = False
 
-    samplings = ['static']
-    sampling = 'static'
+    samplings = ['top_p']
+    sampling = 'top_p'
 
     endpoint = 'https://webapi.laratranslate.com/translate/segmented'
     api_key_errors: list[str] = ['401']
