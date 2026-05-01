@@ -133,3 +133,48 @@ class DeeplFreeTranslate(Base):
 
     def get_result(self, response):
         return json.loads(response)['result']['texts'][0]['text']
+
+
+class DeeplWebFreeTranslate(Base):
+    name = 'DeepL(Web Free)'
+    alias = 'DeepL (Web Free)'
+    free = True
+    lang_codes = Base.load_lang_codes(deepl)
+    endpoint = 'https://oneshot-free.www.deepl.com/v1/storefront/translate'
+    need_api_key = False
+    placeholder = DeeplTranslate.placeholder
+
+    concurrency_limit = 1
+    request_interval = 1.0
+
+    def get_headers(self):
+        return {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36',
+            'Origin': 'https://www.deepl.com',
+            'Referer': 'https://www.deepl.com/',
+        }
+
+    def get_body(self, text):
+        body = {
+            'app_information': {
+                'app_build': 'Chrome',
+                'app_version': 'any',
+                'instance_id': '%08x-%04x-%04x-%04x-%012x' % (
+                    random.getrandbits(32), random.getrandbits(16),
+                    random.getrandbits(16), random.getrandbits(16),
+                    random.getrandbits(48)),
+                'os': 'Windows',
+                'os_version': 'any',
+            },
+            'language_model': 'next-gen',
+            'source_lang': self._get_source_code().lower(),
+            'text': [text],
+            'usage_type': 'Translate',
+        }
+        body['target_lang'] = self._get_target_code().lower()
+
+        return json.dumps(body, separators=(',', ':'))
+
+    def get_result(self, response):
+        return json.loads(response)['translations'][0]['text']

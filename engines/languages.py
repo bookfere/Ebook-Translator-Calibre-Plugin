@@ -568,6 +568,7 @@ deepl = {
         'Turkish': 'TR',
         'Ukrainian': 'UK',
         'Chinese (all variants)': 'ZH',
+        'Vietnamese': 'VI',
     },
     'target': {
         'Arabic': 'AR',
@@ -606,6 +607,7 @@ deepl = {
         'Chinese': 'ZH',
         'Chinese (simplified)': 'ZH-HANS',
         'Chinese (traditional)': 'ZH-HANT',
+        'Vietnamese': 'VI',
     }
 }
 
