@@ -1324,7 +1324,7 @@ class TranslationSetting(QDialog):
         if not issubclass(self.current_engine, GenAI):
             return
         prompt = widget.toPlainText().strip()
-        if prompt and '<tlang>' not in prompt:
+        if prompt and not self.current_engine.not_need_tlang and '<tlang>' not in prompt:
             self.alert.pop(
                 _('the prompt must include {}.').format('<slang>'),
                 'warning')
