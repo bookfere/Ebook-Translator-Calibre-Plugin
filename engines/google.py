@@ -369,7 +369,10 @@ class GeminiTranslate(GenAI):
             prompt += (
                 ' Ensure that placeholders matching the pattern {{id_\\d+}} '
                 'in the content are retained.')
-        return prompt + ' Start translating: ' + text
+
+        # Always append context rules to ensure stability
+        prompt += f"\n\n{self.context_rules}"
+        return prompt
 
     def get_models(self):
         endpoint = f'{self.endpoint}?key={self.api_key}'
@@ -398,10 +401,21 @@ class GeminiTranslate(GenAI):
         return {'Content-Type': 'application/json'}
 
     def get_body(self, text):
+        # Build system instruction with context if available
+        system_instruction = self._prompt(text)
+        if getattr(self, 'context_manager', None):
+            current_row = getattr(self.local_state, 'current_row', -1)
+            context_block = self.context_manager.get_context_block(current_row)
+            if context_block:
+                system_instruction += f"\n\n{context_block}"
+        
+        # Gemini messages structure: system-like instruction + current text
+        messages = [
+            {"role": "user", "parts": [{"text": f"{system_instruction}\n\nNow translate:\n{text}"}]}
+        ]
+
         return json.dumps({
-            "contents": [
-                {"role": "user", "parts": [{"text": self._prompt(text)}]},
-            ],
+            "contents": messages,
             "generationConfig": {
                 # "stopSequences": ["Test"],
                 # "maxOutputTokens": 2048,

@@ -84,12 +84,20 @@ class AzureChatgptTranslate(ChatgptTranslate):
         }
 
     def get_body(self, text):
+        # Add system prompt with context if available
+        system_content = self.get_prompt()
+        if getattr(self, 'context_manager', None):
+            current_row = getattr(self.local_state, 'current_row', -1)
+            context_block = self.context_manager.get_context_block(current_row)
+            if context_block:
+                system_content += f"\n\n{context_block}"
+        system_content += f"\n\n{self.context_rules}"
+        messages = [{'role': 'system', 'content': system_content}]
+        messages.append({'role': 'user', 'content': text})
+
         body = {
             'stream': self.stream,
-            'messages': [
-                {'role': 'system', 'content': self.get_prompt()},
-                {'role': 'user', 'content': text}
-            ]
+            'messages': messages
         }
         sampling_value = getattr(self, self.sampling)
         body.update({self.sampling: sampling_value})

@@ -14,6 +14,7 @@ from .utils import log, sep, trim, dummy, traceback_error
 from .config import get_config
 from .exception import TranslationFailed, TranslationCanceled
 from .handler import Handler
+from .context import ContextManager
 
 
 load_translations()  # type: ignore
@@ -88,6 +89,18 @@ class Translation:
         self.progress_bar = ProgressBar()
         self.abort_count = 0
 
+        # Initialize context manager
+        config = get_config()
+        self.context_enabled = config.get('context_enabled', False)
+        if self.context_enabled:
+            paragraph_limit = config.get('context_paragraph_limit', 3)
+            max_tokens = config.get('context_max_tokens', 2000)
+            position = config.get('context_position', 'before')
+            self.context_manager = ContextManager(paragraph_limit, max_tokens, position)
+            self.translator.set_context_manager(self.context_manager)
+        else:
+            self.context_manager = None
+
     def set_fresh(self, fresh):
         self.fresh = fresh
 
@@ -161,7 +174,13 @@ class Translation:
         self.streaming('')
         self.streaming(_('Translating...'))
         text = self.glossary.replace(paragraph.original)
-        translation = self.translate_text(paragraph.row, text)
+
+        # Add context to translator if enabled
+        if self.context_enabled and self.context_manager:
+            self.translator.local_state.current_row = int(paragraph.id)
+            # print(f"DEBUG: Translation setting current_row={int(paragraph.id)} for id={paragraph.id}")
+
+        translation = self.translate_text(int(paragraph.id), text)
         # Process streaming text
         if isinstance(translation, GeneratorType):
             if self.total == 1:
@@ -208,7 +227,11 @@ class Translation:
                 message = _('Translation (Cached): {}')
             self.log(message.format(paragraph.translation.strip()))
 
-    def handle(self, paragraphs=[]):
+    def handle(self, paragraphs=[], context_paragraphs=None):
+        # Load paragraphs into context manager if enabled
+        if self.context_enabled and self.context_manager:
+            self.context_manager.load_paragraphs(context_paragraphs or paragraphs)
+
         start_time = time.time()
         char_count = 0
         for paragraph in paragraphs:

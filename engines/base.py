@@ -1,5 +1,6 @@
 import socket
 import os.path
+import threading
 from typing import Any
 
 from mechanize import HTTPError
@@ -55,6 +56,10 @@ class Base:
         self.api_keys: list = self.config.get('api_keys', [])[:]
         self.bad_api_keys = []
         self.api_key = self.get_api_key()
+
+        # Context support
+        self.context_manager = None
+        self.local_state = threading.local()
 
         concurrency_limit = self.config.get('concurrency_limit')
         if concurrency_limit is not None:
@@ -146,6 +151,10 @@ class Base:
 
     def set_merge_enabled(self, enable):
         self.merge_enabled = enable
+
+    def set_context_manager(self, context_manager):
+        """Set the context manager for context-aware translation."""
+        self.context_manager = context_manager
 
     def set_source_lang(self, source_lang: str) -> None:
         self.source_lang = source_lang
