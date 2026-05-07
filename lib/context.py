@@ -42,10 +42,8 @@ class ContextManager:
             rows = range(current_row + 1, current_row + 1 + self.paragraph_limit)
             
         for row in rows:
-            if row < 0 or row >= len(self.paragraphs):
-                # Using len(self.paragraphs) as a proxy, but better to check if row exists
-                if row not in self.paragraphs:
-                    continue
+            if row not in self.paragraphs:
+                continue
             
             p = self.paragraphs.get(row)
             if not p:
