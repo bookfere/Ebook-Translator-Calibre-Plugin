@@ -25,7 +25,7 @@ class ContextManager:
     def load_paragraphs(self, paragraphs):
         """Load all paragraphs to allow direct lookup by row index for concurrent translation."""
         self.paragraphs = {int(p.id): p for p in paragraphs}
-        print(f"DEBUG: ContextManager loaded {len(self.paragraphs)} paragraphs. Keys: {list(self.paragraphs.keys())[:10]}...")
+        # print(f"DEBUG: ContextManager loaded {len(self.paragraphs)} paragraphs. Keys: {list(self.paragraphs.keys())[:10]}...")
 
     def get_context_items(self, current_row: int) -> List[dict]:
         """Fetch the previous or next valid context paragraphs based on the current row and stored position."""
