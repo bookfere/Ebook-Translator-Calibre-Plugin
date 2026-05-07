@@ -91,7 +91,6 @@ class AzureChatgptTranslate(ChatgptTranslate):
             context_block = self.context_manager.get_context_block(current_row)
             if context_block:
                 system_content += f"\n\n{context_block}"
-        system_content += f"\n\n{self.context_rules}"
         messages = [{'role': 'system', 'content': system_content}]
         messages.append({'role': 'user', 'content': text})
 
