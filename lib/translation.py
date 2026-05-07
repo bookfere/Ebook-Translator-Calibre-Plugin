@@ -89,13 +89,23 @@ class Translation:
         self.progress_bar = ProgressBar()
         self.abort_count = 0
 
-        # Initialize context manager
-        config = get_config()
-        self.context_enabled = config.get('context_enabled', False)
+        # Initialize context manager from engine-specific config
+        engine_config = getattr(self.translator, 'config', None)
+        global_config = get_config()
+
+        # First check engine-specific config, fallback to global config
+        if engine_config and 'context_enabled' in engine_config:
+            self.context_enabled = engine_config.get('context_enabled', True)
+            paragraph_limit = engine_config.get('context_paragraph_limit', 3)
+            max_tokens = engine_config.get('context_max_tokens', 2000)
+            position = engine_config.get('context_position', 'before')
+        else:
+            self.context_enabled = global_config.get('context_enabled', True)
+            paragraph_limit = global_config.get('context_paragraph_limit', 3)
+            max_tokens = global_config.get('context_max_tokens', 2000)
+            position = global_config.get('context_position', 'before')
+
         if self.context_enabled:
-            paragraph_limit = config.get('context_paragraph_limit', 3)
-            max_tokens = config.get('context_max_tokens', 2000)
-            position = config.get('context_position', 'before')
             self.context_manager = ContextManager(paragraph_limit, max_tokens, position)
             self.translator.set_context_manager(self.context_manager)
         else:

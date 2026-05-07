@@ -83,6 +83,7 @@ class TestTranslation(unittest.TestCase):
         self.streaming = Mock()
         self.cancel_request = Mock(return_value=False)
         self.log = Mock()
+        self.translator.config = {}
         self.translation = Translation(self.translator, self.glossary)
         self.translator.local_state = Mock()
         self.translator.local_state.current_row = None

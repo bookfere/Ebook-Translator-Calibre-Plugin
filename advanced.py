@@ -753,12 +753,24 @@ class AdvancedTranslation(QDialog):
             translator.set_source_lang(self.ebook.source_lang)
             translator.set_target_lang(self.ebook.target_lang)
 
-            # Enable context if configured
-            if self.config.get('context_enabled', False):
+            # Enable context if configured (check engine-specific config first, fallback to global)
+            engine_config = getattr(translator, 'config', None)
+            global_config = self.config
+
+            if engine_config and 'context_enabled' in engine_config:
+                context_enabled = engine_config.get('context_enabled', True)
+                paragraph_limit = engine_config.get('context_paragraph_limit', 3)
+                max_tokens = engine_config.get('context_max_tokens', 2000)
+                position = engine_config.get('context_position', 'before')
+            else:
+                context_enabled = global_config.get('context_enabled', True)
+                paragraph_limit = global_config.get('context_paragraph_limit', 3)
+                max_tokens = global_config.get('context_max_tokens', 2000)
+                position = global_config.get('context_position', 'before')
+
+            if context_enabled:
                 from .lib.context import ContextManager
-                paragraph_limit = self.config.get('context_paragraph_limit', 3)
-                max_tokens = self.config.get('context_max_tokens', 2000)
-                context_manager = ContextManager(paragraph_limit, max_tokens)
+                context_manager = ContextManager(paragraph_limit, max_tokens, position)
                 context_manager.load_paragraphs(self.table.paragraphs)
                 translator.set_context_manager(context_manager)
 
