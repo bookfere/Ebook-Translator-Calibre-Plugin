@@ -130,6 +130,3 @@ class ContextManager:
 
     def update_translation(self, original: str, translation: str):
         pass
-
-    def get_summary_context(self) -> str:
-        return self.get_context()
