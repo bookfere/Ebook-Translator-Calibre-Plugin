@@ -21,30 +21,34 @@ class ContextManager:
         self.max_tokens = max_tokens
         self.position = position
         self.paragraphs = {}
+        self.ordered_ids = []
+        self.id_to_index = {}
 
     def load_paragraphs(self, paragraphs):
         """Load all paragraphs to allow direct lookup by row index for concurrent translation."""
         self.paragraphs = {int(p.id): p for p in paragraphs}
-        # print(f"DEBUG: ContextManager loaded {len(self.paragraphs)} paragraphs. Keys: {list(self.paragraphs.keys())[:10]}...")
+        self.ordered_ids = sorted(self.paragraphs.keys())
+        self.id_to_index = {id_: idx for idx, id_ in enumerate(self.ordered_ids)}
 
     def get_context_items(self, current_row: int) -> List[dict]:
         """Fetch the previous or next valid context paragraphs based on the current row and stored position."""
-        if current_row < 0 or not self.paragraphs:
+        if current_row < 0 or not self.paragraphs or current_row not in self.id_to_index:
             return []
 
+        current_idx = self.id_to_index[current_row]
         items = []
         total_chars = 0
         
         # Determine search range based on stored position
         if self.position == 'before':
-            rows = range(current_row - 1, current_row - 1 - self.paragraph_limit, -1)
+            rows = range(current_idx - 1, max(current_idx - self.paragraph_limit - 1, -1), -1)
         else:
-            rows = range(current_row + 1, current_row + 1 + self.paragraph_limit)
-            
+            rows = range(current_idx + 1, min(current_idx + self.paragraph_limit + 1, len(self.ordered_ids)))
+
         for row in rows:
-            if row not in self.paragraphs:
+            if row < 0 or row >= len(self.ordered_ids):
                 continue
-            
+            row = self.ordered_ids[row]
             p = self.paragraphs.get(row)
             if not p:
                 continue
