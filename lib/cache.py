@@ -232,7 +232,8 @@ class TranslationCache:
             self.connection.commit()
 
     def all(self):
-        resource = self.cursor.execute('SELECT * FROM cache WHERE NOT ignored')
+        resource = self.cursor.execute(
+            'SELECT * FROM cache WHERE NOT ignored ORDER BY id')
         return resource.fetchall()
 
     def get(self, ids):

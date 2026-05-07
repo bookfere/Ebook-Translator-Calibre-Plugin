@@ -79,10 +79,14 @@ class TestTranslation(unittest.TestCase):
         self.translator = Mock()
         self.glossary = Mock()
         self.paragraph = Mock()
+        self.paragraph.id = 0
         self.streaming = Mock()
         self.cancel_request = Mock(return_value=False)
         self.log = Mock()
+        self.translator.config = {}
         self.translation = Translation(self.translator, self.glossary)
+        self.translator.local_state = Mock()
+        self.translator.local_state.current_row = None
 
     def test_created_translation(self):
         self.assertIs(self.translation.translator, self.translator)
