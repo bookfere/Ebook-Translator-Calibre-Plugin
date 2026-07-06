@@ -36,6 +36,13 @@ class Base:
     placeholder = ('{{{{id_{}}}}}', r'({{\s*)+id\s*_\s*{}\s*(\s*}})+')
     using_tip = None
 
+    # Novel Mode (see lib/novel.py) requires stateful, chat-style engines
+    # able to accept a customized system prompt with a running summary and
+    # glossary. Only GenAI subclasses opt-in to True. Kept as a plain class
+    # attribute rather than an ABC method so all builtin/custom engines can
+    # be introspected uniformly at UI level.
+    supports_novel_mode: bool = False
+
     concurrency_limit: int = 0
     request_interval: float = 0.0
     request_attempt: int = 3

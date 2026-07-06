@@ -46,6 +46,24 @@ defaults: dict[str, Any] = {
     'merge_length': 1800,
     'ebook_metadata': {},
     'search_paths': [],
+    # Novel Mode: LLM-only sequential pipeline with running summary + dynamic
+    # glossary. See lib/novel.py for details. Prompts default to None so the
+    # runtime falls back to the templates defined in lib/novel.py; users can
+    # override them from the Setting dialog.
+    'novel_mode_enabled': False,
+    'novel_chunk_tokens': 8000,
+    'novel_context_tokens': 1500,
+    'novel_summary_tokens': 400,
+    'novel_glossary_max_entries': 200,
+    # Chapters with fewer translated characters than this threshold are
+    # translated normally but skip the summary + glossary extraction
+    # LLM calls. Typical target: front/back matter (Copyright, Table of
+    # Contents, About the Author, ...) which is not narrative content.
+    'novel_min_chars_for_context': 300,
+    'novel_chapter_source': 'toc_level_1',  # 'toc_level_1' | 'xhtml_file'
+    'novel_translation_prompt': None,
+    'novel_summary_prompt': None,
+    'novel_glossary_prompt': None,
 }
 
 

@@ -154,27 +154,30 @@ class TranslationSetting(QDialog):
         mode_layout = QGridLayout(mode_group)
         advanced_mode = QRadioButton(_('Advanced Mode'))
         batch_mode = QRadioButton(_('Batch Mode'))
+        novel_mode = QRadioButton(_('Novel Mode'))
         icon_button = QLabel()
         icon_button.setPixmap(self.icon.pixmap(52, 52))
         mode_layout.addWidget(icon_button, 0, 0, 3, 1)
         mode_layout.addWidget(advanced_mode, 0, 1)
         mode_layout.addWidget(batch_mode, 0, 2)
-        mode_layout.addItem(QSpacerItem(0, 0), 0, 3)
+        mode_layout.addWidget(novel_mode, 0, 3)
+        mode_layout.addItem(QSpacerItem(0, 0), 0, 4)
         mode_layout.addWidget(self._divider(), 1, 1, 1, 4)
         mode_layout.addWidget(QLabel(
             _('Choose a translation mode for clicking the icon button.')),
             2, 1, 1, 4)
-        mode_layout.setColumnStretch(3, 1)
+        mode_layout.setColumnStretch(4, 1)
         layout.addWidget(mode_group)
 
-        mode_map = dict(enumerate(['advanced', 'batch']))
+        mode_map = dict(enumerate(['advanced', 'batch', 'novel']))
         mode_rmap = dict((v, k) for k, v in mode_map.items())
         mode_btn_group = QButtonGroup(mode_group)
         mode_btn_group.addButton(advanced_mode, 0)
         mode_btn_group.addButton(batch_mode, 1)
+        mode_btn_group.addButton(novel_mode, 2)
 
         preferred_mode = self.config.get('preferred_mode')
-        if preferred_mode is not None:
+        if preferred_mode is not None and preferred_mode in mode_rmap:
             mode_btn_group.button(
                 mode_rmap.get(preferred_mode)).setChecked(True)
         mode_btn_group.idClicked.connect(
@@ -571,6 +574,150 @@ class TranslationSetting(QDialog):
 
         layout.addWidget(genai_group)
 
+        # Novel Mode settings (visible only for GenAI engines).
+        novel_group = QGroupBox(_('Novel Mode'))
+        novel_group.setVisible(False)
+        novel_layout = QFormLayout(novel_group)
+        self.apply_form_layout_policy(novel_layout)
+
+        novel_chapter_source = QComboBox()
+        novel_chapter_source.addItem(
+            _('Table of Contents (level 1)'), 'toc_level_1')
+        novel_chapter_source.addItem(
+            _('One XHTML file per chapter'), 'xhtml_file')
+        novel_layout.addRow(
+            _('Chapter detection'), novel_chapter_source)
+        self.disable_wheel_event(novel_chapter_source)
+
+        novel_chunk_tokens = QSpinBox()
+        novel_chunk_tokens.setRange(1024, 200000)
+        novel_chunk_tokens.setSingleStep(1024)
+        novel_layout.addRow(
+            _('Chunk size (tokens)'), novel_chunk_tokens)
+        self.disable_wheel_event(novel_chunk_tokens)
+
+        novel_context_tokens = QSpinBox()
+        novel_context_tokens.setRange(0, 100000)
+        novel_context_tokens.setSingleStep(256)
+        novel_layout.addRow(
+            _('Reserved for context (tokens)'), novel_context_tokens)
+        self.disable_wheel_event(novel_context_tokens)
+
+        novel_summary_tokens = QSpinBox()
+        novel_summary_tokens.setRange(50, 5000)
+        novel_summary_tokens.setSingleStep(50)
+        novel_layout.addRow(
+            _('Summary target size (tokens)'), novel_summary_tokens)
+        self.disable_wheel_event(novel_summary_tokens)
+
+        novel_glossary_max = QSpinBox()
+        novel_glossary_max.setRange(10, 5000)
+        novel_glossary_max.setSingleStep(10)
+        novel_layout.addRow(
+            _('Glossary max entries'), novel_glossary_max)
+        self.disable_wheel_event(novel_glossary_max)
+
+        novel_min_chars = QSpinBox()
+        novel_min_chars.setRange(0, 100000)
+        novel_min_chars.setSingleStep(50)
+        novel_min_chars.setToolTip(_(
+            'Chapters shorter than this many translated characters skip '
+            'the summary and glossary LLM calls. Useful to avoid wasting '
+            'time on Copyright, Table of Contents, About the Author, '
+            'etc. Set to 0 to always run summary/glossary.'))
+        novel_layout.addRow(
+            _('Skip context under (chars)'), novel_min_chars)
+        self.disable_wheel_event(novel_min_chars)
+
+        novel_translation_prompt = QPlainTextEdit()
+        novel_translation_prompt.setFixedHeight(90)
+        novel_layout.addRow(
+            _('Translation prompt'), novel_translation_prompt)
+        novel_summary_prompt = QPlainTextEdit()
+        novel_summary_prompt.setFixedHeight(70)
+        novel_layout.addRow(
+            _('Summary prompt'), novel_summary_prompt)
+        novel_glossary_prompt = QPlainTextEdit()
+        novel_glossary_prompt.setFixedHeight(70)
+        novel_layout.addRow(
+            _('Glossary prompt'), novel_glossary_prompt)
+
+        layout.addWidget(novel_group)
+
+        # Wire novel settings to config on change.
+        def load_novel_settings():
+            from .lib.novel import (
+                DEFAULT_NOVEL_TRANSLATION_PROMPT,
+                DEFAULT_NOVEL_SUMMARY_PROMPT,
+                DEFAULT_NOVEL_GLOSSARY_PROMPT)
+            src = self.config.get(
+                'novel_chapter_source', 'toc_level_1') or 'toc_level_1'
+            idx = novel_chapter_source.findData(src)
+            if idx >= 0:
+                novel_chapter_source.setCurrentIndex(idx)
+            novel_chunk_tokens.setValue(int(self.config.get(
+                'novel_chunk_tokens', 8000) or 8000))
+            novel_context_tokens.setValue(int(self.config.get(
+                'novel_context_tokens', 1500) or 1500))
+            novel_summary_tokens.setValue(int(self.config.get(
+                'novel_summary_tokens', 400) or 400))
+            novel_glossary_max.setValue(int(self.config.get(
+                'novel_glossary_max_entries', 200) or 200))
+            novel_min_chars.setValue(int(self.config.get(
+                'novel_min_chars_for_context', 300) or 0))
+            novel_translation_prompt.setPlaceholderText(
+                DEFAULT_NOVEL_TRANSLATION_PROMPT)
+            novel_translation_prompt.setPlainText(
+                self.config.get('novel_translation_prompt') or '')
+            novel_summary_prompt.setPlaceholderText(
+                DEFAULT_NOVEL_SUMMARY_PROMPT)
+            novel_summary_prompt.setPlainText(
+                self.config.get('novel_summary_prompt') or '')
+            novel_glossary_prompt.setPlaceholderText(
+                DEFAULT_NOVEL_GLOSSARY_PROMPT)
+            novel_glossary_prompt.setPlainText(
+                self.config.get('novel_glossary_prompt') or '')
+        load_novel_settings()
+
+        def _persist_novel(key, cast):
+            def _handler(value):
+                try:
+                    self.config.update(**{key: cast(value)})
+                except (ValueError, TypeError):
+                    pass
+            return _handler
+
+        novel_chapter_source.currentIndexChanged.connect(
+            lambda _idx: self.config.update(
+                novel_chapter_source=novel_chapter_source.currentData()))
+        novel_chunk_tokens.valueChanged.connect(
+            _persist_novel('novel_chunk_tokens', int))
+        novel_context_tokens.valueChanged.connect(
+            _persist_novel('novel_context_tokens', int))
+        novel_summary_tokens.valueChanged.connect(
+            _persist_novel('novel_summary_tokens', int))
+        novel_glossary_max.valueChanged.connect(
+            _persist_novel('novel_glossary_max_entries', int))
+        novel_min_chars.valueChanged.connect(
+            _persist_novel('novel_min_chars_for_context', int))
+
+        def _persist_prompt(widget, key):
+            def _handler():
+                text = widget.toPlainText().strip()
+                if text:
+                    self.config.update(**{key: text})
+                else:
+                    self.config.delete(key)
+            return _handler
+
+        novel_translation_prompt.textChanged.connect(
+            _persist_prompt(
+                novel_translation_prompt, 'novel_translation_prompt'))
+        novel_summary_prompt.textChanged.connect(
+            _persist_prompt(novel_summary_prompt, 'novel_summary_prompt'))
+        novel_glossary_prompt.textChanged.connect(
+            _persist_prompt(novel_glossary_prompt, 'novel_glossary_prompt'))
+
         # Setup genAI model
         def init_ai_models(model=None):
             if not issubclass(self.current_engine, GenAI):
@@ -760,8 +907,10 @@ class TranslationSetting(QDialog):
                 lambda value: config.update(max_error_count=value))
             # Show GenAI preferences
             genai_group.setVisible(False)
+            novel_group.setVisible(False)
             if issubclass(self.current_engine, GenAI):
                 genai_group.setVisible(True)
+                novel_group.setVisible(True)
                 show_genai_preferences(config)
         choose_default_engine(engine_list.findData(self.current_engine.name))
         engine_list.currentIndexChanged.connect(choose_default_engine)
