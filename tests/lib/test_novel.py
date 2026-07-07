@@ -282,6 +282,85 @@ class TestTokenBudget(unittest.TestCase):
         # All paragraphs (including ignored) are still present.
         self.assertEqual(3, len(chunks[0]))
 
+    # -- dual-cap chunking ------------------------------------------------
+
+    def test_chunk_capped_by_max_paragraphs(self):
+        # 100 very short paragraphs, small token weight but many tags.
+        # Cap tokens is generous (8000) so the paragraph cap should fire.
+        paragraphs = [make_paragraph(i, 'short') for i in range(100)]
+        budget = TokenBudget(budget=8000, max_paragraphs=30)
+        chunks = budget.chunk(paragraphs, reserved=0)
+        # 100 / 30 = ceil(3.33) => 4 chunks.
+        self.assertEqual(4, len(chunks))
+        for c in chunks:
+            # Each chunk must not exceed the paragraph cap.
+            self.assertLessEqual(len(c), 30)
+
+    def test_chunk_capped_by_tokens(self):
+        # Few very large paragraphs: token cap should fire first.
+        paragraphs = [make_paragraph(i, 'x' * 3000) for i in range(5)]
+        # Very small token budget forces splitting on tokens.
+        budget = TokenBudget(budget=200, max_paragraphs=60)
+        chunks = budget.chunk(paragraphs, reserved=0)
+        # Oversized paragraphs become singleton chunks -> 5 chunks.
+        self.assertGreater(len(chunks), 1)
+        # No chunk should hold more than one paragraph in this case.
+        for c in chunks:
+            self.assertEqual(1, len(c))
+
+    def test_chunk_max_paragraphs_zero_disables_cap(self):
+        # Many short paragraphs, generous token budget, cap=0 -> single chunk.
+        paragraphs = [make_paragraph(i, 'short') for i in range(200)]
+        budget = TokenBudget(budget=100000, max_paragraphs=0)
+        chunks = budget.chunk(paragraphs, reserved=0)
+        self.assertEqual(1, len(chunks))
+        self.assertEqual(200, len(chunks[0]))
+
+    def test_chunk_default_max_paragraphs_is_60(self):
+        # Backward-compatible default. New default is 60.
+        budget = TokenBudget(budget=8000)
+        self.assertEqual(60, budget.max_paragraphs)
+
+    def test_chunk_with_stats_reports_reason(self):
+        # 70 short paragraphs, generous token budget, cap=60.
+        # First chunk closed by paragraphs, second by end of stream.
+        paragraphs = [make_paragraph(i, 'short') for i in range(70)]
+        budget = TokenBudget(budget=100000, max_paragraphs=60)
+        stats = budget.chunk_with_stats(paragraphs, reserved=0)
+        self.assertEqual(2, len(stats))
+        # (chunk, tokens, reason)
+        self.assertEqual(TokenBudget.REASON_PARAGRAPHS, stats[0][2])
+        self.assertEqual(TokenBudget.REASON_END, stats[-1][2])
+        # First chunk has exactly 60 paragraphs (the cap).
+        self.assertEqual(60, len(stats[0][0]))
+
+    def test_chunk_with_stats_token_reason(self):
+        # Trigger token-based closure with small budget.
+        paragraphs = [make_paragraph(i, 'x' * 400) for i in range(10)]
+        # 400 chars / 4 ~= 100 tokens per paragraph.
+        budget = TokenBudget(budget=250, max_paragraphs=60)
+        stats = budget.chunk_with_stats(paragraphs, reserved=0)
+        # At least the first split should be token-driven.
+        reasons = [s[2] for s in stats[:-1]]
+        self.assertIn(TokenBudget.REASON_TOKENS, reasons)
+
+    def test_chunk_ignored_do_not_count_toward_paragraph_cap(self):
+        # 5 translatable + 55 ignored + 5 translatable = 10 translatable
+        # but 65 total. With max_paragraphs=60 the cap should NOT fire
+        # because ignored paragraphs do not consume the budget.
+        paragraphs = []
+        for i in range(5):
+            paragraphs.append(make_paragraph(i, 'text'))
+        for i in range(5, 60):
+            paragraphs.append(make_paragraph(i, '', ignored=True))
+        for i in range(60, 65):
+            paragraphs.append(make_paragraph(i, 'text'))
+        budget = TokenBudget(budget=100000, max_paragraphs=60)
+        chunks = budget.chunk(paragraphs, reserved=0)
+        # All 65 paragraphs (including ignored) fit in a single chunk.
+        self.assertEqual(1, len(chunks))
+        self.assertEqual(65, len(chunks[0]))
+
 
 # ---------------------------------------------------------------------------
 # ContextManager

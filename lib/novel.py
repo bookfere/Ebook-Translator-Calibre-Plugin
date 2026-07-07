@@ -276,7 +276,7 @@ _CJK_RE = re.compile(
 
 
 class TokenBudget:
-    """Cheap token estimation and chunking, char-based.
+    """Cheap token estimation and dual-cap chunking, char-based.
 
     We deliberately avoid heavy dependencies (tiktoken and friends): they are
     accurate for GPT/Claude but wrong for Gemma/Mistral/others and would add
@@ -285,18 +285,36 @@ class TokenBudget:
       * Latin/Cyrillic/etc: ~4 chars per token.
       * CJK: ~2 chars per token (each ideograph is often one token).
 
-    For chunking we treat the paragraph as an atomic unit: a chunk contains
-    a contiguous slice of paragraphs whose combined estimated tokens fit
-    within the available budget. Paragraphs that alone exceed the budget are
-    still emitted as a single-paragraph chunk (with a warning) rather than
-    being split mid-sentence.
+    Chunking is driven by **two independent caps**, both enforced
+    simultaneously: whichever is reached first closes the current chunk.
+
+      * ``budget``: maximum estimated tokens per chunk. Prevents overflowing
+        the model's context window.
+      * ``max_paragraphs``: maximum non-ignored paragraphs per chunk.
+        Prevents the LLM from being overwhelmed by too many ``<Pn>...</Pn>``
+        alignment markers when paragraphs are short (dialogue, TOC lists,
+        one-line stanzas). Empirically, medium-sized local models start
+        losing tags reliably above ~60-80 tags per chunk. Set to 0 to
+        disable this cap and fall back to token-only chunking.
+
+    Paragraphs that alone exceed the per-chunk budget are still emitted as
+    a single-paragraph chunk (with a warning) rather than being split
+    mid-sentence.
     """
 
-    def __init__(self, budget=8000, ratio_latin=4.0, ratio_cjk=2.0,
-                 cjk_threshold=0.30):
+    # Reasons why a chunk was closed. Exposed via ``chunk_with_stats``.
+    REASON_TOKENS = 'tokens'
+    REASON_PARAGRAPHS = 'paragraphs'
+    REASON_OVERSIZED = 'oversized'
+    REASON_END = 'end'
+
+    def __init__(self, budget=12000, max_paragraphs=60,
+                 ratio_latin=4.0, ratio_cjk=2.0, cjk_threshold=0.30):
         if budget < 100:
             budget = 100
         self.budget = int(budget)
+        # 0 (or negative) disables the paragraph cap.
+        self.max_paragraphs = max(0, int(max_paragraphs or 0))
         self.ratio_latin = float(ratio_latin)
         self.ratio_cjk = float(ratio_cjk)
         self.cjk_threshold = float(cjk_threshold)
@@ -316,47 +334,90 @@ class TokenBudget:
         return max(1, int(cjk / self.ratio_cjk + latin / self.ratio_latin))
 
     def chunk(self, paragraphs, reserved=0):
-        """Split ``paragraphs`` into contiguous chunks fitting the budget.
+        """Split ``paragraphs`` into contiguous chunks respecting both the
+        token budget and the paragraph cap.
 
         :reserved: number of tokens to leave available for the system prompt,
             the running summary, the glossary and the model reply. The
             effective per-chunk budget is ``self.budget - reserved`` with a
             minimum of 200 tokens.
+
+        Returns a list of paragraph-lists. Use ``chunk_with_stats`` to also
+        obtain the per-chunk token estimate and the reason why each chunk
+        was closed (useful for tuning / logging).
+        """
+        return [c for c, _tok, _reason
+                in self.chunk_with_stats(paragraphs, reserved)]
+
+    def chunk_with_stats(self, paragraphs, reserved=0):
+        """Same as :meth:`chunk` but returns list of tuples
+        ``(chunk, tokens_estimate, reason)`` where ``reason`` is one of
+        ``TokenBudget.REASON_*``. The reason indicates which limit closed
+        the chunk (or ``REASON_END`` for the tail chunk).
         """
         available = max(200, self.budget - int(reserved))
         chunks = []
         current = []
         current_tokens = 0
+        current_translatable = 0  # non-ignored paragraph count
+
         for p in paragraphs:
             if getattr(p, 'ignored', False):
                 # Ignored paragraphs still travel through the pipeline (they
                 # must be re-injected into the DOM) but they consume no
-                # tokens for translation.
+                # tokens for translation and do not count toward the
+                # paragraph cap.
                 current.append(p)
                 continue
+
             text = p.original or ''
             tokens = self.estimate(text)
-            if tokens >= available and not current:
-                # Oversized paragraph on its own. Emit it as a single chunk
-                # (LLM might still handle it, or the caller will log a
-                # warning); do not split mid-paragraph.
+
+            # Oversized single paragraph: emit alone (do not split mid-
+            # sentence). If ``current`` is non-empty flush it first so
+            # ordering is preserved.
+            if tokens >= available:
+                if current:
+                    # Determine closing reason for the flushed chunk.
+                    reason = self.REASON_TOKENS
+                    if (self.max_paragraphs
+                            and current_translatable >= self.max_paragraphs):
+                        reason = self.REASON_PARAGRAPHS
+                    chunks.append((current, current_tokens, reason))
+                    current = []
+                    current_tokens = 0
+                    current_translatable = 0
                 log.warn(
                     'Novel mode: paragraph estimated at %d tokens exceeds '
                     'per-chunk budget %d; sending as-is.'
                     % (tokens, available))
-                chunks.append([p])
-                current = []
-                current_tokens = 0
+                chunks.append(([p], tokens, self.REASON_OVERSIZED))
                 continue
-            if current_tokens + tokens > available and current:
-                chunks.append(current)
+
+            would_exceed_tokens = current_tokens + tokens > available
+            would_exceed_paragraphs = (
+                self.max_paragraphs
+                and current_translatable >= self.max_paragraphs)
+
+            if (would_exceed_tokens or would_exceed_paragraphs) and current:
+                # Which cap fired first? If both, tokens takes precedence
+                # (the harder limit for the model).
+                if would_exceed_tokens:
+                    reason = self.REASON_TOKENS
+                else:
+                    reason = self.REASON_PARAGRAPHS
+                chunks.append((current, current_tokens, reason))
                 current = [p]
                 current_tokens = tokens
+                current_translatable = 1
                 continue
+
             current.append(p)
             current_tokens += tokens
+            current_translatable += 1
+
         if current:
-            chunks.append(current)
+            chunks.append((current, current_tokens, self.REASON_END))
         return chunks
 
 
@@ -881,7 +942,19 @@ class NovelTranslator:
 
     @property
     def chunk_tokens(self):
-        return int(self._cfg('novel_chunk_tokens', 8000))
+        return int(self._cfg('novel_chunk_tokens', 12000))
+
+    @property
+    def max_paragraphs_per_chunk(self):
+        """Maximum number of translatable paragraphs per chunk.
+
+        Prevents the LLM from being overwhelmed by too many ``<Pn>...</Pn>``
+        alignment markers when paragraphs are short (dialogue, TOC lists,
+        one-line stanzas). The chunk is closed as soon as either the token
+        budget or this paragraph cap is reached -- whichever comes first.
+        Set to 0 to disable the cap and use only the token budget.
+        """
+        return int(self._cfg('novel_max_paragraphs_per_chunk', 60))
 
     @property
     def context_tokens(self):
@@ -1235,13 +1308,32 @@ class NovelTranslator:
             self._report_progress()
             return
 
-        # Chunk.
-        budget = TokenBudget(budget=self.chunk_tokens)
-        chunks = budget.chunk(
+        # Chunk with dual-cap (token budget + paragraph count).
+        budget = TokenBudget(
+            budget=self.chunk_tokens,
+            max_paragraphs=self.max_paragraphs_per_chunk,
+        )
+        chunks_with_stats = budget.chunk_with_stats(
             translatable, reserved=self.context_tokens + self.summary_tokens)
+        chunks = [c for c, _tok, _reason in chunks_with_stats]
         total_chunks = len(chunks)
-        self.log(_('Split into {} chunk(s), ~{} tokens budget per chunk.')
-                 .format(total_chunks, self.chunk_tokens))
+        cap_paragraphs_display = (
+            str(self.max_paragraphs_per_chunk)
+            if self.max_paragraphs_per_chunk else _('unlimited'))
+        self.log(_(
+            'Split into {} chunk(s). Caps: {} tokens / {} paragraphs.')
+            .format(total_chunks, self.chunk_tokens, cap_paragraphs_display))
+        # Per-chunk diagnostic (helps tune the caps against a real book).
+        # ``reason`` is one of TokenBudget.REASON_* and tells which limit
+        # closed the chunk.
+        for i, (chunk_paras, tok_est, reason) in enumerate(
+                chunks_with_stats, start=1):
+            visible = sum(
+                1 for p in chunk_paras if not getattr(p, 'ignored', False))
+            self.log(_(
+                '  Chunk {}/{}: {} paragraphs, ~{} tokens '
+                '(closed by: {}).').format(
+                    i, total_chunks, visible, tok_est, reason))
 
         context_text = self.ctx.context_text(
             budget_tokens=self.context_tokens)

@@ -478,7 +478,9 @@ def convert_item_novel(
 
     config = get_config()
     novel_config = {
-        'novel_chunk_tokens': config.get('novel_chunk_tokens', 8000),
+        'novel_chunk_tokens': config.get('novel_chunk_tokens', 12000),
+        'novel_max_paragraphs_per_chunk': config.get(
+            'novel_max_paragraphs_per_chunk', 60),
         'novel_context_tokens': config.get('novel_context_tokens', 1500),
         'novel_summary_tokens': config.get('novel_summary_tokens', 400),
         'novel_glossary_max_entries': config.get(

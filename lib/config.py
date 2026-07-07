@@ -51,7 +51,14 @@ defaults: dict[str, Any] = {
     # runtime falls back to the templates defined in lib/novel.py; users can
     # override them from the Setting dialog.
     'novel_mode_enabled': False,
-    'novel_chunk_tokens': 8000,
+    'novel_chunk_tokens': 12000,
+    # Maximum number of translatable paragraphs per chunk. Dual-cap
+    # chunking closes a chunk when EITHER the token budget above OR this
+    # paragraph count is reached -- whichever comes first. Prevents the
+    # LLM from losing track of <Pn>...</Pn> alignment markers on short
+    # paragraphs (dialogue, TOC lists). Set to 0 to disable and rely
+    # exclusively on the token budget.
+    'novel_max_paragraphs_per_chunk': 60,
     'novel_context_tokens': 1500,
     'novel_summary_tokens': 400,
     'novel_glossary_max_entries': 200,

@@ -592,9 +592,30 @@ class TranslationSetting(QDialog):
         novel_chunk_tokens = QSpinBox()
         novel_chunk_tokens.setRange(1024, 200000)
         novel_chunk_tokens.setSingleStep(1024)
+        novel_chunk_tokens.setToolTip(_(
+            'Maximum estimated tokens per translation chunk. Together '
+            'with "Max paragraphs per chunk" it forms a dual-cap: the '
+            'chunk is closed as soon as either limit is reached.'))
         novel_layout.addRow(
-            _('Chunk size (tokens)'), novel_chunk_tokens)
+            _('Max tokens per chunk'), novel_chunk_tokens)
         self.disable_wheel_event(novel_chunk_tokens)
+
+        novel_max_paragraphs = QSpinBox()
+        novel_max_paragraphs.setRange(0, 500)
+        novel_max_paragraphs.setSingleStep(10)
+        novel_max_paragraphs.setToolTip(_(
+            'Maximum number of paragraphs per translation chunk. '
+            'Prevents the LLM from losing track of the <Pn>...</Pn> '
+            'alignment markers when paragraphs are short (dialogue, '
+            'TOC lists). The chunk is closed as soon as either the '
+            'token budget or this paragraph cap is reached, whichever '
+            'comes first.\n\n'
+            'Recommended: 40 for small models (7B), 60 for medium (26B '
+            'like gemma), 100+ for large models (Claude, GPT-4). '
+            'Set to 0 to disable and use only the token budget.'))
+        novel_layout.addRow(
+            _('Max paragraphs per chunk'), novel_max_paragraphs)
+        self.disable_wheel_event(novel_max_paragraphs)
 
         novel_context_tokens = QSpinBox()
         novel_context_tokens.setRange(0, 100000)
@@ -656,7 +677,9 @@ class TranslationSetting(QDialog):
             if idx >= 0:
                 novel_chapter_source.setCurrentIndex(idx)
             novel_chunk_tokens.setValue(int(self.config.get(
-                'novel_chunk_tokens', 8000) or 8000))
+                'novel_chunk_tokens', 12000) or 12000))
+            novel_max_paragraphs.setValue(int(self.config.get(
+                'novel_max_paragraphs_per_chunk', 60) or 0))
             novel_context_tokens.setValue(int(self.config.get(
                 'novel_context_tokens', 1500) or 1500))
             novel_summary_tokens.setValue(int(self.config.get(
@@ -692,6 +715,8 @@ class TranslationSetting(QDialog):
                 novel_chapter_source=novel_chapter_source.currentData()))
         novel_chunk_tokens.valueChanged.connect(
             _persist_novel('novel_chunk_tokens', int))
+        novel_max_paragraphs.valueChanged.connect(
+            _persist_novel('novel_max_paragraphs_per_chunk', int))
         novel_context_tokens.valueChanged.connect(
             _persist_novel('novel_context_tokens', int))
         novel_summary_tokens.valueChanged.connect(
