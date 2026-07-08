@@ -46,19 +46,18 @@ defaults: dict[str, Any] = {
     'merge_length': 1800,
     'ebook_metadata': {},
     'search_paths': [],
-    # Novel Mode: LLM-only sequential pipeline with running summary + dynamic
-    # glossary. See lib/novel.py for details. Prompts default to None so the
-    # runtime falls back to the templates defined in lib/novel.py; users can
-    # override them from the Setting dialog.
     'novel_mode_enabled': False,
     'novel_chunk_tokens': 12000,
-    # Maximum number of translatable paragraphs per chunk. Dual-cap
-    # chunking closes a chunk when EITHER the token budget above OR this
-    # paragraph count is reached -- whichever comes first. Prevents the
-    # LLM from losing track of <Pn>...</Pn> alignment markers on short
-    # paragraphs (dialogue, TOC lists). Set to 0 to disable and rely
-    # exclusively on the token budget.
-    'novel_max_paragraphs_per_chunk': 60,
+    'novel_max_paragraphs_per_chunk': 80,
+    # Structured output policy for the novel translator.
+    #   'auto'  -> use JSON structured output when the engine advertises
+    #              support (see engines.genai.GenAI.structured_output_mode),
+    #              otherwise fall back to text markers [N]. Default.
+    #   'off'   -> always use text markers, even on capable engines.
+    #   'force' -> always use JSON structured output, even on engines that
+    #              don't advertise it
+    'novel_structured_output': 'auto',
+    'novel_overlap_paragraphs': 3,
     'novel_context_tokens': 1500,
     'novel_summary_tokens': 400,
     'novel_glossary_max_entries': 200,
@@ -67,7 +66,11 @@ defaults: dict[str, Any] = {
     # LLM calls. Typical target: front/back matter (Copyright, Table of
     # Contents, About the Author, ...) which is not narrative content.
     'novel_min_chars_for_context': 300,
-    'novel_chapter_source': 'toc_level_1',  # 'toc_level_1' | 'xhtml_file'
+    'novel_chapter_source': 'toc_level_1',  # 'toc_level_1' | 'toc_level_2' | 'xhtml_file'
+    # Pages whose total non-ignored text (in chars) is below this threshold
+    # are treated as front/back matter (Cover, Titlepage, decorative pages)
+    # and excluded from chapter narrative content. Set to 0 to disable.
+    'novel_front_matter_min_chars': 100,
     'novel_translation_prompt': None,
     'novel_summary_prompt': None,
     'novel_glossary_prompt': None,

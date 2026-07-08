@@ -209,7 +209,8 @@ class Base:
                 'method': self.method,
                 'proxy_uri': None,
                 'timeout': int(self.request_timeout),
-                'raw_object': self.stream
+                'raw_object': self.stream,
+                'keepalive': getattr(self, 'request_keepalive', False),
             }
             if self.proxy_type == 'socks5' and self.proxy_host is not None \
                     and self.proxy_port is not None:

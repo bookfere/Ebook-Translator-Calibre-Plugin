@@ -351,8 +351,7 @@ class PageElement(Element):
                 if attr == 'text':
                     elem.text = part if part else None
                 else:
-                    # Preserve surrounding whitespace for tails.
-                    elem.tail = (' ' + part) if part else (elem.tail or '')
+                    elem.tail = (' ' + part) if part else None
 
             # Apply translation attributes.
             cloned.set('dir', self.target_direction or 'auto')

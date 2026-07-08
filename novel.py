@@ -38,6 +38,7 @@ from .lib.translation import get_engine_class, get_translator
 from .lib.exception import TranslationCanceled, TranslationFailed
 from .lib.novel import (
     ChapterBuilder, ContextManager, NovelTranslator, novel_cache_id)
+from .lib.conversion import get_novel_config
 from .engines.genai import GenAI
 from .components import (
     Footer, AlertMessage, SourceLang, TargetLang, InputFormat, OutputFormat)
@@ -151,9 +152,13 @@ class NovelPreparationWorker(QObject):
             page_ids = [it.id for it in xhtml_items]
             source = get_config().get(
                 'novel_chapter_source', 'toc_level_1') or 'toc_level_1'
+            front_matter_min = int(
+                get_config().get('novel_front_matter_min_chars', 100) or 0)
             builder = ChapterBuilder(
                 page_ids, oeb.toc.nodes,
-                list(oeb.manifest.items), paragraphs, source=source)
+                list(oeb.manifest.items), paragraphs,
+                source=source,
+                front_matter_min_chars=front_matter_min)
             chapters = builder.build()
             for ch in chapters:
                 chapters_meta.append({
@@ -269,9 +274,12 @@ class NovelTranslationWorker(QObject):
         page_ids = [it.id for it in xhtml_items]
         source = get_config().get(
             'novel_chapter_source', 'toc_level_1') or 'toc_level_1'
+        front_matter_min = int(
+            get_config().get('novel_front_matter_min_chars', 100) or 0)
         chapters = ChapterBuilder(
             page_ids, oeb.toc.nodes, list(oeb.manifest.items),
-            paragraphs, source=source).build()
+            paragraphs, source=source,
+            front_matter_min_chars=front_matter_min).build()
 
         ctx = ContextManager(
             cache,
@@ -279,20 +287,7 @@ class NovelTranslationWorker(QObject):
                 get_config().get('novel_glossary_max_entries', 200) or 0),
         ).load()
 
-        config = get_config()
-        novel_config = {
-            'novel_chunk_tokens': config.get('novel_chunk_tokens', 8000),
-            'novel_context_tokens': config.get('novel_context_tokens', 1500),
-            'novel_summary_tokens': config.get('novel_summary_tokens', 400),
-            'novel_glossary_max_entries': config.get(
-                'novel_glossary_max_entries', 200),
-            'novel_translation_prompt': config.get(
-                'novel_translation_prompt', None),
-            'novel_summary_prompt': config.get(
-                'novel_summary_prompt', None),
-            'novel_glossary_prompt': config.get(
-                'novel_glossary_prompt', None),
-        }
+        novel_config = get_novel_config()
 
         translator_novel = NovelTranslator(
             translator, chapters, ctx, cache, config=novel_config)
@@ -663,6 +658,11 @@ class NovelTranslation(QDialog):
         btn_row.addWidget(self.close_button)
         outer.addLayout(btn_row)
 
+        # In-memory glossary accumulator. Updated incrementally from the
+        # chapter_done signal so the UI never needs to read back from SQLite
+        # (which can miss in-flight transactions from the worker thread).
+        self._ui_glossary = {}
+
         return widget
 
     # -- chapter list rendering -------------------------------------------
@@ -725,12 +725,32 @@ class NovelTranslation(QDialog):
             self.start_button.setText(_('Re-run all'))
 
     def _refresh_context_views(self, cache=None):
+        """Refresh the Summaries and Glossary tabs.
+
+        Summaries are always read from the SQLite cache (they are long
+        strings, writing them into the signal payload would be wasteful).
+
+        The glossary is read from ``self._ui_glossary``, an in-memory dict
+        that is updated incrementally by :meth:`_on_chapter_done` every
+        time the worker emits a ``chapter_done`` signal. This avoids the
+        SQLite transaction-visibility race that caused the Glossary tab to
+        appear empty during a live translation run: the worker's open
+        connection commits after each chapter, but the secondary connection
+        opened here would sometimes read stale data depending on SQLite's
+        WAL checkpoint timing.
+
+        When ``cache`` is supplied (e.g. from the initial load in
+        :meth:`_refresh_chapter_list_from_cache`), both summaries AND the
+        glossary initial state are read from it so the UI is correctly
+        restored on re-open.
+        """
         should_close = False
         if cache is None:
             cache = get_cache(self.cache_id)
             should_close = True
         try:
             import json as _json
+            # --- Summaries: always from cache ---
             raw = cache.get_info('novel_summaries')
             summaries = []
             try:
@@ -746,25 +766,35 @@ class NovelTranslation(QDialog):
                 self.summaries_view.appendPlainText(s.get('summary', ''))
                 self.summaries_view.appendPlainText('')
 
-            raw = cache.get_info('novel_glossary')
-            glossary = {}
-            try:
-                glossary = _json.loads(raw) if raw else {}
-            except (ValueError, TypeError):
-                glossary = {}
-            self.glossary_table.setRowCount(len(glossary))
-            for row, (source, entry) in enumerate(glossary.items()):
-                self.glossary_table.setItem(
-                    row, 0, QTableWidgetItem(source))
-                self.glossary_table.setItem(
-                    row, 1, QTableWidgetItem(entry.get('translation', '')))
-                self.glossary_table.setItem(
-                    row, 2, QTableWidgetItem(entry.get('type', '')))
-                self.glossary_table.setItem(
-                    row, 3, QTableWidgetItem(entry.get('notes', '')))
+            # --- Glossary: prefer in-memory accumulator; seed from cache
+            # on the initial load (when _ui_glossary is still empty).
+            if not self._ui_glossary:
+                raw = cache.get_info('novel_glossary')
+                try:
+                    self._ui_glossary = _json.loads(raw) if raw else {}
+                    if not isinstance(self._ui_glossary, dict):
+                        self._ui_glossary = {}
+                except (ValueError, TypeError):
+                    self._ui_glossary = {}
+
+            self._redraw_glossary_table()
         finally:
             if should_close:
                 cache.close()
+
+    def _redraw_glossary_table(self):
+        """Repopulate the glossary QTableWidget from ``self._ui_glossary``."""
+        glossary = self._ui_glossary
+        self.glossary_table.setRowCount(len(glossary))
+        for row, (source, entry) in enumerate(glossary.items()):
+            self.glossary_table.setItem(
+                row, 0, QTableWidgetItem(source))
+            self.glossary_table.setItem(
+                row, 1, QTableWidgetItem(entry.get('translation', '')))
+            self.glossary_table.setItem(
+                row, 2, QTableWidgetItem(entry.get('type', '')))
+            self.glossary_table.setItem(
+                row, 3, QTableWidgetItem(entry.get('notes', '')))
 
     # -- controls ----------------------------------------------------------
 
@@ -832,6 +862,23 @@ class NovelTranslation(QDialog):
 
     def _on_chapter_done(self, index, summary, glossary_delta):
         self._set_chapter_status(index, self.STATUS_DONE)
+        # Merge the glossary delta received directly from the worker signal
+        # into the in-memory accumulator. This avoids the SQLite read-back
+        # race: the delta is already the freshly extracted data, so no need
+        # to reopen the cache connection.
+        if glossary_delta:
+            for item in glossary_delta:
+                if not isinstance(item, dict):
+                    continue
+                source = (item.get('source') or '').strip()
+                translation = (item.get('translation') or '').strip()
+                if not source or not translation:
+                    continue
+                self._ui_glossary[source] = {
+                    'translation': translation,
+                    'type': (item.get('type') or '').strip(),
+                    'notes': (item.get('notes') or '').strip(),
+                }
         self._refresh_context_views()
 
     def _on_worker_finished(self, success, message):
@@ -877,6 +924,7 @@ class NovelTranslation(QDialog):
                 _json.dumps(new_glossary, ensure_ascii=False))
         finally:
             cache.close()
+        self._ui_glossary = new_glossary
         self.alert.pop(_('Glossary saved.'))
 
     def _reset_context(self):
@@ -893,6 +941,7 @@ class NovelTranslation(QDialog):
             ContextManager(cache).load().reset()
         finally:
             cache.close()
+        self._ui_glossary = {}
         for idx in list(self.status_by_chapter.keys()):
             self._set_chapter_status(idx, self.STATUS_PENDING)
         self.progress_bar.setValue(0)

@@ -836,6 +836,43 @@ epub:type="pagebreak"/>b</code></p></body>
         # No child elements (plain paragraph has no structural links).
         self.assertEqual(0, len(list(new_p)))
 
+    def test_add_translation_only_link_with_tail_no_duplication(self):
+        """Regression test for the tail-duplication bug: when a structural
+        link element has a tail (text after the closing tag of the child),
+        e.g. <li><a href="...">Chapter One</a>: The Wrong Door</li>,
+        the translated output must NOT append the original tail text.
+        """
+        xhtml = etree.XML(rb"""<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head><title>Test</title></head>
+    <body>
+        <ul>
+            <li><a href="ch1.xhtml">Chapter One</a>: The Wrong Door</li>
+        </ul>
+    </body>
+</html>""")
+        li = xhtml.find('.//x:li', namespaces=ns)
+        element = PageElement(li, 'p1')
+        element.position = 'only'
+        element.set_placeholder(Base.placeholder)
+        element.set_remove_pattern(None)
+        element.set_reserve_pattern(None)
+        element.get_content()
+        element.add_translation('Capitolo Uno: La porta sbagliata')
+
+        new_li = xhtml.find('.//x:li', namespaces=ns)
+        self.assertIsNotNone(new_li)
+
+        a = xhtml.find('.//x:a', namespaces=ns)
+        self.assertIsNotNone(a)
+        self.assertEqual('ch1.xhtml', a.get('href'))
+
+        full_text = ''.join(new_li.itertext())
+        self.assertNotIn('The Wrong Door', full_text,
+                         'Original tail must not appear in translated output.')
+        self.assertIn('Capitolo', full_text)
+
     def test_add_translation_table(self):
         pass
 

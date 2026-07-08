@@ -584,10 +584,40 @@ class TranslationSetting(QDialog):
         novel_chapter_source.addItem(
             _('Table of Contents (level 1)'), 'toc_level_1')
         novel_chapter_source.addItem(
+            _('Table of Contents (level 2)'), 'toc_level_2')
+        novel_chapter_source.addItem(
             _('One XHTML file per chapter'), 'xhtml_file')
+        novel_chapter_source.setToolTip(_(
+            'How to detect chapter boundaries.\n\n'
+            '- TOC level 1: use the top-level Table of Contents entries as '
+            'chapter boundaries. Best for single-book EPUBs.\n'
+            '- TOC level 2: use the second-level TOC entries (sub-chapters). '
+            'Recommended for multi-book anthologies (e.g. a complete series '
+            'in one EPUB) where level 1 maps each full novel to a single '
+            '"chapter". Level 2 maps individual chapters, giving the LLM '
+            'the correct chapter title and preventing front-matter pages '
+            '(Cover, Titlepage) from polluting the first translation chunk.\n'
+            '- One XHTML file: each XHTML file in the spine becomes one '
+            'chapter. Useful when the TOC is missing or unreliable.'))
         novel_layout.addRow(
             _('Chapter detection'), novel_chapter_source)
         self.disable_wheel_event(novel_chapter_source)
+
+        novel_front_matter_min = QSpinBox()
+        novel_front_matter_min.setRange(0, 5000)
+        novel_front_matter_min.setSingleStep(50)
+        novel_front_matter_min.setToolTip(_(
+            'XHTML pages whose total text content is shorter than this '
+            'many characters are treated as front/back matter (Cover, '
+            'Titlepage, decorative pages) and excluded from chapter '
+            'narrative content. Their paragraphs are still translated by '
+            'the auxiliary pipeline (metadata/TOC titles).\n\n'
+            'A typical Titlepage in a multi-book anthology contains only '
+            'the book title as a single heading (~25 chars) -- well below '
+            'the default of 100. Set to 0 to include all pages.'))
+        novel_layout.addRow(
+            _('Skip front matter under (chars)'), novel_front_matter_min)
+        self.disable_wheel_event(novel_front_matter_min)
 
         novel_chunk_tokens = QSpinBox()
         novel_chunk_tokens.setRange(1024, 200000)
@@ -605,17 +635,58 @@ class TranslationSetting(QDialog):
         novel_max_paragraphs.setSingleStep(10)
         novel_max_paragraphs.setToolTip(_(
             'Maximum number of paragraphs per translation chunk. '
-            'Prevents the LLM from losing track of the <Pn>...</Pn> '
-            'alignment markers when paragraphs are short (dialogue, '
-            'TOC lists). The chunk is closed as soon as either the '
-            'token budget or this paragraph cap is reached, whichever '
-            'comes first.\n\n'
-            'Recommended: 40 for small models (7B), 60 for medium (26B '
+            'Prevents the LLM from losing track of the [N] alignment '
+            'markers when paragraphs are short (dialogue, TOC lists). '
+            'The chunk is closed as soon as either the token budget or '
+            'this paragraph cap is reached, whichever comes first.\n\n'
+            'Recommended: 40 for small models (7B), 80 for medium (26B '
             'like gemma), 100+ for large models (Claude, GPT-4). '
             'Set to 0 to disable and use only the token budget.'))
         novel_layout.addRow(
             _('Max paragraphs per chunk'), novel_max_paragraphs)
         self.disable_wheel_event(novel_max_paragraphs)
+
+        novel_overlap = QSpinBox()
+        novel_overlap.setRange(0, 50)
+        novel_overlap.setSingleStep(1)
+        novel_overlap.setToolTip(_(
+            'Number of already-translated paragraphs from the previous '
+            'chunk to replay as context for the next chunk. Similar to '
+            'the sliding-window overlap used in RAG chunking, this '
+            'preserves dialogue threads, pronoun referents and stylistic '
+            'continuity across chunk boundaries. The overlap paragraphs '
+            'are shown to the LLM as already-translated text (do NOT '
+            'retranslate), so they consume some of the token budget but '
+            'do not cause double translations.\n\n'
+            'Recommended: 3 for most novels; 5-10 for dense narrative '
+            'with long scenes. Set to 0 to disable overlap.'))
+        novel_layout.addRow(
+            _('Overlap paragraphs'), novel_overlap)
+        self.disable_wheel_event(novel_overlap)
+
+        novel_structured = QComboBox()
+        novel_structured.addItem(_('Auto (recommended)'), 'auto')
+        novel_structured.addItem(_('Off (text markers [N])'), 'off')
+        novel_structured.addItem(_('Force JSON on any engine'), 'force')
+        novel_structured.setToolTip(_(
+            'How to format the LLM response for paragraph alignment.\n\n'
+            '- Auto: use native JSON structured output when the engine '
+            'supports it (ChatGPT, Gemini, Ollama via OpenAI-compatible '
+            'endpoint). Falls back to text markers [N] otherwise. '
+            'Recommended.\n'
+            '- Off: always use text markers [N]. Slightly less reliable '
+            'above 60-80 paragraphs per chunk on medium models but '
+            'works everywhere.\n'
+            '- Force: always request JSON output, even from engines that '
+            'do not advertise support. Useful for custom OpenAI-compatible '
+            'endpoints (Ollama exotics, LM Studio, vLLM) that accept '
+            '"response_format" but are not recognised by the plugin.\n\n'
+            'With structured output active you can safely raise '
+            '"Max paragraphs per chunk" to 80+ without markers being '
+            'dropped by the model.'))
+        novel_layout.addRow(
+            _('Structured output'), novel_structured)
+        self.disable_wheel_event(novel_structured)
 
         novel_context_tokens = QSpinBox()
         novel_context_tokens.setRange(0, 100000)
@@ -676,10 +747,19 @@ class TranslationSetting(QDialog):
             idx = novel_chapter_source.findData(src)
             if idx >= 0:
                 novel_chapter_source.setCurrentIndex(idx)
+            novel_front_matter_min.setValue(int(self.config.get(
+                'novel_front_matter_min_chars', 100) or 0))
             novel_chunk_tokens.setValue(int(self.config.get(
                 'novel_chunk_tokens', 12000) or 12000))
             novel_max_paragraphs.setValue(int(self.config.get(
-                'novel_max_paragraphs_per_chunk', 60) or 0))
+                'novel_max_paragraphs_per_chunk', 80) or 0))
+            novel_overlap.setValue(int(self.config.get(
+                'novel_overlap_paragraphs', 3) or 0))
+            structured_mode = self.config.get(
+                'novel_structured_output', 'auto') or 'auto'
+            idx = novel_structured.findData(structured_mode)
+            if idx >= 0:
+                novel_structured.setCurrentIndex(idx)
             novel_context_tokens.setValue(int(self.config.get(
                 'novel_context_tokens', 1500) or 1500))
             novel_summary_tokens.setValue(int(self.config.get(
@@ -713,10 +793,17 @@ class TranslationSetting(QDialog):
         novel_chapter_source.currentIndexChanged.connect(
             lambda _idx: self.config.update(
                 novel_chapter_source=novel_chapter_source.currentData()))
+        novel_front_matter_min.valueChanged.connect(
+            _persist_novel('novel_front_matter_min_chars', int))
         novel_chunk_tokens.valueChanged.connect(
             _persist_novel('novel_chunk_tokens', int))
         novel_max_paragraphs.valueChanged.connect(
             _persist_novel('novel_max_paragraphs_per_chunk', int))
+        novel_overlap.valueChanged.connect(
+            _persist_novel('novel_overlap_paragraphs', int))
+        novel_structured.currentIndexChanged.connect(
+            lambda _idx: self.config.update(
+                novel_structured_output=novel_structured.currentData()))
         novel_context_tokens.valueChanged.connect(
             _persist_novel('novel_context_tokens', int))
         novel_summary_tokens.valueChanged.connect(

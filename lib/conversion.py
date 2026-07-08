@@ -180,7 +180,10 @@ def convert_book_novel(
             builder = ChapterBuilder(
                 ordered_page_ids, oeb.toc.nodes,
                 list(oeb.manifest.items), paragraphs,
-                source=chapter_source)
+                source=chapter_source,
+                front_matter_min_chars=int(
+                    (novel_config or {}).get(
+                        'novel_front_matter_min_chars', 100) or 0))
             chapters = builder.build()
             log_callback(
                 _('Novel mode: {} chapter(s) detected.')
@@ -420,6 +423,43 @@ def convert_item(
     cache.done()
 
 
+def get_novel_config():
+    """Return a dict of all ``novel_*`` settings read from the plugin config.
+
+    Single source of truth for the novel-mode configuration dict. Both
+    the interactive UI worker (``NovelTranslationWorker`` in ``novel.py``)
+    and the background job entry point (``convert_item_novel``) call this
+    function so that any future additions to the config surface
+    automatically in both code paths without risking drift.
+    """
+    config = get_config()
+    return {
+        'novel_chunk_tokens': config.get('novel_chunk_tokens', 12000),
+        'novel_max_paragraphs_per_chunk': config.get(
+            'novel_max_paragraphs_per_chunk', 20),
+        'novel_overlap_paragraphs': config.get(
+            'novel_overlap_paragraphs', 3),
+        'novel_structured_output': config.get(
+            'novel_structured_output', 'auto'),
+        'novel_front_matter_min_chars': config.get(
+            'novel_front_matter_min_chars', 100),
+        'novel_context_tokens': config.get('novel_context_tokens', 1500),
+        'novel_summary_tokens': config.get('novel_summary_tokens', 400),
+        'novel_glossary_max_entries': config.get(
+            'novel_glossary_max_entries', 200),
+        'novel_min_chars_for_context': config.get(
+            'novel_min_chars_for_context', 300),
+        'novel_summary_input_max_chars': config.get(
+            'novel_summary_input_max_chars', 12000),
+        'novel_translation_prompt': config.get(
+            'novel_translation_prompt', None),
+        'novel_summary_prompt': config.get(
+            'novel_summary_prompt', None),
+        'novel_glossary_prompt': config.get(
+            'novel_glossary_prompt', None),
+    }
+
+
 def convert_item_novel(
         ebook_title, input_path, output_path, source_lang, target_lang,
         cache_only, format, encoding, direction, notification):
@@ -476,25 +516,8 @@ def convert_item_novel(
     debug_info += '| Input Path: %s\n' % input_path
     debug_info += '| Output Path: %s' % output_path
 
-    config = get_config()
-    novel_config = {
-        'novel_chunk_tokens': config.get('novel_chunk_tokens', 12000),
-        'novel_max_paragraphs_per_chunk': config.get(
-            'novel_max_paragraphs_per_chunk', 60),
-        'novel_context_tokens': config.get('novel_context_tokens', 1500),
-        'novel_summary_tokens': config.get('novel_summary_tokens', 400),
-        'novel_glossary_max_entries': config.get(
-            'novel_glossary_max_entries', 200),
-        'novel_min_chars_for_context': config.get(
-            'novel_min_chars_for_context', 300),
-        'novel_translation_prompt': config.get(
-            'novel_translation_prompt', None),
-        'novel_summary_prompt': config.get(
-            'novel_summary_prompt', None),
-        'novel_glossary_prompt': config.get(
-            'novel_glossary_prompt', None),
-    }
-    chapter_source = config.get(
+    novel_config = get_novel_config()
+    chapter_source = get_config().get(
         'novel_chapter_source', 'toc_level_1') or 'toc_level_1'
 
     convert_book_novel(

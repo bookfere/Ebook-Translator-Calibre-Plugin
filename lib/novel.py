@@ -126,7 +126,8 @@ class ChapterBuilder:
     AUX_PAGES = {'content.opf', 'toc.ncx'}
 
     def __init__(self, ordered_page_ids, toc_nodes, manifest_items,
-                 paragraphs, source='toc_level_1'):
+                 paragraphs, source='toc_level_1',
+                 front_matter_min_chars=100):
         """
         :ordered_page_ids: list of page ids in spine order (xhtml only).
         :toc_nodes: list of TOC root nodes (each has ``.title`` and
@@ -134,15 +135,52 @@ class ChapterBuilder:
         :manifest_items: iterable of manifest items exposing ``.id`` and
             ``.href``. Used to resolve TOC hrefs to page ids.
         :paragraphs: list of Paragraph rows extracted from the cache.
-        :source: 'toc_level_1' | 'xhtml_file'.
+        :source: 'toc_level_1' | 'toc_level_2' | 'xhtml_file'.
+        :front_matter_min_chars: XHTML pages whose total non-ignored text
+            is shorter than this threshold are considered front/back matter
+            (Cover, Titlepage, decorative pages) and their paragraphs are
+            silently dropped from chapter content. Set to 0 to disable.
         """
         self.ordered_page_ids = list(ordered_page_ids)
         self.toc_nodes = list(toc_nodes or [])
         self.manifest_items = list(manifest_items or [])
         self.paragraphs = list(paragraphs)
         self.source = source
+        self.front_matter_min_chars = max(0, int(front_matter_min_chars))
         self.aux_paragraphs = [
             p for p in self.paragraphs if p.page in self.AUX_PAGES]
+
+        # Pre-compute per-page character counts (non-ignored paragraphs only)
+        # used by the front-matter filter.
+        self._page_char_count = {}
+        for p in self.paragraphs:
+            if p.page in self.AUX_PAGES or p.ignored:
+                continue
+            self._page_char_count[p.page] = (
+                self._page_char_count.get(p.page, 0)
+                + len(p.original or ''))
+
+    def _is_front_matter(self, page_id):
+        """Return True if ``page_id`` looks like a decorative / front-matter
+        page that should be excluded from chapter content.
+
+        Detection strategy:
+
+        1. If ``front_matter_min_chars`` is 0, the filter is disabled.
+        2. Pages with fewer non-ignored characters than the threshold are
+           treated as front matter (e.g. a Titlepage that only carries
+           ``"THE MAGICIAN'S NEPHEW"`` as a single heading paragraph, or a
+           Cover page with nothing but an image).
+
+        This handles the common EPUB pattern where each book inside a
+        multi-book anthology has its own Cover.xhtml / Titlepage.xhtml that
+        contains only a large-caps styled heading.  Sending those headings
+        to the LLM as isolated paragraphs produces hallucinations because
+        the model has no narrative context around them.
+        """
+        if self.front_matter_min_chars <= 0:
+            return False
+        return self._page_char_count.get(page_id, 0) < self.front_matter_min_chars
 
     # -- boundary discovery ------------------------------------------------
 
@@ -165,6 +203,45 @@ class ChapterBuilder:
             seen.add(page_id)
             result.append((page_id, title.strip()))
         # Sort boundaries by spine order.
+        order = {pid: i for i, pid in enumerate(self.ordered_page_ids)}
+        result.sort(key=lambda t: order[t[0]])
+        return result
+
+    def _boundaries_from_toc_level2(self):
+        """Return boundaries from the *second* level of the TOC hierarchy.
+
+        Many multi-book anthologies have a two-level TOC:
+
+          Level 1: Cover.xhtml   (entire book)
+            Level 2: Chapter One  -> Chapter_1.xhtml
+            Level 2: Chapter Two  -> Chapter_2.xhtml
+            ...
+
+        Using level-2 nodes as chapter boundaries maps each narrative chapter
+        to its own translation unit, giving the LLM the chapter title in the
+        prompt header and preventing front-matter pages (Cover, Titlepage,
+        Contents) from polluting the first chunk.
+
+        If the TOC has no level-2 children or fewer than 2 usable entries,
+        falls back to level-1 boundaries.
+        """
+        result = []
+        seen = set()
+        for top_node in self.toc_nodes:
+            children = getattr(top_node, 'nodes', []) or []
+            for child in children:
+                href = getattr(child, 'href', None)
+                title = getattr(child, 'title', None) or ''
+                page_id = _href_to_page_id(href, self.manifest_items)
+                if page_id is None or page_id in seen:
+                    continue
+                if page_id not in self.ordered_page_ids:
+                    continue
+                seen.add(page_id)
+                result.append((page_id, title.strip()))
+        if len(result) < 2:
+            # Not enough level-2 entries -- fall back to level-1.
+            return self._boundaries_from_toc()
         order = {pid: i for i, pid in enumerate(self.ordered_page_ids)}
         result.sort(key=lambda t: order[t[0]])
         return result
@@ -196,7 +273,10 @@ class ChapterBuilder:
         if self.source == 'toc_level_1':
             boundaries = self._boundaries_from_toc()
             if len(boundaries) < 2:
-                # Not enough TOC info -> fallback.
+                boundaries = self._boundaries_from_files()
+        elif self.source == 'toc_level_2':
+            boundaries = self._boundaries_from_toc_level2()
+            if len(boundaries) < 2:
                 boundaries = self._boundaries_from_files()
         else:
             boundaries = self._boundaries_from_files()
@@ -243,13 +323,22 @@ class ChapterBuilder:
             page_to_chapter[pid] = chap_i
             chapter_page_ids[chap_i].append(pid)
 
-        # Group paragraphs by chapter.
+        # Group paragraphs by chapter, applying the front-matter filter.
+        # Pages identified as front matter (very short text, e.g. Cover,
+        # Titlepage) are silently excluded from chapter content.  Their
+        # paragraphs are still in the cache and will be translated by the
+        # auxiliary pipeline (metadata/TOC titles), but they will not be
+        # sent to the LLM as part of the chapter narrative payload.
         chapter_paragraphs = {i: [] for i in chapter_titles}
+        skipped_pages = set()
         for p in self.paragraphs:
             if p.page in self.AUX_PAGES:
                 continue
             chap_i = page_to_chapter.get(p.page)
             if chap_i is None:
+                continue
+            if self._is_front_matter(p.page):
+                skipped_pages.add(p.page)
                 continue
             chapter_paragraphs[chap_i].append(p)
 
@@ -308,7 +397,7 @@ class TokenBudget:
     REASON_OVERSIZED = 'oversized'
     REASON_END = 'end'
 
-    def __init__(self, budget=12000, max_paragraphs=60,
+    def __init__(self, budget=12000, max_paragraphs=80,
                  ratio_latin=4.0, ratio_cjk=2.0, cjk_threshold=0.30):
         if budget < 100:
             budget = 100
@@ -668,22 +757,27 @@ class ContextManager:
 
 DEFAULT_NOVEL_TRANSLATION_PROMPT = (
     'You are a professional literary translator working on a novel. '
-    'Translate the given content from <slang> to <tlang>. Preserve the '
-    'author\'s narrative voice, tone, register and pacing. Do NOT summarize, '
-    'shorten, expand, or explain anything. Do NOT answer questions in the '
-    'text. Respond only with the translation itself.\n\n'
-    '{context}\n\n'
-    'FORMAT RULES (MUST be followed strictly):\n'
-    '- The source content is split into paragraphs, each wrapped between '
-    'markers <P1>...</P1>, <P2>...</P2>, and so on.\n'
-    '- Return the translation using the exact same markers with the exact '
-    'same numbers, in the same order. Do NOT rename, drop, add, split or '
-    'merge paragraphs.\n'
-    '- Do NOT translate the markers themselves.\n'
-    '- Preserve verbatim any inline placeholder that matches the pattern '
-    '{{id_XXXXX}} (they represent images, line breaks or other elements).\n'
-    '- Do not add any prefix, suffix, explanation or commentary outside '
-    'the markers.')
+    'Translate from <slang> to <tlang>. Preserve the author\'s narrative '
+    'voice, tone, register and pacing. Do NOT summarize, shorten, expand, '
+    'or explain anything. Do NOT answer questions in the text.\n\n'
+    '{context}')
+
+
+# Format instructions live in the USER message, not in the system prompt.
+# Local models (Gemma, Mistral, LLaMA) tend to "forget" formatting rules
+# placed in a long system prompt but respect them when they are the last
+# thing they read before the actual task.
+DEFAULT_NOVEL_FORMAT_INSTRUCTIONS = (
+    'Translate each numbered paragraph below. Rules:\n'
+    '1) Keep the exact marker "[N]" on its own line before each translated '
+    'paragraph, in the same order and with the same numbers as the source.\n'
+    '2) Do NOT drop, add, split, merge or renumber paragraphs.\n'
+    '3) Do NOT translate the markers themselves.\n'
+    '4) Preserve verbatim any inline placeholder like {id_XXXXX} '
+    '(they represent images, line breaks and similar).\n'
+    '5) Reply with the numbered paragraphs only. No preamble, no '
+    'explanation, no closing remarks.\n\n'
+    'Source paragraphs:\n\n{text}')
 
 
 DEFAULT_NOVEL_SUMMARY_PROMPT = (
@@ -721,44 +815,90 @@ DEFAULT_NOVEL_GLOSSARY_PROMPT = (
 # ---------------------------------------------------------------------------
 
 
-_TAG_RE = re.compile(r'<P(\d+)>(.*?)</P\1>', re.DOTALL)
+# Paragraph markers
+# -----------------
+#
+# We use bracketed numeric markers ``[N]`` on their own line before each
+# paragraph rather than XML-style ``<Pn>...</Pn>`` tags. Empirically, local
+# LLMs (Gemma, Mistral, LLaMA-based) follow this format much more reliably:
+# XML tags require nested balancing which the models tend to skip when the
+# context is long, while numeric markers are the natural way these models
+# already structure numbered lists in their training data.
+#
+# Format sent to the LLM:
+#     [1]
+#     First paragraph text.
+#
+#     [2]
+#     Second paragraph text.
+#
+# Expected response:
+#     [1]
+#     Primo paragrafo tradotto.
+#
+#     [2]
+#     Secondo paragrafo tradotto.
+
+# Matches a marker line ``[N]`` capturing everything up to the next marker
+# or end of string.  MULTILINE + DOTALL so ``.`` spans newlines inside a
+# paragraph, and ``^\s*\[N\]`` anchors on a line by itself.
+_MARKER_RE = re.compile(
+    r'^[ \t]*\[(\d+)\][ \t]*\n(.*?)(?=\n[ \t]*\[\d+\][ \t]*\n|\Z)',
+    re.MULTILINE | re.DOTALL)
 
 
 def tag_paragraphs(paragraphs):
-    """Return the ``<Pn>...</Pn>`` block that will be sent to the LLM plus
+    """Return the ``[N]\\ntext`` block that will be sent to the LLM plus
     the list of indices used (in order).
 
     Ignored paragraphs are skipped (they carry no translatable content).
     """
-    lines = []
+    parts = []
     indices = []
     for i, p in enumerate(paragraphs, start=1):
         if getattr(p, 'ignored', False):
             continue
         text = (p.original or '').strip()
-        # We keep the newline structure inside the paragraph as-is; the
-        # regex uses re.DOTALL so it will match across newlines.
-        lines.append('<P%d>%s</P%d>' % (i, text, i))
+        parts.append('[%d]\n%s' % (i, text))
         indices.append(i)
-    return '\n'.join(lines), indices
+    # Blank line between paragraphs helps the LLM keep them separated and
+    # makes the parser boundary regex simpler / more robust.
+    return '\n\n'.join(parts), indices
 
 
 def parse_tagged_response(response, expected_indices):
-    """Parse an LLM response containing ``<Pn>...</Pn>`` markers.
+    """Parse an LLM response containing ``[N]`` numeric markers.
 
     Returns a dict ``{index: translation}``. Missing indices are absent
     from the dict; callers can then decide how to handle the mismatch.
+
+    The parser is tolerant of the common LLM habits:
+      * leading/trailing prose (e.g. "Here is the translation:")
+      * extra whitespace between markers
+      * duplicate markers (last one wins)
+      * hallucinated marker numbers (filtered by ``expected_indices``)
     """
     if not response:
         return {}
     found = {}
-    for m in _TAG_RE.finditer(response):
+    for m in _MARKER_RE.finditer(response):
         try:
             idx = int(m.group(1))
         except (ValueError, TypeError):
             continue
+        body = m.group(2)
+        # Trim trailing prose after the last marker: if the body ends
+        # with a blank line followed by additional text, that text is
+        # commentary (e.g. "End of translation.") and must be dropped.
+        # A blank line is ``\n\n`` with optional whitespace.
+        blank_break = re.search(r'\n[ \t]*\n', body)
+        if blank_break:
+            # Everything after the blank line is discarded UNLESS it
+            # itself contains a marker — but that case is already
+            # handled by the outer finditer, so this cut is safe.
+            body = body[:blank_break.start()]
         # Latest occurrence wins if duplicated.
-        found[idx] = m.group(2).strip()
+        found[idx] = body.strip()
     # Filter to only expected indices to avoid pollution from
     # hallucinated tags.
     return {i: found[i] for i in expected_indices if i in found}
@@ -815,11 +955,6 @@ def _extract_json_object(text):
 
 
 # Fallback pattern for line-based entity extraction when JSON parsing fails.
-# Matches lines like:
-#   "Aslan" -> "Aslan" (character): the lion
-#   Aslan -> Aslan (character) - the lion
-#   Aslan => Aslan (character)
-#   "Frodo" → "Frodo" (character): the hobbit
 # The separator between source and translation is restricted to arrow-like
 # symbols (``->``, ``=>``, ``→``) which are unambiguous entity mappings;
 # colon and pipe alone would match prose lines like "Here are the
@@ -917,6 +1052,9 @@ class NovelTranslator:
         self.abort_count = 0
         self.total_chapters = 0
         self.completed_chapters = 0
+        # One-shot log flag: set to True after the first _structured_active
+        # call logs the chosen output format. Reset per instance.
+        self._structured_choice_logged = False
 
     # -- setters (mirroring lib.translation.Translation) -------------------
 
@@ -948,13 +1086,115 @@ class NovelTranslator:
     def max_paragraphs_per_chunk(self):
         """Maximum number of translatable paragraphs per chunk.
 
-        Prevents the LLM from being overwhelmed by too many ``<Pn>...</Pn>``
+        Prevents the LLM from being overwhelmed by too many ``[N]``
         alignment markers when paragraphs are short (dialogue, TOC lists,
         one-line stanzas). The chunk is closed as soon as either the token
         budget or this paragraph cap is reached -- whichever comes first.
         Set to 0 to disable the cap and use only the token budget.
         """
-        return int(self._cfg('novel_max_paragraphs_per_chunk', 60))
+        return int(self._cfg('novel_max_paragraphs_per_chunk', 20))
+
+    @property
+    def overlap_paragraphs(self):
+        """Number of already-translated paragraphs from the previous chunk
+        to replay as narrative context for the next chunk.
+
+        Analogous to the sliding-window overlap used in RAG chunking, but
+        here the overlap serves a different purpose: it preserves
+        dialogue threads, pronoun referents and stylistic continuity
+        across chunk boundaries. The overlap is:
+
+          * shown to the LLM as *already-translated* text so it needs no
+            further translation (avoids re-cost + preserves consistency);
+          * not re-aligned into the DOM (the ``paragraph.translation``
+            for those items was already written by the previous chunk);
+          * subtracted from the per-chunk token budget so the total
+            request size stays within the model window.
+
+        Set to 0 to disable overlap entirely.
+        """
+        return max(0, int(self._cfg('novel_overlap_paragraphs', 3)))
+
+    @property
+    def structured_output_setting(self):
+        """User preference for the structured (JSON) output path.
+
+        Values:
+          ``'auto'``  -- use structured output when the current engine
+                         advertises support via ``structured_output_mode``.
+                         Otherwise fall back to text markers ``[N]``.
+                         This is the default and the safest choice.
+          ``'off'``   -- always use text markers, even if the engine
+                         supports structured output. Useful for debugging
+                         or when a specific model produces low-quality
+                         translations in JSON mode.
+          ``'force'`` -- use structured output regardless of what the
+                         engine advertises. Useful for OpenAI-compatible
+                         custom endpoints (Ollama exotics, LM Studio,
+                         vLLM, ...) that accept ``response_format`` but
+                         do not declare the capability in the plugin.
+        """
+        value = self._cfg('novel_structured_output', 'auto')
+        if value not in ('auto', 'off', 'force'):
+            value = 'auto'
+        return value
+
+    def _engine_supports_structured(self):
+        """Return True if the current translator declares native support
+        for structured output (JSON mode or JSON schema)."""
+        return getattr(
+            self.translator, 'structured_output_mode', None) in (
+                'json', 'schema')
+
+    def _structured_active(self):
+        """Combine the user setting and the engine capability to decide
+        whether the current chunk should be translated via the structured
+        path or the marker path.
+
+        Emits a one-shot log line the first time it is called so the
+        user sees which path is active without needing to inspect chunk
+        payloads. The choice is stable per translation session (the
+        engine and the config do not change mid-run).
+        """
+        setting = self.structured_output_setting
+        supports = self._engine_supports_structured()
+
+        if setting == 'off':
+            active = False
+        elif setting == 'force':
+            active = True
+        else:  # 'auto'
+            active = supports
+
+        # Verbose one-shot log: informs the user which output format the
+        # LLM will be asked to produce.
+        if not getattr(self, '_structured_choice_logged', False):
+            self._structured_choice_logged = True
+            engine_name = getattr(
+                self.translator, 'name', self.translator.__class__.__name__)
+            capability_desc = getattr(
+                self.translator, 'structured_output_mode', None) or 'none'
+            if active:
+                self.log(_(
+                    'Output format: structured JSON '
+                    '(engine={eng}, capability={cap}, setting={s}). '
+                    'Chunks can safely hold more paragraphs than with '
+                    'text markers.').format(
+                        eng=engine_name, cap=capability_desc, s=setting))
+            else:
+                if setting == 'off':
+                    reason = _('disabled by user setting')
+                elif not supports:
+                    reason = _('engine does not advertise support')
+                else:
+                    reason = _('unknown')
+                self.log(_(
+                    'Output format: text markers [N] '
+                    '(engine={eng}, capability={cap}, setting={s}, '
+                    'reason={reason}).').format(
+                        eng=engine_name, cap=capability_desc,
+                        s=setting, reason=reason))
+        return active
 
     @property
     def context_tokens(self):
@@ -1063,23 +1303,77 @@ class NovelTranslator:
     # -- chunk-level translation with alignment retry ---------------------
 
     def _translate_chunk(self, chunk_paragraphs, context_text,
-                         chapter_num, chapter_title, chunk_num, total_chunks):
+                         chapter_num, chapter_title, chunk_num, total_chunks,
+                         overlap_translations=None):
+        """Dispatcher: choose between structured (JSON) and text-marker
+        translation paths depending on engine capability and user config.
+
+        The two paths implement the same contract:
+
+            (chunk_paragraphs, ...) -> {chunk_local_index: translation}
+
+        The dispatcher swaps them transparently; the caller
+        (:meth:`_translate_chapter`) does not need to know which one was
+        used. A one-shot log line at the very first invocation records
+        the chosen path so the user can verify what is happening.
+        """
+        if self._structured_active():
+            return self._translate_chunk_structured(
+                chunk_paragraphs, context_text,
+                chapter_num, chapter_title, chunk_num, total_chunks,
+                overlap_translations=overlap_translations)
+        return self._translate_chunk_markers(
+            chunk_paragraphs, context_text,
+            chapter_num, chapter_title, chunk_num, total_chunks,
+            overlap_translations=overlap_translations)
+
+    def _translate_chunk_markers(self, chunk_paragraphs, context_text,
+                                 chapter_num, chapter_title, chunk_num,
+                                 total_chunks, overlap_translations=None):
         """Translate one chunk of paragraphs, returning a dict
         ``{paragraph_index: translation}`` covering all non-ignored
         paragraphs. If the LLM misses some indices, up to 2 alignment
         retries are attempted before giving up (missing translations end
         up as ``None`` and the caller may re-run with a smaller chunk).
+
+        :overlap_translations: optional list of already-translated
+            paragraph texts from the immediately preceding chunk. When
+            provided, they are shown to the LLM as narrative context
+            (do NOT retranslate) so it can preserve pronouns, dialogue
+            threads and stylistic continuity across chunk boundaries.
         """
         tagged, indices = tag_paragraphs(chunk_paragraphs)
         if not indices:
             return {}
 
+        # System prompt: role + languages + narrative context (summary +
+        # glossary). Static per-chapter -- no formatting rules here.
         system_prompt = self._fill_placeholders(
             self.translation_prompt, extra={'{context}': context_text})
+
+        # Build the user message. Order matters: header, then optional
+        # overlap block (already translated -- for reading only), then
+        # format instructions + the tagged source paragraphs.
         header = _('Chapter {n}: "{title}" (chunk {c}/{t})').format(
             n=chapter_num, title=chapter_title,
             c=chunk_num, t=total_chunks)
-        user_text = '%s\n\n%s' % (header, tagged)
+
+        overlap_block = ''
+        if overlap_translations:
+            joined = '\n\n'.join(
+                t.strip() for t in overlap_translations if t and t.strip())
+            if joined:
+                overlap_block = (
+                    '\n\n'
+                    + _('--- Context from previous paragraphs '
+                        '(already translated -- do NOT modify or '
+                        'retranslate this section) ---')
+                    + '\n' + joined + '\n'
+                    + _('--- End of context ---'))
+
+        format_body = self._fill_placeholders(
+            DEFAULT_NOVEL_FORMAT_INSTRUCTIONS, extra={'{text}': tagged})
+        user_text = '%s%s\n\n%s' % (header, overlap_block, format_body)
 
         response = self._translate_with_retry(system_prompt, user_text)
         parsed = parse_tagged_response(response, indices)
@@ -1087,22 +1381,27 @@ class NovelTranslator:
 
         # Alignment retries: only ask for the missing paragraphs so the LLM
         # doesn't waste tokens re-translating the ones we already have.
+        # The retry request omits the overlap block: the model has already
+        # seen the surrounding context in the initial call, and repeating
+        # it would just eat into the retry budget.
         for retry in range(2):
             if not missing:
                 break
             self.log(
-                _('Alignment retry {}: {} missing tags.').format(
+                _('Alignment retry {}: {} missing markers.').format(
                     retry + 1, len(missing)))
             fixup_paras = [chunk_paragraphs[i - 1] for i in missing]
-            fixup_tagged, _fixup_idx = tag_paragraphs(fixup_paras)
             # Re-tag using the original indices so downstream logic stays
             # consistent.
-            # (tag_paragraphs numbers from 1..len(fixup_paras); rewrite it.)
             fixup_tagged = self._retag(fixup_paras, missing)
-            user_text = (
-                _('The previous response was incomplete. Please translate '
-                  'only the following paragraphs, keeping the exact tag '
-                  'numbers shown:') + '\n\n' + fixup_tagged)
+            fixup_body = self._fill_placeholders(
+                _('The previous response was incomplete. Translate only '
+                  'the numbered paragraphs below, keeping the exact same '
+                  '[N] markers with the same numbers, in the same order. '
+                  'Reply with the numbered paragraphs only.\n\n'
+                  'Source paragraphs:\n\n{text}'),
+                extra={'{text}': fixup_tagged})
+            user_text = fixup_body
             response = self._translate_with_retry(system_prompt, user_text)
             fixup_parsed = parse_tagged_response(response, missing)
             parsed.update(fixup_parsed)
@@ -1115,17 +1414,283 @@ class NovelTranslator:
         return parsed
 
     def _retag(self, paragraphs, indices):
-        """Like ``tag_paragraphs`` but forces the tag numbers to be exactly
-        ``indices`` (skipping ignored paragraphs).
+        """Like ``tag_paragraphs`` but forces the marker numbers to be
+        exactly ``indices`` (skipping ignored paragraphs). Uses the same
+        ``[N]\\ntext`` format as :func:`tag_paragraphs`.
         """
         assert len(paragraphs) == len(indices)
-        lines = []
+        parts = []
         for p, idx in zip(paragraphs, indices):
             if getattr(p, 'ignored', False):
                 continue
             text = (p.original or '').strip()
-            lines.append('<P%d>%s</P%d>' % (idx, text, idx))
-        return '\n'.join(lines)
+            parts.append('[%d]\n%s' % (idx, text))
+        return '\n\n'.join(parts)
+
+    # -- structured (JSON) output path -------------------------------------
+
+    #: JSON Schema describing the response shape for the structured path.
+    #: Kept as a class attribute so it can be reused as a stable reference
+    #: across chunks (the value is constant per translation session).
+    _STRUCTURED_RESPONSE_SCHEMA = {
+        'type': 'object',
+        'additionalProperties': False,
+        'properties': {
+            'paragraphs': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'additionalProperties': False,
+                    'properties': {
+                        'n': {'type': 'integer'},
+                        'translation': {'type': 'string'},
+                    },
+                    'required': ['n', 'translation'],
+                },
+            },
+        },
+        'required': ['paragraphs'],
+    }
+
+    def _build_structured_payload(self, chunk_paragraphs, indices):
+        """Return the JSON payload with source paragraphs to translate.
+
+        The response must mirror this shape but with ``translation``
+        replacing (or accompanying) the ``source`` field.
+        """
+        return {
+            'paragraphs': [
+                {
+                    'n': i,
+                    'source': (chunk_paragraphs[i - 1].original or '').strip(),
+                }
+                for i in indices
+            ],
+        }
+
+    def _parse_structured_response(self, response, expected_indices):
+        """Parse a JSON response and return ``{index: translation}``.
+
+        Robust to the common LLM sloppiness:
+          * responses wrapped in prose or Markdown fences (delegated to
+            :func:`_extract_json_object`);
+          * extra fields inside each paragraph object;
+          * ``n`` values as strings instead of integers;
+          * missing paragraphs (caller handles via alignment retry);
+          * hallucinated indices not in ``expected_indices``.
+        """
+        if not response:
+            return {}
+        obj = _extract_json_object(response)
+        if not obj or not isinstance(obj.get('paragraphs'), list):
+            return {}
+        expected = set(expected_indices)
+        result = {}
+        for item in obj['paragraphs']:
+            if not isinstance(item, dict):
+                continue
+            raw_n = item.get('n')
+            try:
+                n = int(raw_n)
+            except (TypeError, ValueError):
+                continue
+            if n not in expected:
+                continue
+            translation = (item.get('translation') or '').strip()
+            if translation:
+                result[n] = translation
+        return result
+
+    def _translate_with_retry_structured(self, system_prompt, user_text,
+                                         schema=None, attempts=None):
+        """Same retry loop as :meth:`_translate_with_retry` but the
+        request body is built via ``engine.get_body_for_structured`` so
+        the server enforces the JSON response.
+
+        The structured body includes ``stream: true`` so that long
+        responses (80+ translated paragraphs) are delivered token by
+        token without triggering the client-side request timeout.
+        Because the engine's ``_parse_stream`` returns a generator, we
+        must reassemble all chunks into a single string here before the
+        caller tries to parse the JSON.
+
+        Additionally, the engine's ``request_timeout`` is temporarily
+        raised to at least 300 seconds as a safety net: with streaming
+        the timeout only governs the connection and the first byte, so
+        300 s is never reached in practice, but it protects against edge
+        cases where the server is slow to start streaming.
+
+        TCP keepalive is also enabled for the duration of the structured
+        call (``request_keepalive = True``). This prevents intermediate
+        NAT devices / stateful firewalls (typical home routers, corporate
+        proxies) from dropping the connection during the time the LLM
+        spends generating the first token. Without keepalive we observed
+        Ollama's ``srv stop: cancel task`` at exactly the router NAT
+        session timeout (~30s).
+
+        Implementation swaps ``get_body`` temporarily rather than
+        threading a "structured" flag through :meth:`_translate_with_retry`;
+        this keeps the retry / backoff / cancel logic in one place.
+        """
+        from types import GeneratorType
+
+        translator = self.translator
+        original_get_body = translator.get_body
+        original_timeout = getattr(translator, 'request_timeout', None)
+        original_keepalive = getattr(translator, 'request_keepalive', False)
+        # Raise timeout defensively; with streaming this only covers the
+        # time until the first token arrives, not the total generation.
+        min_structured_timeout = 300.0
+        if original_timeout is not None \
+                and original_timeout < min_structured_timeout:
+            translator.request_timeout = min_structured_timeout
+        # Enable TCP keepalive on the underlying socket. The structured
+        # path may spend tens of seconds waiting for the first streamed
+        # token from the LLM; without keepalive, intermediate NAT devices
+        # (routers, corporate firewalls) silently drop the connection
+        # after ~30s of idle, causing the Ollama-side "cancel task" we
+        # observed in the logs.
+        translator.request_keepalive = True
+
+        def structured_get_body(text):
+            return translator.get_body_for_structured(text, schema)
+
+        translator.get_body = structured_get_body
+        try:
+            result = self._translate_with_retry(
+                system_prompt, user_text, attempts=attempts)
+        finally:
+            translator.get_body = original_get_body
+            if original_timeout is not None:
+                translator.request_timeout = original_timeout
+            translator.request_keepalive = original_keepalive
+
+        # If the engine returned a streaming generator (because stream:true
+        # is set in the body), collect all chunks now so the JSON parser
+        # receives the complete response string.
+        if isinstance(result, GeneratorType):
+            result = ''.join(chunk for chunk in result)
+
+        return result or ''
+
+    def _translate_chunk_structured(self, chunk_paragraphs, context_text,
+                                    chapter_num, chapter_title, chunk_num,
+                                    total_chunks, overlap_translations=None):
+        """Translate one chunk via the engine's native JSON output.
+
+        Contract identical to :meth:`_translate_chunk_markers` -- returns
+        ``{chunk_local_index: translation}`` covering all non-ignored
+        paragraphs. Alignment retries call the *marker* path as a safety
+        net so we always converge on some usable output even when the
+        JSON server rejects our schema.
+        """
+        indices = [
+            i for i, p in enumerate(chunk_paragraphs, start=1)
+            if not getattr(p, 'ignored', False)
+        ]
+        if not indices:
+            return {}
+
+        # System prompt: role + languages + narrative context (summary +
+        # glossary). Same as the marker path.
+        system_prompt = self._fill_placeholders(
+            self.translation_prompt, extra={'{context}': context_text})
+
+        # User message: header + optional overlap block + JSON schema
+        # instructions + serialized payload.
+        header = _('Chapter {n}: "{title}" (chunk {c}/{t})').format(
+            n=chapter_num, title=chapter_title,
+            c=chunk_num, t=total_chunks)
+
+        overlap_block = ''
+        if overlap_translations:
+            joined = '\n\n'.join(
+                t.strip() for t in overlap_translations if t and t.strip())
+            if joined:
+                overlap_block = (
+                    '\n\n'
+                    + _('--- Context from previous paragraphs '
+                        '(already translated -- do NOT modify or '
+                        'retranslate this section) ---')
+                    + '\n' + joined + '\n'
+                    + _('--- End of context ---'))
+
+        payload = self._build_structured_payload(chunk_paragraphs, indices)
+        payload_json = json.dumps(payload, ensure_ascii=False, indent=2)
+
+        instructions = _(
+            'You will receive a JSON object with a list of numbered '
+            'source paragraphs. Reply with a JSON object of the same '
+            'shape, where each paragraph carries a "translation" field '
+            'containing your translation of "source". Preserve the "n" '
+            'field verbatim. Preserve any inline placeholder like '
+            '{id_XXXXX}. Do not add, drop, or renumber paragraphs. '
+            'Return ONLY the JSON object, no preamble.')
+
+        user_text = (
+            '%s%s\n\n%s\n\nInput:\n%s'
+            % (header, overlap_block, instructions, payload_json))
+
+        response = self._translate_with_retry_structured(
+            system_prompt, user_text,
+            schema=self._STRUCTURED_RESPONSE_SCHEMA)
+        parsed = self._parse_structured_response(response, indices)
+        missing = [i for i in indices if i not in parsed]
+
+        # Alignment retries (structured): ask only for the missing
+        # paragraphs, still in JSON form. If two retries still fail, fall
+        # back to the marker path for the remaining ones (belt and
+        # suspenders).
+        for retry in range(2):
+            if not missing:
+                break
+            self.log(
+                _('Structured retry {}: {} missing entries.').format(
+                    retry + 1, len(missing)))
+            fixup_indices = list(missing)
+            fixup_payload = self._build_structured_payload(
+                chunk_paragraphs, fixup_indices)
+            fixup_json = json.dumps(
+                fixup_payload, ensure_ascii=False, indent=2)
+            fixup_body = (
+                _('The previous JSON response was incomplete. Reply '
+                  'with a JSON object translating ONLY the paragraphs '
+                  'below. Same shape as before: "paragraphs" array of '
+                  '{"n": int, "translation": string}. Return JSON only.')
+                + '\n\nInput:\n' + fixup_json)
+            response = self._translate_with_retry_structured(
+                system_prompt, fixup_body,
+                schema=self._STRUCTURED_RESPONSE_SCHEMA)
+            fixup_parsed = self._parse_structured_response(
+                response, fixup_indices)
+            parsed.update(fixup_parsed)
+            missing = [i for i in indices if i not in parsed]
+
+        if missing:
+            # Last-resort fallback: try the marker path for the leftover
+            # paragraphs. This handles the corner case where the server
+            # refuses the JSON schema on a specific input (rare).
+            self.log(
+                _('Structured path could not resolve {} paragraph(s); '
+                  'falling back to text markers for those.').format(
+                      len(missing)))
+            fallback_paras = [
+                chunk_paragraphs[i - 1] for i in missing]
+            fallback_result = self._translate_chunk_markers(
+                fallback_paras, context_text,
+                chapter_num, chapter_title, chunk_num, total_chunks,
+                overlap_translations=overlap_translations)
+            # Map back to the original chunk-local indices.
+            for local_i, i in enumerate(missing, start=1):
+                if local_i in fallback_result:
+                    parsed[i] = fallback_result[local_i]
+            missing = [i for i in indices if i not in parsed]
+
+        if missing:
+            self.log(
+                _('Warning: {} paragraph(s) missing after all retries: {}')
+                .format(len(missing), missing), True)
+        return parsed
 
     # -- summary / glossary extraction -------------------------------------
 
@@ -1149,16 +1714,50 @@ class NovelTranslator:
                 parts.append(text)
         return '\n\n'.join(parts)
 
+    def _head_and_tail(self, text, max_chars):
+        """Truncate ``text`` to at most ``max_chars``, keeping only the head.
+
+        Used for summary/glossary prompts. We deliberately take ONLY the
+        beginning of the translated chapter text because:
+
+          * The opening paragraphs reliably introduce the characters, setting
+            and plot thread for that chapter -- exactly what a useful summary
+            needs.
+
+        If the text already fits within ``max_chars`` it is returned verbatim.
+        If ``max_chars`` <= 0, truncation is disabled.
+        """
+        if max_chars <= 0 or len(text) <= max_chars:
+            return text
+        return text[:max_chars]
+
+    def _summary_input_budget_chars(self):
+        """Max characters to feed the summary/glossary LLM calls.
+
+        Rule of thumb: keep the input under ~4x the token budget reserved
+        for these auxiliary calls, so the model has room for its own
+        response. Hardcoded to a sensible default; the ``novel_summary_
+        input_max_chars`` config key can override.
+        """
+        default = 12000  # ~3000 words in Latin text
+        return int(self._cfg('novel_summary_input_max_chars', default))
+
     def _generate_summary(self, chapter, translated_text):
         if not translated_text.strip():
             return ''
+        max_chars = self._summary_input_budget_chars()
+        clipped = self._head_and_tail(translated_text, max_chars)
+        if len(clipped) < len(translated_text):
+            self.log(_(
+                'Summary input truncated: {} -> {} chars.').format(
+                    len(translated_text), len(clipped)))
         system_prompt = self._fill_placeholders(
             _('You are a helpful assistant that produces concise summaries.'))
         user_prompt = self._fill_placeholders(
             self.summary_prompt.format(
                 chapter_num=chapter.index,
                 chapter_title=chapter.title,
-                text=translated_text))
+                text=clipped))
         try:
             response = self._translate_with_retry(
                 system_prompt, user_prompt, attempts=2)
@@ -1170,6 +1769,9 @@ class NovelTranslator:
     def _extract_glossary_updates(self, chapter, source_text, translated_text):
         if not source_text.strip() or not translated_text.strip():
             return []
+        max_chars = self._summary_input_budget_chars()
+        src_clipped = self._head_and_tail(source_text, max_chars)
+        tgt_clipped = self._head_and_tail(translated_text, max_chars)
         existing_keys = ', '.join(sorted(self.ctx.get_glossary().keys())) \
             or _('(none)')
         system_prompt = self._fill_placeholders(
@@ -1177,8 +1779,8 @@ class NovelTranslator:
         user_prompt = self._fill_placeholders(
             self.glossary_prompt.format(
                 existing_keys=existing_keys,
-                source_text=source_text,
-                translated_text=translated_text))
+                source_text=src_clipped,
+                translated_text=tgt_clipped))
         try:
             response = self._translate_with_retry(
                 system_prompt, user_prompt, attempts=2)
@@ -1297,8 +1899,18 @@ class NovelTranslator:
         self.log(_('Chapter {}/{}: {}').format(
             chapter.index, self.total_chapters, chapter.title))
 
-        # Fast-path: chapter has no translatable paragraphs (e.g. cover
-        # image only). Still bump progress so we don't re-process it.
+        total_chars = sum(
+            len(p.original or '')
+            for p in chapter.paragraphs if not p.ignored)
+        self.log(_(
+            '  Structure: {} page(s), {} paragraphs, {} chars. '
+            'page_ids: {}').format(
+                len(chapter.page_ids),
+                len(chapter.paragraphs),
+                total_chars,
+                chapter.page_ids[:5])
+            + (' ...' if len(chapter.page_ids) > 5 else ''))
+
         translatable = chapter.translatable_paragraphs()
         if not translatable:
             self.log(_('Chapter {} has no translatable content, skipping.')
@@ -1313,16 +1925,25 @@ class NovelTranslator:
             budget=self.chunk_tokens,
             max_paragraphs=self.max_paragraphs_per_chunk,
         )
+        overlap_reserved = self.overlap_paragraphs * 80
         chunks_with_stats = budget.chunk_with_stats(
-            translatable, reserved=self.context_tokens + self.summary_tokens)
+            translatable,
+            reserved=(
+                self.context_tokens + self.summary_tokens + overlap_reserved))
         chunks = [c for c, _tok, _reason in chunks_with_stats]
         total_chunks = len(chunks)
         cap_paragraphs_display = (
             str(self.max_paragraphs_per_chunk)
             if self.max_paragraphs_per_chunk else _('unlimited'))
+        overlap_display = (
+            str(self.overlap_paragraphs)
+            if self.overlap_paragraphs else _('disabled'))
         self.log(_(
-            'Split into {} chunk(s). Caps: {} tokens / {} paragraphs.')
-            .format(total_chunks, self.chunk_tokens, cap_paragraphs_display))
+            'Split into {} chunk(s). Caps: {} tokens / {} paragraphs. '
+            'Overlap: {} paragraphs.')
+            .format(
+                total_chunks, self.chunk_tokens, cap_paragraphs_display,
+                overlap_display))
         # Per-chunk diagnostic (helps tune the caps against a real book).
         # ``reason`` is one of TokenBudget.REASON_* and tells which limit
         # closed the chunk.
@@ -1352,6 +1973,12 @@ class NovelTranslator:
             counter += 1
             chapter_local_index[counter] = i  # translatable_seq -> chapter_seq
 
+        # Sliding overlap: after each chunk we capture up to
+        # ``self.overlap_paragraphs`` of its just-produced translations
+        # and pass them to the next chunk as reading context. The first
+        # chunk of a chapter starts with an empty overlap.
+        overlap_translations = []
+
         seq = 0
         for c_idx, chunk in enumerate(chunks, start=1):
             if self.cancel_request():
@@ -1360,7 +1987,14 @@ class NovelTranslator:
             # rewrite them back into chapter-level indices.
             chunk_result = self._translate_chunk(
                 chunk, context_text, chapter.index, chapter.title,
-                c_idx, total_chunks)
+                c_idx, total_chunks,
+                overlap_translations=overlap_translations or None)
+
+            # Track the translations produced by THIS chunk so we can
+            # build the overlap for the NEXT one. We record them in the
+            # order the LLM saw them (chunk-local order), not in chapter
+            # order, so that a "recent context" window is preserved.
+            new_translations_in_chunk = []
             for local_i in range(1, len(chunk) + 1):
                 p = chunk[local_i - 1]
                 if p.ignored:
@@ -1369,8 +2003,19 @@ class NovelTranslator:
                 translation = chunk_result.get(local_i)
                 if translation is not None:
                     translations[chapter_local_index[seq]] = translation
+                    new_translations_in_chunk.append(translation)
             # Persist translations as they arrive.
             self._store_chapter(chapter, translations)
+
+            # Prepare overlap for the next chunk (last N translated
+            # paragraphs of THIS chunk). If this chunk produced fewer
+            # translations than the overlap window, the window naturally
+            # shrinks to what is available.
+            if self.overlap_paragraphs > 0 and new_translations_in_chunk:
+                overlap_translations = new_translations_in_chunk[
+                    -self.overlap_paragraphs:]
+            else:
+                overlap_translations = []
 
         # Summary + glossary.
         source_text = self._build_source_chapter_text(chapter.paragraphs)

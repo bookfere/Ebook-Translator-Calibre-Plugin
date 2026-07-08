@@ -331,6 +331,8 @@ class GeminiTranslate(GenAI):
     request_interval: float = 1.0
     request_timeout: float = 30.0
 
+    structured_output_mode = 'schema'
+
     prompt = (
         'You are a meticulous translator who translates any given content. '
         'Translate the given content from <slang> to <tlang> only. Do not '
@@ -403,8 +405,6 @@ class GeminiTranslate(GenAI):
                 {"role": "user", "parts": [{"text": self._prompt(text)}]},
             ],
             "generationConfig": {
-                # "stopSequences": ["Test"],
-                # "maxOutputTokens": 2048,
                 "temperature": self.temperature,
                 "topP": self.top_p,
                 "topK": self.top_k,
@@ -428,6 +428,21 @@ class GeminiTranslate(GenAI):
                 },
             ],
         })
+
+    def get_body_for_structured(self, text, schema=None):
+        """Return the request body with Gemini's native JSON output.
+
+        Uses ``generationConfig.responseMimeType = 'application/json'``
+        and optionally ``responseSchema`` for strict enforcement. See:
+        https://ai.google.dev/gemini-api/docs/structured-output
+        """
+        body = json.loads(self.get_body(text))
+        gen_config = body.get('generationConfig', {})
+        gen_config['responseMimeType'] = 'application/json'
+        if schema:
+            gen_config['responseSchema'] = schema
+        body['generationConfig'] = gen_config
+        return json.dumps(body)
 
     def get_result(self, response):
         if self.stream:

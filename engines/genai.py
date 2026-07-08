@@ -42,6 +42,30 @@ class GenAI(Base, ABC):
     # ``self.prompt`` (ChatGPT, Claude, Gemini) do not need any further
     # change: they will naturally pick up the overridden value.
 
+    structured_output_mode: str | None = None
+
+    def get_body_for_structured(self, text, schema=None):
+        """Return the request body with structured (JSON) output enabled.
+
+        Default implementation is a graceful fallback: it returns the same
+        body as :meth:`get_body`, so engines that do not override this
+        method silently continue with unstructured output. The novel
+        pipeline detects the lack of structured support via the
+        ``structured_output_mode`` class attribute and routes such
+        requests through the classical text-marker path instead.
+
+        Subclasses that support structured output override this method to
+        inject the provider-specific field (``response_format`` for
+        OpenAI-compatible APIs, ``generationConfig.responseMimeType`` +
+        ``responseSchema`` for Gemini, ...).
+
+        :schema: an optional JSON Schema dict describing the expected
+            response shape. Engines that support ``'schema'`` should
+            enforce it; engines that only support ``'json'`` may ignore
+            it and rely on prompt engineering to produce the right shape.
+        """
+        return self.get_body(text)
+
     def override_prompt(self, prompt_text):
         if not hasattr(self, '_prompt_stash'):
             self._prompt_stash = self.prompt
