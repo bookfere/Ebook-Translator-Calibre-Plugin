@@ -1092,7 +1092,7 @@ class NovelTranslator:
         budget or this paragraph cap is reached -- whichever comes first.
         Set to 0 to disable the cap and use only the token budget.
         """
-        return int(self._cfg('novel_max_paragraphs_per_chunk', 20))
+        return int(self._cfg('novel_max_paragraphs_per_chunk', 80))
 
     @property
     def overlap_paragraphs(self):

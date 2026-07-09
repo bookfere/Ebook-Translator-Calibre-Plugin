@@ -436,7 +436,7 @@ def get_novel_config():
     return {
         'novel_chunk_tokens': config.get('novel_chunk_tokens', 12000),
         'novel_max_paragraphs_per_chunk': config.get(
-            'novel_max_paragraphs_per_chunk', 20),
+            'novel_max_paragraphs_per_chunk', 80),
         'novel_overlap_paragraphs': config.get(
             'novel_overlap_paragraphs', 3),
         'novel_structured_output': config.get(

@@ -471,10 +471,11 @@ class TestTokenBudget(unittest.TestCase):
         self.assertEqual(200, len(chunks[0]))
 
     def test_chunk_default_max_paragraphs(self):
-        # Default is deliberately conservative (20) to ensure high tag
-        # compliance on local medium-sized models.
+        # Default is 80: with structured JSON output the model reliably
+        # follows alignment markers at this count, making it the appropriate
+        # default for capable engines (ChatGPT, Gemini, Ollama 0.31+).
         budget = TokenBudget(budget=8000)
-        self.assertEqual(20, budget.max_paragraphs)
+        self.assertEqual(80, budget.max_paragraphs)
 
     def test_chunk_with_stats_reports_reason(self):
         # 70 short paragraphs, generous token budget, cap=60.
