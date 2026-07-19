@@ -14,6 +14,7 @@ from .utils import log, sep, trim, dummy, traceback_error
 from .config import get_config
 from .exception import TranslationFailed, TranslationCanceled
 from .handler import Handler
+from .token_usage import TokenCounter, TokenUsage, token_estimate
 
 
 load_translations()  # type: ignore
@@ -72,7 +73,7 @@ class ProgressBar:
 
 
 class Translation:
-    def __init__(self, translator, glossary):
+    def __init__(self, translator, glossary, token_limit=0):
         self.translator = translator
         self.glossary = glossary
 
@@ -83,10 +84,22 @@ class Translation:
         self.streaming = dummy
         self.callback = dummy
         self.cancel_request = dummy
+        self.token_usage_callback = dummy
 
         self.total = 0
         self.progress_bar = ProgressBar()
         self.abort_count = 0
+        self.token_tracking = getattr(translator, 'free', False) is not True
+        self.token_counter = TokenCounter(
+            token_limit if self.token_tracking else 0)
+
+    @property
+    def token_limit(self):
+        return self.token_counter.limit
+
+    @property
+    def token_usage(self):
+        return self.token_counter.snapshot()
 
     def set_fresh(self, fresh):
         self.fresh = fresh
@@ -109,6 +122,37 @@ class Translation:
     def set_cancel_request(self, cancel_request):
         self.cancel_request = cancel_request
 
+    def set_token_usage_callback(self, callback):
+        self.token_usage_callback = callback
+
+    def record_token_usage(self, translator, input_text, output_text=''):
+        if getattr(translator, 'free', False) is True:
+            return self.token_usage
+        consume = getattr(translator, 'consume_token_usage', None)
+        usage = consume(output_text) if callable(consume) else None
+        if usage is not None:
+            try:
+                usage = TokenUsage(
+                    usage.input_tokens, usage.output_tokens,
+                    usage.total_tokens, bool(usage.estimated))
+            except (AttributeError, TypeError, ValueError):
+                usage = None
+        if usage is not None and usage.estimated \
+                and usage.input_tokens == 0:
+            input_tokens = token_estimate(input_text)
+            usage = TokenUsage(
+                input_tokens, usage.output_tokens,
+                input_tokens + usage.output_tokens, True)
+        if usage is None:
+            input_tokens = token_estimate(input_text)
+            output_tokens = token_estimate(output_text)
+            usage = TokenUsage(
+                input_tokens, output_tokens,
+                input_tokens + output_tokens, True)
+        snapshot = self.token_counter.add(usage)
+        self.token_usage_callback(snapshot)
+        return snapshot
+
     def need_stop(self):
         # Cancel the request if there are more than max continuous errors.
         return self.translator.max_error_count > 0 and \
@@ -122,14 +166,23 @@ class Translation:
         * https://ai.youdao.com/DOCSIRMA/html/trans/api/wbfy/index.html
         * https://api.fanyi.baidu.com/doc/21
         """
-        if self.cancel_request():
+        if self.cancel_request() or self.token_usage['reached']:
             raise TranslationCanceled(_('Translation canceled.'))
+        translation = ''
         try:
             translation = self.translator.translate(text)
+            if isinstance(translation, GeneratorType):
+                translation = self._track_stream_usage(translation, text)
+            else:
+                self.record_token_usage(self.translator, text, translation)
             self.abort_count = 0
             return translation
+        except TranslationCanceled:
+            raise
         except Exception as e:
-            if self.cancel_request() or self.need_stop():
+            self.record_token_usage(self.translator, text, translation)
+            if self.cancel_request() or self.need_stop() \
+                    or self.token_usage['reached']:
                 raise TranslationCanceled(_('Translation canceled.'))
             self.abort_count += 1
             message = _('Failed to retrieve data from translate engine API.')
@@ -152,8 +205,20 @@ class Translation:
             time.sleep(interval)
             return self.translate_text(row, text, retry, interval)
 
+    def _track_stream_usage(self, stream, input_text):
+        def tracked():
+            chunks = []
+            try:
+                for chunk in stream:
+                    chunks.append(chunk)
+                    yield chunk
+            finally:
+                self.record_token_usage(
+                    self.translator, input_text, ''.join(chunks))
+        return tracked()
+
     def translate_paragraph(self, paragraph):
-        if self.cancel_request():
+        if self.cancel_request() or self.token_usage['reached']:
             raise TranslationCanceled(_('Translation canceled.'))
         if paragraph.translation and not self.fresh:
             paragraph.is_cache = True
@@ -211,6 +276,8 @@ class Translation:
     def handle(self, paragraphs=[]):
         start_time = time.time()
         char_count = 0
+        if self.token_tracking:
+            self.token_usage_callback(self.token_usage)
         for paragraph in paragraphs:
             self.total += 1
             char_count += len(paragraph.original)
@@ -225,19 +292,37 @@ class Translation:
             raise Exception(_('There is no content need to translate.'))
         self.progress_bar.load(self.total)
 
+        concurrency_limit = 1 if self.token_limit > 0 \
+            else self.translator.concurrency_limit
         handler = Handler(
-            paragraphs, self.translator.concurrency_limit,
+            paragraphs, concurrency_limit,
             self.translate_paragraph, self.process_translation,
-            self.translator.request_interval)
+            self.translator.request_interval,
+            should_stop=lambda: self.token_usage['reached'])
         handler.handle()
 
         self.log(sep())
+        usage = self.token_usage
+        if self.token_tracking:
+            approximation = ' ≈' if usage['estimated'] else ''
+            self.log(_(
+                'Token usage{}: input {}, output {}, total {}').format(
+                    approximation, usage['input_tokens'],
+                    usage['output_tokens'], usage['total_tokens']))
+        if usage['reached'] and handler.stopped_early:
+            message = _(
+                'Soft token limit reached ({}); translation stopped after '
+                'the current request.').format(usage['limit'])
+            self.log(message)
+            self.progress(1, message)
+            return False
         if self.batch and self.need_stop():
             raise Exception(_('Translation failed.'))
         consuming = round((time.time() - start_time) / 60, 2)
         self.log(_('Time consuming: {} minutes').format(consuming))
         self.log(_('Translation completed.'))
         self.progress(1, _('Translation completed.'))
+        return True
 
 
 def get_engine_class(engine_name=None):
@@ -283,7 +368,8 @@ def get_translation(translator, log=None):
     glossary = Glossary(translator.placeholder)
     if config.get('glossary_enabled'):
         glossary.load_from_file(config.get('glossary_path'))
-    translation = Translation(translator, glossary)
+    translation = Translation(
+        translator, glossary, getattr(translator, 'token_limit', 0))
     if get_config().get('log_translation'):
         translation.set_logging(log)
     return translation

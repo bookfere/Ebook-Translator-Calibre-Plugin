@@ -1,8 +1,10 @@
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch, Mock, call
 
 from ...lib.utils import dummy
-from ...lib.translation import Glossary, ProgressBar, Translation
+from ...lib.translation import (
+    Glossary, ProgressBar, Translation, get_translation)
 from ...lib.exception import TranslationCanceled, TranslationFailed
 from ...engines.base import Base
 from ...engines.deepl import DeeplTranslate
@@ -99,6 +101,209 @@ class TestTranslation(unittest.TestCase):
         self.assertEqual(0, self.translation.total)
         self.assertIsInstance(self.translation.progress_bar, ProgressBar)
         self.assertEqual(0, self.translation.abort_count)
+
+        self.assertTrue(hasattr(self.translation, 'token_usage'))
+        self.assertEqual(0, self.translation.token_usage['total_tokens'])
+        self.assertEqual(0, self.translation.token_limit)
+
+    @patch(f'{module_name}.get_config')
+    def test_factory_applies_engine_token_limit(self, mock_get_config):
+        mock_get_config.return_value = {
+            'glossary_enabled': False, 'log_translation': False}
+        translator = Mock(placeholder=Base.placeholder, token_limit=321)
+
+        translation = get_translation(translator)
+
+        self.assertEqual(321, translation.token_limit)
+
+    def test_accumulates_request_token_usage_and_emits_snapshot(self):
+        self.assertTrue(hasattr(self.translation, 'record_token_usage'))
+        usage_callback = Mock()
+        self.translation.set_token_usage_callback(usage_callback)
+        self.translator.free = False
+        self.translator.consume_token_usage.return_value = SimpleNamespace(
+            input_tokens=12, output_tokens=7, total_tokens=19,
+            estimated=False)
+
+        self.translation.record_token_usage(
+            self.translator, 'source', 'translation')
+
+        self.assertEqual(19, self.translation.token_usage['total_tokens'])
+        usage_callback.assert_called_once_with(self.translation.token_usage)
+
+    def test_does_not_count_free_engine_usage(self):
+        self.translator.free = True
+        self.translator.consume_token_usage.return_value = SimpleNamespace(
+            input_tokens=12, output_tokens=7, total_tokens=19,
+            estimated=False)
+        usage_callback = Mock()
+        self.translation.set_token_usage_callback(usage_callback)
+
+        self.translation.record_token_usage(
+            self.translator, 'source', 'translation')
+
+        self.assertEqual(0, self.translation.token_usage['total_tokens'])
+        self.translator.consume_token_usage.assert_not_called()
+        usage_callback.assert_not_called()
+
+    def test_estimates_when_engine_returns_invalid_usage(self):
+        self.translator.free = False
+        self.translator.consume_token_usage.return_value = Mock()
+
+        usage = self.translation.record_token_usage(
+            self.translator, 'source text', 'translated text')
+
+        self.assertTrue(usage['estimated'])
+        self.assertGreater(usage['total_tokens'], 0)
+
+    def test_estimates_input_for_engine_that_bypasses_base_translate(self):
+        self.translator.free = False
+        self.translator.consume_token_usage.return_value = SimpleNamespace(
+            input_tokens=0, output_tokens=4, total_tokens=4,
+            estimated=True)
+
+        usage = self.translation.record_token_usage(
+            self.translator, 'source text', 'translated text')
+
+        self.assertGreater(usage['input_tokens'], 0)
+        self.assertEqual(4, usage['output_tokens'])
+        self.assertEqual(
+            usage['input_tokens'] + 4, usage['total_tokens'])
+
+    def test_translate_text_records_successful_request_usage(self):
+        self.translator.free = False
+        self.translator.translate.return_value = 'translated'
+        self.translator.consume_token_usage.return_value = SimpleNamespace(
+            input_tokens=8, output_tokens=3, total_tokens=11,
+            estimated=False)
+
+        result = self.translation.translate_text(0, 'source')
+
+        self.assertEqual('translated', result)
+        self.assertEqual(11, self.translation.token_usage['total_tokens'])
+
+    @patch(f'{module_name}.Handler')
+    def test_token_limit_forces_serial_requests(self, mock_handler):
+        self.translator.free = False
+        self.translator.concurrency_limit = 8
+        self.translator.request_interval = 0
+        translation = Translation(
+            self.translator, self.glossary, token_limit=100)
+        paragraph = Mock(original='source')
+
+        translation.handle([paragraph])
+
+        self.assertEqual(1, mock_handler.call_args.args[1])
+
+    @patch(f'{module_name}.Handler')
+    def test_free_engine_ignores_token_limit(self, mock_handler):
+        self.translator.free = True
+        self.translator.concurrency_limit = 8
+        self.translator.request_interval = 0
+        translation = Translation(
+            self.translator, self.glossary, token_limit=100)
+        paragraph = Mock(original='source')
+
+        translation.handle([paragraph])
+
+        self.assertEqual(0, translation.token_limit)
+        self.assertEqual(8, mock_handler.call_args.args[1])
+
+    def test_stops_before_next_paragraph_after_soft_limit(self):
+        self.translator.free = False
+        self.translator.concurrency_limit = 4
+        self.translator.request_interval = 0
+        self.translator.merge_enabled = False
+        self.translator.name = 'Paid Engine'
+        self.translator.get_target_lang.return_value = 'zh'
+        self.translator.translate.return_value = 'translated'
+        self.translator.consume_token_usage.return_value = SimpleNamespace(
+            input_tokens=7, output_tokens=3, total_tokens=10,
+            estimated=False)
+        self.glossary.replace.side_effect = lambda text: text
+        self.glossary.restore.side_effect = lambda text: text
+        paragraphs = [
+            Mock(row=1, original='first', translation=''),
+            Mock(row=2, original='second', translation=''),
+        ]
+        translation = Translation(
+            self.translator, self.glossary, token_limit=10)
+
+        completed = translation.handle(paragraphs)
+
+        self.assertFalse(completed)
+        self.translator.translate.assert_called_once_with('first')
+        self.assertEqual('translated', paragraphs[0].translation)
+        self.assertEqual('', paragraphs[1].translation)
+        self.assertTrue(translation.token_usage['reached'])
+
+    def test_finishes_when_last_paragraph_reaches_soft_limit(self):
+        self.translator.free = False
+        self.translator.concurrency_limit = 4
+        self.translator.request_interval = 0
+        self.translator.merge_enabled = False
+        self.translator.name = 'Paid Engine'
+        self.translator.get_target_lang.return_value = 'zh'
+        self.translator.translate.return_value = 'translated'
+        self.translator.consume_token_usage.return_value = SimpleNamespace(
+            input_tokens=7, output_tokens=3, total_tokens=10,
+            estimated=False)
+        self.glossary.replace.side_effect = lambda text: text
+        self.glossary.restore.side_effect = lambda text: text
+        paragraph = Mock(row=1, original='only', translation='')
+        translation = Translation(
+            self.translator, self.glossary, token_limit=10)
+
+        completed = translation.handle([paragraph])
+
+        self.assertTrue(completed)
+        self.assertEqual('translated', paragraph.translation)
+        self.assertTrue(translation.token_usage['reached'])
+
+    def test_failed_only_request_reaching_limit_is_incomplete(self):
+        self.translator.free = False
+        self.translator.concurrency_limit = 1
+        self.translator.request_interval = 0
+        self.translator.translate.side_effect = RuntimeError('request failed')
+        self.translator.consume_token_usage.return_value = SimpleNamespace(
+            input_tokens=10, output_tokens=0, total_tokens=10,
+            estimated=True)
+        paragraph = Mock(row=1, original='only', translation='')
+        translation = Translation(
+            self.translator, self.glossary, token_limit=10)
+
+        completed = translation.handle([paragraph])
+
+        self.assertFalse(completed)
+        self.assertTrue(translation.token_usage['reached'])
+
+    def test_stream_failure_reaching_limit_stops_before_next_paragraph(self):
+        self.translator.free = False
+        self.translator.concurrency_limit = 1
+        self.translator.request_interval = 0
+        self.translator.merge_enabled = False
+        self.translator.consume_token_usage.return_value = SimpleNamespace(
+            input_tokens=7, output_tokens=3, total_tokens=10,
+            estimated=False)
+        self.glossary.replace.side_effect = lambda text: text
+
+        def failed_stream():
+            yield 'partial'
+            raise RuntimeError('stream failed')
+
+        self.translator.translate.side_effect = lambda _: failed_stream()
+        paragraphs = [
+            Mock(row=1, original='first', translation=''),
+            Mock(row=2, original='second', translation=''),
+        ]
+        translation = Translation(
+            self.translator, self.glossary, token_limit=10)
+
+        completed = translation.handle(paragraphs)
+
+        self.assertFalse(completed)
+        self.translator.translate.assert_called_once_with('first')
+        self.assertEqual('', paragraphs[1].translation)
 
     def test_set_fresh(self):
         self.assertFalse(self.translation.fresh)

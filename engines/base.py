@@ -1,5 +1,6 @@
 import socket
 import os.path
+import threading
 from typing import Any
 
 from mechanize import HTTPError
@@ -8,6 +9,7 @@ from calibre.utils.localization import _, lang_as_iso639_1  # type: ignore
 
 from ..lib.utils import log, traceback_error, request, socks_proxy
 from ..lib.exception import UnexpectedResult
+from ..lib.token_usage import TokenUsage, token_estimate
 
 from .languages import lang_directionality
 
@@ -41,11 +43,13 @@ class Base:
     request_attempt: int = 3
     request_timeout: float = 10.0
     max_error_count: int = 10
+    token_limit: int = 0
 
     def __init__(self):
         self.source_lang: str
         self.target_lang: str
         self.search_paths: list = []
+        self._token_state = threading.local()
 
         self.proxy_type: str | None = None  # http, socks5
         self.proxy_host: str | None = None
@@ -71,6 +75,9 @@ class Base:
         max_error_count = self.config.get('max_error_count')
         if max_error_count is not None:
             self.max_error_count = max_error_count
+        token_limit = self.config.get('token_limit')
+        if token_limit is not None:
+            self.token_limit = max(0, int(token_limit))
 
     @classmethod
     def load_lang_codes(cls, codes):
@@ -195,9 +202,11 @@ class Base:
     def translate(self, content):
         response = None
         try:
+            body = self.get_body(content)
+            self._begin_token_request(body)
             params = {
                 'url': self.get_endpoint(),
-                'data': self.get_body(content),
+                'data': body,
                 'headers': self.get_headers(),
                 'method': self.method,
                 'proxy_uri': None,
@@ -240,6 +249,37 @@ class Base:
 
     def get_usage(self):
         return None
+
+    def _begin_token_request(self, request_data):
+        self._token_state.request_data = request_data
+        self._token_state.usage = None
+
+    def set_token_usage(
+            self, input_tokens=None, output_tokens=None, total_tokens=None):
+        current = getattr(self._token_state, 'usage', None)
+        if current is None:
+            current = TokenUsage()
+        input_tokens = current.input_tokens \
+            if input_tokens is None else input_tokens
+        output_tokens = current.output_tokens \
+            if output_tokens is None else output_tokens
+        if total_tokens is None:
+            total_tokens = int(input_tokens or 0) + int(output_tokens or 0)
+        self._token_state.usage = TokenUsage(
+            input_tokens, output_tokens, total_tokens, False)
+
+    def consume_token_usage(self, output=''):
+        usage = getattr(self._token_state, 'usage', None)
+        request_data = getattr(self._token_state, 'request_data', '')
+        self._token_state.usage = None
+        self._token_state.request_data = ''
+        if usage is not None and usage.total_tokens > 0:
+            return usage
+        input_tokens = token_estimate(request_data)
+        output_tokens = token_estimate(output)
+        return TokenUsage(
+            input_tokens, output_tokens,
+            input_tokens + output_tokens, True)
 
     def allow_raw(self) -> bool:
         """Allow raw content translation only if the engine supports HTML and

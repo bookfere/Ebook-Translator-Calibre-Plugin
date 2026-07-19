@@ -8,7 +8,7 @@ from .exception import TranslationCanceled
 
 class Handler:
     def __init__(self, paragraphs, concurrency_limit, translate_paragraph,
-                 process_translation, request_interval):
+                 process_translation, request_interval, should_stop=None):
         self.queue = asyncio.Queue()
         self.done_queue = asyncio.Queue()
 
@@ -19,6 +19,8 @@ class Handler:
         self.translate_paragraph = translate_paragraph
         self.process_translation = process_translation
         self.request_interval = request_interval
+        self.should_stop = should_stop or (lambda: False)
+        self.stopped_early = False
 
     async def translation_worker(self):
         while True:
@@ -31,13 +33,27 @@ class Handler:
                     await asyncio.sleep(self.request_interval)
                 self.done_queue.put_nowait(paragraph)
                 self.queue.task_done()
+                if self.should_stop():
+                    self.stopped_early = not self.queue.empty()
+                    await self.done_queue.join()
+                    await self.cancel_pending_tasks()
+                    break
             except TranslationCanceled:
+                if self.should_stop():
+                    # The current paragraph did not complete, even if it was
+                    # the final queued item.
+                    self.stopped_early = True
                 await self.cancel_tasks()
                 break
             except Exception:
                 paragraph.error = traceback_error()
                 self.done_queue.put_nowait(paragraph)
                 self.queue.task_done()
+                if self.should_stop():
+                    self.stopped_early = True
+                    await self.done_queue.join()
+                    await self.cancel_pending_tasks()
+                    break
 
     async def processing_worker(self):
         while True:
@@ -49,12 +65,15 @@ class Handler:
 
     async def cancel_tasks(self):
         self.queue.task_done()
-        while not self.queue.empty():
-            await self.queue.get()
-            self.queue.task_done()
+        await self.cancel_pending_tasks()
         while not self.done_queue.empty():
             await self.done_queue.get()
             self.done_queue.task_done()
+
+    async def cancel_pending_tasks(self):
+        while not self.queue.empty():
+            await self.queue.get()
+            self.queue.task_done()
 
     async def create_tasks(self):
         tasks = []

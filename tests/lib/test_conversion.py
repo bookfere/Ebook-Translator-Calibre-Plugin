@@ -3,11 +3,30 @@ from pathlib import Path
 from typing import Callable
 from unittest.mock import patch, Mock
 
-from ...lib.conversion import ConversionWorker
+from ...lib.conversion import ConversionWorker, handle_translation
 from ...lib.ebook import Ebook
+from ...lib.exception import TranslationCanceled
 
 
 module_name = 'calibre_plugins.ebook_translator.lib.conversion'
+
+
+class TestHandleTranslation(unittest.TestCase):
+    def test_returns_after_completed_translation(self):
+        translation = Mock()
+        translation.handle.return_value = True
+        paragraphs = [Mock()]
+
+        handle_translation(translation, paragraphs)
+
+        translation.handle.assert_called_once_with(paragraphs)
+
+    def test_aborts_output_after_soft_limit_stops_translation(self):
+        translation = Mock()
+        translation.handle.return_value = False
+
+        with self.assertRaises(TranslationCanceled):
+            handle_translation(translation, [Mock()])
 
 
 class TestConversionWorker(unittest.TestCase):

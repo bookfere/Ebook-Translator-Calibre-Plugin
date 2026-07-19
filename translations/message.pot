@@ -1213,3 +1213,47 @@ msgstr ""
 #: ui.py:166
 msgid "Choose Translation Mode"
 msgstr ""
+
+#: advanced.py:429
+msgid "estimated"
+msgstr ""
+
+#: advanced.py:434
+#, python-brace-format
+msgid "Tokens: input {}, output {}, total {}"
+msgstr ""
+
+#: advanced.py:438
+#, python-brace-format
+msgid "soft limit {}"
+msgstr ""
+
+#: setting.py:487
+msgid "Unlimited"
+msgstr ""
+
+#: setting.py:489
+msgid ""
+"Input and output tokens are counted together. The current request may exceed "
+"this soft limit; no new request starts afterward. A value of 0 means "
+"unlimited. Limited tasks use one request at a time."
+msgstr ""
+
+#: setting.py:494
+msgid "Soft token limit per task"
+msgstr ""
+
+#: lib/conversion.py:54
+msgid "Translation stopped after reaching the soft token limit."
+msgstr ""
+
+#: lib/translation.py:303
+#, python-brace-format
+msgid "Token usage{}: input {}, output {}, total {}"
+msgstr ""
+
+#: lib/translation.py:308
+#, python-brace-format
+msgid ""
+"Soft token limit reached ({}); translation stopped after the current request."
+msgstr ""

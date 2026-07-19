@@ -168,6 +168,7 @@ class TranslationWorker(QObject):
     # error = pyqtSignal(str, str, str)
     streaming = pyqtSignal(object)
     callback = pyqtSignal(object)
+    token_usage = pyqtSignal(object)
 
     def __init__(self, engine_class, ebook):
         QObject.__init__(self)
@@ -178,6 +179,7 @@ class TranslationWorker(QObject):
         self.on_working = False
         self.canceled = False
         self.need_close = False
+        self.token_limit_reached = False
         self.translate.connect(self.translate_paragraphs)
         # self.finished.connect(lambda: self.set_canceled(False))
 
@@ -203,6 +205,7 @@ class TranslationWorker(QObject):
     def translate_paragraphs(self, paragraphs=[], fresh=False):
         """:fresh: retranslate all paragraphs."""
         self.on_working = True
+        self.token_limit_reached = False
         self.start.emit()
         translator = get_translator(self.engine_class)
         translator.set_source_lang(self.source_lang)
@@ -213,8 +216,9 @@ class TranslationWorker(QObject):
             lambda text, error=False: self.logging.emit(text, error))
         translation.set_streaming(self.streaming.emit)
         translation.set_callback(self.callback.emit)
+        translation.set_token_usage_callback(self.token_usage.emit)
         translation.set_cancel_request(self.cancel_request)
-        translation.handle(paragraphs)
+        self.token_limit_reached = not translation.handle(paragraphs)
         self.on_working = False
         self.finished.emit()
         if self.need_close:
@@ -377,6 +381,9 @@ class AdvancedTranslation(QDialog):
         self.config = get_config()
         self.alert = AlertMessage(self)
         self.footer = Footer()
+        self.token_usage_label = QLabel()
+        self.token_usage_label.setVisible(False)
+        self.footer.layout().insertWidget(0, self.token_usage_label)
         # self.error = JobError(self)
         self.current_engine = get_engine_class()
         self.cache = None
@@ -416,14 +423,29 @@ class AdvancedTranslation(QDialog):
         def working_status():
             self.logging_text.clear()
             self.errors_text.clear()
+            self.token_usage_label.clear()
+            self.token_usage_label.setVisible(False)
         self.trans_worker.start.connect(working_status)
+
+        def show_token_usage(usage):
+            approximate = ' (%s)' % _('estimated') \
+                if usage['estimated'] else ''
+            text = _('Tokens: input {}, output {}, total {}').format(
+                usage['input_tokens'], usage['output_tokens'],
+                usage['total_tokens']) + approximate
+            if usage['limit'] > 0:
+                text += ' · ' + _('soft limit {}').format(usage['limit'])
+            self.token_usage_label.setText(text)
+            self.token_usage_label.setVisible(True)
+        self.trans_worker.token_usage.connect(show_token_usage)
 
         self.trans_worker.logging.connect(
             lambda text, error: self.errors_text.appendPlainText(text)
             if error else self.logging_text.appendPlainText(text))
 
         def working_finished():
-            if self.translate_all and not self.trans_worker.cancel_request():
+            if self.translate_all and not self.trans_worker.cancel_request() \
+                    and not self.trans_worker.token_limit_reached:
                 failures = len(self.table.get_selected_paragraphs(True, True))
                 if failures > 0:
                     message = _(
