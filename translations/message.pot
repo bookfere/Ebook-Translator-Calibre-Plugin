@@ -1213,3 +1213,31 @@ msgstr ""
 #: ui.py:166
 msgid "Choose Translation Mode"
 msgstr ""
+
+#: setting.py
+msgid "Primary Engine"
+msgstr ""
+
+#: setting.py
+msgid "Fallback Engine"
+msgstr ""
+
+#: setting.py
+msgid "Fallback Rules"
+msgstr ""
+
+#: setting.py
+msgid "Switch to the fallback engine when the primary engine fails or its response contains any of these phrases. One phrase per line."
+msgstr ""
+
+#: setting.py
+msgid "None"
+msgstr ""
+
+#: lib/translation.py
+msgid "The translation engine refused to translate the content."
+msgstr ""
+
+#: lib/translation.py
+msgid "The translation engine returned an empty result."
+msgstr ""
