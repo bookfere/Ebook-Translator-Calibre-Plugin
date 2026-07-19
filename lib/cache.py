@@ -121,10 +121,7 @@ class TranslationCache:
         self.identity = identity
         self.persistence = persistence
         self.file_path = self._path(identity)
-        # An interruption may occur, resulting in the cache size being less
-        # than 50,000 bytes. Therefore, we need to resave it again.
-        if os.path.exists(self.file_path) and self.size() > 50000:
-            self.fresh = False
+        cache_existed = os.path.exists(self.file_path)
         self.cache_only = False
         self.connection = sqlite3.connect(
             self.file_path, check_same_thread=False)
@@ -137,6 +134,9 @@ class TranslationCache:
             'target_lang DEFAULT NULL)')
         self.cursor.execute(
             'CREATE TABLE IF NOT EXISTS info(key UNIQUE, value)')
+        paragraph_count = self.cursor.execute(
+            'SELECT COUNT(*) FROM cache').fetchone()[0]
+        self.fresh = not cache_existed or paragraph_count == 0
 
     @classmethod
     def move(cls, dest):
