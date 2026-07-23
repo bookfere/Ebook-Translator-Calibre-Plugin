@@ -151,7 +151,7 @@ class GoogleTranslate(Base):
                 startupinfo.dwFlags |= STARTF_USESHOWWINDOW
             process = Popen(
                 command, stdout=PIPE, stderr=PIPE, universal_newlines=True,
-                startupinfo=startupinfo)
+                errors='replace', startupinfo=startupinfo)
         except Exception:
             if silence:
                 return None
