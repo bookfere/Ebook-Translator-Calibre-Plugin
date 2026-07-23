@@ -522,6 +522,22 @@ class TestChatgptTranslate(unittest.TestCase):
         self.assertIsInstance(result, GeneratorType)
         self.assertEqual('你好世界！', ''.join(result))
 
+    @patch(module_name + '.openai.EbookTranslator')
+    @patch(module_name + '.base.request')
+    def test_translate_stream_without_data_space(self, mock_request, mock_et):
+        # SSE lines may omit the space after "data:" (e.g. "data:{...}").
+        mock_et.__version__ = '1.0.0'
+        template = b'data:{"choices":[{"delta":{"content":"%b"}}]}'
+        mock_response = Mock()
+        mock_response.readline.side_effect = [
+            template % i.encode() for i in '你好世界！'] \
+            + ['data:[DONE]'.encode()]
+        mock_request.return_value = mock_response
+        result = self.translator.translate('Hello World!')
+
+        self.assertIsInstance(result, GeneratorType)
+        self.assertEqual('你好世界！', ''.join(result))
+
     @patch(module_name + '.base.request')
     def test_translate_normal(self, mock_request):
         mock_request.return_value = \
@@ -1024,6 +1040,25 @@ data: {"type":"message_stop"}
             proxy_uri=None, raw_object=True)
         self.assertIsInstance(result, GeneratorType)
         self.assertEqual('你好世界！', ''.join(result))
+
+    @patch(module_name + '.anthropic.EbookTranslator')
+    @patch(module_name + '.base.request')
+    def test_translate_stream_without_data_space(self, mock_request, mock_et):
+        # SSE lines may omit the space after "data:" (e.g. "data:{...}").
+        mock_et.__version__ = '1.0.0'
+        data_sample = (
+            'data:{"type":"content_block_delta","delta":{"text":"你"}}\n'
+            'data:{"type":"content_block_delta","delta":{"text":"好"}}\n'
+            'data:{"type":"message_stop"}\n')
+        mock_response = Mock()
+        mock_response.readline.side_effect = data_sample.encode().splitlines()
+        mock_request.return_value = mock_response
+        self.translator.endpoint = 'https://api.anthropic.com/v1/messages'
+        self.translator.model = 'claude-3-5-sonnet-20241022'
+        result = self.translator.translate('Hello World!')
+
+        self.assertIsInstance(result, GeneratorType)
+        self.assertEqual('你好', ''.join(result))
 
 
 class TestFunction(unittest.TestCase):
