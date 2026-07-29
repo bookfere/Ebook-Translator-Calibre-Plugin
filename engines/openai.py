@@ -100,6 +100,8 @@ class ChatgptTranslate(GenAI):
         }
         if self.stream:
             body.update(stream=True)
+            if urlsplit(self.endpoint or '').hostname == 'api.openai.com':
+                body.update(stream_options={'include_usage': True})
         sampling_value = getattr(self, self.sampling)
         body.update({self.sampling: sampling_value})
         return json.dumps(body)
@@ -110,6 +112,7 @@ class ChatgptTranslate(GenAI):
         # Parse JSON response with robust schema handling
         try:
             data = json.loads(response)
+            self._capture_token_usage(data)
             # Handle different response schemas
             if 'choices' in data and len(data['choices']) > 0:
                 choice = data['choices'][0]
@@ -154,6 +157,7 @@ class ChatgptTranslate(GenAI):
                     break
                 try:
                     data = json.loads(chunk)
+                    self._capture_token_usage(data)
                     # Handle different streaming response schemas
                     if 'choices' in data and len(data['choices']) > 0:
                         choice = data['choices'][0]
@@ -179,6 +183,17 @@ class ChatgptTranslate(GenAI):
                 except json.JSONDecodeError:
                     # Skip malformed JSON chunks
                     continue
+
+    def _capture_token_usage(self, data):
+        usage = data.get('usage') or {}
+        if not usage:
+            return
+        self.set_token_usage(
+            input_tokens=usage.get(
+                'prompt_tokens', usage.get('input_tokens')),
+            output_tokens=usage.get(
+                'completion_tokens', usage.get('output_tokens')),
+            total_tokens=usage.get('total_tokens'))
 
 
 class ChatgptBatchTranslate:

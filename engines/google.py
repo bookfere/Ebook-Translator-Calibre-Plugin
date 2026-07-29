@@ -432,7 +432,9 @@ class GeminiTranslate(GenAI):
     def get_result(self, response):
         if self.stream:
             return self._parse_stream(response)
-        parts = json.loads(response)['candidates'][0]['content']['parts']
+        data = json.loads(response)
+        self._capture_token_usage(data)
+        parts = data['candidates'][0]['content']['parts']
         return ''.join([part['text'] for part in parts])
 
     def _parse_stream(self, response):
@@ -447,10 +449,25 @@ class GeminiTranslate(GenAI):
                     .format(str(e)))
             if line.startswith('data:'):
                 item = json.loads(line.split('data: ')[1])
-                candidate = item['candidates'][0]
+                self._capture_token_usage(item)
+                candidates = item.get('candidates') or []
+                if not candidates:
+                    if item.get('usageMetadata'):
+                        break
+                    continue
+                candidate = candidates[0]
                 content = candidate['content']
                 if 'parts' in content.keys():
                     for part in content['parts']:
                         yield part['text']
                 if candidate.get('finishReason') == 'STOP':
                     break
+
+    def _capture_token_usage(self, data):
+        usage = data.get('usageMetadata') or {}
+        if not usage:
+            return
+        self.set_token_usage(
+            input_tokens=usage.get('promptTokenCount'),
+            output_tokens=usage.get('candidatesTokenCount'),
+            total_tokens=usage.get('totalTokenCount'))
