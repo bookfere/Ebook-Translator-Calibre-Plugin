@@ -28,6 +28,19 @@ from .components import (
 load_translations()  # type: ignore
 
 
+class ModelFetchState:
+    def __init__(self):
+        self.manual = False
+
+    def begin(self, manual=False):
+        self.manual = manual
+
+    def finish(self, success):
+        show_error = not success and self.manual
+        self.manual = False
+        return show_error
+
+
 class ModelWorker(QObject):
     start = pyqtSignal(object)
     success = pyqtSignal(bool, str)
@@ -90,6 +103,7 @@ class TranslationSetting(QDialog):
         self.plugin = plugin
         self.icon = icon
         self.alert = AlertMessage(self)
+        self.model_fetch_state = ModelFetchState()
 
         self.config = get_config()
         self.current_engine = get_engine_class()
@@ -607,7 +621,7 @@ class TranslationSetting(QDialog):
             lambda model: self.current_engine.config.update(
                 model=model.strip()))
 
-        def fetch_ai_models():
+        def fetch_ai_models(manual=False):
             try:
                 genai_model_list.currentTextChanged.disconnect()
             except TypeError:
@@ -618,11 +632,12 @@ class TranslationSetting(QDialog):
             genai_model_list.setDisabled(True)
             genai_model_input.setVisible(False)
             self.current_engine.set_config(self.get_engine_config())
+            self.model_fetch_state.begin(manual)
             self.model_worker.start.emit(self.current_engine)
 
         def manual_fetch_ai_models():
             if self.api_keys.toPlainText().strip() != '':
-                fetch_ai_models()
+                fetch_ai_models(manual=True)
             else:
                 self.alert.pop(_('You need to provide an API key to proceed.'))
         genai_model_refresh.clicked.connect(manual_fetch_ai_models)
@@ -639,7 +654,7 @@ class TranslationSetting(QDialog):
 
         def handle_worker_status(success, message=''):
             genai_model_refresh.setVisible(not success)
-            if not success:
+            if self.model_fetch_state.finish(success):
                 error_dialog(self, _("Can't fetch model list"), _(
                     "Can't fetch model list, please check and try again."),
                     message, show=True)
