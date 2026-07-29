@@ -2,7 +2,8 @@ import unittest
 from unittest.mock import patch, Mock, call
 
 from ...lib.utils import dummy
-from ...lib.translation import Glossary, ProgressBar, Translation
+from ...lib.translation import (
+    Glossary, ProgressBar, Translation, get_engine_class, get_translation)
 from ...lib.exception import TranslationCanceled, TranslationFailed
 from ...engines.base import Base
 from ...engines.deepl import DeeplTranslate
@@ -99,6 +100,134 @@ class TestTranslation(unittest.TestCase):
         self.assertEqual(0, self.translation.total)
         self.assertIsInstance(self.translation.progress_bar, ProgressBar)
         self.assertEqual(0, self.translation.abort_count)
+
+    def test_translate_text_uses_fallback_when_primary_errors(self):
+        fallback = Mock()
+        self.translator.translate.side_effect = Exception('primary failed')
+        fallback.translate.return_value = 'fallback result'
+        translation = Translation(
+            self.translator, self.glossary, fallback, ['cannot translate'])
+
+        result = translation.translate_text(0, 'text')
+
+        self.assertEqual('fallback result', result)
+        fallback.translate.assert_called_once_with('text')
+
+    def test_translate_text_uses_primary_result(self):
+        fallback = Mock()
+        self.translator.translate.return_value = 'primary result'
+        translation = Translation(
+            self.translator, self.glossary, fallback, ['cannot translate'])
+
+        result = translation.translate_text(0, 'text')
+
+        self.assertEqual('primary result', result)
+        fallback.translate.assert_not_called()
+
+    def test_translate_text_uses_fallback_when_primary_refuses(self):
+        fallback = Mock()
+        self.translator.translate.return_value = \
+            'Sorry, I CANNOT TRANSLATE this content.'
+        fallback.translate.return_value = 'fallback result'
+        translation = Translation(
+            self.translator, self.glossary, fallback, ['cannot translate'])
+
+        result = translation.translate_text(0, 'text')
+
+        self.assertEqual('fallback result', result)
+        fallback.translate.assert_called_once_with('text')
+
+    def test_translate_text_accepts_refusal_keyword_from_fallback(self):
+        fallback = Mock()
+        self.translator.translate.return_value = \
+            'Sorry, I cannot translate this content.'
+        fallback.translate.return_value = 'Sorry，这正是因为我读过她的文字。'
+        translation = Translation(
+            self.translator, self.glossary, fallback, ['sorry'])
+
+        result = translation.translate_text(0, 'text')
+
+        self.assertEqual('Sorry，这正是因为我读过她的文字。', result)
+
+    def test_translate_text_uses_fallback_when_primary_returns_empty_text(self):
+        fallback = Mock()
+        self.translator.translate.return_value = '  \n'
+        fallback.translate.return_value = 'fallback result'
+        translation = Translation(
+            self.translator, self.glossary, fallback, ['cannot translate'])
+
+        result = translation.translate_text(0, 'text')
+
+        self.assertEqual('fallback result', result)
+
+    def test_translate_text_uses_fallback_when_primary_stream_is_empty(self):
+        fallback = Mock()
+        self.translator.translate.return_value = (chunk for chunk in [])
+        fallback.translate.return_value = 'fallback result'
+        translation = Translation(
+            self.translator, self.glossary, fallback, ['cannot translate'])
+
+        result = translation.translate_text(0, 'text')
+
+        self.assertEqual('fallback result', result)
+
+    def test_translate_text_detects_refusal_in_stream(self):
+        fallback = Mock()
+        self.translator.translate.return_value = (
+            chunk for chunk in ['I cannot ', 'translate this'])
+        fallback.translate.return_value = 'fallback result'
+        translation = Translation(
+            self.translator, self.glossary, fallback, ['cannot translate'])
+
+        result = translation.translate_text(0, 'text')
+
+        self.assertEqual('fallback result', result)
+
+    def test_translate_text_fails_after_both_engines_fail(self):
+        fallback = Mock()
+        self.translator.translate.side_effect = Exception('primary failed')
+        fallback.translate.side_effect = Exception('fallback failed')
+        self.translator.request_attempt = 0
+        self.translator.max_error_count = 10
+        self.translator.match_error.return_value = False
+        translation = Translation(
+            self.translator, self.glossary, fallback, ['cannot translate'])
+
+        with self.assertRaises(TranslationFailed) as cm:
+            translation.translate_text(0, 'text')
+
+        self.assertIn('primary failed', str(cm.exception))
+        self.assertIn('fallback failed', str(cm.exception))
+
+    def test_translate_text_does_not_fallback_when_primary_cancels(self):
+        fallback = Mock()
+        self.translator.translate.side_effect = TranslationCanceled('stop')
+        translation = Translation(
+            self.translator, self.glossary, fallback, ['cannot translate'])
+
+        with self.assertRaises(TranslationCanceled):
+            translation.translate_text(0, 'text')
+
+        fallback.translate.assert_not_called()
+
+    def test_translate_paragraph_records_fallback_engine(self):
+        fallback = Mock()
+        self.translator.translate.side_effect = Exception('primary failed')
+        fallback.translate.return_value = 'fallback result'
+        fallback.name = 'Fallback'
+        fallback.merge_enabled = False
+        fallback.get_target_lang.return_value = 'zh'
+        self.glossary.replace.return_value = 'text'
+        self.glossary.restore.return_value = '备用结果'
+        self.paragraph.translation = ''
+        translation = Translation(
+            self.translator, self.glossary, fallback, ['cannot translate'])
+
+        translation.translate_paragraph(self.paragraph)
+
+        self.assertEqual('备用结果', self.paragraph.translation)
+        self.assertEqual('Fallback', self.paragraph.engine_name)
+        self.assertEqual('zh', self.paragraph.target_lang)
 
     def test_set_fresh(self):
         self.assertFalse(self.translation.fresh)
@@ -288,3 +417,79 @@ class TestTranslation(unittest.TestCase):
         self.translation.translate_paragraph(self.paragraph)
 
         self.paragraph.do_aligment.assert_called_once_with('\n\n')
+
+
+class TestGetTranslation(unittest.TestCase):
+    @patch(f'{module_name}.get_config')
+    def test_custom_engine_classes_keep_independent_configuration(
+            self, mock_get_config):
+        custom_engines = {
+            name: '{{"name":"{}","languages":{{"English":"en"}},'
+            '"request":{{"url":"https://{}.example"}},'
+            '"response":"response"}}'.format(name, name.lower())
+            for name in ('Primary Custom', 'Fallback Custom')}
+        config = mock_get_config.return_value
+        config.get.side_effect = lambda key: {
+            'custom_engines': custom_engines,
+            'engine_preferences': {},
+        }.get(key)
+
+        primary_class = get_engine_class('Primary Custom')
+        fallback_class = get_engine_class('Fallback Custom')
+
+        self.assertIsNot(primary_class, fallback_class)
+        self.assertEqual('Primary Custom', primary_class.name)
+        self.assertEqual('Fallback Custom', fallback_class.name)
+
+    @patch(f'{module_name}.get_translator')
+    @patch(f'{module_name}.get_engine_class')
+    @patch(f'{module_name}.get_config')
+    def test_builds_configured_fallback_engine(
+            self, mock_get_config, mock_get_engine_class,
+            mock_get_translator):
+        config = mock_get_config.return_value
+        config.get.side_effect = lambda key: {
+            'fallback_engine': 'Fallback',
+            'fallback_refusal_keywords': ['cannot translate', '无法翻译'],
+            'log_translation': False,
+        }.get(key)
+        primary = Mock()
+        primary.name = 'Primary'
+        primary.source_lang = 'English'
+        primary.target_lang = 'Chinese'
+        fallback_class = Mock()
+        fallback = Mock()
+        mock_get_engine_class.return_value = fallback_class
+        mock_get_translator.return_value = fallback
+
+        translation = get_translation(primary)
+
+        mock_get_engine_class.assert_called_once_with('Fallback')
+        mock_get_translator.assert_called_once_with(fallback_class)
+        fallback.set_source_lang.assert_called_once_with('English')
+        fallback.set_target_lang.assert_called_once_with('Chinese')
+        self.assertIs(fallback, translation.fallback_translator)
+        self.assertEqual(
+            ['cannot translate', '无法翻译'],
+            translation.refusal_keywords)
+
+    @patch(f'{module_name}.get_translator')
+    @patch(f'{module_name}.get_engine_class')
+    @patch(f'{module_name}.get_config')
+    def test_ignores_fallback_when_it_matches_primary(
+            self, mock_get_config, mock_get_engine_class,
+            mock_get_translator):
+        config = mock_get_config.return_value
+        config.get.side_effect = lambda key: {
+            'fallback_engine': 'Primary',
+            'fallback_refusal_keywords': ['cannot translate'],
+            'log_translation': False,
+        }.get(key)
+        primary = Mock()
+        primary.name = 'Primary'
+
+        translation = get_translation(primary)
+
+        mock_get_engine_class.assert_not_called()
+        mock_get_translator.assert_not_called()
+        self.assertIsNone(translation.fallback_translator)
