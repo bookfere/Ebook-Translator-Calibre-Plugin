@@ -240,8 +240,10 @@ class PageElement(Element):
 
     def _polish_translation(self, translation):
         translation = translation.replace('\n', '<br/>')
-        # Condense consecutive letters to a maximum of four.
-        return re.sub(r'((\w)\2{3})\2*', r'\1', translation)
+        # Condense a run of the same letter down to four (some engines emit
+        # repetition artifacts). Digits and underscores are excluded so that
+        # legitimate content such as "100000000" is not silently corrupted.
+        return re.sub(r'(([^\W\d_])\2{3})\2*', r'\1', translation)
 
     def _create_new_element(
             self, name, content='', copy_attrs=True, excluding_attrs=[]):
