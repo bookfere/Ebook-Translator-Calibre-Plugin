@@ -106,7 +106,7 @@ def convert_srt(
     log.info(_('Starting to output subtitles file...'))
     log.info(sep())
 
-    with open(output_path, 'w') as file:
+    with open(output_path, 'w', encoding='utf-8') as file:
         file.write('\n\n'.join([e.get_translation() for e in elements]))
 
     log.info(_('The translation of the subtitles file was completed.'))
