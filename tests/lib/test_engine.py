@@ -1141,9 +1141,47 @@ class TestCustom(unittest.TestCase):
     },
     "response": "response['text']"
 }"""
+        self.engine_data = json.loads(engine_data)
+        CustomTranslate.set_engine_data(self.engine_data)
 
-        engine_data = json.loads(engine_data)
-        CustomTranslate.set_engine_data(engine_data)
+    def test_custom_placeholder_creation(self):
+        original_engine_data = self.engine_data.copy()
+
+        # Verify default placeholder
+        default_placeholder = ('{{{{id_{}}}}}', r'({{\s*)+id\s*_\s*{}\s*(\s*}})+')
+        self.assertEqual(default_placeholder, CustomTranslate.placeholder)
+
+        # Incomplete glossary_config should not change the placeholder
+        incomplete_config = r"""{
+            "glossary_config": {
+                "placeholder_pattern": "//id_{}//"
+            }
+        }"""
+        CustomTranslate.set_engine_data(original_engine_data | json.loads(incomplete_config))
+        self.assertEqual(default_placeholder, CustomTranslate.placeholder)
+
+        # Incorrect glossary_config should not change the placeholder
+        incorrect_config = r"""{
+            "glossary_config": {
+                "wrong_key": "//id_{}//",
+                "match_pattern": "(//\\s*)+id\\s*_\\s*{}\\s*(\\s*//)+"
+            }
+        }"""
+        CustomTranslate.set_engine_data(original_engine_data | json.loads(incorrect_config))
+        self.assertEqual(default_placeholder, CustomTranslate.placeholder)
+
+        correct_config = r"""{
+            "glossary_config": {
+                "placeholder_pattern": "//id_{}//",
+                "match_pattern": "(//\\s*)+id\\s*_\\s*{}\\s*(\\s*//)+"
+            }
+        }"""
+        CustomTranslate.set_engine_data(original_engine_data | json.loads(correct_config))
+        custom_placeholder = ('//id_{}//', r'(//\s*)+id\s*_\s*{}\s*(\s*//)+')
+        self.assertEqual(custom_placeholder, CustomTranslate.placeholder)
+
+        # Restore original engine data because set_engine_data is class-wide
+        CustomTranslate.set_engine_data(original_engine_data)
 
     @patch(module_name + '.base.request')
     def test_translate(self, mock_request):
