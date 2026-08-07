@@ -1,3 +1,17 @@
+## v2.4.2
+
+1. feat: Move cache path from temp to a persistent folder. Credit to @Sansui233.
+2. feat: Add toggleable horizontal/vertical review layout. Credit to @lazydao.
+3. feat: Add support for SOCKS5 proxy. @Credit to Milor123.
+4. feat: add Japanese UI language. Credit to @Utakata.
+5. feat: Add a button to toggle word wrap. Credit to @lazydao.
+6. fix: Update Microsoft Edge translate.
+6. fix: incorrect output format for PGN files.
+7. fix: failed to fetch GenAI models list.
+8. All Bug fixes and feature enhancements. (8e91461...d56b4d4)
+
+---
+
 ## v2.4.1
 
 Added features and fixed bugs as follows:
