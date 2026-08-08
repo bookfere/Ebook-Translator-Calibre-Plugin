@@ -154,27 +154,30 @@ class TranslationSetting(QDialog):
         mode_layout = QGridLayout(mode_group)
         advanced_mode = QRadioButton(_('Advanced Mode'))
         batch_mode = QRadioButton(_('Batch Mode'))
+        novel_mode = QRadioButton(_('Novel Mode'))
         icon_button = QLabel()
         icon_button.setPixmap(self.icon.pixmap(52, 52))
         mode_layout.addWidget(icon_button, 0, 0, 3, 1)
         mode_layout.addWidget(advanced_mode, 0, 1)
         mode_layout.addWidget(batch_mode, 0, 2)
-        mode_layout.addItem(QSpacerItem(0, 0), 0, 3)
+        mode_layout.addWidget(novel_mode, 0, 3)
+        mode_layout.addItem(QSpacerItem(0, 0), 0, 4)
         mode_layout.addWidget(self._divider(), 1, 1, 1, 4)
         mode_layout.addWidget(QLabel(
             _('Choose a translation mode for clicking the icon button.')),
             2, 1, 1, 4)
-        mode_layout.setColumnStretch(3, 1)
+        mode_layout.setColumnStretch(4, 1)
         layout.addWidget(mode_group)
 
-        mode_map = dict(enumerate(['advanced', 'batch']))
+        mode_map = dict(enumerate(['advanced', 'batch', 'novel']))
         mode_rmap = dict((v, k) for k, v in mode_map.items())
         mode_btn_group = QButtonGroup(mode_group)
         mode_btn_group.addButton(advanced_mode, 0)
         mode_btn_group.addButton(batch_mode, 1)
+        mode_btn_group.addButton(novel_mode, 2)
 
         preferred_mode = self.config.get('preferred_mode')
-        if preferred_mode is not None:
+        if preferred_mode is not None and preferred_mode in mode_rmap:
             mode_btn_group.button(
                 mode_rmap.get(preferred_mode)).setChecked(True)
         mode_btn_group.idClicked.connect(
@@ -571,6 +574,262 @@ class TranslationSetting(QDialog):
 
         layout.addWidget(genai_group)
 
+        # Novel Mode settings (visible only for GenAI engines).
+        novel_group = QGroupBox(_('Novel Mode'))
+        novel_group.setVisible(False)
+        novel_layout = QFormLayout(novel_group)
+        self.apply_form_layout_policy(novel_layout)
+
+        novel_chapter_source = QComboBox()
+        novel_chapter_source.addItem(
+            _('Table of Contents (level 1)'), 'toc_level_1')
+        novel_chapter_source.addItem(
+            _('Table of Contents (level 2)'), 'toc_level_2')
+        novel_chapter_source.addItem(
+            _('One XHTML file per chapter'), 'xhtml_file')
+        novel_chapter_source.setToolTip(_(
+            'How to detect chapter boundaries.\n\n'
+            '- TOC level 1: use the top-level Table of Contents entries as '
+            'chapter boundaries. Best for single-book EPUBs.\n'
+            '- TOC level 2: use the second-level TOC entries (sub-chapters). '
+            'Recommended for multi-book anthologies (e.g. a complete series '
+            'in one EPUB) where level 1 maps each full novel to a single '
+            '"chapter". Level 2 maps individual chapters, giving the LLM '
+            'the correct chapter title and preventing front-matter pages '
+            '(Cover, Titlepage) from polluting the first translation chunk.\n'
+            '- One XHTML file: each XHTML file in the spine becomes one '
+            'chapter. Useful when the TOC is missing or unreliable.'))
+        novel_layout.addRow(
+            _('Chapter detection'), novel_chapter_source)
+        self.disable_wheel_event(novel_chapter_source)
+
+        novel_front_matter_min = QSpinBox()
+        novel_front_matter_min.setRange(0, 5000)
+        novel_front_matter_min.setSingleStep(50)
+        novel_front_matter_min.setToolTip(_(
+            'XHTML pages whose total text content is shorter than this '
+            'many characters are treated as front/back matter (Cover, '
+            'Titlepage, decorative pages) and excluded from chapter '
+            'narrative content. Their paragraphs are still translated by '
+            'the auxiliary pipeline (metadata/TOC titles).\n\n'
+            'A typical Titlepage in a multi-book anthology contains only '
+            'the book title as a single heading (~25 chars) -- well below '
+            'the default of 100. Set to 0 to include all pages.'))
+        novel_layout.addRow(
+            _('Skip front matter under (chars)'), novel_front_matter_min)
+        self.disable_wheel_event(novel_front_matter_min)
+
+        novel_chunk_tokens = QSpinBox()
+        novel_chunk_tokens.setRange(1024, 200000)
+        novel_chunk_tokens.setSingleStep(1024)
+        novel_chunk_tokens.setToolTip(_(
+            'Maximum estimated tokens per translation chunk. Together '
+            'with "Max paragraphs per chunk" it forms a dual-cap: the '
+            'chunk is closed as soon as either limit is reached.'))
+        novel_layout.addRow(
+            _('Max tokens per chunk'), novel_chunk_tokens)
+        self.disable_wheel_event(novel_chunk_tokens)
+
+        novel_max_paragraphs = QSpinBox()
+        novel_max_paragraphs.setRange(0, 500)
+        novel_max_paragraphs.setSingleStep(10)
+        novel_max_paragraphs.setToolTip(_(
+            'Maximum number of paragraphs per translation chunk. '
+            'Prevents the LLM from losing track of the [N] alignment '
+            'markers when paragraphs are short (dialogue, TOC lists). '
+            'The chunk is closed as soon as either the token budget or '
+            'this paragraph cap is reached, whichever comes first.\n\n'
+            'Recommended: 40 for small models (7B), 80 for medium (26B '
+            'like gemma), 100+ for large models (Claude, GPT-4). '
+            'Set to 0 to disable and use only the token budget.'))
+        novel_layout.addRow(
+            _('Max paragraphs per chunk'), novel_max_paragraphs)
+        self.disable_wheel_event(novel_max_paragraphs)
+
+        novel_overlap = QSpinBox()
+        novel_overlap.setRange(0, 50)
+        novel_overlap.setSingleStep(1)
+        novel_overlap.setToolTip(_(
+            'Number of already-translated paragraphs from the previous '
+            'chunk to replay as context for the next chunk. Similar to '
+            'the sliding-window overlap used in RAG chunking, this '
+            'preserves dialogue threads, pronoun referents and stylistic '
+            'continuity across chunk boundaries. The overlap paragraphs '
+            'are shown to the LLM as already-translated text (do NOT '
+            'retranslate), so they consume some of the token budget but '
+            'do not cause double translations.\n\n'
+            'Recommended: 3 for most novels; 5-10 for dense narrative '
+            'with long scenes. Set to 0 to disable overlap.'))
+        novel_layout.addRow(
+            _('Overlap paragraphs'), novel_overlap)
+        self.disable_wheel_event(novel_overlap)
+
+        novel_structured = QComboBox()
+        novel_structured.addItem(_('Auto (recommended)'), 'auto')
+        novel_structured.addItem(_('Off (text markers [N])'), 'off')
+        novel_structured.addItem(_('Force JSON on any engine'), 'force')
+        novel_structured.setToolTip(_(
+            'How to format the LLM response for paragraph alignment.\n\n'
+            '- Auto: use native JSON structured output when the engine '
+            'supports it (ChatGPT, Gemini, Ollama via OpenAI-compatible '
+            'endpoint). Falls back to text markers [N] otherwise. '
+            'Recommended.\n'
+            '- Off: always use text markers [N]. Slightly less reliable '
+            'above 60-80 paragraphs per chunk on medium models but '
+            'works everywhere.\n'
+            '- Force: always request JSON output, even from engines that '
+            'do not advertise support. Useful for custom OpenAI-compatible '
+            'endpoints (Ollama exotics, LM Studio, vLLM) that accept '
+            '"response_format" but are not recognised by the plugin.\n\n'
+            'With structured output active you can safely raise '
+            '"Max paragraphs per chunk" to 80+ without markers being '
+            'dropped by the model.'))
+        novel_layout.addRow(
+            _('Structured output'), novel_structured)
+        self.disable_wheel_event(novel_structured)
+
+        novel_context_tokens = QSpinBox()
+        novel_context_tokens.setRange(0, 100000)
+        novel_context_tokens.setSingleStep(256)
+        novel_layout.addRow(
+            _('Reserved for context (tokens)'), novel_context_tokens)
+        self.disable_wheel_event(novel_context_tokens)
+
+        novel_summary_tokens = QSpinBox()
+        novel_summary_tokens.setRange(50, 5000)
+        novel_summary_tokens.setSingleStep(50)
+        novel_layout.addRow(
+            _('Summary target size (tokens)'), novel_summary_tokens)
+        self.disable_wheel_event(novel_summary_tokens)
+
+        novel_glossary_max = QSpinBox()
+        novel_glossary_max.setRange(10, 5000)
+        novel_glossary_max.setSingleStep(10)
+        novel_layout.addRow(
+            _('Glossary max entries'), novel_glossary_max)
+        self.disable_wheel_event(novel_glossary_max)
+
+        novel_min_chars = QSpinBox()
+        novel_min_chars.setRange(0, 100000)
+        novel_min_chars.setSingleStep(50)
+        novel_min_chars.setToolTip(_(
+            'Chapters shorter than this many translated characters skip '
+            'the summary and glossary LLM calls. Useful to avoid wasting '
+            'time on Copyright, Table of Contents, About the Author, '
+            'etc. Set to 0 to always run summary/glossary.'))
+        novel_layout.addRow(
+            _('Skip context under (chars)'), novel_min_chars)
+        self.disable_wheel_event(novel_min_chars)
+
+        novel_translation_prompt = QPlainTextEdit()
+        novel_translation_prompt.setFixedHeight(90)
+        novel_layout.addRow(
+            _('Translation prompt'), novel_translation_prompt)
+        novel_summary_prompt = QPlainTextEdit()
+        novel_summary_prompt.setFixedHeight(70)
+        novel_layout.addRow(
+            _('Summary prompt'), novel_summary_prompt)
+        novel_glossary_prompt = QPlainTextEdit()
+        novel_glossary_prompt.setFixedHeight(70)
+        novel_layout.addRow(
+            _('Glossary prompt'), novel_glossary_prompt)
+
+        layout.addWidget(novel_group)
+
+        # Wire novel settings to config on change.
+        def load_novel_settings():
+            from .lib.novel import (
+                DEFAULT_NOVEL_TRANSLATION_PROMPT,
+                DEFAULT_NOVEL_SUMMARY_PROMPT,
+                DEFAULT_NOVEL_GLOSSARY_PROMPT)
+            src = self.config.get(
+                'novel_chapter_source', 'toc_level_1') or 'toc_level_1'
+            idx = novel_chapter_source.findData(src)
+            if idx >= 0:
+                novel_chapter_source.setCurrentIndex(idx)
+            novel_front_matter_min.setValue(int(self.config.get(
+                'novel_front_matter_min_chars', 100) or 0))
+            novel_chunk_tokens.setValue(int(self.config.get(
+                'novel_chunk_tokens', 12000) or 12000))
+            novel_max_paragraphs.setValue(int(self.config.get(
+                'novel_max_paragraphs_per_chunk', 80) or 0))
+            novel_overlap.setValue(int(self.config.get(
+                'novel_overlap_paragraphs', 3) or 0))
+            structured_mode = self.config.get(
+                'novel_structured_output', 'auto') or 'auto'
+            idx = novel_structured.findData(structured_mode)
+            if idx >= 0:
+                novel_structured.setCurrentIndex(idx)
+            novel_context_tokens.setValue(int(self.config.get(
+                'novel_context_tokens', 1500) or 1500))
+            novel_summary_tokens.setValue(int(self.config.get(
+                'novel_summary_tokens', 400) or 400))
+            novel_glossary_max.setValue(int(self.config.get(
+                'novel_glossary_max_entries', 200) or 200))
+            novel_min_chars.setValue(int(self.config.get(
+                'novel_min_chars_for_context', 300) or 0))
+            novel_translation_prompt.setPlaceholderText(
+                DEFAULT_NOVEL_TRANSLATION_PROMPT)
+            novel_translation_prompt.setPlainText(
+                self.config.get('novel_translation_prompt') or '')
+            novel_summary_prompt.setPlaceholderText(
+                DEFAULT_NOVEL_SUMMARY_PROMPT)
+            novel_summary_prompt.setPlainText(
+                self.config.get('novel_summary_prompt') or '')
+            novel_glossary_prompt.setPlaceholderText(
+                DEFAULT_NOVEL_GLOSSARY_PROMPT)
+            novel_glossary_prompt.setPlainText(
+                self.config.get('novel_glossary_prompt') or '')
+        load_novel_settings()
+
+        def _persist_novel(key, cast):
+            def _handler(value):
+                try:
+                    self.config.update(**{key: cast(value)})
+                except (ValueError, TypeError):
+                    pass
+            return _handler
+
+        novel_chapter_source.currentIndexChanged.connect(
+            lambda _idx: self.config.update(
+                novel_chapter_source=novel_chapter_source.currentData()))
+        novel_front_matter_min.valueChanged.connect(
+            _persist_novel('novel_front_matter_min_chars', int))
+        novel_chunk_tokens.valueChanged.connect(
+            _persist_novel('novel_chunk_tokens', int))
+        novel_max_paragraphs.valueChanged.connect(
+            _persist_novel('novel_max_paragraphs_per_chunk', int))
+        novel_overlap.valueChanged.connect(
+            _persist_novel('novel_overlap_paragraphs', int))
+        novel_structured.currentIndexChanged.connect(
+            lambda _idx: self.config.update(
+                novel_structured_output=novel_structured.currentData()))
+        novel_context_tokens.valueChanged.connect(
+            _persist_novel('novel_context_tokens', int))
+        novel_summary_tokens.valueChanged.connect(
+            _persist_novel('novel_summary_tokens', int))
+        novel_glossary_max.valueChanged.connect(
+            _persist_novel('novel_glossary_max_entries', int))
+        novel_min_chars.valueChanged.connect(
+            _persist_novel('novel_min_chars_for_context', int))
+
+        def _persist_prompt(widget, key):
+            def _handler():
+                text = widget.toPlainText().strip()
+                if text:
+                    self.config.update(**{key: text})
+                else:
+                    self.config.delete(key)
+            return _handler
+
+        novel_translation_prompt.textChanged.connect(
+            _persist_prompt(
+                novel_translation_prompt, 'novel_translation_prompt'))
+        novel_summary_prompt.textChanged.connect(
+            _persist_prompt(novel_summary_prompt, 'novel_summary_prompt'))
+        novel_glossary_prompt.textChanged.connect(
+            _persist_prompt(novel_glossary_prompt, 'novel_glossary_prompt'))
+
         # Setup genAI model
         def init_ai_models(model=None):
             if not issubclass(self.current_engine, GenAI):
@@ -760,8 +1019,10 @@ class TranslationSetting(QDialog):
                 lambda value: config.update(max_error_count=value))
             # Show GenAI preferences
             genai_group.setVisible(False)
+            novel_group.setVisible(False)
             if issubclass(self.current_engine, GenAI):
                 genai_group.setVisible(True)
+                novel_group.setVisible(True)
                 show_genai_preferences(config)
         choose_default_engine(engine_list.findData(self.current_engine.name))
         engine_list.currentIndexChanged.connect(choose_default_engine)

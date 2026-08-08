@@ -740,6 +740,139 @@ epub:type="pagebreak"/>b</code></p></body>
         self.assertEqual('abc', a.get('href'))
         self.assertEqual('A', a.text)
 
+    def test_add_translation_only_preserves_nested_links(self):
+        """position='only' on a <nav>/<ol>/<li> with nested <a href> must
+        keep the href attributes so TOC navigation survives translation."""
+        xhtml = etree.XML(rb"""<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head><title>Test</title></head>
+    <body>
+        <ol>
+            <li><a href="ch1.xhtml">Chapter One</a></li>
+            <li><a href="ch2.xhtml">Chapter Two</a></li>
+        </ol>
+    </body>
+</html>""")
+        ol = xhtml.find('.//x:ol', namespaces=ns)
+        element = PageElement(ol, 'p1')
+        element.position = 'only'
+        element.set_placeholder(Base.placeholder)
+        element.set_remove_pattern(None)
+        element.set_reserve_pattern(None)
+        element.get_content()
+        element.add_translation('Capitolo Uno\nCapitolo Due')
+
+        # After only-mode replacement the <ol> must still be present.
+        new_ol = xhtml.find('.//x:ol', namespaces=ns)
+        self.assertIsNotNone(new_ol)
+
+        # Both <a> elements must survive with their original hrefs.
+        links = xhtml.findall('.//x:a', namespaces=ns)
+        self.assertEqual(2, len(links))
+        hrefs = [a.get('href') for a in links]
+        self.assertIn('ch1.xhtml', hrefs)
+        self.assertIn('ch2.xhtml', hrefs)
+
+        # The text of the links must be the translated version.
+        texts = [a.text for a in links]
+        self.assertTrue(
+            any(t and ('Capitolo' in t or 'Uno' in t) for t in texts),
+            'At least one translated text expected, got: %s' % texts)
+
+    def test_add_translation_only_li_preserves_link(self):
+        """position='only' on a <li> with a nested <a href> must keep the
+        href (TOC list item)."""
+        xhtml = etree.XML(rb"""<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head><title>Test</title></head>
+    <body>
+        <ul>
+            <li><a href="ch3.xhtml">Chapter Three</a></li>
+        </ul>
+    </body>
+</html>""")
+        li = xhtml.find('.//x:li', namespaces=ns)
+        element = PageElement(li, 'p1')
+        element.position = 'only'
+        element.set_placeholder(Base.placeholder)
+        element.set_remove_pattern(None)
+        element.set_reserve_pattern(None)
+        element.get_content()
+        element.add_translation('Capitolo Tre')
+
+        new_li = xhtml.find('.//x:li', namespaces=ns)
+        self.assertIsNotNone(new_li)
+        a = xhtml.find('.//x:a', namespaces=ns)
+        self.assertIsNotNone(a)
+        self.assertEqual('ch3.xhtml', a.get('href'))
+
+    def test_add_translation_only_no_links_unchanged(self):
+        """position='only' on a plain <p> without links must behave
+        exactly as before (flat text replacement)."""
+        xhtml = etree.XML(rb"""<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head><title>Test</title></head>
+    <body>
+        <p id="para1">Hello world.</p>
+    </body>
+</html>""")
+        p = xhtml.find('.//x:p', namespaces=ns)
+        element = PageElement(p, 'p1')
+        element.position = 'only'
+        element.set_placeholder(Base.placeholder)
+        element.set_remove_pattern(None)
+        element.set_reserve_pattern(None)
+        element.get_content()
+        element.add_translation('Ciao mondo.')
+
+        new_p = xhtml.find('.//x:p', namespaces=ns)
+        self.assertIsNotNone(new_p)
+        # id is preserved on the translated element in only mode.
+        self.assertEqual('para1', new_p.get('id'))
+        self.assertEqual('Ciao mondo.', new_p.text)
+        # No child elements (plain paragraph has no structural links).
+        self.assertEqual(0, len(list(new_p)))
+
+    def test_add_translation_only_link_with_tail_no_duplication(self):
+        """Regression test for the tail-duplication bug: when a structural
+        link element has a tail (text after the closing tag of the child),
+        e.g. <li><a href="...">Chapter One</a>: The Wrong Door</li>,
+        the translated output must NOT append the original tail text.
+        """
+        xhtml = etree.XML(rb"""<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head><title>Test</title></head>
+    <body>
+        <ul>
+            <li><a href="ch1.xhtml">Chapter One</a>: The Wrong Door</li>
+        </ul>
+    </body>
+</html>""")
+        li = xhtml.find('.//x:li', namespaces=ns)
+        element = PageElement(li, 'p1')
+        element.position = 'only'
+        element.set_placeholder(Base.placeholder)
+        element.set_remove_pattern(None)
+        element.set_reserve_pattern(None)
+        element.get_content()
+        element.add_translation('Capitolo Uno: La porta sbagliata')
+
+        new_li = xhtml.find('.//x:li', namespaces=ns)
+        self.assertIsNotNone(new_li)
+
+        a = xhtml.find('.//x:a', namespaces=ns)
+        self.assertIsNotNone(a)
+        self.assertEqual('ch1.xhtml', a.get('href'))
+
+        full_text = ''.join(new_li.itertext())
+        self.assertNotIn('The Wrong Door', full_text,
+                         'Original tail must not appear in translated output.')
+        self.assertIn('Capitolo', full_text)
+
     def test_add_translation_table(self):
         pass
 

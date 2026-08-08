@@ -1,4 +1,5 @@
 import unittest
+import socket
 from unittest.mock import patch
 from types import GeneratorType
 
@@ -8,7 +9,7 @@ from ...vendor.cssselect import SelectorError
 
 from ...lib.utils import (
     ns, css, css_to_xpath, create_xpath, uid, trim, chunk, group, open_file,
-    request)
+    request, keepalive_socket, _KeepAliveSocket, original_socket)
 
 
 module_name = 'calibre_plugins.ebook_translator.lib.utils'
@@ -198,3 +199,64 @@ class TestUtils(unittest.TestCase):
             'https://example.com/api', 'test data',
             headers={'User-Agent': 'Test/Agent'}, timeout=30, method='POST')
         browser.open.assert_called_once_with(mock_request())
+
+
+class TestKeepAliveSocket(unittest.TestCase):
+    """Tests for the TCP keepalive helper used by novel-mode structured
+    output (see lib/novel.py::_translate_with_retry_structured)."""
+
+    def test_class_is_a_socket_subclass(self):
+        # _KeepAliveSocket must be usable as a drop-in replacement for
+        # socket.socket wherever a factory is expected.
+        self.assertTrue(issubclass(_KeepAliveSocket, socket.socket))
+
+    def test_can_be_instantiated(self):
+        # Instantiation must not fail (does not open a real connection).
+        s = _KeepAliveSocket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            self.assertGreater(s.fileno(), 0)
+        finally:
+            s.close()
+
+    def test_keepalive_socket_swaps_and_restores(self):
+        # Context manager must swap socket.socket while inside the block
+        # and put the original one back on exit.
+        before = socket.socket
+        try:
+            with keepalive_socket(enable=True):
+                self.assertIs(socket.socket, _KeepAliveSocket)
+            self.assertIs(socket.socket, before)
+        finally:
+            # Safety net: force restore in case the test fails midway so
+            # we do not pollute subsequent tests.
+            socket.socket = before
+
+    def test_keepalive_socket_disabled_is_noop(self):
+        before = socket.socket
+        with keepalive_socket(enable=False):
+            self.assertIs(socket.socket, before)
+        self.assertIs(socket.socket, before)
+
+    def test_keepalive_socket_restores_on_exception(self):
+        before = socket.socket
+        with self.assertRaises(RuntimeError):
+            with keepalive_socket(enable=True):
+                self.assertIs(socket.socket, _KeepAliveSocket)
+                raise RuntimeError('boom')
+        self.assertIs(socket.socket, before)
+
+    def test_keepalive_socket_skips_when_already_patched(self):
+        # If someone else (e.g. socks_proxy) has already patched
+        # socket.socket, we must NOT overwrite their patch.
+        class _AlreadyPatched(socket.socket):
+            pass
+
+        before = socket.socket
+        socket.socket = _AlreadyPatched
+        try:
+            with keepalive_socket(enable=True):
+                # Our wrapper must have detected the existing patch and
+                # left socket.socket untouched.
+                self.assertIs(socket.socket, _AlreadyPatched)
+        finally:
+            socket.socket = before
