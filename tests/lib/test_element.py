@@ -437,7 +437,7 @@ class TestPageElement(unittest.TestCase):
         self.assertEqual(
             '<img src="w2.jpg"></img>', self.element.reserve_elements[4])
         self.assertEqual(
-            '<img alt="{\D}" src="w3.jpg"></img>', # type: ignore
+            r'<img alt="{\D}" src="w3.jpg"></img>', # type: ignore
             self.element.reserve_elements[5])
         self.assertEqual(
             '<img src="w3.jpg"></img>', self.element.reserve_elements[6])

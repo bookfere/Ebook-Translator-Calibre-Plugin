@@ -14,7 +14,7 @@ module_name = 'calibre_plugins.ebook_translator.lib.translation'
 class TestGlossary(unittest.TestCase):
     @patch(f'{module_name}.open')
     def test_load_from_file(self, mock_open):
-        def mock_open_function(path, mode, newline=None):
+        def mock_open_function(path, mode, newline=None, encoding=None):
             if path == '/path/to/glossary.txt':
                 file = Mock()
                 file.read.return_value.strip.return_value = 'a\n\n\nb\nZ\n'

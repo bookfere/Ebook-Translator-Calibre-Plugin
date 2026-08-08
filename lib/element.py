@@ -641,6 +641,8 @@ class ElementHandler:
         self.position = position
 
         self.merge_length = 0
+        self.merge_by_chapter = False
+        self.chapter_merge_length = 8000
         self.target_direction = None
 
         self.translation_lang = None
@@ -658,7 +660,15 @@ class ElementHandler:
         self.merge_length = length
 
     def get_merge_length(self):
+        if self.merge_by_chapter:
+            return self.chapter_merge_length
         return self.merge_length
+
+    def set_merge_by_chapter(self, enable):
+        self.merge_by_chapter = enable
+
+    def set_chapter_merge_length(self, length):
+        self.chapter_merge_length = length
 
     def set_target_direction(self, direction):
         self.target_direction = direction
@@ -739,7 +749,35 @@ class ElementHandler:
 
 
 class ElementHandlerMerge(ElementHandler):
+    def _prepare_element(self, element):
+        """Configure a single element with handler settings."""
+        element.set_placeholder(self.placeholder)
+        element.set_position(self.position)
+        element.set_target_direction(self.target_direction)
+        element.set_translation_lang(self.translation_lang)
+        element.set_original_color(self.original_color)
+        element.set_translation_color(self.translation_color)
+        if self.column_gap is not None:
+            element.set_column_gap(self.column_gap)
+        element.set_remove_pattern(self.remove_pattern)
+        element.set_reserve_pattern(self.reserve_pattern)
+        return element.get_raw(), element.get_content() + self.separator
+
+    def _flush_merge(self, oid, raw, txt):
+        """Flush accumulated merged text into an original entry."""
+        if not txt:
+            return oid
+        md5 = uid('%s%s' % (oid, txt))
+        self.originals.append((oid, md5, raw, txt, False))
+        return oid + 1
+
     def prepare_original(self, elements):
+        if self.merge_by_chapter:
+            return self._prepare_by_chapter(elements)
+        return self._prepare_by_length(elements)
+
+    def _prepare_by_length(self, elements):
+        """Original behaviour: merge consecutive elements up to merge_length chars."""
         raw = ''
         txt = ''
         oid = 0
@@ -747,32 +785,49 @@ class ElementHandlerMerge(ElementHandler):
             self.elements[eid] = element
             if element.ignored:
                 continue
-            element.set_placeholder(self.placeholder)
-            element.set_position(self.position)
-            element.set_target_direction(self.target_direction)
-            element.set_translation_lang(self.translation_lang)
-            element.set_original_color(self.original_color)
-            element.set_translation_color(self.translation_color)
-            if self.column_gap is not None:
-                element.set_column_gap(self.column_gap)
-            element.set_remove_pattern(self.remove_pattern)
-            element.set_reserve_pattern(self.reserve_pattern)
-            code = element.get_raw()
-            content = element.get_content()
-            content += self.separator
+            code, content = self._prepare_element(element)
             if len(txt + content) < self.merge_length:
                 raw += code + self.separator
                 txt += content
                 continue
             elif txt:
-                md5 = uid('%s%s' % (oid, txt))
-                self.originals.append((oid, md5, raw, txt, False))
-                oid += 1
+                oid = self._flush_merge(oid, raw, txt)
             raw = code
             txt = content
-        md5 = uid('%s%s' % (oid, txt))
-        if txt:
-            self.originals.append((oid, md5, raw, txt, False))
+        oid = self._flush_merge(oid, raw, txt)
+        return self.originals
+
+    def _prepare_by_chapter(self, elements):
+        """Chapter-level merge: group elements by page_id (XHTML chapter),
+        then subdivide if a chapter exceeds chapter_merge_length."""
+        oid = 0
+        # Group elements by page_id, preserving order within each page
+        pages = {}
+        page_order = []
+        for eid, element in enumerate(elements):
+            self.elements[eid] = element
+            if element.ignored:
+                continue
+            page_id = getattr(element, 'page_id', None) or '__default__'
+            if page_id not in pages:
+                pages[page_id] = []
+                page_order.append(page_id)
+            pages[page_id].append(element)
+        # Process each page/chapter
+        for page_id in page_order:
+            page_elements = pages[page_id]
+            raw = ''
+            txt = ''
+            for element in page_elements:
+                code, content = self._prepare_element(element)
+                if self.chapter_merge_length > 0 and \
+                        len(txt + content) > self.chapter_merge_length and txt:
+                    oid = self._flush_merge(oid, raw, txt)
+                    raw = ''
+                    txt = ''
+                raw += code + self.separator
+                txt += content
+            oid = self._flush_merge(oid, raw, txt)
         return self.originals
 
     def align_paragraph(self, paragraph):
@@ -885,9 +940,11 @@ def get_element_handler(placeholder, separator, direction):
     position = config.get('translation_position') or 'below'
     position = position_alias.get(position) or position
     handler = ElementHandler(placeholder, separator, position)
-    if config.get('merge_enabled'):
+    if config.get('merge_enabled') or config.get('merge_by_chapter'):
         handler = ElementHandlerMerge(placeholder, separator, position)
         handler.set_merge_length(config.get('merge_length'))
+        handler.set_merge_by_chapter(config.get('merge_by_chapter'))
+        handler.set_chapter_merge_length(config.get('chapter_merge_length'))
     handler.set_target_direction(direction)
     column_gap = config.get('column_gap') or {}
     gap_type = column_gap.get('_type')
