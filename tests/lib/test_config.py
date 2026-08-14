@@ -3,7 +3,8 @@ from typing import Any
 from unittest.mock import call, Mock
 
 from ...lib.config import (
-    Configuration, get_config, ver200_upgrade, ver203_upgrade)
+    Configuration, get_config, ver200_upgrade, ver203_upgrade,
+    migrate_opencode_config)
 
 
 class TestFunction(unittest.TestCase):
@@ -126,6 +127,77 @@ class TestFunction(unittest.TestCase):
         self.assertNotIn('request_timeout', data)
 
         config.commit.assert_called()
+
+
+class TestMigrateOpenCodeConfig(unittest.TestCase):
+    def make_config(self, data):
+        config = Mock()
+        config.get.side_effect = lambda key: data.get(key)
+        config.update.side_effect = lambda **kwargs: data.update(**kwargs)
+        return config
+
+    def test_migrate_from_chatgpt_opencode_endpoint(self):
+        data = {
+            'engine_preferences': {
+                'ChatGPT': {
+                    'api_keys': ['a', 'b'],
+                    'endpoint': (
+                        'https://opencode.ai/zen/go/v1/chat/completions'),
+                    'model': 'gpt-5.6-luna',
+                    'prompt': 'test prompt',
+                    'stream': False,
+                },
+            },
+        }
+
+        config = self.make_config(data)
+        migrate_opencode_config(config)
+        self.assertIn('OpenCode Go', data['engine_preferences'])
+        self.assertIn('ChatGPT', data['engine_preferences'])
+        self.assertEqual(
+            data['engine_preferences']['OpenCode Go'],
+            data['engine_preferences']['ChatGPT'])
+        config.commit.assert_called()
+
+    def test_no_migration_when_opencode_preferences_exist(self):
+        data = {
+            'engine_preferences': {
+                'OpenCode Go': {'api_keys': ['a']},
+                'ChatGPT': {
+                    'endpoint': (
+                        'https://opencode.ai/zen/go/v1/chat/completions'),
+                },
+            },
+        }
+
+        config = self.make_config(data)
+        migrate_opencode_config(config)
+        self.assertEqual(
+            data['engine_preferences']['OpenCode Go'], {'api_keys': ['a']})
+        config.commit.assert_not_called()
+
+    def test_no_migration_without_opencode_endpoint(self):
+        data = {
+            'engine_preferences': {
+                'ChatGPT': {
+                    'endpoint': 'https://api.openai.com/v1/chat/completions',
+                    'model': 'gpt-4o',
+                },
+            },
+        }
+
+        config = self.make_config(data)
+        migrate_opencode_config(config)
+        self.assertNotIn('OpenCode Go', data['engine_preferences'])
+        config.commit.assert_not_called()
+
+    def test_no_migration_without_chatgpt_preferences(self):
+        data = {'engine_preferences': {}}
+
+        config = self.make_config(data)
+        migrate_opencode_config(config)
+        self.assertEqual(data['engine_preferences'], {})
+        config.commit.assert_not_called()
 
 
 class TestConfig(unittest.TestCase):

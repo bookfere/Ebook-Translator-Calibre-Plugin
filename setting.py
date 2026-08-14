@@ -83,7 +83,6 @@ def layout_scroll_area(name):
 class TranslationSetting(QDialog):
     save_config = pyqtSignal(int)
     fetch_models = pyqtSignal()
-    model_thread = QThread()
 
     def __init__(self, plugin, parent, icon):
         QDialog.__init__(self, parent)
@@ -94,12 +93,21 @@ class TranslationSetting(QDialog):
         self.config = get_config()
         self.current_engine = get_engine_class()
 
+        # Use an instance-level thread so that repeated opening of the
+        # settings dialog cannot share a stale worker across instances.
+        self.model_thread = QThread()
         self.model_worker = ModelWorker()
         self.model_worker.moveToThread(self.model_thread)
         self.model_thread.finished.connect(self.model_worker.deleteLater)
         self.model_thread.start()
+        self.finished.connect(self.quit_model_thread)
 
         self.main_layout()
+
+    def quit_model_thread(self):
+        if self.model_thread.isRunning():
+            self.model_thread.quit()
+            self.model_thread.wait(30000)
 
     def _divider(self):
         divider = QFrame()
@@ -581,7 +589,9 @@ class TranslationSetting(QDialog):
                 pass
             config = self.current_engine.config
             models = self.current_engine.models
-            genai_model_refresh.setVisible(len(models) < 1)
+            # Always allow manual refreshing of the model list, even for
+            # engines that ship with a static model list.
+            genai_model_refresh.setVisible(True)
             # Clear the model list to refill data
             genai_model_list.clear()
             genai_model_list.setDisabled(False)

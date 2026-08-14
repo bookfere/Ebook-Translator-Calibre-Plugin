@@ -117,6 +117,24 @@ def upgrade_config():
         ver205_upgrade(config)
     if version >= (2, 4, 0):  # type: ignore
         ver240_upgrade()
+    migrate_opencode_config(config)
+
+
+def migrate_opencode_config(config):
+    """One-time migration for users who previously used the OpenCode relay
+    service through the ChatGPT engine (its endpoint points to opencode.ai).
+    Copy the settings into the dedicated OpenCode Go engine preferences so
+    that selecting the new engine keeps the existing API keys, model, prompt
+    and request parameters. The original ChatGPT settings are kept intact."""
+    preferences = config.get('engine_preferences') or {}
+    if 'OpenCode Go' in preferences:
+        return
+    chatgpt = preferences.get(ChatgptTranslate.name) or {}
+    endpoint = chatgpt.get('endpoint') or ''
+    if 'opencode.ai' in endpoint:
+        preferences['OpenCode Go'] = dict(chatgpt)
+        config.update(engine_preferences=preferences)
+        config.commit()
 
 
 def ver200_upgrade(config):

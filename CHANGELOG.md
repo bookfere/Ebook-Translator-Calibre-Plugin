@@ -1,3 +1,12 @@
+## v2.4.3
+
+1. feat: Add OpenCode Go as a built-in translation engine (OpenAI-compatible).
+2. feat: Migrate ChatGPT settings that point to the OpenCode endpoint to the OpenCode Go engine.
+3. fix: Improve OpenAI-compatible response parsing for buffering relay services.
+4. fix: Preserve path prefixes (e.g. /zen/go) when fetching the model list.
+
+---
+
 ## v2.4.2
 
 1. feat: Move cache path from temp to a persistent folder. Credit to @Sansui233.

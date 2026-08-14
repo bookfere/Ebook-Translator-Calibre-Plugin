@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 from types import GeneratorType
 from unittest.mock import patch, Mock
+from http.client import IncompleteRead
 
 from mechanize import HTTPError  # type: ignore
 from mechanize._response import (  # type: ignore
@@ -15,9 +16,11 @@ from ...engines.base import Base
 from ...lib.exception import UnexpectedResult, UnsupportedModel
 from ...engines.genai import GenAI
 from ...engines.deepl import DeeplTranslate
-from ...engines.openai import ChatgptTranslate, ChatgptBatchTranslate
+from ...engines.openai import (
+    ChatgptTranslate, ChatgptBatchTranslate, get_api_base, get_model_endpoint)
 from ...engines.microsoft import AzureChatgptTranslate
 from ...engines.anthropic import ClaudeTranslate
+from ...engines.opencode import OpenCodeTranslate
 from ...engines.custom import (
     create_engine_template, load_engine_data, CustomTranslate)
 
@@ -461,6 +464,47 @@ class TestChatgptTranslate(unittest.TestCase):
             headers=self.translator.get_headers(),
             proxy_uri=self.translator.proxy_uri)
 
+    @patch(module_name + '.openai.request')
+    def test_get_models_with_path_prefix(self, mock_request):
+        mock_request.return_value = '{"object":"list","data":[{"id":"a"},{"id":"b"}]}'
+        self.translator.endpoint = (
+            'https://opencode.ai/zen/go/v1/chat/completions')
+
+        self.assertEqual(self.translator.get_models(), ['a', 'b'])
+        mock_request.assert_called_once_with(
+            'https://opencode.ai/zen/go/v1/models',
+            headers=self.translator.get_headers(),
+            proxy_uri=self.translator.proxy_uri)
+
+    @patch(module_name + '.openai.request')
+    def test_get_models_fallback_on_error(self, mock_request):
+        mock_request.side_effect = Exception('HTTP Error 404')
+        self.translator.models = ['model-a', 'model-b']
+
+        self.assertEqual(self.translator.get_models(), ['model-a', 'model-b'])
+
+    def test_get_api_base(self):
+        cases = (
+            ('https://api.openai.com/v1/chat/completions',
+             'https://api.openai.com/v1'),
+            ('https://opencode.ai/zen/go/v1/chat/completions',
+             'https://opencode.ai/zen/go/v1'),
+            ('https://example.com/v1/completions', 'https://example.com/v1'),
+            ('https://example.com', 'https://example.com/v1'),
+        )
+        for endpoint, expected in cases:
+            with self.subTest(endpoint=endpoint):
+                self.assertEqual(expected, get_api_base(endpoint))
+
+    def test_get_model_endpoint(self):
+        self.assertEqual(
+            'https://opencode.ai/zen/go/v1/models',
+            get_model_endpoint(
+                'https://opencode.ai/zen/go/v1/chat/completions'))
+        self.assertEqual(
+            'https://api.openai.com/v1/models',
+            get_model_endpoint('https://api.openai.com/v1/chat/completions'))
+
     def test_get_body(self):
         model = 'gpt-4o'
         self.assertEqual(
@@ -531,11 +575,63 @@ class TestChatgptTranslate(unittest.TestCase):
 
         self.assertEqual('你好世界！', result)
 
+    def test_parse_stream_json_fallback(self):
+        self.translator.stream = True
+        mock_response = Mock()
+        payload = json.dumps(
+            {'choices': [{'message': {'content': '你好世界！'}}]})
+        mock_response.readline.side_effect = [
+            payload.encode() + b'\n', b'']
+
+        result = self.translator._parse_stream(mock_response)
+        self.assertIsInstance(result, GeneratorType)
+        self.assertEqual('你好世界！', ''.join(result))
+
+    def test_parse_stream_json_fallback_multiline(self):
+        self.translator.stream = True
+        mock_response = Mock()
+        payload = json.dumps(
+            {'choices': [{'message': {'content': '你好世界！'}}]},
+            indent=2)
+        mock_response.readline.side_effect = [
+            line.encode() + b'\n' for line in payload.split('\n')] + [b'']
+
+        result = self.translator._parse_stream(mock_response)
+        self.assertEqual('你好世界！', ''.join(result))
+
+    def test_parse_stream_eof_terminates(self):
+        self.translator.stream = True
+        mock_response = Mock()
+        mock_response.readline.return_value = b''
+
+        result = self.translator._parse_stream(mock_response)
+        self.assertEqual('', ''.join(result))
+
+    def test_parse_stream_incomplete_read_terminates(self):
+        self.translator.stream = True
+        mock_response = Mock()
+        mock_response.readline.side_effect = IncompleteRead(b'data: x')
+
+        result = self.translator._parse_stream(mock_response)
+        self.assertEqual('', ''.join(result))
+
+    def test_parse_stream_blank_separator_lines(self):
+        self.translator.stream = True
+        mock_response = Mock()
+        template = b'data: {"choices":[{"delta":{"content":"%b"}}]}'
+        mock_response.readline.side_effect = [
+            template % i.encode() for i in '你好'] \
+            + [b'\n', b'\n', b'data: [DONE]\n']
+
+        result = self.translator._parse_stream(mock_response)
+        self.assertEqual('你好', ''.join(result))
+
 
 class TestChatgptBatchTranslate(unittest.TestCase):
     def setUp(self):
         self.mock_translator = Mock(ChatgptTranslate)
-        self.mock_translator.endpoint = 'https://api.openai.com/test'
+        self.mock_translator.endpoint = \
+            'https://api.openai.com/v1/chat/completions'
         self.mock_translator.proxy_uri = {}
         self.mock_headers = {
             'Content-Type': 'application/json',
@@ -810,6 +906,56 @@ class TestChatgptBatchTranslate(unittest.TestCase):
             'https://api.openai.com/v1/batches/test-batch-id/cancel',
             headers=self.mock_headers, method='POST',
             proxy_uri=self.mock_translator.proxy_uri)
+
+
+class TestOpenCodeTranslate(unittest.TestCase):
+    def setUp(self):
+        OpenCodeTranslate.set_config({'api_keys': ['a', 'b', 'c']})
+        OpenCodeTranslate.lang_codes = {
+            'source': {'English': 'EN'}, 'target': {'Chinese': 'ZH'}}
+
+        self.translator = OpenCodeTranslate()
+        self.translator.set_source_lang('English')
+        self.translator.set_target_lang('Chinese')
+
+    def test_created_engine(self):
+        self.assertIsInstance(self.translator, Base)
+        self.assertIsInstance(self.translator, GenAI)
+        self.assertIsInstance(self.translator, ChatgptTranslate)
+
+    def test_engine_defaults(self):
+        self.assertEqual('OpenCode Go', OpenCodeTranslate.name)
+        self.assertEqual(
+            'https://opencode.ai/zen/go/v1/chat/completions',
+            OpenCodeTranslate.endpoint)
+        self.assertEqual(0, OpenCodeTranslate.concurrency_limit)
+        self.assertEqual(0.0, OpenCodeTranslate.request_interval)
+        self.assertEqual(120.0, OpenCodeTranslate.request_timeout)
+        self.assertFalse(OpenCodeTranslate.stream)
+        self.assertEqual('deepseek-v4-flash', OpenCodeTranslate.model)
+        self.assertIn('deepseek-v4-flash', OpenCodeTranslate.models)
+        self.assertGreater(len(OpenCodeTranslate.models), 0)
+
+    @patch(module_name + '.openai.request')
+    def test_get_models(self, mock_request):
+        mock_request.return_value = (
+            '{"object":"list","data":'
+            '[{"id":"deepseek-v4-flash"},{"id":"kimi-k3"}]}')
+
+        self.assertEqual(
+            self.translator.get_models(),
+            ['deepseek-v4-flash', 'kimi-k3'])
+        mock_request.assert_called_once_with(
+            'https://opencode.ai/zen/go/v1/models',
+            headers=self.translator.get_headers(),
+            proxy_uri=self.translator.proxy_uri)
+
+    @patch(module_name + '.openai.request')
+    def test_get_models_fallback_to_static_list(self, mock_request):
+        mock_request.side_effect = Exception('HTTP Error 404')
+
+        self.assertEqual(
+            self.translator.get_models(), OpenCodeTranslate.models)
 
 
 class TestAzureChatgptTranslate(unittest.TestCase):
