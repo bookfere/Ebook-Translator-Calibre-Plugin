@@ -192,7 +192,7 @@ class TestTranslation(unittest.TestCase):
             str(cm.exception),
             'Failed to retrieve data from translate engine API.\n'
             'network error')
-        self.assertEqual(5, self.log.call_count)
+        self.assertEqual(4, self.log.call_count)
         log_text = (
             '══════════════════════════════════════\n'
             'Row: 0\n'
@@ -203,8 +203,37 @@ class TestTranslation(unittest.TestCase):
             'Error: test error trackback')
         self.log.assert_any_call(log_text, True)
         mock_time.sleep.assert_has_calls([
-            call(5), call(10), call(15), call(20), call(25)])
-        self.assertEqual(6, self.translation.abort_count)
+            call(5), call(10), call(15), call(20)])
+        self.assertEqual(5, self.translation.abort_count)
+
+    @patch.object(Translation, 'need_stop', lambda self: False)
+    def test_translate_text_does_not_retry_permanent_error(self):
+        self.translation.translator.translate.side_effect = Exception(
+            'HTTP Error 404: model not found')
+        self.translation.translator.should_retry = Base().should_retry
+        self.translation.cancel_request = self.cancel_request
+        self.translator.request_attempt = 3
+
+        with self.assertRaises(TranslationFailed):
+            self.translation.translate_text(0, 'text')
+
+        self.assertEqual(1, self.translation.translator.translate.call_count)
+
+    @patch.object(Translation, 'need_stop', lambda self: False)
+    @patch(f'{module_name}.time')
+    def test_translate_text_retries_temporary_error(self, mock_time):
+        self.translation.translator.translate.side_effect = Exception(
+            'HTTP Error 503: service unavailable')
+        self.translation.translator.should_retry = Base().should_retry
+        self.translation.translator.match_error.return_value = False
+        self.translation.cancel_request = self.cancel_request
+        self.translator.request_attempt = 3
+
+        with self.assertRaises(TranslationFailed):
+            self.translation.translate_text(0, 'text')
+
+        self.assertEqual(3, self.translation.translator.translate.call_count)
+        mock_time.sleep.assert_has_calls([call(5), call(10)])
 
     def test_translate_cancel_due_to_fatal_error(self):
         pass

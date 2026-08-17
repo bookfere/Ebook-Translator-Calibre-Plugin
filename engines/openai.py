@@ -83,18 +83,32 @@ class ChatgptTranslate(GenAI):
         self.model = self.config.get('model', self.model)
 
     def get_models(self):
-        model_endpoint = get_model_endpoint(self.endpoint)
         try:
-            response = request(
-                model_endpoint, headers=self.get_headers(),
-                proxy_uri=self.proxy_uri)
-            return [item['id'] for item in json.loads(response).get('data')]
+            return self._fetch_models()
         except Exception as e:
             # Some relay services do not implement the /models endpoint or
             # return an unexpected response. Fall back to the static list.
+            model_endpoint = get_model_endpoint(self.endpoint)
             log.warning('Failed to fetch models from %s: %s'
                         % (model_endpoint, str(e)))
             return list(self.models)
+
+    def _fetch_models(self):
+        """Fetch model identifiers from an OpenAI-compatible endpoint.
+
+        Subclasses with a fixed protocol-specific compatibility list can use
+        this method and choose their own fallback without losing that list
+        after a previous dynamic refresh.
+        """
+        model_endpoint = get_model_endpoint(self.endpoint)
+        response = request(
+            model_endpoint, headers=self.get_headers(),
+            proxy_uri=self.proxy_uri)
+        data = json.loads(response).get('data')
+        if not isinstance(data, list):
+            raise ValueError('Invalid model list response.')
+        return [item['id'] for item in data if isinstance(item, dict)
+                and isinstance(item.get('id'), str)]
 
     def get_prompt(self):
         prompt = self.prompt.replace('<tlang>', self.target_lang)
@@ -143,6 +157,7 @@ class ChatgptTranslate(GenAI):
     def _parse_json(self, response):
         """Parse a non-streaming response with robust schema handling."""
         data = json.loads(response)
+        self.record_usage(data.get('usage'))
         if 'choices' in data and len(data['choices']) > 0:
             choice = data['choices'][0]
             # Standard chat/completions format
@@ -225,6 +240,7 @@ class ChatgptTranslate(GenAI):
                 except json.JSONDecodeError:
                     # Skip malformed JSON chunks.
                     continue
+                self.record_usage(data.get('usage'))
                 content = self._parse_chunk_content(data)
                 if content:
                     yield content

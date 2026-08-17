@@ -9,7 +9,8 @@ from calibre.utils.config import JSONConfig  # type: ignore
 
 from .. import EbookTranslator
 from ..engines import (
-    GoogleFreeTranslateNew, ChatgptTranslate, AzureChatgptTranslate)
+    GoogleFreeTranslateNew, ChatgptTranslate, AzureChatgptTranslate,
+    OpenCodeTranslate, OpenCodeZenTranslate)
 
 
 defaults: dict[str, Any] = {
@@ -127,14 +128,22 @@ def migrate_opencode_config(config):
     that selecting the new engine keeps the existing API keys, model, prompt
     and request parameters. The original ChatGPT settings are kept intact."""
     preferences = config.get('engine_preferences') or {}
-    if 'OpenCode Go' in preferences:
-        return
     chatgpt = preferences.get(ChatgptTranslate.name) or {}
-    endpoint = chatgpt.get('endpoint') or ''
-    if 'opencode.ai' in endpoint:
-        preferences['OpenCode Go'] = dict(chatgpt)
-        config.update(engine_preferences=preferences)
-        config.commit()
+    endpoint = (chatgpt.get('endpoint') or '').lower()
+    if '/zen/go/' in endpoint:
+        engine_name = OpenCodeTranslate.name
+    elif '/zen/v1/' in endpoint:
+        engine_name = OpenCodeZenTranslate.name
+    elif 'opencode.ai' in endpoint:
+        # Preserve the migration behavior for older OpenCode relay URLs.
+        engine_name = OpenCodeTranslate.name
+    else:
+        return
+    if engine_name in preferences:
+        return
+    preferences[engine_name] = dict(chatgpt)
+    config.update(engine_preferences=preferences)
+    config.commit()
 
 
 def ver200_upgrade(config):

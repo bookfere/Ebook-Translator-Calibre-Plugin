@@ -10,11 +10,12 @@ from .youdao import YoudaoTranslate
 from .baidu import BaiduTranslate
 from .microsoft import MicrosoftEdgeTranslate, AzureChatgptTranslate
 from .deepseek import DeepseekTranslate
-from .opencode import OpenCodeTranslate
+from .opencode import OpenCodeTranslate, OpenCodeZenTranslate
 
 builtin_engines: tuple[type[Base], ...] = (
     GoogleFreeTranslateNew, GoogleFreeTranslateHtml, GoogleFreeTranslate,
     GoogleBasicTranslate, GoogleBasicTranslateADC, GoogleAdvancedTranslate,
     ChatgptTranslate, AzureChatgptTranslate, GeminiTranslate, ClaudeTranslate,
-    DeepseekTranslate, OpenCodeTranslate, DeeplTranslate, DeeplProTranslate,
+    DeepseekTranslate, OpenCodeTranslate, OpenCodeZenTranslate,
+    DeeplTranslate, DeeplProTranslate,
     DeeplFreeTranslate, MicrosoftEdgeTranslate, YoudaoTranslate, BaiduTranslate)

@@ -1,5 +1,7 @@
 import socket
 import os.path
+import re
+import threading
 from typing import Any
 
 from mechanize import HTTPError
@@ -52,6 +54,12 @@ class Base:
         self.proxy_port: int | None = None
 
         self.merge_enabled = False
+        self.merge_length = 0
+        self._stats_lock = threading.Lock()
+        self._usage_stats = {
+            'requests': 0, 'retries': 0, 'input_tokens': 0,
+            'output_tokens': 0, 'cached_tokens': 0,
+            'reasoning_tokens': 0, 'usage_available': False}
         self.api_keys: list = self.config.get('api_keys', [])[:]
         self.bad_api_keys = []
         self.api_key = self.get_api_key()
@@ -195,6 +203,7 @@ class Base:
     def translate(self, content):
         response = None
         try:
+            self.record_request()
             params = {
                 'url': self.get_endpoint(),
                 'data': self.get_body(content),
@@ -225,6 +234,79 @@ class Base:
             raise UnexpectedResult(
                 _('Can not parse returned response. Raw data: {}')
                 .format('\n\n' + error_message))
+
+    def record_request(self):
+        with self._stats_lock:
+            self._usage_stats['requests'] += 1
+
+    def record_retry(self):
+        with self._stats_lock:
+            self._usage_stats['retries'] += 1
+
+    def record_usage(self, usage):
+        if not isinstance(usage, dict):
+            return
+        aliases = {
+            'input_tokens': ('input_tokens', 'prompt_tokens'),
+            'output_tokens': ('output_tokens', 'completion_tokens'),
+            'cached_tokens': ('cached_tokens', 'cache_read_tokens'),
+            'reasoning_tokens': ('reasoning_tokens',),
+        }
+        with self._stats_lock:
+            found = False
+            recorded_targets = set()
+            for target, sources in aliases.items():
+                for source in sources:
+                    value = usage.get(source)
+                    if isinstance(value, (int, float)):
+                        self._usage_stats[target] += int(value)
+                        recorded_targets.add(target)
+                        found = True
+                        break
+            if found:
+                self._usage_stats['usage_available'] = True
+            prompt_details = usage.get('prompt_tokens_details')
+            if 'cached_tokens' not in recorded_targets and \
+                    isinstance(prompt_details, dict):
+                cached = prompt_details.get('cached_tokens')
+                if isinstance(cached, (int, float)):
+                    self._usage_stats['cached_tokens'] += int(cached)
+                    self._usage_stats['usage_available'] = True
+            completion_details = usage.get('completion_tokens_details')
+            if 'reasoning_tokens' not in recorded_targets and \
+                    isinstance(completion_details, dict):
+                reasoning = completion_details.get('reasoning_tokens')
+                if isinstance(reasoning, (int, float)):
+                    self._usage_stats['reasoning_tokens'] += int(reasoning)
+                    self._usage_stats['usage_available'] = True
+
+    def get_usage_stats(self):
+        with self._stats_lock:
+            return dict(self._usage_stats)
+
+    def should_retry(self, error):
+        """Retry only errors that are likely to be temporary."""
+        message = str(error).lower()
+        status_codes = [int(code) for code in re.findall(
+            r'(?<!\d)([45]\d\d)(?!\d)', message)]
+        if any(code in (400, 401, 402, 403, 404, 405, 409, 410, 422)
+               for code in status_codes):
+            return False
+        if any(code == 429 or 500 <= code <= 599 for code in status_codes):
+            return True
+        permanent = (
+            'model not found', 'model does not exist', 'unknown model',
+            'invalid model', 'permission denied', 'unauthorized',
+            'insufficient balance', 'insufficient quota', 'billing',
+        )
+        if any(term in message for term in permanent):
+            return False
+        temporary = (
+            'timeout', 'timed out', 'rate limit', 'too many requests',
+            'temporarily unavailable', 'connection', 'network',
+            'incomplete read', 'service unavailable', 'bad gateway',
+        )
+        return any(term in message for term in temporary)
 
     def get_endpoint(self):
         return self.endpoint

@@ -337,6 +337,12 @@ msgstr "翻译中……"
 msgid "Test Translation Engine"
 msgstr "测试翻译引擎"
 
+msgid "Test Translation Engine Failed"
+msgstr "测试翻译引擎失败"
+
+msgid "The translation engine rejected the test request."
+msgstr "翻译引擎拒绝了测试请求。"
+
 msgid "Usage: checking..."
 msgstr "用量：检查中……"
 
@@ -737,6 +743,30 @@ msgstr "无法获取模型列表，请检查后重试。"
 
 msgid "The model depends on your Azure project."
 msgstr "模型取决于你的 Azure 项目。"
+
+msgid "OpenCode Zen lists every model returned by your API key. Some models may reject this engine's request format; use Test Translation Engine to verify a model before translating an ebook. To reduce token usage, apply the OpenCode Zen balanced preset in Merge to Translate. Check actual charges and monthly limits in the OpenCode Zen console."
+msgstr "OpenCode Zen 会列出当前 API 密钥返回的所有模型。部分模型可能拒绝此引擎的请求格式；翻译电子书前请使用“测试翻译引擎”验证模型。要减少 token 消耗，请在“合并翻译”中应用 OpenCode Zen 均衡节省预设。实际费用和月度限额请在 OpenCode Zen 控制台中查看。"
+
+msgid "Use OpenCode Zen balanced preset"
+msgstr "使用 OpenCode Zen 均衡节省预设"
+
+msgid "OpenCode Zen balanced preset applied: merged translation is enabled with about 6000 characters per request."
+msgstr "已应用 OpenCode Zen 均衡节省预设：启用合并翻译，每次请求约 6000 个字符。"
+
+msgid "Estimated API requests: {}"
+msgstr "预计 API 请求数：{}"
+
+msgid "Token saving tip: enable Merge to Translate and use about 6000 characters per request."
+msgstr "Token 节省提示：启用合并翻译，并将每次请求设为约 6000 个字符。"
+
+msgid "API requests: {} (retries: {})"
+msgstr "API 请求数：{}（重试：{}）"
+
+msgid "Tokens - input: {}, output: {}, cached: {}, reasoning: {}"
+msgstr "Token - 输入：{}，输出：{}，缓存：{}，推理：{}"
+
+msgid "Token usage: unavailable in API response."
+msgstr "API 响应未提供 Token 用量。"
 
 msgid "Below original"
 msgstr "原文下方"

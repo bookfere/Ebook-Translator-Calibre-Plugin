@@ -176,6 +176,44 @@ class TestMigrateOpenCodeConfig(unittest.TestCase):
             data['engine_preferences']['OpenCode Go'], {'api_keys': ['a']})
         config.commit.assert_not_called()
 
+    def test_migrate_zen_endpoint_to_zen_engine(self):
+        data = {
+            'engine_preferences': {
+                'ChatGPT': {
+                    'api_keys': ['a', 'b'],
+                    'endpoint': (
+                        'https://opencode.ai/zen/v1/chat/completions'),
+                    'model': 'deepseek-v4-flash',
+                },
+            },
+        }
+
+        config = self.make_config(data)
+        migrate_opencode_config(config)
+        self.assertIn('OpenCode Zen', data['engine_preferences'])
+        self.assertEqual(
+            data['engine_preferences']['OpenCode Zen'],
+            data['engine_preferences']['ChatGPT'])
+        self.assertNotIn('OpenCode Go', data['engine_preferences'])
+        config.commit.assert_called()
+
+    def test_no_migration_when_zen_preferences_exist(self):
+        data = {
+            'engine_preferences': {
+                'OpenCode Zen': {'api_keys': ['a']},
+                'ChatGPT': {
+                    'endpoint': (
+                        'https://opencode.ai/zen/v1/chat/completions'),
+                },
+            },
+        }
+
+        config = self.make_config(data)
+        migrate_opencode_config(config)
+        self.assertEqual(
+            data['engine_preferences']['OpenCode Zen'], {'api_keys': ['a']})
+        config.commit.assert_not_called()
+
     def test_no_migration_without_opencode_endpoint(self):
         data = {
             'engine_preferences': {

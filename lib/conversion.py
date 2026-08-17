@@ -199,6 +199,7 @@ def convert_item(
 
     element_handler = get_element_handler(
         translator.placeholder, translator.separator, direction)
+    translator.merge_length = element_handler.get_merge_length()
     element_handler.set_translation_lang(
         translator.get_iso639_target_code(target_lang))
 

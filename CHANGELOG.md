@@ -4,6 +4,9 @@
 2. feat: Migrate ChatGPT settings that point to the OpenCode endpoint to the OpenCode Go engine.
 3. fix: Improve OpenAI-compatible response parsing for buffering relay services.
 4. fix: Preserve path prefixes (e.g. /zen/go) when fetching the model list.
+5. feat: Add OpenCode Zen as a built-in translation engine.
+6. feat: Add a balanced token-saving preset, usage statistics, and selective
+   retries for OpenCode Zen.
 
 ---
 

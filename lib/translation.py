@@ -114,7 +114,7 @@ class Translation:
         return self.translator.max_error_count > 0 and \
             self.abort_count >= self.translator.max_error_count
 
-    def translate_text(self, row, text, retry=0, interval=0):
+    def translate_text(self, row, text, attempt=1, interval=0):
         """Translation engine service error code documentation:
         * https://cloud.google.com/apis/design/errors
         * https://www.deepl.com/docs-api/api-access/error-handling/
@@ -133,16 +133,21 @@ class Translation:
                 raise TranslationCanceled(_('Translation canceled.'))
             self.abort_count += 1
             message = _('Failed to retrieve data from translate engine API.')
-            if retry >= self.translator.request_attempt:
+            max_attempts = max(1, int(self.translator.request_attempt))
+            should_retry = getattr(self.translator, 'should_retry', None)
+            retryable = should_retry(e) if callable(should_retry) else False
+            if attempt >= max_attempts or not retryable:
                 raise TranslationFailed('{}\n{}'.format(message, str(e)))
-            retry += 1
+            recorder = getattr(self.translator, 'record_retry', None)
+            if callable(recorder):
+                recorder()
             interval += 5
             # Logging any errors that occur during translation.
             logged_text = text[:200] + '...' if len(text) > 200 else text
             error_messages = [
                 sep(), _('Original: {}').format(logged_text), sep('┈'),
                 _('Status: Failed {} times / Sleeping for {} seconds')
-                .format(retry, interval), sep('┈'), _('Error: {}')
+                .format(attempt, interval), sep('┈'), _('Error: {}')
                 .format(traceback_error())]
             if row >= 0:
                 error_messages.insert(1, _('Row: {}').format(row))
@@ -150,7 +155,7 @@ class Translation:
             if self.translator.match_error(str(e)):
                 raise TranslationCanceled(_('Translation canceled.'))
             time.sleep(interval)
-            return self.translate_text(row, text, retry, interval)
+            return self.translate_text(row, text, attempt + 1, interval)
 
     def translate_paragraph(self, paragraph):
         if self.cancel_request():
@@ -221,6 +226,17 @@ class Translation:
         self.log(_('Item count: {}').format(self.total))
         self.log(_('Character count: {}').format(char_count))
 
+        estimated_requests = sum(
+            1 for paragraph in paragraphs
+            if self.fresh or not paragraph.translation)
+        self.log(_('Estimated API requests: {}').format(estimated_requests))
+        if getattr(self.translator, 'name', None) == 'OpenCode Zen' and \
+                (not self.translator.merge_enabled or
+                 self.translator.merge_length < 6000):
+            self.log(_(
+                'Token saving tip: enable Merge to Translate and use about '
+                '6000 characters per request.'), True)
+
         if self.total < 1:
             raise Exception(_('There is no content need to translate.'))
         self.progress_bar.load(self.total)
@@ -235,6 +251,19 @@ class Translation:
         if self.batch and self.need_stop():
             raise Exception(_('Translation failed.'))
         consuming = round((time.time() - start_time) / 60, 2)
+        get_stats = getattr(self.translator, 'get_usage_stats', None)
+        if callable(get_stats):
+            stats = get_stats()
+            self.log(_('API requests: {} (retries: {})').format(
+                stats['requests'], stats['retries']))
+            if stats['usage_available']:
+                self.log(_(
+                    'Tokens - input: {}, output: {}, cached: {}, reasoning: '
+                    '{}').format(
+                        stats['input_tokens'], stats['output_tokens'],
+                        stats['cached_tokens'], stats['reasoning_tokens']))
+            else:
+                self.log(_('Token usage: unavailable in API response.'))
         self.log(_('Time consuming: {} minutes').format(consuming))
         self.log(_('Translation completed.'))
         self.progress(1, _('Translation completed.'))
