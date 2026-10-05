@@ -1,0 +1,1227 @@
+# Hebrew translation for the Ebook Translator Calibre Plugin.
+# This file is distributed under the same license as the Ebook Translator Calibre Plugin package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Ebook Translator Calibre Plugin\n"
+"Report-Msgid-Bugs-To: bookfere@gmail.com\n"
+"POT-Creation-Date: 2025-08-22 02:34+0800\n"
+"PO-Revision-Date: 2026-06-19 00:00+0300\n"
+"Last-Translator: \n"
+"Language-Team: Hebrew\n"
+"Language: he\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: __init__.py:23
+msgid "Ebook Translator"
+msgstr "מתרגם ספרים אלקטרוניים"
+
+#: __init__.py:31
+msgid ""
+"A Calibre plugin to translate ebook into a specified language (optionally "
+"keeping the original content)."
+msgstr ""
+"תוסף ל‑Calibre לתרגום ספרים אלקטרוניים לשפה נבחרת (עם אפשרות לשמור את התוכן "
+"המקורי)."
+
+#: advanced.py:110
+msgid "Extracting ebook content..."
+msgstr "מחלץ את תוכן הספר..."
+
+#: advanced.py:117
+msgid "Failed to extract ebook content"
+msgstr "חילוץ תוכן הספר נכשל"
+
+#: advanced.py:132
+msgid "Filtering ebook content..."
+msgstr "מסנן את תוכן הספר..."
+
+#: advanced.py:141
+msgid "Preparing user interface..."
+msgstr "מכין את ממשק המשתמש..."
+
+#: advanced.py:231
+msgid "&Start"
+msgstr "ה&תחל"
+
+#: advanced.py:246 batch.py:67 setting.py:221
+msgid "Input Format"
+msgstr "תבנית קלט"
+
+#: advanced.py:253 batch.py:67 setting.py:222
+msgid "Output Format"
+msgstr "תבנית פלט"
+
+#: advanced.py:260 advanced.py:812 batch.py:68 setting.py:439
+msgid "Source Language"
+msgstr "שפת מקור"
+
+#: advanced.py:267 advanced.py:818 batch.py:68 setting.py:440
+msgid "Target Language"
+msgstr "שפת יעד"
+
+#: advanced.py:308 batch.py:67
+msgid "Encoding"
+msgstr "קידוד"
+
+#: advanced.py:320 batch.py:69
+msgid "Target Directionality"
+msgstr "כיווניות היעד"
+
+#: advanced.py:324 batch.py:163
+msgid "Auto"
+msgstr "אוטומטי"
+
+#: advanced.py:325 batch.py:164
+msgid "Left to Right"
+msgstr "משמאל לימין"
+
+#: advanced.py:326 batch.py:165
+msgid "Right to Left"
+msgstr "מימין לשמאל"
+
+#: advanced.py:422
+msgid "Failed to translate {} paragraph(s), Would you like to retry?"
+msgstr "תרגום {} פסקאות נכשל. לנסות שוב?"
+
+#: advanced.py:428 lib/translation.py:238 lib/translation.py:239
+msgid "Translation completed."
+msgstr "התרגום הושלם."
+
+#: advanced.py:443
+msgid "There is no content that needs to be translated."
+msgstr "אין תוכן שדורש תרגום."
+
+#: advanced.py:491
+msgid "Loading ebook data, please wait..."
+msgstr "טוען את נתוני הספר, נא להמתין..."
+
+#: advanced.py:520
+msgid "Review"
+msgstr "בדיקה"
+
+#: advanced.py:521
+msgid "Log"
+msgstr "יומן"
+
+#: advanced.py:522
+msgid "Errors"
+msgstr "שגיאות"
+
+#: advanced.py:549
+msgid "All"
+msgstr "הכול"
+
+#: advanced.py:551 components/indicator.py:11
+msgid "Non-aligned"
+msgstr "לא מיושר"
+
+#: advanced.py:552 advanced.py:908 components/indicator.py:10
+#: components/table.py:85
+msgid "Translated"
+msgstr "מתורגם"
+
+#: advanced.py:553 components/indicator.py:12 components/table.py:76
+msgid "Untranslated"
+msgstr "לא מתורגם"
+
+#: advanced.py:556
+msgid "Original Text"
+msgstr "טקסט מקורי"
+
+#: advanced.py:557
+msgid "Original Code"
+msgstr "קוד מקורי"
+
+#: advanced.py:558
+msgid "Translation Text"
+msgstr "טקסט מתורגם"
+
+#: advanced.py:561
+msgid "keyword for filtering"
+msgstr "מילת מפתח לסינון"
+
+#: advanced.py:566 cache.py:72
+msgid "Reset"
+msgstr "איפוס"
+
+#: advanced.py:667
+msgid "Total items: {}"
+msgstr "סך הפריטים: {}"
+
+#: advanced.py:668 lib/translation.py:221
+msgid "Character count: {}"
+msgstr "מספר תווים: {}"
+
+#: advanced.py:677
+msgid "Non-aligned items: {}"
+msgstr "פריטים לא מיושרים: {}"
+
+#: advanced.py:710 cache.py:90 cache.py:179 components/engine.py:202
+#: components/table.py:157
+msgid "Delete"
+msgstr "מחיקה"
+
+#: advanced.py:713
+msgid "Batch Translation"
+msgstr "תרגום באצווה"
+
+#: advanced.py:713 setting.py:802 setting.py:804
+msgid "Beta"
+msgstr "בטא"
+
+#: advanced.py:714
+msgid "Translate All"
+msgstr "תרגם הכול"
+
+#: advanced.py:715
+msgid "Translate Selected"
+msgstr "תרגם נבחרים"
+
+#: advanced.py:731 advanced.py:771
+msgid "Stop"
+msgstr "עצור"
+
+#: advanced.py:761
+msgid "Are you sure you want to stop the translation progress?"
+msgstr "לעצור את תהליך התרגום?"
+
+#: advanced.py:765
+msgid "Stopping..."
+msgstr "עוצר..."
+
+#: advanced.py:796
+msgid "Cache Status"
+msgstr "מצב המטמון"
+
+#: advanced.py:799
+msgid "Disabled"
+msgstr "מושבת"
+
+#: advanced.py:799
+msgid "Enabled"
+msgstr "מופעל"
+
+#: advanced.py:806 setting.py:394
+msgid "Translation Engine"
+msgstr "מנוע תרגום"
+
+#: advanced.py:824
+msgid "Custom Ebook Title"
+msgstr "כותרת ספר מותאמת"
+
+#: advanced.py:829
+msgid "By default, title metadata will be translated."
+msgstr "כברירת מחדל, מטא‑נתוני הכותרת יתורגמו."
+
+#: advanced.py:858
+msgid "Output Ebook"
+msgstr "ספר פלט"
+
+#: advanced.py:860
+msgid "Output"
+msgstr "פלט"
+
+#: advanced.py:909
+msgid "The ebook has not been translated yet."
+msgstr "הספר עדיין לא תורגם."
+
+#: advanced.py:913
+msgid ""
+"The number of lines in some translation units differs between the original "
+"text and the translated text. Are you sure you want to output without "
+"checking alignment?"
+msgstr ""
+"מספר השורות בחלק מיחידות התרגום שונה בין הטקסט המקורי לטקסט המתורגם. להפיק "
+"פלט בלי לבדוק יישור?"
+
+#: advanced.py:954
+msgid "No translation yet"
+msgstr "אין תרגום עדיין"
+
+#: advanced.py:1022 components/engine.py:208 setting.py:66
+msgid "&Save"
+msgstr "&שמור"
+
+#: advanced.py:1026
+msgid "Word Wrap"
+msgstr "גלישת שורות"
+
+#: advanced.py:1152
+msgid "Your changes have been saved."
+msgstr "השינויים שלך נשמרו."
+
+#: advanced.py:1164
+msgid "Translation log"
+msgstr "יומן תרגום"
+
+#: advanced.py:1175
+msgid "Error log"
+msgstr "יומן שגיאות"
+
+#: advanced.py:1195
+msgid "Are you sure you want to translate all {:n} paragraphs?"
+msgstr "לתרגם את כל {:n} הפסקאות?"
+
+#: advanced.py:1223
+msgid "Are you sure you want to cancel the preparation progress?"
+msgstr "לבטל את תהליך ההכנה?"
+
+#: advanced.py:1234
+msgid "Are you sure you want to cancel the translation progress?"
+msgstr "לבטל את תהליך התרגום?"
+
+#: batch.py:67 cache.py:199
+msgid "Title"
+msgstr "כותרת"
+
+#: batch.py:153 batch.py:157
+msgid "Default"
+msgstr "ברירת מחדל"
+
+#: batch.py:190 components/engine.py:139 components/table.py:155
+msgid "Translate"
+msgstr "תרגם"
+
+#: batch.py:205 lib/cache.py:146
+msgid "Unknown"
+msgstr "לא ידוע"
+
+#: batch.py:214 cache.py:127 setting.py:1228
+msgid "The specified path does not exist."
+msgstr "הנתיב שצוין אינו קיים."
+
+#: cache.py:70
+msgid "Choose a path to store cache files."
+msgstr "בחר נתיב לאחסון קובצי המטמון."
+
+#: cache.py:71
+msgid "Move"
+msgstr "העבר"
+
+#: cache.py:73
+msgid "Reveal"
+msgstr "הצג במערכת הקבצים"
+
+#: cache.py:75
+msgid "Cache Path"
+msgstr "נתיב מטמון"
+
+#: cache.py:88
+msgid "Clear All"
+msgstr "נקה הכול"
+
+#: cache.py:107
+msgid ""
+"All cache(s) will be moved to the default path. Are you sure to proceed?"
+msgstr "כל המטמון יועבר לנתיב ברירת המחדל. להמשיך?"
+
+#: cache.py:122
+msgid "All cache(s) will be moved to the new path. Are you sure to proceed?"
+msgstr "כל המטמון יועבר לנתיב החדש. להמשיך?"
+
+#: cache.py:130
+msgid "Please choose an empty folder."
+msgstr "נא לבחור תיקייה ריקה."
+
+#: cache.py:140
+msgid "Are you sure you want to clear all caches?"
+msgstr "לנקות את כל המטמון?"
+
+#: cache.py:150
+msgid "No cache exists."
+msgstr "אין מטמון."
+
+#: cache.py:155
+msgid "Total: {}"
+msgstr "סך הכול: {}"
+
+#: cache.py:186
+msgid "Are you sure you want to delete the selected cache(s)?"
+msgstr "למחוק את פריטי המטמון הנבחרים?"
+
+#: cache.py:199 components/table.py:34 setting.py:113
+msgid "Engine"
+msgstr "מנוע"
+
+#: cache.py:199 components/table.py:34
+msgid "Language"
+msgstr "שפה"
+
+#: cache.py:199
+msgid "Merge Length"
+msgstr "אורך מיזוג"
+
+#: cache.py:200
+msgid "Filename"
+msgstr "שם קובץ"
+
+#: cache.py:200
+msgid "Last Modification Time"
+msgstr "זמן שינוי אחרון"
+
+#: cache.py:200
+msgid "Size (MB)"
+msgstr "גודל (MB)"
+
+#: components/chatgpt.py:74
+msgid "processing..."
+msgstr "מעבד..."
+
+#: components/chatgpt.py:88
+msgid "checking..."
+msgstr "בודק..."
+
+#: components/chatgpt.py:100
+msgid "canceling..."
+msgstr "מבטל..."
+
+#: components/chatgpt.py:114
+msgid "applying..."
+msgstr "מחיל..."
+
+#: components/chatgpt.py:134
+msgid "ChatGPT Batch Translation"
+msgstr "תרגום באצווה של ChatGPT"
+
+#: components/chatgpt.py:199
+msgid "Create a new batch translation"
+msgstr "יצירת תרגום אצווה חדש"
+
+#: components/chatgpt.py:202
+msgid ""
+"All original content must be uploaded to OpenAI for batch translation, and "
+"you will need to wait up to 24 hours to continue the translation process.<a "
+"href=\"https://cookbook.openai.com/examples/batch_processing\">more details</"
+"a>"
+msgstr ""
+"כל התוכן המקורי יועלה ל‑OpenAI לצורך תרגום באצווה, ויהיה עליך להמתין עד 24 "
+"שעות כדי להמשיך בתהליך התרגום.<a href=\"https://cookbook.openai.com/examples/"
+"batch_processing\">פרטים נוספים</a>"
+
+#: components/chatgpt.py:253 setting.py:498
+msgid "Refresh"
+msgstr "רענן"
+
+#: components/chatgpt.py:254
+msgid "Cancel Batch Translation"
+msgstr "ביטול תרגום אצווה"
+
+#: components/chatgpt.py:255
+msgid "Apply"
+msgstr "החל"
+
+#: components/chatgpt.py:273
+msgid "Are you sure you want to cancel the batch translation?"
+msgstr "לבטל את תרגום האצווה?"
+
+#: components/chatgpt.py:297
+msgid "Batch translation details"
+msgstr "פרטי תרגום אצווה"
+
+#: components/chatgpt.py:299 components/table.py:34
+msgid "Status"
+msgstr "מצב"
+
+#: components/chatgpt.py:300
+msgid "Detail"
+msgstr "פירוט"
+
+#: components/engine.py:66 lib/translation.py:161
+msgid "Translating..."
+msgstr "מתרגם..."
+
+#: components/engine.py:98
+msgid "Test Translation Engine"
+msgstr "בדיקת מנוע התרגום"
+
+#: components/engine.py:144
+msgid "Usage: checking..."
+msgstr "שימוש: בודק..."
+
+#: components/engine.py:155
+msgid "Usage: {}"
+msgstr "שימוש: {}"
+
+#: components/engine.py:193
+msgid "Custom Translation Engine"
+msgstr "מנוע תרגום מותאם"
+
+#: components/engine.py:201
+msgid "Add"
+msgstr "הוסף"
+
+#: components/engine.py:205
+msgid "Clear"
+msgstr "נקה"
+
+#: components/engine.py:206
+msgid "Restore"
+msgstr "שחזר"
+
+#: components/engine.py:207
+msgid "Verify"
+msgstr "אמת"
+
+#: components/engine.py:248
+msgid "Valid engine data format."
+msgstr "תבנית נתוני המנוע תקינה."
+
+#: components/engine.py:267
+msgid "The engine name is already in use."
+msgstr "שם המנוע כבר בשימוש."
+
+#: components/engine.py:289 setting.py:128
+msgid "The setting has been saved."
+msgstr "ההגדרה נשמרה."
+
+#: components/footer.py:27
+msgid "Feedback"
+msgstr "משוב"
+
+#: components/footer.py:28
+msgid "Donate"
+msgstr "תרומה"
+
+#: components/format.py:19 setting.py:231
+msgid "Ebook Specific"
+msgstr "ספציפי לספר"
+
+#: components/indicator.py:13
+msgid "Failed translation"
+msgstr "תרגום שנכשל"
+
+#: components/indicator.py:14
+msgid "Not selected"
+msgstr "לא נבחר"
+
+#: components/lang.py:30 engines/base.py:90 setting.py:1284
+msgid "Auto detect"
+msgstr "זיהוי אוטומטי"
+
+#: components/mode.py:23 setting.py:162
+msgid "Choose a translation mode for clicking the icon button."
+msgstr "בחר מצב תרגום ללחיצה על כפתור הסמל."
+
+#: components/mode.py:28 setting.py:152 ui.py:47 ui.py:74 ui.py:87
+msgid "Advanced Mode"
+msgstr "מצב מתקדם"
+
+#: components/mode.py:33
+msgid ""
+"This mode provides additional options for the translation process, allowing "
+"for more control and customization."
+msgstr ""
+"מצב זה מספק אפשרויות נוספות לתהליך התרגום, ומאפשר שליטה והתאמה רבות יותר."
+
+#: components/mode.py:36 components/mode.py:46 setting.py:193 setting.py:939
+#: setting.py:958 setting.py:1005
+msgid "Choose"
+msgstr "בחר"
+
+#: components/mode.py:38 setting.py:153 ui.py:48 ui.py:103
+msgid "Batch Mode"
+msgstr "מצב אצווה"
+
+#: components/mode.py:43
+msgid ""
+"This mode allows users to translate multiple ebooks at once, streamlining "
+"the translation process and saving time."
+msgstr ""
+"מצב זה מאפשר לתרגם מספר ספרים בבת אחת, לייעל את תהליך התרגום ולחסוך זמן."
+
+#: components/table.py:34 setting.py:817
+msgid "Original"
+msgstr "מקור"
+
+#: components/table.py:134
+msgid ""
+"The number of lines differs between the original text and the translated "
+"text."
+msgstr "מספר השורות שונה בין הטקסט המקורי לטקסט המתורגם."
+
+#: components/table.py:162
+msgid "Select the whole chapter"
+msgstr "בחר את כל הפרק"
+
+#: components/table.py:168
+msgid "Select similar paragraphs: {}=\"{}\""
+msgstr "בחר פסקאות דומות: {}=\"{}\""
+
+#: components/table.py:256
+msgid "Retain at least one row."
+msgstr "יש לשמור לפחות שורה אחת."
+
+#: engines/anthropic.py:151 engines/base.py:217 engines/google.py:429
+#: engines/openai.py:117
+msgid "Can not parse returned response. Raw data: {}"
+msgstr "לא ניתן לנתח את התשובה שהוחזרה. נתונים גולמיים: {}"
+
+#: engines/anthropic.py:160
+msgid "Invalid event type received: {}"
+msgstr "התקבל סוג אירוע לא תקין: {}"
+
+#: engines/anthropic.py:171
+msgid "Error received: {}"
+msgstr "התקבלה שגיאה: {}"
+
+#: engines/baidu.py:18
+msgid "Baidu"
+msgstr "Baidu"
+
+#: engines/base.py:32 setting.py:420
+msgid "API Keys"
+msgstr "מפתחות API"
+
+#: engines/base.py:107
+msgid "A correct key format \"{}\" is required."
+msgstr "נדרשת תבנית מפתח תקינה \"{}\"."
+
+#: engines/custom.py:47
+msgid "Engine data must be in valid JSON format."
+msgstr "נתוני המנוע חייבים להיות בתבנית JSON תקינה."
+
+#: engines/custom.py:50
+msgid "Invalid engine data."
+msgstr "נתוני מנוע לא תקינים."
+
+#: engines/custom.py:54
+msgid "Engine name is required."
+msgstr "נדרש שם מנוע."
+
+#: engines/custom.py:57
+msgid "Engine name must be different from builtin engine name."
+msgstr "שם המנוע חייב להיות שונה משם מנוע מובנה."
+
+#: engines/custom.py:61
+msgid "Language codes are required."
+msgstr "נדרשים קודי שפה."
+
+#: engines/custom.py:65
+msgid "Source and target must be added in pair."
+msgstr "יש להוסיף מקור ויעד כזוג."
+
+#: engines/custom.py:69
+msgid "Request information is required."
+msgstr "נדרש מידע על הבקשה."
+
+#: engines/custom.py:71
+msgid "API URL is required."
+msgstr "נדרשת כתובת API."
+
+#: engines/custom.py:75
+msgid "Placeholder <text> is required."
+msgstr "נדרש מציין מיקום <text>."
+
+#: engines/custom.py:79
+msgid "Request headers must be an JSON object."
+msgstr "כותרות הבקשה חייבות להיות אובייקט JSON."
+
+#: engines/custom.py:82
+msgid "A appropriate Content-Type in headers is required."
+msgstr "נדרש Content-Type מתאים בכותרות."
+
+#: engines/custom.py:86
+msgid "Expression to parse response is required."
+msgstr "נדרש ביטוי לניתוח התשובה."
+
+#: engines/custom.py:139
+msgid "Response was parsed incorrectly."
+msgstr "התשובה נותחה באופן שגוי."
+
+#: engines/deepl.py:37
+msgid "{} total, {} used, {} left"
+msgstr "{} סך הכול, {} בשימוש, {} נותרו"
+
+#: engines/google.py:134
+msgid ""
+"This plugin uses Application Default Credentials (ADC) in your local "
+"environment to access your Google Translate service. To set up the ADC, "
+"follow these steps:\n"
+"1. Install the gcloud CLI by checking out its instructions {}.\n"
+"2. Run the command: gcloud auth application-default login.\n"
+"3. Sign in to your Google account and grant needed privileges."
+msgstr ""
+"תוסף זה משתמש ב‑Application Default Credentials‏ (ADC) בסביבה המקומית שלך כדי "
+"לגשת לשירות Google Translate. כדי להגדיר את ה‑ADC, בצע את השלבים הבאים:\n"
+"1. התקן את כלי ה‑CLI‏ gcloud לפי ההוראות {}.\n"
+"2. הרץ את הפקודה: gcloud auth application-default login.\n"
+"3. היכנס לחשבון Google שלך והענק את ההרשאות הנדרשות."
+
+#: engines/google.py:144
+msgid "Cannot run the command \"{}\"."
+msgstr "לא ניתן להריץ את הפקודה \"{}\"."
+
+#: engines/google.py:189
+msgid "Cannot find the command \"{}\"."
+msgstr "לא ניתן למצוא את הפקודה \"{}\"."
+
+#: engines/microsoft.py:28
+msgid "Failed get APP key due to an invalid Token."
+msgstr "קבלת מפתח האפליקציה נכשלה עקב אסימון לא תקין."
+
+#: engines/microsoft.py:32
+msgid "Failed get APP key due to and invalid Base64 URL."
+msgstr "קבלת מפתח האפליקציה נכשלה עקב כתובת Base64 לא תקינה."
+
+#: engines/youdao.py:19
+msgid "Youdao"
+msgstr "Youdao"
+
+#: lib/conversion.py:76
+msgid "Start to convert ebook format..."
+msgstr "מתחיל בהמרת תבנית הספר..."
+
+#: lib/conversion.py:81
+msgid "Outputting ebook file..."
+msgstr "מפיק את קובץ הספר..."
+
+#: lib/conversion.py:104
+msgid "Starting to output subtitles file..."
+msgstr "מתחיל להפיק קובץ כתוביות..."
+
+#: lib/conversion.py:110
+msgid "The translation of the subtitles file was completed."
+msgstr "תרגום קובץ הכתוביות הושלם."
+
+#: lib/conversion.py:129
+msgid "Starting to output PGN file..."
+msgstr "מתחיל להפיק קובץ PGN..."
+
+#: lib/conversion.py:139
+msgid "The translation of the PGN file was completed."
+msgstr "תרגום קובץ ה‑PGN הושלם."
+
+#: lib/conversion.py:275
+msgid "[{} > {}] Translating \"{}\""
+msgstr "[{} > {}] מתרגם \"{}\""
+
+#: lib/conversion.py:284
+msgid "Translation job failed"
+msgstr "משימת התרגום נכשלה"
+
+#: lib/conversion.py:332
+msgid "completed"
+msgstr "הושלם"
+
+#: lib/conversion.py:346
+msgid "Ebook Translation Log"
+msgstr "יומן תרגום הספר"
+
+#: lib/conversion.py:346
+msgid "Translation Completed"
+msgstr "התרגום הושלם"
+
+#: lib/conversion.py:347
+msgid "The translation of \"{}\" was completed. Do you want to open the book?"
+msgstr "תרגום \"{}\" הושלם. לפתוח את הספר?"
+
+#: lib/translation.py:124 lib/translation.py:131 lib/translation.py:150
+#: lib/translation.py:156
+msgid "Translation canceled."
+msgstr "התרגום בוטל."
+
+#: lib/translation.py:134
+msgid "Failed to retrieve data from translate engine API."
+msgstr "אחזור הנתונים מ‑API של מנוע התרגום נכשל."
+
+#: lib/translation.py:142 lib/translation.py:203
+msgid "Original: {}"
+msgstr "מקור: {}"
+
+#: lib/translation.py:143
+msgid "Status: Failed {} times / Sleeping for {} seconds"
+msgstr "מצב: נכשל {} פעמים / ממתין {} שניות"
+
+#: lib/translation.py:144
+msgid "Error: {}"
+msgstr "שגיאה: {}"
+
+#: lib/translation.py:147 lib/translation.py:202
+msgid "Row: {}"
+msgstr "שורה: {}"
+
+#: lib/translation.py:191
+msgid "Translating: {}/{}"
+msgstr "מתרגם: {}/{}"
+
+#: lib/translation.py:205
+msgid "Translation: {}"
+msgstr "תרגום: {}"
+
+#: lib/translation.py:207
+msgid "Translation (Cached): {}"
+msgstr "תרגום (ממטמון): {}"
+
+#: lib/translation.py:218
+msgid "Start to translate ebook content"
+msgstr "מתחיל לתרגם את תוכן הספר"
+
+#: lib/translation.py:220
+msgid "Item count: {}"
+msgstr "מספר פריטים: {}"
+
+#: lib/translation.py:224
+msgid "There is no content need to translate."
+msgstr "אין תוכן לתרגום."
+
+#: lib/translation.py:235
+msgid "Translation failed."
+msgstr "התרגום נכשל."
+
+#: lib/translation.py:237
+msgid "Time consuming: {} minutes"
+msgstr "משך זמן: {} דקות"
+
+#: setting.py:112
+msgid "General"
+msgstr "כללי"
+
+#: setting.py:114
+msgid "Content"
+msgstr "תוכן"
+
+#: setting.py:150
+msgid "Preferred Mode"
+msgstr "מצב מועדף"
+
+#: setting.py:182
+msgid "Output Path"
+msgstr "נתיב פלט"
+
+#: setting.py:184
+msgid "Library"
+msgstr "ספרייה"
+
+#: setting.py:185
+msgid "Path"
+msgstr "נתיב"
+
+#: setting.py:190
+msgid "Choose a path to store translated book(s)"
+msgstr "בחר נתיב לאחסון הספרים המתורגמים"
+
+#: setting.py:217
+msgid "Preferred Format"
+msgstr "תבנית מועדפת"
+
+#: setting.py:241
+msgid "(Beta)"
+msgstr "(בטא)"
+
+#: setting.py:241
+msgid "Merge to Translate"
+msgstr "מיזוג לתרגום"
+
+#: setting.py:243 setting.py:264 setting.py:328 setting.py:356 setting.py:1002
+msgid "Enable"
+msgstr "הפעל"
+
+#: setting.py:249
+msgid "The number of characters to translate at once."
+msgstr "מספר התווים לתרגום בבת אחת."
+
+#: setting.py:261
+msgid "Network Proxy"
+msgstr "שרת מתווך (Proxy)"
+
+#: setting.py:281
+msgid "Host"
+msgstr "מארח"
+
+#: setting.py:284
+msgid "Port"
+msgstr "פורט"
+
+#: setting.py:295 setting.py:397
+msgid "Test"
+msgstr "בדיקה"
+
+#: setting.py:326 ui.py:50
+msgid "Cache"
+msgstr "מטמון"
+
+#: setting.py:329
+msgid "Manage"
+msgstr "ניהול"
+
+#: setting.py:346
+msgid "Job Log"
+msgstr "יומן משימות"
+
+#: setting.py:347
+msgid "Show translation"
+msgstr "הצג תרגום"
+
+#: setting.py:354
+msgid "Notification"
+msgstr "התראה"
+
+#: setting.py:371
+msgid "Search Paths"
+msgstr "נתיבי חיפוש"
+
+#: setting.py:374
+msgid "The plugin will search for external programs via these paths."
+msgstr "התוסף יחפש תוכניות חיצוניות בנתיבים אלה."
+
+#: setting.py:398 setting.py:574 setting.py:578 setting.py:584 setting.py:587
+msgid "Custom"
+msgstr "מותאם"
+
+#: setting.py:410
+msgid "Usage Tip"
+msgstr "טיפ לשימוש"
+
+#: setting.py:424 setting.py:1035 setting.py:1053 setting.py:1096
+#: setting.py:1150
+msgid "Tip: "
+msgstr "טיפ: "
+
+#: setting.py:425
+msgid "API keys will auto-switch if the previous one is unavailable."
+msgstr "מפתחות ה‑API יוחלפו אוטומטית אם הקודם אינו זמין."
+
+#: setting.py:435
+msgid "Preferred Language"
+msgstr "שפה מועדפת"
+
+#: setting.py:446
+msgid "HTTP Request"
+msgstr "בקשת HTTP"
+
+#: setting.py:458
+msgid "Concurrency limit"
+msgstr "מגבלת מקביליות"
+
+#: setting.py:459
+msgid "Interval (seconds)"
+msgstr "מרווח (שניות)"
+
+#: setting.py:460
+msgid "Attempt times"
+msgstr "מספר ניסיונות"
+
+#: setting.py:461
+msgid "Timeout (seconds)"
+msgstr "פסק זמן (שניות)"
+
+#: setting.py:465
+msgid "Abort Translation"
+msgstr "ביטול התרגום"
+
+#: setting.py:469
+msgid "Max errors"
+msgstr "מקסימום שגיאות"
+
+#: setting.py:472
+msgid "The number of consecutive errors to abort translation."
+msgstr "מספר השגיאות הרצופות לביטול התרגום."
+
+#: setting.py:484
+msgid "Fine-tuning"
+msgstr "כוונון עדין"
+
+#: setting.py:491
+msgid "Prompt"
+msgstr "הנחיה"
+
+#: setting.py:493
+msgid "Endpoint"
+msgstr "נקודת קצה"
+
+#: setting.py:501
+msgid "A model name"
+msgstr "שם מודל"
+
+#: setting.py:506
+msgid "Model"
+msgstr "מודל"
+
+#: setting.py:539
+msgid "Sampling"
+msgstr "דגימה"
+
+#: setting.py:544
+msgid "Enable streaming response"
+msgstr "הפעל תגובת הזרמה"
+
+#: setting.py:545
+msgid "Stream"
+msgstr "הזרמה"
+
+#: setting.py:602
+msgid "Fetching..."
+msgstr "מאחזר..."
+
+#: setting.py:611
+msgid "You need to provide an API key to proceed."
+msgstr "עליך לספק מפתח API כדי להמשיך."
+
+#: setting.py:626
+msgid "Can't fetch model list"
+msgstr "לא ניתן לאחזר את רשימת המודלים"
+
+#: setting.py:627
+msgid "Can't fetch model list, please check and try again."
+msgstr "לא ניתן לאחזר את רשימת המודלים, נא לבדוק ולנסות שוב."
+
+#: setting.py:655
+msgid "The model depends on your Azure project."
+msgstr "המודל תלוי בפרויקט ה‑Azure שלך."
+
+#: setting.py:798
+msgid "Below original"
+msgstr "מתחת למקור"
+
+#: setting.py:800
+msgid "Above original"
+msgstr "מעל המקור"
+
+#: setting.py:802
+msgid "Right to original"
+msgstr "מימין למקור"
+
+#: setting.py:804
+msgid "Left to original"
+msgstr "משמאל למקור"
+
+#: setting.py:805
+msgid "With no original"
+msgstr "ללא המקור"
+
+#: setting.py:824
+msgid "Translation"
+msgstr "תרגום"
+
+#: setting.py:841
+msgid "Column Gap"
+msgstr "מרווח עמודות"
+
+#: setting.py:851
+msgid "Percentage"
+msgstr "אחוז"
+
+#: setting.py:852
+msgid "Space count"
+msgstr "מספר רווחים"
+
+#: setting.py:883
+msgid "Translation Position"
+msgstr "מיקום התרגום"
+
+#: setting.py:927
+msgid "Original Text Color"
+msgstr "צבע הטקסט המקורי"
+
+#: setting.py:932 setting.py:950 setting.py:1027 setting.py:1044
+#: setting.py:1142
+msgid "e.g.,"
+msgstr "לדוגמה,"
+
+#: setting.py:946
+msgid "Translation Text Color"
+msgstr "צבע טקסט התרגום"
+
+#: setting.py:1000
+msgid "Translation Glossary"
+msgstr "מילון מונחים לתרגום"
+
+#: setting.py:1004
+msgid "Choose a glossary file"
+msgstr "בחר קובץ מילון מונחים"
+
+#: setting.py:1023
+msgid "Priority Element"
+msgstr "רכיב בעדיפות"
+
+#: setting.py:1032
+msgid "CSS selectors for priority elements. One rule per line:"
+msgstr "בוררי CSS לרכיבים בעדיפות. כלל אחד בכל שורה:"
+
+#: setting.py:1036
+msgid "Stop further extraction once elements match these rules."
+msgstr "הפסק את החילוץ ברגע שרכיבים תואמים לכללים אלה."
+
+#: setting.py:1040
+msgid "Ignore Element"
+msgstr "התעלם מרכיב"
+
+#: setting.py:1050
+msgid "CSS selectors to exclude elements. One rule per line:"
+msgstr "בוררי CSS להחרגת רכיבים. כלל אחד בכל שורה:"
+
+#: setting.py:1054
+msgid "Do not translate elements that matches these rules."
+msgstr "אל תתרגם רכיבים התואמים לכללים אלה."
+
+#: setting.py:1058
+msgid "Ignore Paragraph"
+msgstr "התעלם מפסקה"
+
+#: setting.py:1064
+msgid "Scope"
+msgstr "היקף"
+
+#: setting.py:1065
+msgid "Text only"
+msgstr "טקסט בלבד"
+
+#: setting.py:1067
+msgid "HTML element"
+msgstr "רכיב HTML"
+
+#: setting.py:1074
+msgid "Mode"
+msgstr "מצב"
+
+#: setting.py:1075
+msgid "Normal"
+msgstr "רגיל"
+
+#: setting.py:1077
+msgid "Normal (case-sensitive)"
+msgstr "רגיל (תלוי רישיות)"
+
+#: setting.py:1078
+msgid "Regular Expression"
+msgstr "ביטוי רגולרי"
+
+#: setting.py:1096
+msgid "Do not translate extracted elements that contain these rules."
+msgstr "אל תתרגם רכיבים שחולצו ומכילים כללים אלה."
+
+#: setting.py:1121
+msgid "Exclude paragraph by keyword. One keyword per line:"
+msgstr "החרג פסקה לפי מילת מפתח. מילת מפתח אחת בכל שורה:"
+
+#: setting.py:1122
+msgid "Exclude paragraph by case-sensitive keyword. One keyword per line:"
+msgstr "החרג פסקה לפי מילת מפתח תלוית רישיות. מילת מפתח אחת בכל שורה:"
+
+#: setting.py:1124
+msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
+msgstr "החרג פסקה לפי תבנית ביטוי רגולרי. תבנית אחת בכל שורה:"
+
+#: setting.py:1138
+msgid "Reserve Element"
+msgstr "שמירת רכיב"
+
+#: setting.py:1147
+msgid "CSS selectors to reserve elements. One rule per line:"
+msgstr "בוררי CSS לשמירת רכיבים. כלל אחד בכל שורה:"
+
+#: setting.py:1151
+msgid "Keep elements that match these rules for extraction."
+msgstr "שמור רכיבים התואמים לכללים אלה עבור החילוץ."
+
+#: setting.py:1155
+msgid "Ebook Metadata"
+msgstr "מטא‑נתוני הספר"
+
+#: setting.py:1159
+msgid "Translate all of the metadata information"
+msgstr "תרגם את כל מטא‑הנתונים"
+
+#: setting.py:1161
+msgid "Append target language to title metadata"
+msgstr "הוסף את שפת היעד למטא‑נתוני הכותרת"
+
+#: setting.py:1163
+msgid "Set target language code to language metadata"
+msgstr "הגדר את קוד שפת היעד במטא‑נתוני השפה"
+
+#: setting.py:1166
+msgid "Subjects of ebook (one subject per line)"
+msgstr "נושאי הספר (נושא אחד בכל שורה)"
+
+#: setting.py:1168
+msgid "Metadata Translation"
+msgstr "תרגום מטא‑נתונים"
+
+#: setting.py:1169
+msgid "Language Mark"
+msgstr "סימון שפה"
+
+#: setting.py:1170
+msgid "Language Code"
+msgstr "קוד שפה"
+
+#: setting.py:1171
+msgid "Append Subjects"
+msgstr "הוסף נושאים"
+
+#: setting.py:1194 setting.py:1243
+msgid "Proxy host or port is incorrect."
+msgstr "מארח או פורט המתווך שגויים."
+
+#: setting.py:1197 setting.py:1208
+msgid "The proxy is available."
+msgstr "המתווך זמין."
+
+#: setting.py:1198 setting.py:1211
+msgid "The proxy is not available."
+msgstr "המתווך אינו זמין."
+
+#: setting.py:1294
+msgid "the prompt must include {}."
+msgstr "ההנחיה חייבת לכלול {}."
+
+#: setting.py:1321 setting.py:1328
+msgid "Invalid color value."
+msgstr "ערך צבע לא תקין."
+
+#: setting.py:1337
+msgid "The specified glossary file does not exist."
+msgstr "קובץ מילון המונחים שצוין אינו קיים."
+
+#: setting.py:1348 setting.py:1373 setting.py:1386
+msgid "{} is not a valid CSS selector."
+msgstr "{} אינו בורר CSS תקין."
+
+#: setting.py:1361
+msgid "{} is not a valid regular expression."
+msgstr "{} אינו ביטוי רגולרי תקין."
+
+#: ui.py:29
+msgid "Translate Book"
+msgstr "תרגם ספר"
+
+#: ui.py:29
+msgid "Translate Ebook Content"
+msgstr "תרגם את תוכן הספר"
+
+#: ui.py:52 ui.py:120
+msgid "Setting"
+msgstr "הגדרות"
+
+#: ui.py:53 ui.py:148
+msgid "About"
+msgstr "אודות"
+
+#: ui.py:82
+msgid "Please choose a book."
+msgstr "נא לבחור ספר."
+
+#: ui.py:97
+msgid "Please choose at least one book."
+msgstr "נא לבחור לפחות ספר אחד."
+
+#: ui.py:111
+msgid "Cannot change setting while book(s) are under translation."
+msgstr "לא ניתן לשנות הגדרות בזמן שספרים נמצאים בתרגום."
+
+#: ui.py:128
+msgid "Cannot manage cache while book(s) are under translation."
+msgstr "לא ניתן לנהל את המטמון בזמן שספרים נמצאים בתרגום."
+
+#: ui.py:137
+msgid "Cache Manager"
+msgstr "מנהל המטמון"
+
+#: ui.py:166
+msgid "Choose Translation Mode"
+msgstr "בחר מצב תרגום"
