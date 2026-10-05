@@ -1,0 +1,1188 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Ebook Translator Calibre Plugin\n"
+"Report-Msgid-Bugs-To: bookfere@gmail.com\n"
+"POT-Creation-Date: 2025-08-22 02:34+0800\n"
+"PO-Revision-Date: 2026-09-01 00:00+0200\n"
+"Last-Translator: \n"
+"Language-Team: Deutsch\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: __init__.py:23
+msgid "Ebook Translator"
+msgstr "Ebook Translator"
+
+#: __init__.py:31
+msgid "A Calibre plugin to translate ebook into a specified language (optionally keeping the original content)."
+msgstr "Eine Calibre-Erweiterung, die E-Books in eine gewählte Sprache übersetzt (wahlweise unter Beibehaltung des Originaltexts)."
+
+#: advanced.py:110
+msgid "Extracting ebook content..."
+msgstr "E-Book-Inhalt wird ausgelesen …"
+
+#: advanced.py:117
+msgid "Failed to extract ebook content"
+msgstr "E-Book-Inhalt konnte nicht ausgelesen werden"
+
+#: advanced.py:132
+msgid "Filtering ebook content..."
+msgstr "E-Book-Inhalt wird gefiltert …"
+
+#: advanced.py:141
+msgid "Preparing user interface..."
+msgstr "Oberfläche wird vorbereitet …"
+
+#: advanced.py:231
+msgid "&Start"
+msgstr "&Start"
+
+#: advanced.py:246 batch.py:67 setting.py:221
+msgid "Input Format"
+msgstr "Eingabeformat"
+
+#: advanced.py:253 batch.py:67 setting.py:222
+msgid "Output Format"
+msgstr "Ausgabeformat"
+
+#: advanced.py:260 advanced.py:812 batch.py:68 setting.py:439
+msgid "Source Language"
+msgstr "Ausgangssprache"
+
+#: advanced.py:267 advanced.py:818 batch.py:68 setting.py:440
+msgid "Target Language"
+msgstr "Zielsprache"
+
+#: advanced.py:308 batch.py:67
+msgid "Encoding"
+msgstr "Zeichenkodierung"
+
+#: advanced.py:320 batch.py:69
+msgid "Target Directionality"
+msgstr "Schreibrichtung"
+
+#: advanced.py:324 batch.py:163
+msgid "Auto"
+msgstr "Automatisch"
+
+#: advanced.py:325 batch.py:164
+msgid "Left to Right"
+msgstr "Links nach rechts"
+
+#: advanced.py:326 batch.py:165
+msgid "Right to Left"
+msgstr "Rechts nach links"
+
+#: advanced.py:422
+msgid "Failed to translate {} paragraph(s), Would you like to retry?"
+msgstr "{} Absätze konnten nicht übersetzt werden. Erneut versuchen?"
+
+#: advanced.py:428 lib/translation.py:238 lib/translation.py:239
+msgid "Translation completed."
+msgstr "Übersetzung abgeschlossen."
+
+#: advanced.py:443
+msgid "There is no content that needs to be translated."
+msgstr "Es gibt keinen Inhalt, der übersetzt werden müsste."
+
+#: advanced.py:491
+msgid "Loading ebook data, please wait..."
+msgstr "E-Book-Daten werden geladen, bitte warten …"
+
+#: advanced.py:520
+msgid "Review"
+msgstr "Prüfen"
+
+#: advanced.py:521
+msgid "Log"
+msgstr "Protokoll"
+
+#: advanced.py:522
+msgid "Errors"
+msgstr "Fehler"
+
+#: advanced.py:549
+msgid "All"
+msgstr "Alle"
+
+#: advanced.py:551 components/indicator.py:11
+msgid "Non-aligned"
+msgstr "Nicht zugeordnet"
+
+#: advanced.py:552 advanced.py:908 components/indicator.py:10
+#: components/table.py:85
+msgid "Translated"
+msgstr "Übersetzt"
+
+#: advanced.py:553 components/indicator.py:12 components/table.py:76
+msgid "Untranslated"
+msgstr "Nicht übersetzt"
+
+#: advanced.py:556
+msgid "Original Text"
+msgstr "Originaltext"
+
+#: advanced.py:557
+msgid "Original Code"
+msgstr "Original-Code"
+
+#: advanced.py:558
+msgid "Translation Text"
+msgstr "Übersetzungstext"
+
+#: advanced.py:561
+msgid "keyword for filtering"
+msgstr "Suchbegriff zum Filtern"
+
+#: advanced.py:566 cache.py:72
+msgid "Reset"
+msgstr "Zurücksetzen"
+
+#: advanced.py:667
+msgid "Total items: {}"
+msgstr "Einträge gesamt: {}"
+
+#: advanced.py:668 lib/translation.py:221
+msgid "Character count: {}"
+msgstr "Zeichenzahl: {}"
+
+#: advanced.py:677
+msgid "Non-aligned items: {}"
+msgstr "Nicht zugeordnete Einträge: {}"
+
+#: advanced.py:710 cache.py:90 cache.py:179 components/engine.py:202
+#: components/table.py:157
+msgid "Delete"
+msgstr "Löschen"
+
+#: advanced.py:713
+msgid "Batch Translation"
+msgstr "Stapelübersetzung"
+
+#: advanced.py:713 setting.py:802 setting.py:804
+msgid "Beta"
+msgstr "Beta"
+
+#: advanced.py:714
+msgid "Translate All"
+msgstr "Alle übersetzen"
+
+#: advanced.py:715
+msgid "Translate Selected"
+msgstr "Auswahl übersetzen"
+
+#: advanced.py:731 advanced.py:771
+msgid "Stop"
+msgstr "Anhalten"
+
+#: advanced.py:761
+msgid "Are you sure you want to stop the translation progress?"
+msgstr "Soll die Übersetzung wirklich angehalten werden?"
+
+#: advanced.py:765
+msgid "Stopping..."
+msgstr "Wird angehalten …"
+
+#: advanced.py:796
+msgid "Cache Status"
+msgstr "Cache-Status"
+
+#: advanced.py:799
+msgid "Disabled"
+msgstr "Aus"
+
+#: advanced.py:799
+msgid "Enabled"
+msgstr "An"
+
+#: advanced.py:806 setting.py:394
+msgid "Translation Engine"
+msgstr "Engine"
+
+#: advanced.py:824
+msgid "Custom Ebook Title"
+msgstr "Eigener E-Book-Titel"
+
+#: advanced.py:829
+msgid "By default, title metadata will be translated."
+msgstr "Ohne Angabe wird der Titel mitübersetzt."
+
+#: advanced.py:858
+msgid "Output Ebook"
+msgstr "E-Book ausgeben"
+
+#: advanced.py:860
+msgid "Output"
+msgstr "Ausgeben"
+
+#: advanced.py:909
+msgid "The ebook has not been translated yet."
+msgstr "Das E-Book wurde noch nicht übersetzt."
+
+#: advanced.py:913
+msgid "The number of lines in some translation units differs between the original text and the translated text. Are you sure you want to output without checking alignment?"
+msgstr "Bei einigen Übersetzungseinheiten weicht die Zeilenzahl von der des Originals ab. Wirklich ohne Prüfung der Zuordnung ausgeben?"
+
+#: advanced.py:954
+msgid "No translation yet"
+msgstr "Noch keine Übersetzung"
+
+#: advanced.py:1022 components/engine.py:208 setting.py:66
+msgid "&Save"
+msgstr "&Sichern"
+
+#: advanced.py:1026
+msgid "Word Wrap"
+msgstr "Zeilenumbruch"
+
+#: advanced.py:1152
+msgid "Your changes have been saved."
+msgstr "Die Änderungen wurden gesichert."
+
+#: advanced.py:1164
+msgid "Translation log"
+msgstr "Übersetzungsprotokoll"
+
+#: advanced.py:1175
+msgid "Error log"
+msgstr "Fehlerprotokoll"
+
+#: advanced.py:1195
+msgid "Are you sure you want to translate all {:n} paragraphs?"
+msgstr "Sollen wirklich alle {:n} Absätze übersetzt werden?"
+
+#: advanced.py:1223
+msgid "Are you sure you want to cancel the preparation progress?"
+msgstr "Soll die Vorbereitung wirklich abgebrochen werden?"
+
+#: advanced.py:1234
+msgid "Are you sure you want to cancel the translation progress?"
+msgstr "Soll die Übersetzung wirklich abgebrochen werden?"
+
+#: batch.py:67 cache.py:199
+msgid "Title"
+msgstr "Titel"
+
+#: batch.py:153 batch.py:157
+msgid "Default"
+msgstr "Standard"
+
+#: batch.py:190 components/engine.py:139 components/table.py:155
+msgid "Translate"
+msgstr "Übersetzen"
+
+#: batch.py:205 lib/cache.py:146
+msgid "Unknown"
+msgstr "Unbekannt"
+
+#: batch.py:214 cache.py:127 setting.py:1228
+msgid "The specified path does not exist."
+msgstr "Der angegebene Pfad existiert nicht."
+
+#: cache.py:70
+msgid "Choose a path to store cache files."
+msgstr "Ordner für die Cache-Dateien wählen."
+
+#: cache.py:71
+msgid "Move"
+msgstr "Verschieben"
+
+#: cache.py:73
+msgid "Reveal"
+msgstr "Im Dateimanager zeigen"
+
+#: cache.py:75
+msgid "Cache Path"
+msgstr "Cache-Pfad"
+
+#: cache.py:88
+msgid "Clear All"
+msgstr "Alle löschen"
+
+#: cache.py:107
+msgid "All cache(s) will be moved to the default path. Are you sure to proceed?"
+msgstr "Alle Caches werden in den Standardpfad verschoben. Fortfahren?"
+
+#: cache.py:122
+msgid "All cache(s) will be moved to the new path. Are you sure to proceed?"
+msgstr "Alle Caches werden in den neuen Pfad verschoben. Fortfahren?"
+
+#: cache.py:130
+msgid "Please choose an empty folder."
+msgstr "Bitte einen leeren Ordner wählen."
+
+#: cache.py:140
+msgid "Are you sure you want to clear all caches?"
+msgstr "Sollen wirklich alle Caches gelöscht werden?"
+
+#: cache.py:150
+msgid "No cache exists."
+msgstr "Es ist kein Cache vorhanden."
+
+#: cache.py:155
+msgid "Total: {}"
+msgstr "Gesamt: {}"
+
+#: cache.py:186
+msgid "Are you sure you want to delete the selected cache(s)?"
+msgstr "Sollen die gewählten Caches wirklich gelöscht werden?"
+
+#: cache.py:199 components/table.py:34 setting.py:113
+msgid "Engine"
+msgstr "Engine"
+
+#: cache.py:199 components/table.py:34
+msgid "Language"
+msgstr "Sprache"
+
+#: cache.py:199
+msgid "Merge Length"
+msgstr "Blockgröße"
+
+#: cache.py:200
+msgid "Filename"
+msgstr "Dateiname"
+
+#: cache.py:200
+msgid "Last Modification Time"
+msgstr "Zuletzt geändert"
+
+#: cache.py:200
+msgid "Size (MB)"
+msgstr "Größe (MB)"
+
+#: components/chatgpt.py:74
+msgid "processing..."
+msgstr "wird verarbeitet …"
+
+#: components/chatgpt.py:88
+msgid "checking..."
+msgstr "wird geprüft …"
+
+#: components/chatgpt.py:100
+msgid "canceling..."
+msgstr "wird abgebrochen …"
+
+#: components/chatgpt.py:114
+msgid "applying..."
+msgstr "wird übernommen …"
+
+#: components/chatgpt.py:134
+msgid "ChatGPT Batch Translation"
+msgstr "ChatGPT-Stapelübersetzung"
+
+#: components/chatgpt.py:199
+msgid "Create a new batch translation"
+msgstr "Neue Stapelübersetzung anlegen"
+
+#: components/chatgpt.py:202
+msgid "All original content must be uploaded to OpenAI for batch translation, and you will need to wait up to 24 hours to continue the translation process.<a href=\"https://cookbook.openai.com/examples/batch_processing\">more details</a>"
+msgstr "Für die Stapelübersetzung muss der gesamte Ausgangstext zu OpenAI hochgeladen werden. Bis der Vorgang fortgesetzt werden kann, können bis zu 24 Stunden vergehen.<a href=\"https://cookbook.openai.com/examples/batch_processing\">weitere Hinweise</a>"
+
+#: components/chatgpt.py:253 setting.py:498
+msgid "Refresh"
+msgstr "Aktualisieren"
+
+#: components/chatgpt.py:254
+msgid "Cancel Batch Translation"
+msgstr "Stapelübersetzung abbrechen"
+
+#: components/chatgpt.py:255
+msgid "Apply"
+msgstr "Übernehmen"
+
+#: components/chatgpt.py:273
+msgid "Are you sure you want to cancel the batch translation?"
+msgstr "Soll die Stapelübersetzung wirklich abgebrochen werden?"
+
+#: components/chatgpt.py:297
+msgid "Batch translation details"
+msgstr "Einzelheiten zur Stapelübersetzung"
+
+#: components/chatgpt.py:299 components/table.py:34
+msgid "Status"
+msgstr "Status"
+
+#: components/chatgpt.py:300
+msgid "Detail"
+msgstr "Einzelheiten"
+
+#: components/engine.py:66 lib/translation.py:161
+msgid "Translating..."
+msgstr "Wird übersetzt …"
+
+#: components/engine.py:98
+msgid "Test Translation Engine"
+msgstr "Engine testen"
+
+#: components/engine.py:144
+msgid "Usage: checking..."
+msgstr "Verbrauch: wird geprüft …"
+
+#: components/engine.py:155
+msgid "Usage: {}"
+msgstr "Verbrauch: {}"
+
+#: components/engine.py:193
+msgid "Custom Translation Engine"
+msgstr "Eigene Engine"
+
+#: components/engine.py:201
+msgid "Add"
+msgstr "Hinzufügen"
+
+#: components/engine.py:205
+msgid "Clear"
+msgstr "Leeren"
+
+#: components/engine.py:206
+msgid "Restore"
+msgstr "Wiederherstellen"
+
+#: components/engine.py:207
+msgid "Verify"
+msgstr "Prüfen"
+
+#: components/engine.py:248
+msgid "Valid engine data format."
+msgstr "Gültiges Format der Engine-Beschreibung."
+
+#: components/engine.py:267
+msgid "The engine name is already in use."
+msgstr "Der Engine-Name wird bereits verwendet."
+
+#: components/engine.py:289 setting.py:128
+msgid "The setting has been saved."
+msgstr "Die Einstellung wurde gesichert."
+
+#: components/footer.py:27
+msgid "Feedback"
+msgstr "Rückmeldung"
+
+#: components/footer.py:28
+msgid "Donate"
+msgstr "Spenden"
+
+#: components/format.py:19 setting.py:231
+msgid "Ebook Specific"
+msgstr "E-Book-spezifisch"
+
+#: components/indicator.py:13
+msgid "Failed translation"
+msgstr "Fehlgeschlagene Übersetzung"
+
+#: components/indicator.py:14
+msgid "Not selected"
+msgstr "Nicht gewählt"
+
+#: components/lang.py:30 engines/base.py:90 setting.py:1284
+msgid "Auto detect"
+msgstr "Automatisch erkennen"
+
+#: components/mode.py:23 setting.py:162
+msgid "Choose a translation mode for clicking the icon button."
+msgstr "Modus wählen, der beim Klick auf das Symbol geöffnet wird."
+
+#: components/mode.py:28 setting.py:152 ui.py:47 ui.py:74 ui.py:87
+msgid "Advanced Mode"
+msgstr "Erweiterter Modus"
+
+#: components/mode.py:33
+msgid "This mode provides additional options for the translation process, allowing for more control and customization."
+msgstr "Dieser Modus bietet zusätzliche Einstellungen für den Übersetzungsvorgang und damit mehr Kontrolle."
+
+#: components/mode.py:36 components/mode.py:46 setting.py:193 setting.py:939
+#: setting.py:958 setting.py:1005
+msgid "Choose"
+msgstr "Wählen"
+
+#: components/mode.py:38 setting.py:153 ui.py:48 ui.py:103
+msgid "Batch Mode"
+msgstr "Stapelmodus"
+
+#: components/mode.py:43
+msgid "This mode allows users to translate multiple ebooks at once, streamlining the translation process and saving time."
+msgstr "In diesem Modus lassen sich mehrere E-Books auf einmal übersetzen, was den Ablauf vereinfacht und Zeit spart."
+
+#: components/table.py:34 setting.py:817
+msgid "Original"
+msgstr "Original"
+
+#: components/table.py:134
+msgid "The number of lines differs between the original text and the translated text."
+msgstr "Die Zeilenzahl von Original und Übersetzung weicht voneinander ab."
+
+#: components/table.py:162
+msgid "Select the whole chapter"
+msgstr "Ganzes Kapitel markieren"
+
+#: components/table.py:168
+msgid "Select similar paragraphs: {}=\"{}\""
+msgstr "Ähnliche Absätze markieren: {}=\"{}\""
+
+#: components/table.py:256
+msgid "Retain at least one row."
+msgstr "Mindestens eine Zeile muss erhalten bleiben."
+
+#: engines/anthropic.py:151 engines/base.py:217 engines/google.py:429
+#: engines/openai.py:117
+msgid "Can not parse returned response. Raw data: {}"
+msgstr "Die Antwort konnte nicht ausgewertet werden. Rohdaten: {}"
+
+#: engines/anthropic.py:160
+msgid "Invalid event type received: {}"
+msgstr "Ungültiger Ereignistyp empfangen: {}"
+
+#: engines/anthropic.py:171
+msgid "Error received: {}"
+msgstr "Fehler empfangen: {}"
+
+#: engines/baidu.py:18
+msgid "Baidu"
+msgstr "Baidu"
+
+#: engines/base.py:32 setting.py:420
+msgid "API Keys"
+msgstr "API-Schlüssel"
+
+#: engines/base.py:107
+msgid "A correct key format \"{}\" is required."
+msgstr "Ein Schlüssel im Format \"{}\" wird benötigt."
+
+#: engines/custom.py:47
+msgid "Engine data must be in valid JSON format."
+msgstr "Die Engine-Beschreibung muss gültiges JSON sein."
+
+#: engines/custom.py:50
+msgid "Invalid engine data."
+msgstr "Ungültige Engine-Beschreibung."
+
+#: engines/custom.py:54
+msgid "Engine name is required."
+msgstr "Ein Engine-Name wird benötigt."
+
+#: engines/custom.py:57
+msgid "Engine name must be different from builtin engine name."
+msgstr "Der Engine-Name muss sich von den Namen der eingebauten Engines unterscheiden."
+
+#: engines/custom.py:61
+msgid "Language codes are required."
+msgstr "Sprachcodes werden benötigt."
+
+#: engines/custom.py:65
+msgid "Source and target must be added in pair."
+msgstr "Ausgangs- und Zielsprache müssen gemeinsam angegeben werden."
+
+#: engines/custom.py:69
+msgid "Request information is required."
+msgstr "Angaben zur Anfrage werden benötigt."
+
+#: engines/custom.py:71
+msgid "API URL is required."
+msgstr "Eine API-URL wird benötigt."
+
+#: engines/custom.py:75
+msgid "Placeholder <text> is required."
+msgstr "Der Platzhalter <text> wird benötigt."
+
+#: engines/custom.py:79
+msgid "Request headers must be an JSON object."
+msgstr "Die Kopfzeilen der Anfrage müssen ein JSON-Objekt sein."
+
+#: engines/custom.py:82
+msgid "A appropriate Content-Type in headers is required."
+msgstr "In den Kopfzeilen wird ein passender Content-Type benötigt."
+
+#: engines/custom.py:86
+msgid "Expression to parse response is required."
+msgstr "Ein Ausdruck zum Auswerten der Antwort wird benötigt."
+
+#: engines/custom.py:139
+msgid "Response was parsed incorrectly."
+msgstr "Die Antwort wurde fehlerhaft ausgewertet."
+
+#: engines/deepl.py:37
+msgid "{} total, {} used, {} left"
+msgstr "{} gesamt, {} verbraucht, {} übrig"
+
+#: engines/google.py:134
+msgid "This plugin uses Application Default Credentials (ADC) in your local environment to access your Google Translate service. To set up the ADC, follow these steps:\n1. Install the gcloud CLI by checking out its instructions {}.\n2. Run the command: gcloud auth application-default login.\n3. Sign in to your Google account and grant needed privileges."
+msgstr "Diese Erweiterung verwendet die Standardanmeldedaten (Application Default Credentials, ADC) der lokalen Umgebung, um auf Google Translate zuzugreifen. So werden sie eingerichtet:\n1. Die gcloud-CLI nach dieser Anleitung installieren: {}.\n2. Den Befehl ausführen: gcloud auth application-default login.\n3. Am Google-Konto anmelden und die nötigen Rechte erteilen."
+
+#: engines/google.py:144
+msgid "Cannot run the command \"{}\"."
+msgstr "Der Befehl \"{}\" konnte nicht ausgeführt werden."
+
+#: engines/google.py:189
+msgid "Cannot find the command \"{}\"."
+msgstr "Der Befehl \"{}\" wurde nicht gefunden."
+
+#: engines/microsoft.py:28
+msgid "Failed get APP key due to an invalid Token."
+msgstr "APP-Schlüssel konnte wegen eines ungültigen Tokens nicht geholt werden."
+
+#: engines/microsoft.py:32
+msgid "Failed get APP key due to and invalid Base64 URL."
+msgstr "APP-Schlüssel konnte wegen einer ungültigen Base64-URL nicht geholt werden."
+
+#: engines/youdao.py:19
+msgid "Youdao"
+msgstr "Youdao"
+
+#: lib/conversion.py:76
+msgid "Start to convert ebook format..."
+msgstr "E-Book-Format wird umgewandelt …"
+
+#: lib/conversion.py:81
+msgid "Outputting ebook file..."
+msgstr "E-Book-Datei wird geschrieben …"
+
+#: lib/conversion.py:104
+msgid "Starting to output subtitles file..."
+msgstr "Untertiteldatei wird geschrieben …"
+
+#: lib/conversion.py:110
+msgid "The translation of the subtitles file was completed."
+msgstr "Die Übersetzung der Untertiteldatei ist abgeschlossen."
+
+#: lib/conversion.py:129
+msgid "Starting to output PGN file..."
+msgstr "PGN-Datei wird geschrieben …"
+
+#: lib/conversion.py:139
+msgid "The translation of the PGN file was completed."
+msgstr "Die Übersetzung der PGN-Datei ist abgeschlossen."
+
+#: lib/conversion.py:275
+msgid "[{} > {}] Translating \"{}\""
+msgstr "[{} > {}] Übersetze \"{}\""
+
+#: lib/conversion.py:284
+msgid "Translation job failed"
+msgstr "Übersetzungsauftrag fehlgeschlagen"
+
+#: lib/conversion.py:332
+msgid "completed"
+msgstr "abgeschlossen"
+
+#: lib/conversion.py:346
+msgid "Ebook Translation Log"
+msgstr "E-Book-Übersetzungsprotokoll"
+
+#: lib/conversion.py:346
+msgid "Translation Completed"
+msgstr "Übersetzung abgeschlossen"
+
+#: lib/conversion.py:347
+msgid "The translation of \"{}\" was completed. Do you want to open the book?"
+msgstr "Die Übersetzung von \"{}\" ist abgeschlossen. Soll das Buch geöffnet werden?"
+
+#: lib/translation.py:124 lib/translation.py:131 lib/translation.py:150
+#: lib/translation.py:156
+msgid "Translation canceled."
+msgstr "Übersetzung abgebrochen."
+
+#: lib/translation.py:134
+msgid "Failed to retrieve data from translate engine API."
+msgstr "Von der Schnittstelle der Engine konnten keine Daten abgerufen werden."
+
+#: lib/translation.py:142 lib/translation.py:203
+msgid "Original: {}"
+msgstr "Original: {}"
+
+#: lib/translation.py:143
+msgid "Status: Failed {} times / Sleeping for {} seconds"
+msgstr "Status: {}-mal fehlgeschlagen / Pause von {} Sekunden"
+
+#: lib/translation.py:144
+msgid "Error: {}"
+msgstr "Fehler: {}"
+
+#: lib/translation.py:147 lib/translation.py:202
+msgid "Row: {}"
+msgstr "Zeile: {}"
+
+#: lib/translation.py:191
+msgid "Translating: {}/{}"
+msgstr "Übersetze: {}/{}"
+
+#: lib/translation.py:205
+msgid "Translation: {}"
+msgstr "Übersetzung: {}"
+
+#: lib/translation.py:207
+msgid "Translation (Cached): {}"
+msgstr "Übersetzung (aus dem Cache): {}"
+
+#: lib/translation.py:218
+msgid "Start to translate ebook content"
+msgstr "Übersetzung des E-Book-Inhalts beginnt"
+
+#: lib/translation.py:220
+msgid "Item count: {}"
+msgstr "Anzahl Einträge: {}"
+
+#: lib/translation.py:224
+msgid "There is no content need to translate."
+msgstr "Es gibt keinen Inhalt zu übersetzen."
+
+#: lib/translation.py:235
+msgid "Translation failed."
+msgstr "Übersetzung fehlgeschlagen."
+
+#: lib/translation.py:237
+msgid "Time consuming: {} minutes"
+msgstr "Zeitaufwand: {} Minuten"
+
+#: setting.py:112
+msgid "General"
+msgstr "Allgemein"
+
+#: setting.py:114
+msgid "Content"
+msgstr "Inhalt"
+
+#: setting.py:150
+msgid "Preferred Mode"
+msgstr "Bevorzugter Modus"
+
+#: setting.py:182
+msgid "Output Path"
+msgstr "Ausgabepfad"
+
+#: setting.py:184
+msgid "Library"
+msgstr "Bibliothek"
+
+#: setting.py:185
+msgid "Path"
+msgstr "Pfad"
+
+#: setting.py:190
+msgid "Choose a path to store translated book(s)"
+msgstr "Ordner für die übersetzten Bücher wählen"
+
+#: setting.py:217
+msgid "Preferred Format"
+msgstr "Bevorzugtes Format"
+
+#: setting.py:241
+msgid "(Beta)"
+msgstr "(Beta)"
+
+#: setting.py:241
+msgid "Merge to Translate"
+msgstr "Absätze zusammenfassen"
+
+#: setting.py:243 setting.py:264 setting.py:328 setting.py:356 setting.py:1002
+msgid "Enable"
+msgstr "Aktiv"
+
+#: setting.py:249
+msgid "The number of characters to translate at once."
+msgstr "Anzahl der Zeichen, die auf einmal übersetzt werden."
+
+#: setting.py:261
+msgid "Network Proxy"
+msgstr "Netzwerk-Proxy"
+
+#: setting.py:281
+msgid "Host"
+msgstr "Host"
+
+#: setting.py:284
+msgid "Port"
+msgstr "Port"
+
+#: setting.py:295 setting.py:397
+msgid "Test"
+msgstr "Testen"
+
+#: setting.py:326 ui.py:50
+msgid "Cache"
+msgstr "Cache"
+
+#: setting.py:329
+msgid "Manage"
+msgstr "Verwalten"
+
+#: setting.py:346
+msgid "Job Log"
+msgstr "Auftragsprotokoll"
+
+#: setting.py:347
+msgid "Show translation"
+msgstr "Übersetzung anzeigen"
+
+#: setting.py:354
+msgid "Notification"
+msgstr "Benachrichtigung"
+
+#: setting.py:371
+msgid "Search Paths"
+msgstr "Suchpfade"
+
+#: setting.py:374
+msgid "The plugin will search for external programs via these paths."
+msgstr "Über diese Pfade sucht die Erweiterung nach externen Programmen."
+
+#: setting.py:398 setting.py:574 setting.py:578 setting.py:584 setting.py:587
+msgid "Custom"
+msgstr "Eigene"
+
+#: setting.py:410
+msgid "Usage Tip"
+msgstr "Hinweis zur Verwendung"
+
+#: setting.py:424 setting.py:1035 setting.py:1053 setting.py:1096
+#: setting.py:1150
+msgid "Tip: "
+msgstr "Hinweis: "
+
+#: setting.py:425
+msgid "API keys will auto-switch if the previous one is unavailable."
+msgstr "Ist ein API-Schlüssel nicht verfügbar, wird selbsttätig auf den nächsten gewechselt."
+
+#: setting.py:435
+msgid "Preferred Language"
+msgstr "Bevorzugte Sprache"
+
+#: setting.py:446
+msgid "HTTP Request"
+msgstr "HTTP-Anfrage"
+
+#: setting.py:458
+msgid "Concurrency limit"
+msgstr "Gleichzeitige Anfragen"
+
+#: setting.py:459
+msgid "Interval (seconds)"
+msgstr "Abstand (Sekunden)"
+
+#: setting.py:460
+msgid "Attempt times"
+msgstr "Versuche"
+
+#: setting.py:461
+msgid "Timeout (seconds)"
+msgstr "Zeitüberschreitung (Sekunden)"
+
+#: setting.py:465
+msgid "Abort Translation"
+msgstr "Übersetzung abbrechen"
+
+#: setting.py:469
+msgid "Max errors"
+msgstr "Höchstzahl Fehler"
+
+#: setting.py:472
+msgid "The number of consecutive errors to abort translation."
+msgstr "Anzahl aufeinanderfolgender Fehler, nach der abgebrochen wird."
+
+#: setting.py:484
+msgid "Fine-tuning"
+msgstr "Feineinstellung"
+
+#: setting.py:491
+msgid "Prompt"
+msgstr "Prompt"
+
+#: setting.py:493
+msgid "Endpoint"
+msgstr "Endpunkt"
+
+#: setting.py:501
+msgid "A model name"
+msgstr "Ein Modellname"
+
+#: setting.py:506
+msgid "Model"
+msgstr "Modell"
+
+#: setting.py:539
+msgid "Sampling"
+msgstr "Abtastverfahren"
+
+#: setting.py:544
+msgid "Enable streaming response"
+msgstr "Fortlaufende Antwort aktivieren"
+
+#: setting.py:545
+msgid "Stream"
+msgstr "Datenstrom"
+
+#: setting.py:602
+msgid "Fetching..."
+msgstr "Wird geholt …"
+
+#: setting.py:611
+msgid "You need to provide an API key to proceed."
+msgstr "Dafür wird ein API-Schlüssel benötigt."
+
+#: setting.py:626
+msgid "Can't fetch model list"
+msgstr "Modelliste konnte nicht geholt werden"
+
+#: setting.py:627
+msgid "Can't fetch model list, please check and try again."
+msgstr "Modelliste konnte nicht geholt werden, bitte prüfen und erneut versuchen."
+
+#: setting.py:655
+msgid "The model depends on your Azure project."
+msgstr "Das Modell hängt vom jeweiligen Azure-Projekt ab."
+
+#: setting.py:798
+msgid "Below original"
+msgstr "Unter dem Original"
+
+#: setting.py:800
+msgid "Above original"
+msgstr "Über dem Original"
+
+#: setting.py:802
+msgid "Right to original"
+msgstr "Rechts vom Original"
+
+#: setting.py:804
+msgid "Left to original"
+msgstr "Links vom Original"
+
+#: setting.py:805
+msgid "With no original"
+msgstr "Ohne Original"
+
+#: setting.py:824
+msgid "Translation"
+msgstr "Übersetzung"
+
+#: setting.py:841
+msgid "Column Gap"
+msgstr "Spaltenabstand"
+
+#: setting.py:851
+msgid "Percentage"
+msgstr "Prozent"
+
+#: setting.py:852
+msgid "Space count"
+msgstr "Anzahl Leerzeichen"
+
+#: setting.py:883
+msgid "Translation Position"
+msgstr "Position der Übersetzung"
+
+#: setting.py:927
+msgid "Original Text Color"
+msgstr "Farbe des Originaltexts"
+
+#: setting.py:932 setting.py:950 setting.py:1027 setting.py:1044
+#: setting.py:1142
+msgid "e.g.,"
+msgstr "z. B."
+
+#: setting.py:946
+msgid "Translation Text Color"
+msgstr "Farbe des Übersetzungstexts"
+
+#: setting.py:1000
+msgid "Translation Glossary"
+msgstr "Glossar"
+
+#: setting.py:1004
+msgid "Choose a glossary file"
+msgstr "Glossardatei wählen"
+
+#: setting.py:1023
+msgid "Priority Element"
+msgstr "Vorrangige Elemente"
+
+#: setting.py:1032
+msgid "CSS selectors for priority elements. One rule per line:"
+msgstr "CSS-Selektoren für vorrangige Elemente. Eine Regel je Zeile:"
+
+#: setting.py:1036
+msgid "Stop further extraction once elements match these rules."
+msgstr "Sobald Elemente auf diese Regeln passen, wird nicht weiter gesucht."
+
+#: setting.py:1040
+msgid "Ignore Element"
+msgstr "Auszulassende Elemente"
+
+#: setting.py:1050
+msgid "CSS selectors to exclude elements. One rule per line:"
+msgstr "CSS-Selektoren für auszuschließende Elemente. Eine Regel je Zeile:"
+
+#: setting.py:1054
+msgid "Do not translate elements that matches these rules."
+msgstr "Elemente, die auf diese Regeln passen, werden nicht übersetzt."
+
+#: setting.py:1058
+msgid "Ignore Paragraph"
+msgstr "Auszulassende Absätze"
+
+#: setting.py:1064
+msgid "Scope"
+msgstr "Bereich"
+
+#: setting.py:1065
+msgid "Text only"
+msgstr "Nur Text"
+
+#: setting.py:1067
+msgid "HTML element"
+msgstr "HTML-Element"
+
+#: setting.py:1074
+msgid "Mode"
+msgstr "Modus"
+
+#: setting.py:1075
+msgid "Normal"
+msgstr "Normal"
+
+#: setting.py:1077
+msgid "Normal (case-sensitive)"
+msgstr "Normal (Groß- und Kleinschreibung beachten)"
+
+#: setting.py:1078
+msgid "Regular Expression"
+msgstr "Regulärer Ausdruck"
+
+#: setting.py:1096
+msgid "Do not translate extracted elements that contain these rules."
+msgstr "Ausgelesene Elemente, die auf diese Regeln passen, werden nicht übersetzt."
+
+#: setting.py:1121
+msgid "Exclude paragraph by keyword. One keyword per line:"
+msgstr "Absätze nach Schlüsselwort ausschließen. Ein Wort je Zeile:"
+
+#: setting.py:1122
+msgid "Exclude paragraph by case-sensitive keyword. One keyword per line:"
+msgstr "Absätze nach Schlüsselwort ausschließen, Groß- und Kleinschreibung beachtend. Ein Wort je Zeile:"
+
+#: setting.py:1124
+msgid "Exclude paragraph by regular expression pattern. One pattern per line:"
+msgstr "Absätze nach regulärem Ausdruck ausschließen. Ein Muster je Zeile:"
+
+#: setting.py:1138
+msgid "Reserve Element"
+msgstr "Zu erhaltende Elemente"
+
+#: setting.py:1147
+msgid "CSS selectors to reserve elements. One rule per line:"
+msgstr "CSS-Selektoren für zu erhaltende Elemente. Eine Regel je Zeile:"
+
+#: setting.py:1151
+msgid "Keep elements that match these rules for extraction."
+msgstr "Elemente, die auf diese Regeln passen, werden zum Auslesen behalten."
+
+#: setting.py:1155
+msgid "Ebook Metadata"
+msgstr "E-Book-Metadaten"
+
+#: setting.py:1159
+msgid "Translate all of the metadata information"
+msgstr "Sämtliche Metadaten übersetzen"
+
+#: setting.py:1161
+msgid "Append target language to title metadata"
+msgstr "Zielsprache an den Titel anhängen"
+
+#: setting.py:1163
+msgid "Set target language code to language metadata"
+msgstr "Sprachfeld auf den Code der Zielsprache setzen"
+
+#: setting.py:1166
+msgid "Subjects of ebook (one subject per line)"
+msgstr "Schlagwörter des E-Books (eines je Zeile)"
+
+#: setting.py:1168
+msgid "Metadata Translation"
+msgstr "Metadaten übersetzen"
+
+#: setting.py:1169
+msgid "Language Mark"
+msgstr "Sprachvermerk"
+
+#: setting.py:1170
+msgid "Language Code"
+msgstr "Sprachcode"
+
+#: setting.py:1171
+msgid "Append Subjects"
+msgstr "Schlagwörter anhängen"
+
+#: setting.py:1194 setting.py:1243
+msgid "Proxy host or port is incorrect."
+msgstr "Proxy-Host oder -Port ist fehlerhaft."
+
+#: setting.py:1197 setting.py:1208
+msgid "The proxy is available."
+msgstr "Der Proxy ist erreichbar."
+
+#: setting.py:1198 setting.py:1211
+msgid "The proxy is not available."
+msgstr "Der Proxy ist nicht erreichbar."
+
+#: setting.py:1294
+msgid "the prompt must include {}."
+msgstr "Der Prompt muss {} enthalten."
+
+#: setting.py:1321 setting.py:1328
+msgid "Invalid color value."
+msgstr "Ungültiger Farbwert."
+
+#: setting.py:1337
+msgid "The specified glossary file does not exist."
+msgstr "Die angegebene Glossardatei existiert nicht."
+
+#: setting.py:1348 setting.py:1373 setting.py:1386
+msgid "{} is not a valid CSS selector."
+msgstr "{} ist kein gültiger CSS-Selektor."
+
+#: setting.py:1361
+msgid "{} is not a valid regular expression."
+msgstr "{} ist kein gültiger regulärer Ausdruck."
+
+#: ui.py:29
+msgid "Translate Book"
+msgstr "Buch übersetzen"
+
+#: ui.py:29
+msgid "Translate Ebook Content"
+msgstr "E-Book-Inhalt übersetzen"
+
+#: ui.py:52 ui.py:120
+msgid "Setting"
+msgstr "Einstellungen"
+
+#: ui.py:53 ui.py:148
+msgid "About"
+msgstr "Über"
+
+#: ui.py:82
+msgid "Please choose a book."
+msgstr "Bitte ein Buch wählen."
+
+#: ui.py:97
+msgid "Please choose at least one book."
+msgstr "Bitte mindestens ein Buch wählen."
+
+#: ui.py:111
+msgid "Cannot change setting while book(s) are under translation."
+msgstr "Einstellungen können nicht geändert werden, während Bücher übersetzt werden."
+
+#: ui.py:128
+msgid "Cannot manage cache while book(s) are under translation."
+msgstr "Der Cache kann nicht verwaltet werden, während Bücher übersetzt werden."
+
+#: ui.py:137
+msgid "Cache Manager"
+msgstr "Cache-Verwaltung"
+
+#: ui.py:166
+msgid "Choose Translation Mode"
+msgstr "Übersetzungsmodus wählen"
