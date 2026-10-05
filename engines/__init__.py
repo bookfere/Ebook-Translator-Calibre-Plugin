@@ -5,7 +5,7 @@ from .google import (
     GeminiTranslate)
 from .openai import ChatgptTranslate
 from .anthropic import ClaudeTranslate
-from .deepl import DeeplTranslate, DeeplProTranslate, DeeplFreeTranslate, DeeplWebFreeTranslate
+from .deepl import DeeplTranslate, DeeplProTranslate, DeeplFreeTranslate
 from .youdao import YoudaoTranslate
 from .baidu import BaiduTranslate
 from .microsoft import MicrosoftEdgeTranslate, AzureChatgptTranslate
@@ -15,5 +15,5 @@ builtin_engines: tuple[type[Base], ...] = (
     GoogleFreeTranslateNew, GoogleFreeTranslateHtml, GoogleFreeTranslate,
     GoogleBasicTranslate, GoogleBasicTranslateADC, GoogleAdvancedTranslate,
     ChatgptTranslate, AzureChatgptTranslate, GeminiTranslate, ClaudeTranslate,
-    DeepseekTranslate, DeeplTranslate, DeeplProTranslate, DeeplFreeTranslate, DeeplWebFreeTranslate,
+    DeepseekTranslate, DeeplTranslate, DeeplProTranslate, DeeplFreeTranslate,
     MicrosoftEdgeTranslate, YoudaoTranslate, BaiduTranslate)
