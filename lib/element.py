@@ -843,13 +843,12 @@ def get_metadata_elements(metadata):
     names = (
         'title', 'creator', 'publisher', 'rights', 'subject', 'contributor',
         'description')
-    pattern = re.compile(r'[a-zA-Z]+')
     for key in metadata.iterkeys():
         if key not in names:
             continue
         items = getattr(metadata, key)
         for item in items:
-            if pattern.search(item.content) is None:
+            if not any(char.isalpha() for char in item.content):
                 continue
             element = MetadataElement(
                 item, page_id='content.opf', ignored=not enable_translation)
