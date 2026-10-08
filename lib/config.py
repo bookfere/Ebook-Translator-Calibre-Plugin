@@ -17,6 +17,8 @@ defaults: dict[str, Any] = {
     'to_library': True,
     'output_path': None,
     'translate_engine': None,
+    'fallback_engine': None,
+    'fallback_refusal_keywords': [],
     'engine_preferences': {},
     'proxy_enabled': False,
     'proxy_type': 'http',

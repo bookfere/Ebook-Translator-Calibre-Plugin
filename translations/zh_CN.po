@@ -927,5 +927,26 @@ msgstr "缓存管理器"
 msgid "Choose Translation Mode"
 msgstr "选择翻译模式"
 
+msgid "Primary Engine"
+msgstr "主翻译引擎"
+
+msgid "Fallback Engine"
+msgstr "备用翻译引擎"
+
+msgid "Fallback Rules"
+msgstr "备用切换规则"
+
+msgid "Switch to the fallback engine when the primary engine fails or its response contains any of these phrases. One phrase per line."
+msgstr "主引擎失败或返回内容包含以下任一短语时，切换至备用引擎。每行一个短语。"
+
+msgid "None"
+msgstr "无"
+
+msgid "The translation engine refused to translate the content."
+msgstr "翻译引擎拒绝翻译该内容。"
+
+msgid "The translation engine returned an empty result."
+msgstr "翻译引擎返回了空结果。"
+
 #~ msgid "HTTP Proxy"
 #~ msgstr "HTTP 代理"

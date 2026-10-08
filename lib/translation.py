@@ -72,9 +72,14 @@ class ProgressBar:
 
 
 class Translation:
-    def __init__(self, translator, glossary):
+    def __init__(self, translator, glossary, fallback_translator=None,
+                 refusal_keywords=None):
         self.translator = translator
         self.glossary = glossary
+        self.fallback_translator = fallback_translator
+        self.refusal_keywords = [
+            keyword.strip().casefold()
+            for keyword in (refusal_keywords or []) if keyword.strip()]
 
         self.fresh = False
         self.batch = False
@@ -114,7 +119,43 @@ class Translation:
         return self.translator.max_error_count > 0 and \
             self.abort_count >= self.translator.max_error_count
 
-    def translate_text(self, row, text, retry=0, interval=0):
+    def _is_refusal(self, translation):
+        content = translation.casefold()
+        return any(keyword in content for keyword in self.refusal_keywords)
+
+    def _translate_with(self, translator, text, check_refusal=True):
+        translation = translator.translate(text)
+        if isinstance(translation, GeneratorType):
+            translation = ''.join(translation)
+        if not translation or not translation.strip():
+            raise TranslationFailed(
+                _('The translation engine returned an empty result.'))
+        if check_refusal and self._is_refusal(translation):
+            raise TranslationFailed(_(
+                'The translation engine refused to translate the content.'))
+        return translation
+
+    def _translate_once(self, text):
+        if self.fallback_translator is None:
+            return self.translator.translate(text), self.translator
+
+        try:
+            return self._translate_with(self.translator, text), self.translator
+        except TranslationCanceled:
+            raise
+        except Exception as primary_error:
+            try:
+                translation = self._translate_with(
+                    self.fallback_translator, text, check_refusal=False)
+                return translation, self.fallback_translator
+            except TranslationCanceled:
+                raise
+            except Exception as fallback_error:
+                raise TranslationFailed(
+                    'Primary engine: {}\nFallback engine: {}'.format(
+                        primary_error, fallback_error))
+
+    def _translate_text(self, row, text, retry=0, interval=0):
         """Translation engine service error code documentation:
         * https://cloud.google.com/apis/design/errors
         * https://www.deepl.com/docs-api/api-access/error-handling/
@@ -125,9 +166,11 @@ class Translation:
         if self.cancel_request():
             raise TranslationCanceled(_('Translation canceled.'))
         try:
-            translation = self.translator.translate(text)
+            translation, translator = self._translate_once(text)
             self.abort_count = 0
-            return translation
+            return translation, translator
+        except TranslationCanceled:
+            raise
         except Exception as e:
             if self.cancel_request() or self.need_stop():
                 raise TranslationCanceled(_('Translation canceled.'))
@@ -150,7 +193,11 @@ class Translation:
             if self.translator.match_error(str(e)):
                 raise TranslationCanceled(_('Translation canceled.'))
             time.sleep(interval)
-            return self.translate_text(row, text, retry, interval)
+            return self._translate_text(row, text, retry, interval)
+
+    def translate_text(self, row, text, retry=0, interval=0):
+        translation, _ = self._translate_text(row, text, retry, interval)
+        return translation
 
     def translate_paragraph(self, paragraph):
         if self.cancel_request():
@@ -161,7 +208,7 @@ class Translation:
         self.streaming('')
         self.streaming(_('Translating...'))
         text = self.glossary.replace(paragraph.original)
-        translation = self.translate_text(paragraph.row, text)
+        translation, translator = self._translate_text(paragraph.row, text)
         # Process streaming text
         if isinstance(translation, GeneratorType):
             if self.total == 1:
@@ -181,10 +228,10 @@ class Translation:
         translation = self.glossary.restore(translation)
         paragraph.translation = translation.strip()
         # Apply aligment checking and processing.
-        if self.translator.merge_enabled:
-            paragraph.do_aligment(self.translator.separator)
-        paragraph.engine_name = self.translator.name
-        paragraph.target_lang = self.translator.get_target_lang()
+        if translator.merge_enabled:
+            paragraph.do_aligment(translator.separator)
+        paragraph.engine_name = translator.name
+        paragraph.target_lang = translator.get_target_lang()
         paragraph.is_cache = False
 
     def process_translation(self, paragraph):
@@ -250,7 +297,11 @@ def get_engine_class(engine_name=None):
     if engine_name in engines:
         engine_class = engines[engine_name]
     elif engine_name in custom_engines:
-        engine_class = CustomTranslate
+        # Each configured custom engine needs its own class-level state. This
+        # is especially important when primary and fallback engines are both
+        # custom definitions.
+        engine_class = type(
+            'ConfiguredCustomTranslate', (CustomTranslate,), {})
         engine_data = json.loads(custom_engines[engine_name])
         engine_class.set_engine_data(engine_data)
     else:
@@ -283,7 +334,16 @@ def get_translation(translator, log=None):
     glossary = Glossary(translator.placeholder)
     if config.get('glossary_enabled'):
         glossary.load_from_file(config.get('glossary_path'))
-    translation = Translation(translator, glossary)
-    if get_config().get('log_translation'):
+    fallback_translator = None
+    fallback_engine = config.get('fallback_engine')
+    if fallback_engine and fallback_engine != translator.name:
+        fallback_class = get_engine_class(fallback_engine)
+        fallback_translator = get_translator(fallback_class)
+        fallback_translator.set_source_lang(translator.source_lang)
+        fallback_translator.set_target_lang(translator.target_lang)
+    translation = Translation(
+        translator, glossary, fallback_translator,
+        config.get('fallback_refusal_keywords') or [])
+    if config.get('log_translation'):
         translation.set_logging(log)
     return translation

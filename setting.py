@@ -405,13 +405,18 @@ class TranslationSetting(QDialog):
 
         # Translate Engine
         engine_group = QGroupBox(_('Translation Engine'))
-        engine_layout = QHBoxLayout(engine_group)
+        engine_layout = QGridLayout(engine_group)
         engine_list = EngineList(self.current_engine.name)
+        fallback_list = EngineList()
         engine_test = QPushButton(_('Test'))
         manage_engine = QPushButton(_('Custom'))
-        engine_layout.addWidget(engine_list, 1)
-        engine_layout.addWidget(engine_test)
-        engine_layout.addWidget(manage_engine)
+        engine_layout.addWidget(QLabel(_('Primary Engine')), 0, 0)
+        engine_layout.addWidget(engine_list, 0, 1)
+        engine_layout.addWidget(engine_test, 0, 2)
+        engine_layout.addWidget(manage_engine, 0, 3)
+        engine_layout.addWidget(QLabel(_('Fallback Engine')), 1, 0)
+        engine_layout.addWidget(fallback_list, 1, 1, 1, 3)
+        engine_layout.setColumnStretch(1, 1)
         layout.addWidget(engine_group)
 
         self.model_worker.start.connect(
@@ -443,6 +448,21 @@ class TranslationSetting(QDialog):
 
         self.api_keys.textChanged.connect(lambda: auto_change.setVisible(
             len(self.api_keys.toPlainText().strip().split('\n')) > 1))
+
+        # Fallback rules
+        fallback_group = QGroupBox(_('Fallback Rules'))
+        fallback_layout = QVBoxLayout(fallback_group)
+        fallback_tip = QLabel(_(
+            'Switch to the fallback engine when the primary engine fails or '
+            'its response contains any of these phrases. One phrase per line.'))
+        fallback_tip.setWordWrap(True)
+        fallback_layout.addWidget(fallback_tip)
+        self.fallback_refusal_keywords = QPlainTextEdit()
+        self.fallback_refusal_keywords.setFixedHeight(100)
+        self.fallback_refusal_keywords.setPlainText('\n'.join(
+            self.config.get('fallback_refusal_keywords') or []))
+        fallback_layout.addWidget(self.fallback_refusal_keywords)
+        layout.addWidget(fallback_group)
 
         # preferred Language
         language_group = QGroupBox(_('Preferred Language'))
@@ -763,6 +783,41 @@ class TranslationSetting(QDialog):
             if issubclass(self.current_engine, GenAI):
                 genai_group.setVisible(True)
                 show_genai_preferences(config)
+
+            refresh_fallback_engine_list()
+
+        def choose_fallback_engine(index):
+            engine_name = fallback_list.itemData(index)
+            if engine_name == self.current_engine.name:
+                engine_name = None
+                fallback_list.setCurrentIndex(0)
+            self.config.update(fallback_engine=engine_name)
+            fallback_group.setEnabled(engine_name is not None)
+
+        def refresh_fallback_engine_list():
+            selected = self.config.get('fallback_engine')
+            if selected == self.current_engine.name:
+                selected = None
+                self.config.update(fallback_engine=None)
+            fallback_list.blockSignals(True)
+            fallback_list.refresh()
+            fallback_list.insertItem(0, _('None'), None)
+            for item_index in range(1, fallback_list.count()):
+                item = fallback_list.model().item(item_index)
+                if item is not None:
+                    item.setEnabled(
+                        fallback_list.itemData(item_index) !=
+                        self.current_engine.name)
+            selected_index = fallback_list.findData(selected)
+            if selected_index < 0:
+                selected = None
+                selected_index = 0
+                self.config.update(fallback_engine=None)
+            fallback_list.setCurrentIndex(selected_index)
+            fallback_list.blockSignals(False)
+            fallback_group.setEnabled(selected is not None)
+
+        fallback_list.currentIndexChanged.connect(choose_fallback_engine)
         choose_default_engine(engine_list.findData(self.current_engine.name))
         engine_list.currentIndexChanged.connect(choose_default_engine)
 
@@ -775,6 +830,7 @@ class TranslationSetting(QDialog):
             choose_default_engine(index)
             engine_list.setCurrentIndex(index)
             engine_list.currentIndexChanged.connect(choose_default_engine)
+            refresh_fallback_engine_list()
 
         def manage_custom_translation_engine():
             manager = ManageCustomEngine(self)
@@ -1336,6 +1392,15 @@ class TranslationSetting(QDialog):
 
     def update_engine_config(self):
         config = self.get_engine_config()
+        fallback_engine = self.config.get('fallback_engine')
+        if fallback_engine == self.current_engine.name:
+            fallback_engine = None
+        self.config.update(fallback_engine=fallback_engine)
+        refusal_keywords = [
+            phrase.strip()
+            for phrase in self.fallback_refusal_keywords.toPlainText()
+            .split('\n') if phrase.strip()]
+        self.config.update(fallback_refusal_keywords=refusal_keywords)
         # Do not update directly as you may get default preferences!
         engine_config = self.config.get('engine_preferences') or {}
         engine_config = engine_config.copy()
