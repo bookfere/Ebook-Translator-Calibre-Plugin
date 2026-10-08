@@ -927,5 +927,40 @@ msgstr "缓存管理器"
 msgid "Choose Translation Mode"
 msgstr "选择翻译模式"
 
+msgid "estimated"
+msgstr "估算"
+
+#, python-brace-format
+msgid "Tokens: input {}, output {}, total {}"
+msgstr "令牌：输入 {}，输出 {}，总计 {}"
+
+#, python-brace-format
+msgid "soft limit {}"
+msgstr "软上限 {}"
+
+msgid "Unlimited"
+msgstr "不限"
+
+msgid ""
+"Input and output tokens are counted together. The current request may exceed "
+"this soft limit; no new request starts afterward. A value of 0 means "
+"unlimited. Limited tasks use one request at a time."
+msgstr "输入和输出令牌会合并计数。当前请求可能超过此软上限；达到后不会启动新请求。设为 0 表示不限。启用上限的任务会一次只发送一个请求。"
+
+msgid "Soft token limit per task"
+msgstr "每个任务的令牌软上限"
+
+msgid "Translation stopped after reaching the soft token limit."
+msgstr "达到令牌软上限后翻译已停止。"
+
+#, python-brace-format
+msgid "Token usage{}: input {}, output {}, total {}"
+msgstr "令牌用量{}：输入 {}，输出 {}，总计 {}"
+
+#, python-brace-format
+msgid ""
+"Soft token limit reached ({}); translation stopped after the current request."
+msgstr "已达到令牌软上限（{}）；当前请求完成后翻译已停止。"
+
 #~ msgid "HTTP Proxy"
 #~ msgstr "HTTP 代理"

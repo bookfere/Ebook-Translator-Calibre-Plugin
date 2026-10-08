@@ -18,6 +18,7 @@ from ...engines.deepl import DeeplTranslate
 from ...engines.openai import ChatgptTranslate, ChatgptBatchTranslate
 from ...engines.microsoft import AzureChatgptTranslate
 from ...engines.anthropic import ClaudeTranslate
+from ...engines.google import GeminiTranslate
 from ...engines.custom import (
     create_engine_template, load_engine_data, CustomTranslate)
 
@@ -66,6 +67,7 @@ class TestBase(unittest.TestCase):
         self.assertEqual(3, Base.request_attempt)
         self.assertEqual(10.0, Base.request_timeout)
         self.assertEqual(10, Base.max_error_count)
+        self.assertEqual(0, getattr(Base, 'token_limit', None))
 
     @patch.dict(Base.config, {
         'api_keys': ['a', 'b', 'c'],
@@ -73,7 +75,8 @@ class TestBase(unittest.TestCase):
         'request_interval': 10,
         'request_attempt': 3,
         'request_timeout': 10,
-        'max_error_count': 20})
+        'max_error_count': 20,
+        'token_limit': 5000})
     def test_create_translator(self):
         translator = Base()
 
@@ -95,6 +98,32 @@ class TestBase(unittest.TestCase):
         self.assertEqual(3, translator.request_attempt)
         self.assertEqual(10, translator.request_timeout)
         self.assertEqual(20, translator.max_error_count)
+        self.assertEqual(5000, translator.token_limit)
+
+    def test_consumes_exact_request_token_usage(self):
+        self.assertTrue(hasattr(self.translator, 'set_token_usage'))
+        self.translator.set_token_usage(
+            input_tokens=12, output_tokens=7, total_tokens=19)
+
+        usage = self.translator.consume_token_usage('translated text')
+
+        self.assertEqual(12, usage.input_tokens)
+        self.assertEqual(7, usage.output_tokens)
+        self.assertEqual(19, usage.total_tokens)
+        self.assertFalse(usage.estimated)
+
+    def test_estimates_usage_when_provider_omits_it(self):
+        self.assertTrue(hasattr(self.translator, '_begin_token_request'))
+        self.translator._begin_token_request(
+            '{"prompt": "Translate Hello World"}')
+
+        usage = self.translator.consume_token_usage('你好世界')
+
+        self.assertGreater(usage.input_tokens, 0)
+        self.assertGreater(usage.output_tokens, 0)
+        self.assertEqual(
+            usage.input_tokens + usage.output_tokens, usage.total_tokens)
+        self.assertTrue(usage.estimated)
 
     def test_placeholder(self):
         marks = [
@@ -472,8 +501,16 @@ class TestChatgptTranslate(unittest.TestCase):
                     {'role': 'user', 'content': 'test content'}
                 ],
                 'stream': True,
+                'stream_options': {'include_usage': True},
                 'temperature': 1.0
             }))
+
+    def test_custom_endpoint_does_not_require_stream_usage_option(self):
+        self.translator.endpoint = 'https://example.com/v1/chat/completions'
+
+        body = json.loads(self.translator.get_body('test content'))
+
+        self.assertNotIn('stream_options', body)
 
     def test_get_body_without_stream(self):
         model = 'gpt-4o'
@@ -500,6 +537,7 @@ class TestChatgptTranslate(unittest.TestCase):
                 {'role': 'user', 'content': 'Hello World!'}
             ],
             'stream': True,
+            'stream_options': {'include_usage': True},
             'temperature': 1.0,
         })
         mock_et.__version__ = '1.0.0'
@@ -530,6 +568,42 @@ class TestChatgptTranslate(unittest.TestCase):
         result = self.translator.translate('Hello World!')
 
         self.assertEqual('你好世界！', result)
+
+    def test_captures_nonstream_token_usage(self):
+        self.translator.stream = False
+        self.translator._begin_token_request('{}')
+        result = self.translator.get_result(json.dumps({
+            'choices': [{'message': {'content': '你好'}}],
+            'usage': {
+                'prompt_tokens': 12,
+                'completion_tokens': 4,
+                'total_tokens': 16,
+            },
+        }))
+
+        self.assertEqual('你好', result)
+        usage = self.translator.consume_token_usage(result)
+        self.assertEqual((12, 4, 16, False), (
+            usage.input_tokens, usage.output_tokens,
+            usage.total_tokens, usage.estimated))
+
+    def test_captures_stream_token_usage(self):
+        self.translator._begin_token_request('{}')
+        response = Mock()
+        response.readline.side_effect = [
+            b'data: {"choices":[{"delta":{"content":"\\u4f60"}}]}',
+            b'data: {"choices":[],"usage":{"prompt_tokens":8,'
+            b'"completion_tokens":3,"total_tokens":11}}',
+            b'data: [DONE]',
+        ]
+
+        result = ''.join(self.translator.get_result(response))
+
+        self.assertEqual('你', result)
+        usage = self.translator.consume_token_usage(result)
+        self.assertEqual((8, 3, 11, False), (
+            usage.input_tokens, usage.output_tokens,
+            usage.total_tokens, usage.estimated))
 
 
 class TestChatgptBatchTranslate(unittest.TestCase):
@@ -1024,6 +1098,82 @@ data: {"type":"message_stop"}
             proxy_uri=None, raw_object=True)
         self.assertIsInstance(result, GeneratorType)
         self.assertEqual('你好世界！', ''.join(result))
+
+    def test_captures_nonstream_token_usage(self):
+        self.translator.stream = False
+        self.translator._begin_token_request('{}')
+        result = self.translator.get_result(json.dumps({
+            'content': [{'text': '你好'}],
+            'usage': {'input_tokens': 10, 'output_tokens': 5},
+        }))
+
+        usage = self.translator.consume_token_usage(result)
+        self.assertEqual((10, 5, 15, False), (
+            usage.input_tokens, usage.output_tokens,
+            usage.total_tokens, usage.estimated))
+
+    def test_captures_stream_token_usage(self):
+        self.translator._begin_token_request('{}')
+        response = Mock()
+        response.readline.side_effect = [
+            b'data: {"type":"message_start","message":{"usage":'
+            b'{"input_tokens":9,"output_tokens":0}}}',
+            b'data: {"type":"content_block_delta","delta":{"text":"x"}}',
+            b'data: {"type":"message_delta","delta":{},"usage":'
+            b'{"output_tokens":4}}',
+            b'data: {"type":"message_stop"}',
+        ]
+
+        result = ''.join(self.translator.get_result(response))
+
+        usage = self.translator.consume_token_usage(result)
+        self.assertEqual((9, 4, 13, False), (
+            usage.input_tokens, usage.output_tokens,
+            usage.total_tokens, usage.estimated))
+
+
+class TestGeminiTranslate(unittest.TestCase):
+    def setUp(self):
+        GeminiTranslate.set_config({'api_keys': ['a']})
+        GeminiTranslate.lang_codes = {
+            'source': {'English': 'EN'}, 'target': {'Chinese': 'ZH'}}
+        self.translator = GeminiTranslate()
+        self.translator.set_source_lang('English')
+        self.translator.set_target_lang('Chinese')
+
+    def test_captures_nonstream_token_usage(self):
+        self.translator.stream = False
+        self.translator._begin_token_request('{}')
+        result = self.translator.get_result(json.dumps({
+            'candidates': [{'content': {'parts': [{'text': '你好'}]}}],
+            'usageMetadata': {
+                'promptTokenCount': 14,
+                'candidatesTokenCount': 6,
+                'totalTokenCount': 20,
+            },
+        }))
+
+        usage = self.translator.consume_token_usage(result)
+        self.assertEqual((14, 6, 20, False), (
+            usage.input_tokens, usage.output_tokens,
+            usage.total_tokens, usage.estimated))
+
+    def test_captures_usage_only_stream_chunk(self):
+        self.translator._begin_token_request('{}')
+        response = Mock()
+        response.readline.side_effect = [
+            b'data: {"candidates":[{"content":{"parts":'
+            b'[{"text":"x"}]}}]}',
+            b'data: {"usageMetadata":{"promptTokenCount":7,'
+            b'"candidatesTokenCount":2,"totalTokenCount":9}}',
+        ]
+
+        result = ''.join(self.translator.get_result(response))
+
+        usage = self.translator.consume_token_usage(result)
+        self.assertEqual((7, 2, 9, False), (
+            usage.input_tokens, usage.output_tokens,
+            usage.total_tokens, usage.estimated))
 
 
 class TestFunction(unittest.TestCase):

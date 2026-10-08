@@ -476,16 +476,27 @@ class TranslationSetting(QDialog):
 
         # Abort Translation
         abort_translation_group = QGroupBox(_('Abort Translation'))
-        abort_translation_layout = QHBoxLayout(abort_translation_group)
+        abort_translation_layout = QFormLayout(abort_translation_group)
         max_error_count = QSpinBox()
         max_error_count.setMinimum(0)
-        abort_translation_layout.addWidget(QLabel(_('Max errors')))
-        abort_translation_layout.addWidget(max_error_count)
-        abort_translation_layout.addWidget(QLabel(
-            _('The number of consecutive errors to abort translation.')), 1)
+        max_error_count.setToolTip(
+            _('The number of consecutive errors to abort translation.'))
+        abort_translation_layout.addRow(_('Max errors'), max_error_count)
+        token_limit = QSpinBox()
+        token_limit.setRange(0, 2147483647)
+        token_limit.setSpecialValueText(_('Unlimited'))
+        token_limit.setToolTip(_(
+            'Input and output tokens are counted together. The current '
+            'request may exceed this soft limit; no new request starts '
+            'afterward. A value of 0 means unlimited. Limited tasks use one '
+            'request at a time.'))
+        abort_translation_layout.addRow(
+            _('Soft token limit per task'), token_limit)
         layout.addWidget(abort_translation_group)
 
         self.disable_wheel_event(max_error_count)
+        self.disable_wheel_event(token_limit)
+        self.apply_form_layout_policy(abort_translation_layout)
 
         self.apply_form_layout_policy(request_layout)
         self.disable_wheel_event(concurrency_limit)
@@ -748,6 +759,11 @@ class TranslationSetting(QDialog):
             if value is None:
                 value = self.current_engine.max_error_count
             max_error_count.setValue(value)
+            value = config.get('token_limit')
+            if value is None:
+                value = self.current_engine.token_limit
+            token_limit.setValue(value)
+            token_limit.setDisabled(self.current_engine.free)
             concurrency_limit.valueChanged.connect(
                 lambda value: config.update(concurrency_limit=value))
             request_interval.valueChanged.connect(
@@ -758,6 +774,8 @@ class TranslationSetting(QDialog):
                 lambda value: config.update(request_timeout=round(value, 1)))
             max_error_count.valueChanged.connect(
                 lambda value: config.update(max_error_count=value))
+            token_limit.valueChanged.connect(
+                lambda value: config.update(token_limit=value))
             # Show GenAI preferences
             genai_group.setVisible(False)
             if issubclass(self.current_engine, GenAI):

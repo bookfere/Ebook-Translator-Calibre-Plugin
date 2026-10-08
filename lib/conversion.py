@@ -24,7 +24,7 @@ from .element import (
     get_element_handler, get_srt_elements, get_toc_elements, get_page_elements,
     get_metadata_elements, get_pgn_elements)
 from .translation import get_translator, get_translation
-from .exception import ConversionAbort
+from .exception import ConversionAbort, TranslationCanceled
 
 
 load_translations()  # type: ignore
@@ -45,6 +45,13 @@ class PrepareStream:
 
     def flush(self):
         pass
+
+
+def handle_translation(translation, paragraphs):
+    """Stop background conversion before it writes a partial output file."""
+    if not translation.handle(paragraphs):
+        raise TranslationCanceled(
+            _('Translation stopped after reaching the soft token limit.'))
 
 
 def convert_book(
@@ -71,7 +78,7 @@ def convert_book(
         cache.save(original_group)
 
         paragraphs = cache.all_paragraphs()
-        translation.handle(paragraphs)
+        handle_translation(translation, paragraphs)
         element_handler.add_translations(paragraphs)
 
         log.info(sep())
@@ -99,7 +106,7 @@ def convert_srt(
 
     paragraphs = cache.all_paragraphs()
     translation.set_progress(notification)
-    translation.handle(paragraphs)
+    handle_translation(translation, paragraphs)
     element_handler.add_translations(paragraphs)
 
     log.info(sep())
@@ -124,7 +131,7 @@ def convert_pgn(
 
     paragraphs = cache.all_paragraphs()
     translation.set_progress(notification)
-    translation.handle(paragraphs)
+    handle_translation(translation, paragraphs)
     element_handler.add_translations(paragraphs)
 
     log.info(sep())
@@ -235,6 +242,7 @@ def convert_item(
     debug_info += '| Request Interval: %s\n' % translator.request_interval
     debug_info += '| Request Attempt: %s\n' % translator.request_attempt
     debug_info += '| Request Timeout: %s\n' % translator.request_timeout
+    debug_info += '| Soft Token Limit: %s\n' % translator.token_limit
     debug_info += '| Input Path: %s\n' % input_path
     debug_info += '| Output Path: %s' % output_path
 

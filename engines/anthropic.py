@@ -137,6 +137,7 @@ class ClaudeTranslate(GenAI):
             return self._parse_stream(response)
 
         response_json = json.loads(response)
+        self._capture_token_usage(response_json)
         response_content_text: str = response_json['content'][0]['text']
         return response_content_text
 
@@ -153,6 +154,7 @@ class ClaudeTranslate(GenAI):
 
             if line.startswith('data:'):
                 chunk: dict = json.loads(line.split('data: ')[1])
+                self._capture_token_usage(chunk)
                 event_type: str = chunk['type']
 
                 if event_type not in self.valid_event_types:
@@ -170,6 +172,16 @@ class ClaudeTranslate(GenAI):
                     raise Exception(
                         _('Error received: {}')
                         .format(chunk['error']['message']))
+
+    def _capture_token_usage(self, data):
+        usage = data.get('usage') or {}
+        if data.get('type') == 'message_start':
+            usage = (data.get('message') or {}).get('usage') or usage
+        if not usage:
+            return
+        self.set_token_usage(
+            input_tokens=usage.get('input_tokens'),
+            output_tokens=usage.get('output_tokens'))
 
 
 class ClaudeBatchTranslate:
