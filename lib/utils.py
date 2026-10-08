@@ -153,9 +153,98 @@ def traceback_error():
     return traceback.format_exc(chain=False).strip()
 
 
+class _KeepAliveSocket(socket.socket):
+    """Socket subclass that enables TCP keepalive right after connect.
+
+    Used to prevent NAT devices / stateful firewalls from silently
+    dropping long-idle streaming HTTP connections (e.g. Ollama running
+    behind a home router while the client is remote and the model spends
+    tens of seconds generating the first token).
+
+    Values are conservative: idle=10s, interval=5s, count=3 -- a keepalive
+    probe is sent after 10s of TCP inactivity, then every 5s until either
+    the peer answers (connection stays open) or 3 probes fail (connection
+    is torn down after ~25s of unreachability).
+
+    We subclass ``socket.socket`` rather than patching an existing socket
+    because mechanize creates its sockets internally through ``socket()``
+    calls; monkey-patching the class (see ``keepalive_socket`` below)
+    lets us intercept those creations transparently.
+    """
+
+    def connect(self, address):
+        super().connect(address)
+        self._enable_keepalive()
+
+    def connect_ex(self, address):
+        result = super().connect_ex(address)
+        if result == 0:
+            self._enable_keepalive()
+        return result
+
+    def _enable_keepalive(self):
+        try:
+            self.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+            if hasattr(socket, 'TCP_KEEPIDLE'):
+                self.setsockopt(
+                    socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 10)
+            if hasattr(socket, 'TCP_KEEPINTVL'):
+                self.setsockopt(
+                    socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 5)
+            if hasattr(socket, 'TCP_KEEPCNT'):
+                self.setsockopt(
+                    socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 3)
+        except (OSError, AttributeError):
+            # Some platforms (Windows in particular) expose fewer knobs.
+            # SO_KEEPALIVE alone is still helpful, so we swallow errors on
+            # the finer-grained options.
+            pass
+
+
+@contextmanager
+def keepalive_socket(enable=True) -> Generator[ModuleType, None, None]:
+    """Context manager: temporarily replace ``socket.socket`` with
+    :class:`_KeepAliveSocket` so any TCP connection opened inside the
+    ``with`` block gets TCP keepalive enabled at connect time.
+
+    When ``enable`` is False this is a pure no-op, so callers can wrap
+    unconditionally: ``with keepalive_socket(enable=needs_keepalive):``.
+    The original socket class is restored on exit even if an exception
+    is raised inside the block.
+
+    This is coordinated with :func:`socks_proxy` (which also
+    monkey-patches ``socket.socket``): the two must not be active
+    simultaneously on the same request. The novel-mode caller does not
+    use SOCKS, so there is no conflict in practice.
+    """
+    if not enable:
+        yield socket
+        return
+    previous = socket.socket
+    # Do not stack our wrapper on top of an already-patched socket (e.g.
+    # if socks_proxy is currently active). Fall back to a no-op.
+    if previous is not original_socket:
+        log.debug('keepalive_socket: socket already patched, skipping.')
+        yield socket
+        return
+    socket.socket = _KeepAliveSocket
+    try:
+        yield socket
+    finally:
+        socket.socket = previous
+
+
 def request(
         url, data=None, headers={}, method='GET', timeout=30, proxy_uri=None,
-        raw_object=False) -> Response | str | None:
+        raw_object=False, keepalive=False) -> Response | str | None:
+    """Send an HTTP request through mechanize.
+
+    :keepalive: if True, enable TCP keepalive on the underlying socket.
+        Useful for long-running streaming responses through NAT / firewalls
+        that would otherwise drop the connection when idle for 30-60s.
+        Sends a keepalive probe every 10 s of idle time and closes the
+        connection only after 3 failed probes (15 s of unreachability).
+    """
     br = Browser()
     br.set_handle_robots(False)
 
@@ -188,8 +277,14 @@ def request(
     try:
         _request = Request(
             url, data, headers=headers, timeout=timeout, method=method)
-        br.open(_request)
-        response: Response | None = br.response()
+        # Optionally wrap the socket layer with TCP keepalive so intermediate
+        # NAT devices do not silently drop long-idle streaming connections.
+        # The ``keepalive_socket`` context manager is a no-op when
+        # ``keepalive`` is False, so the fast paragraph-per-request path
+        # keeps its original behaviour.
+        with keepalive_socket(enable=keepalive):
+            br.open(_request)
+            response: Response | None = br.response()
         if response is None or raw_object:
             return response
         return response.read().decode('utf-8').strip()

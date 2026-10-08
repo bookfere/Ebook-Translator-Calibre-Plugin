@@ -16,6 +16,7 @@ __Plugin Homepage__: [https://translator.bookfere.com](https://translator.bookfe
 
 ## Features
 
+* Support "Novel Mode" to better use LLM capabilities preserving a dynamic context.
 * Support both "Advanced Mode" and "Batch Mode" for different usage situations.
 * Support languages supported by the selected translation engine (e.g. Google Translate supports 134 languages)
 * Support multiple translation engines, including Google Translate, ChatGPT, Gemini, DeepL, etc.

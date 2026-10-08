@@ -266,6 +266,104 @@ class PageElement(Element):
             new_element.set('style', 'color:%s' % self.translation_color)
         return new_element
 
+    def _has_structural_links(self):
+        """Return True if the element contains nested <a href> or named
+        anchors that should survive a position='only' translation.
+
+        These are the link targets / navigation links that connect the
+        in-page Table of Contents to chapter headings.  Losing them in
+        'only' mode makes the TOC non-functional.
+        """
+        for child in self.element.iter():
+            tag = getattr(child, 'tag', None)
+            if tag is None:
+                continue
+            local = etree.QName(tag).localname if '{' in str(tag) else tag
+            if local == 'a':
+                if child.get('href') or child.get('name') or child.get('id'):
+                    return True
+        return False
+
+    def _clone_with_translation(self, translation):
+        """Return a deep clone of the original element where the leaf text
+        nodes have been replaced by the translated text, while all child
+        elements (and crucially their attributes such as href, id, name)
+        are preserved.
+
+        Strategy
+        --------
+        1. Deep-copy the original element.
+        2. Collect all leaf text content (text + tail of each child) in
+           document order.
+        3. Split the translation into the same number of parts by trying
+           to match the original text distribution; fall back to putting
+           all text in the first leaf if the split does not work out.
+        4. Rewrite the text/tail nodes in the clone.
+        5. Apply the standard translation attributes (dir, lang, style).
+
+        This is intentionally conservative: if anything goes wrong the
+        caller falls back to the normal (flat) new_element path.
+        """
+        try:
+            import copy as _copy
+            cloned = _copy.deepcopy(self.element)
+
+            # Collect leaf text positions in document order.
+            # A "position" is (element_ref, 'text'|'tail').
+            positions = []
+            root_text = (cloned.text or '').strip()
+            if root_text:
+                positions.append((cloned, 'text'))
+            for child in cloned.iter():
+                if child is cloned:
+                    continue
+                if (child.text or '').strip():
+                    positions.append((child, 'text'))
+                if (child.tail or '').strip():
+                    positions.append((child, 'tail'))
+
+            if not positions:
+                return None
+
+            # Split translation into parts matching the number of positions.
+            translation_stripped = translation.strip()
+            if len(positions) == 1:
+                parts = [translation_stripped]
+            else:
+                parts = [p.strip()
+                         for p in translation_stripped.splitlines()
+                         if p.strip()]
+                if len(parts) != len(positions):
+                    # Fallback: put all translated text in the first
+                    # position (root text or first child text) and clear
+                    # the rest. This is safe because the link hrefs and
+                    # structural children are preserved regardless.
+                    parts = [translation_stripped] + [''] * (
+                        len(positions) - 1)
+
+            # Pad or truncate to match.
+            while len(parts) < len(positions):
+                parts.append('')
+            parts = parts[:len(positions)]
+
+            # Rewrite text nodes in the clone.
+            for (elem, attr), part in zip(positions, parts):
+                if attr == 'text':
+                    elem.text = part if part else None
+                else:
+                    elem.tail = (' ' + part) if part else None
+
+            # Apply translation attributes.
+            cloned.set('dir', self.target_direction or 'auto')
+            if self.translation_lang is not None:
+                cloned.set('lang', self.translation_lang)
+            if self.translation_color is not None:
+                cloned.set('style', 'color:%s' % self.translation_color)
+
+            return cloned
+        except Exception:
+            return None
+
     def add_translation(self, translation=None):
         # self.element.tail = None  # Make sure the element has no tail
         if self.original_color is not None:
@@ -306,6 +404,17 @@ class PageElement(Element):
         group_elements = ('li', 'th', 'td', 'caption')
         if element_name in group_elements:
             if self.position == 'only':
+                # Same structure-aware logic as the general path below:
+                # preserve nested links inside <li> items (TOC lists).
+                if self._has_structural_links():
+                    import html as _html
+                    plain_translation = _html.unescape(translation)
+                    cloned = self._clone_with_translation(plain_translation)
+                    if cloned is not None:
+                        cloned.tail = self.element.tail
+                        self.element.addnext(cloned)
+                        self._safe_remove(self.element)
+                        return
                 self.element.addnext(new_element)
                 self._safe_remove(self.element)
             new_element = self._create_new_element(
@@ -362,6 +471,30 @@ class PageElement(Element):
             get_name(parent_element) in group_elements
 
         if self.position == 'only':
+            # Structure-aware replacement: if the element contains nested
+            # links (<a href>, named anchors) we clone the original
+            # structure and replace only the text nodes, so TOC links and
+            # in-page navigation survive the translation.  This prevents
+            # the loss of hyperlinks that is otherwise observed when the
+            # translated content is a plain text string reconstructed from
+            # scratch (see _create_new_element which strips all child
+            # markup). Fall back to the flat replacement if the clone
+            # cannot be built (empty element, unexpected structure, etc.).
+            if self._has_structural_links():
+                # Unescape the xml_escape() applied earlier so the clone
+                # receives readable text, not HTML entities.
+                import html as _html
+                plain_translation = _html.unescape(translation)
+                cloned = self._clone_with_translation(plain_translation)
+                if cloned is not None:
+                    # Preserve the tail of the original element on the
+                    # clone so surrounding whitespace is not lost.
+                    cloned.tail = self.element.tail
+                    self.element.addnext(cloned)
+                    self._safe_remove(self.element)
+                    return
+            # Default flat replacement (no structural links, or clone
+            # failed): insert new_element and remove the original.
             self.element.addnext(new_element)
             self._safe_remove(self.element)
             return

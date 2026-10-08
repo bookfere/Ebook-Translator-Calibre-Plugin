@@ -36,6 +36,13 @@ class Base:
     placeholder = ('{{{{id_{}}}}}', r'({{\s*)+id\s*_\s*{}\s*(\s*}})+')
     using_tip = None
 
+    # Novel Mode (see lib/novel.py) requires stateful, chat-style engines
+    # able to accept a customized system prompt with a running summary and
+    # glossary. Only GenAI subclasses opt-in to True. Kept as a plain class
+    # attribute rather than an ABC method so all builtin/custom engines can
+    # be introspected uniformly at UI level.
+    supports_novel_mode: bool = False
+
     concurrency_limit: int = 0
     request_interval: float = 0.0
     request_attempt: int = 3
@@ -202,7 +209,8 @@ class Base:
                 'method': self.method,
                 'proxy_uri': None,
                 'timeout': int(self.request_timeout),
-                'raw_object': self.stream
+                'raw_object': self.stream,
+                'keepalive': getattr(self, 'request_keepalive', False),
             }
             if self.proxy_type == 'socks5' and self.proxy_host is not None \
                     and self.proxy_port is not None:

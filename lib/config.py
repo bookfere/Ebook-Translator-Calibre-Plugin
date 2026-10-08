@@ -46,6 +46,34 @@ defaults: dict[str, Any] = {
     'merge_length': 1800,
     'ebook_metadata': {},
     'search_paths': [],
+    'novel_mode_enabled': False,
+    'novel_chunk_tokens': 12000,
+    'novel_max_paragraphs_per_chunk': 80,
+    # Structured output policy for the novel translator.
+    #   'auto'  -> use JSON structured output when the engine advertises
+    #              support (see engines.genai.GenAI.structured_output_mode),
+    #              otherwise fall back to text markers [N]. Default.
+    #   'off'   -> always use text markers, even on capable engines.
+    #   'force' -> always use JSON structured output, even on engines that
+    #              don't advertise it
+    'novel_structured_output': 'auto',
+    'novel_overlap_paragraphs': 3,
+    'novel_context_tokens': 1500,
+    'novel_summary_tokens': 400,
+    'novel_glossary_max_entries': 200,
+    # Chapters with fewer translated characters than this threshold are
+    # translated normally but skip the summary + glossary extraction
+    # LLM calls. Typical target: front/back matter (Copyright, Table of
+    # Contents, About the Author, ...) which is not narrative content.
+    'novel_min_chars_for_context': 300,
+    'novel_chapter_source': 'toc_level_1',  # 'toc_level_1' | 'toc_level_2' | 'xhtml_file'
+    # Pages whose total non-ignored text (in chars) is below this threshold
+    # are treated as front/back matter (Cover, Titlepage, decorative pages)
+    # and excluded from chapter narrative content. Set to 0 to disable.
+    'novel_front_matter_min_chars': 100,
+    'novel_translation_prompt': None,
+    'novel_summary_prompt': None,
+    'novel_glossary_prompt': None,
 }
 
 
