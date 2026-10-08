@@ -290,11 +290,44 @@ class ConversionWorker:
                     job, dialog_title=_('Translation job failed'))
             return
 
-        # TODO: Try to use the calibre generated metadata file.
         ebook_metadata_config = self.config.get('ebook_metadata') or {}
         if not ebook.is_extra_format():
             with open(output_path, 'r+b') as file:
                 metadata = get_metadata(file, ebook.output_format)
+
+                # Carry over the book's full Calibre library metadata. Fields
+                # such as series, series index, publisher, rating or pubdate
+                # usually live only in Calibre's database and not inside the
+                # ebook file, so without this they would be lost in the
+                # translated copy. Title and description are left as the
+                # translation produced them (they are already translated
+                # during conversion from the book's own metadata); series and
+                # series index are copied verbatim and never translated.
+                library_tags = []
+                try:
+                    if getattr(ebook, 'id', None) is not None:
+                        library = self.api.get_metadata(ebook.id)
+                        if library.series:
+                            metadata.series = library.series
+                            metadata.series_index = library.series_index
+                        if library.publisher:
+                            metadata.publisher = library.publisher
+                        if library.rating:
+                            metadata.rating = library.rating
+                        if library.pubdate:
+                            metadata.pubdate = library.pubdate
+                        if library.author_sort:
+                            metadata.author_sort = library.author_sort
+                        if library.authors and \
+                                library.authors != [_('Unknown')]:
+                            metadata.authors = library.authors
+                        if library.comments and not metadata.comments:
+                            metadata.comments = library.comments
+                        library_tags = list(library.tags or [])
+                except Exception:
+                    # A metadata hiccup must never fail the whole job.
+                    pass
+
                 ebook_title = metadata.title
                 if ebook.custom_title is not None:
                     ebook_title = ebook.custom_title
@@ -304,12 +337,13 @@ class ConversionWorker:
                 if ebook_metadata_config.get('lang_code'):
                     metadata.language = ebook.lang_code
                 subjects = ebook_metadata_config.get('subjects')
-                metadata.tags += (subjects or []) + [
-                    'Translated by Ebook Translator: '
-                    'https://translator.bookfere.com']
-                # metadata.authors = ['bookfere.com']
-                # metadata.author_sort = 'bookfere.com'
-                # metadata.book_producer = 'Ebook Translator'
+                if metadata.tags is None:
+                    metadata.tags = []
+                for tag in library_tags + (subjects or []) + [
+                        'Translated by Ebook Translator: '
+                        'https://translator.bookfere.com']:
+                    if tag not in metadata.tags:
+                        metadata.tags.append(tag)
                 set_metadata(file, metadata, ebook.output_format)
         else:
             metadata = self.api.get_metadata(ebook.id)
