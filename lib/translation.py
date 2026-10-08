@@ -14,6 +14,7 @@ from .utils import log, sep, trim, dummy, traceback_error
 from .config import get_config
 from .exception import TranslationFailed, TranslationCanceled
 from .handler import Handler
+from .context import ContextManager
 
 
 load_translations()  # type: ignore
@@ -88,6 +89,28 @@ class Translation:
         self.progress_bar = ProgressBar()
         self.abort_count = 0
 
+        # Initialize context manager from engine-specific config
+        engine_config = getattr(self.translator, 'config', None)
+        global_config = get_config()
+
+        # First check engine-specific config, fallback to global config
+        if engine_config and 'context_enabled' in engine_config:
+            self.context_enabled = engine_config.get('context_enabled', True)
+            paragraph_limit = engine_config.get('context_paragraph_limit', 3)
+            max_tokens = engine_config.get('context_max_tokens', 2000)
+            position = engine_config.get('context_position', 'before')
+        else:
+            self.context_enabled = global_config.get('context_enabled', True)
+            paragraph_limit = global_config.get('context_paragraph_limit', 3)
+            max_tokens = global_config.get('context_max_tokens', 2000)
+            position = global_config.get('context_position', 'before')
+
+        if self.context_enabled:
+            self.context_manager = ContextManager(paragraph_limit, max_tokens, position)
+            self.translator.set_context_manager(self.context_manager)
+        else:
+            self.context_manager = None
+
     def set_fresh(self, fresh):
         self.fresh = fresh
 
@@ -161,7 +184,13 @@ class Translation:
         self.streaming('')
         self.streaming(_('Translating...'))
         text = self.glossary.replace(paragraph.original)
-        translation = self.translate_text(paragraph.row, text)
+
+        # Add context to translator if enabled
+        if self.context_enabled and self.context_manager:
+            self.translator.local_state.current_row = int(paragraph.id)
+            # print(f"DEBUG: Translation setting current_row={int(paragraph.id)} for id={paragraph.id}")
+
+        translation = self.translate_text(int(paragraph.id), text)
         # Process streaming text
         if isinstance(translation, GeneratorType):
             if self.total == 1:
@@ -208,7 +237,11 @@ class Translation:
                 message = _('Translation (Cached): {}')
             self.log(message.format(paragraph.translation.strip()))
 
-    def handle(self, paragraphs=[]):
+    def handle(self, paragraphs=[], context_paragraphs=None):
+        # Load paragraphs into context manager if enabled
+        if self.context_enabled and self.context_manager:
+            self.context_manager.load_paragraphs(context_paragraphs or paragraphs)
+
         start_time = time.time()
         char_count = 0
         for paragraph in paragraphs:

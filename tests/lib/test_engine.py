@@ -418,7 +418,16 @@ class TestChatgptTranslate(unittest.TestCase):
             'preserved as is in the translation\'s output. Do not omit any '
             'part of the content, even if it seems unimportant. RESPOND ONLY '
             'with the translation text, no formatting, no explanations, '
-            'no additional commentary whatsoever. ')
+            'no additional commentary whatsoever. \n\n'
+            'CRITICAL: Your output must ONLY contain the translation of the current '
+            'input. Never include, summarize, or acknowledge any text from the '
+            'provided context block. If the input is a short marker (e.g., "TL notes:"), '
+            'translate it literally or keep it as is. DO NOT replace the input with '
+            'placeholders or content found in the context block. HTML entities '
+            '(e.g., "&nbsp;", "&amp;", etc.) must be preserved exactly as they are. '
+            'CRITICAL: The length and meaning of your output must strictly correspond '
+            'to the input. Never expand a short input, symbol, or HTML entity into a '
+            'full sentence using information from the context.')
 
     def test_created_engine(self):
         self.assertIsInstance(self.translator, Base)
@@ -517,7 +526,7 @@ class TestChatgptTranslate(unittest.TestCase):
         result = self.translator.translate('Hello World!')
 
         mock_request.assert_called_with(
-            url=url, data=data, headers=headers, method='POST', timeout=60.0,
+            url=url, data=data, headers=headers, method='POST', timeout=60,
             proxy_uri=None, raw_object=True)
         self.assertIsInstance(result, GeneratorType)
         self.assertEqual('你好世界！', ''.join(result))
@@ -572,7 +581,9 @@ class TestChatgptBatchTranslate(unittest.TestCase):
         self.mock_translator.model = 'fake-model'
         self.mock_translator.stream = True
         with self.assertRaises(UnsupportedModel) as cm:
-            self.batch_translator.upload([Mock(Paragraph)])
+            p = Mock(Paragraph)
+            p.id = 0
+            self.batch_translator.upload([p])
         self.assertEqual(
             str(cm.exception),
             'The model "fake-model" does not support batch functionality.')
@@ -595,14 +606,18 @@ class TestChatgptBatchTranslate(unittest.TestCase):
         mock_supported_models.return_value = [model]
 
         mock_paragraph_1 = Mock(Paragraph)
+        mock_paragraph_1.id = 0
         mock_paragraph_1.md5 = 'abc'
         mock_paragraph_1.original = 'test content 1'
         mock_paragraph_2 = Mock(Paragraph)
+        mock_paragraph_2.id = 1
         mock_paragraph_2.md5 = 'def'
         mock_paragraph_2.original = 'test content 2'
         self.mock_translator.model = model
         self.mock_translator.api_key = 'abc'
         self.mock_translator.proxy_uri = {}
+        self.mock_translator.local_state = Mock()
+        self.mock_translator.local_state.current_row = None
 
         def mock_get_body(text):
             return json.dumps({
@@ -840,7 +855,17 @@ class TestAzureChatgptTranslate(unittest.TestCase):
             'preserved as is in the translation\'s output. Do not omit any '
             'part of the content, even if it seems unimportant. RESPOND ONLY '
             'with the translation text, no formatting, no explanations, '
-            'no additional commentary whatsoever. ')
+            'no additional commentary whatsoever. '
+            '\n\n'
+            'CRITICAL: Your output must ONLY contain the translation of the current '
+            'input. Never include, summarize, or acknowledge any text from the '
+            'provided context block. If the input is a short marker (e.g., "TL notes:"), '
+            'translate it literally or keep it as is. DO NOT replace the input with '
+            'placeholders or content found in the context block. HTML entities '
+            '(e.g., "&nbsp;", "&amp;", etc.) must be preserved exactly as they are. '
+            'CRITICAL: The length and meaning of your output must strictly correspond '
+            'to the input. Never expand a short input, symbol, or HTML entity into a '
+            'full sentence using information from the context.')
         data = json.dumps({
             'stream': True,
             'messages': [
@@ -865,7 +890,7 @@ class TestAzureChatgptTranslate(unittest.TestCase):
         result = self.translator.translate('Hello World!')
 
         mock_request.assert_called_with(
-            url=url, data=data, headers=headers, method='POST', timeout=60.0,
+            url=url, data=data, headers=headers, method='POST', timeout=60,
             proxy_uri=None, raw_object=True)
         self.assertIsInstance(result, GeneratorType)
         self.assertEqual('你好世界！', ''.join(result))
@@ -899,7 +924,16 @@ class TestClaudeTranslate(unittest.TestCase):
             'do not add any prefix or suffix to the translated content. Websites\' '
             'URLs/addresses should be preserved as is in the translation\'s output. '
             'Do not omit any part of the content, even if it seems unimportant. '
-            )
+            '\n\n'
+            'CRITICAL: Your output must ONLY contain the translation of the current '
+            'input. Never include, summarize, or acknowledge any text from the '
+            'provided context block. If the input is a short marker (e.g., "TL notes:"), '
+            'translate it literally or keep it as is. DO NOT replace the input with '
+            'placeholders or content found in the context block. HTML entities '
+            '(e.g., "&nbsp;", "&amp;", etc.) must be preserved exactly as they are. '
+            'CRITICAL: The length and meaning of your output must strictly correspond '
+            'to the input. Never expand a short input, symbol, or HTML entity into a '
+            'full sentence using information from the context.')
         data = json.dumps({
             'stream': False,
             'max_tokens': 4096,
@@ -944,7 +978,7 @@ class TestClaudeTranslate(unittest.TestCase):
         result = self.translator.translate('Hello World!')
 
         mock_request.assert_called_with(
-            url=url, data=data, headers=headers, method='POST', timeout=30.0,
+            url=url, data=data, headers=headers, method='POST', timeout=30,
             proxy_uri=None, raw_object=False)
         self.assertEqual('你好世界！', result)
 
@@ -960,7 +994,17 @@ class TestClaudeTranslate(unittest.TestCase):
             'given content. In your answer do not add any prefix or suffix to '
             'the translated content. Websites\' URLs/addresses should be '
             'preserved as is in the translation\'s output. Do not omit any '
-            'part of the content, even if it seems unimportant. ')
+            'part of the content, even if it seems unimportant. '
+            '\n\n'
+            'CRITICAL: Your output must ONLY contain the translation of the current '
+            'input. Never include, summarize, or acknowledge any text from the '
+            'provided context block. If the input is a short marker (e.g., "TL notes:"), '
+            'translate it literally or keep it as is. DO NOT replace the input with '
+            'placeholders or content found in the context block. HTML entities '
+            '(e.g., "&nbsp;", "&amp;", etc.) must be preserved exactly as they are. '
+            'CRITICAL: The length and meaning of your output must strictly correspond '
+            'to the input. Never expand a short input, symbol, or HTML entity into a '
+            'full sentence using information from the context.')
         data = json.dumps({
             'stream': True,
             'max_tokens': 4096,
@@ -1020,7 +1064,7 @@ data: {"type":"message_stop"}
         result = self.translator.translate('Hello World!')
 
         mock_request.assert_called_with(
-            url=url, data=data, headers=headers, method='POST', timeout=30.0,
+            url=url, data=data, headers=headers, method='POST', timeout=30,
             proxy_uri=None, raw_object=True)
         self.assertIsInstance(result, GeneratorType)
         self.assertEqual('你好世界！', ''.join(result))

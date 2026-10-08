@@ -163,7 +163,7 @@ class TranslationWorker(QObject):
     start = pyqtSignal()
     close = pyqtSignal(int)
     finished = pyqtSignal()
-    translate = pyqtSignal(list, bool)
+    translate = pyqtSignal(list, bool, object)
     logging = pyqtSignal(str, bool)
     # error = pyqtSignal(str, str, str)
     streaming = pyqtSignal(object)
@@ -199,8 +199,8 @@ class TranslationWorker(QObject):
     def set_need_close(self, need_close):
         self.need_close = need_close
 
-    @pyqtSlot(list, bool)
-    def translate_paragraphs(self, paragraphs=[], fresh=False):
+    @pyqtSlot(list, bool, object)
+    def translate_paragraphs(self, paragraphs=[], fresh=False, context_paragraphs=None):
         """:fresh: retranslate all paragraphs."""
         self.on_working = True
         self.start.emit()
@@ -214,7 +214,7 @@ class TranslationWorker(QObject):
         translation.set_streaming(self.streaming.emit)
         translation.set_callback(self.callback.emit)
         translation.set_cancel_request(self.cancel_request)
-        translation.handle(paragraphs)
+        translation.handle(paragraphs, context_paragraphs)
         self.on_working = False
         self.finished.emit()
         if self.need_close:
@@ -752,6 +752,28 @@ class AdvancedTranslation(QDialog):
             translator = get_translator(self.current_engine)
             translator.set_source_lang(self.ebook.source_lang)
             translator.set_target_lang(self.ebook.target_lang)
+
+            # Enable context if configured (check engine-specific config first, fallback to global)
+            engine_config = getattr(translator, 'config', None)
+            global_config = self.config
+
+            if engine_config and 'context_enabled' in engine_config:
+                context_enabled = engine_config.get('context_enabled', True)
+                paragraph_limit = engine_config.get('context_paragraph_limit', 3)
+                max_tokens = engine_config.get('context_max_tokens', 2000)
+                position = engine_config.get('context_position', 'before')
+            else:
+                context_enabled = global_config.get('context_enabled', True)
+                paragraph_limit = global_config.get('context_paragraph_limit', 3)
+                max_tokens = global_config.get('context_max_tokens', 2000)
+                position = global_config.get('context_position', 'before')
+
+            if context_enabled:
+                from .lib.context import ContextManager
+                context_manager = ContextManager(paragraph_limit, max_tokens, position)
+                context_manager.load_paragraphs(self.table.paragraphs)
+                translator.set_context_manager(context_manager)
+
             batch_translator = ChatgptBatchTranslate(translator)
             batch = ChatgptBatchTranslationManager(
                 batch_translator, self.cache, self.table, self)
@@ -1231,7 +1253,7 @@ class AdvancedTranslation(QDialog):
             if self.alert.ask(message.format(len(paragraphs))) != 'yes':
                 return
         self.translate_all = True
-        self.trans_worker.translate.emit(paragraphs, is_fresh)
+        self.trans_worker.translate.emit(paragraphs, is_fresh, self.table.paragraphs)
 
     def translate_selected_paragraph(self):
         paragraphs = self.table.get_selected_paragraphs()
@@ -1240,7 +1262,7 @@ class AdvancedTranslation(QDialog):
             self.translate_all_paragraphs()
         else:
             self.progress_step = self.get_progress_step(len(paragraphs))
-            self.trans_worker.translate.emit(paragraphs, True)
+            self.trans_worker.translate.emit(paragraphs, True, self.table.paragraphs)
 
     def install_widget_event(
             self, source, target, action, callback, stop=False):

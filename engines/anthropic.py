@@ -92,6 +92,9 @@ class ClaudeTranslate(GenAI):
         if self.merge_enabled:
             prompt += (' Ensure that placeholders matching the pattern '
                        '{{id_\\d+}} in the content are retained.')
+        
+        # Always append context rules to ensure stability
+        prompt += f"\n\n{self.context_rules}"
         return prompt
 
     def get_models(self):
@@ -119,13 +122,24 @@ class ClaudeTranslate(GenAI):
         return headers
 
     def get_body(self, text):
+        # Build system prompt with context if available
+        system_content = self._get_prompt()
+        if getattr(self, 'context_manager', None):
+            current_row = getattr(self.local_state, 'current_row', -1)
+            context_block = self.context_manager.get_context_block(current_row)
+            if context_block:
+                system_content += f"\n\n{context_block}"
+        
+        # User message only contains the target text
+        messages = [{'role': 'user', 'content': text}]
+
         body = {
             'stream': self.stream,
             'max_tokens': 4096,
             'model': self.model,
             'top_k': self.top_k,
-            'system': self._get_prompt(),
-            'messages': [{'role': 'user', 'content': text}]
+            'system': system_content,
+            'messages': messages
         }
         sampling_value = getattr(self, self.sampling)
         body.update({self.sampling: sampling_value})

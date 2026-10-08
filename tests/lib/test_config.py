@@ -45,6 +45,10 @@ class TestFunction(unittest.TestCase):
             'merge_length': 1800,
             'ebook_metadata': {},
             'search_paths': [],
+            'context_enabled': True,
+            'context_paragraph_limit': 3,
+            'context_max_tokens': 2000,
+            'context_position': 'before',
         }
 
         self.assertEqual(defaults, self.config.preferences.defaults)

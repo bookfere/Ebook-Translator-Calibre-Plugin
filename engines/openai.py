@@ -81,6 +81,9 @@ class ChatgptTranslate(GenAI):
         if self.merge_enabled:
             prompt += (' Ensure that placeholders matching the pattern '
                        '{{id_\\d+}} in the content are retained.')
+        
+        # Always append context rules to ensure stability
+        prompt += f"\n\n{self.context_rules}"
         return prompt
 
     def get_headers(self):
@@ -91,12 +94,25 @@ class ChatgptTranslate(GenAI):
         }
 
     def get_body(self, text):
+        # Build messages with context if available
+        messages = []
+
+        # Add system prompt with context if available
+        system_content = self.get_prompt()
+        if getattr(self, 'context_manager', None):
+            current_row = getattr(self.local_state, 'current_row', -1)
+            context_block = self.context_manager.get_context_block(current_row)
+            if context_block:
+                system_content += f"\n\n{context_block}"
+        
+        messages.append({'role': 'system', 'content': system_content})
+
+        # Add the actual text to translate
+        messages.append({'role': 'user', 'content': text})
+
         body: dict[str, Any] = {
             'model': self.model,
-            'messages': [
-                {'role': 'system', 'content': self.get_prompt()},
-                {'role': 'user', 'content': text}
-            ],
+            'messages': messages,
         }
         if self.stream:
             body.update(stream=True)
@@ -229,6 +245,7 @@ class ChatgptBatchTranslate:
                 .format(self.translator.model))
         body = io.StringIO()
         for paragraph in paragraphs:
+            self.translator.local_state.current_row = int(paragraph.id)
             data = self.translator.get_body(paragraph.original)
             body.write(json.dumps({
                 "custom_id": paragraph.md5,

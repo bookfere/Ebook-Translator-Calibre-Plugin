@@ -557,6 +557,52 @@ class TranslationSetting(QDialog):
         stream_enabled = QCheckBox(_('Enable streaming response'))
         genai_layout.addRow(_('Stream'), stream_enabled)
 
+        # Context-aware translation settings
+        self.context_group = QGroupBox(_('Context-Aware Translation'))
+        self.context_group.setCheckable(True)
+        self.context_group.setChecked(False)
+        context_layout = QFormLayout(self.context_group)
+
+        self.context_paragraph_limit = QSpinBox()
+        self.context_paragraph_limit.setRange(1, 20)
+        self.context_paragraph_limit.setValue(3)
+        context_layout.addRow(_('Context paragraphs'), self.context_paragraph_limit)
+
+        self.context_max_tokens = QSpinBox()
+        self.context_max_tokens.setRange(500, 8000)
+        self.context_max_tokens.setValue(2000)
+        context_layout.addRow(_('Max context tokens'), self.context_max_tokens)
+
+        self.context_position = QComboBox()
+        self.context_position.addItem(_('Before text'))
+        self.context_position.addItem(_('After text'))
+        context_layout.addRow(_('Context position'), self.context_position)
+
+        genai_layout.addRow(self.context_group)
+
+        # Connect context settings
+        def toggle_context_group(checked):
+            self.context_paragraph_limit.setEnabled(checked)
+            self.context_max_tokens.setEnabled(checked)
+            self.context_position.setEnabled(checked)
+            self.current_engine.config.update(context_enabled=checked)
+
+        self.context_group.toggled.connect(toggle_context_group)
+
+        def change_context_paragraph_limit(value):
+            self.current_engine.config.update(context_paragraph_limit=value)
+
+        def change_context_max_tokens(value):
+            self.current_engine.config.update(context_max_tokens=value)
+
+        def change_context_position(index):
+            position = 'before' if index == 0 else 'after'
+            self.current_engine.config.update(context_position=position)
+
+        self.context_paragraph_limit.valueChanged.connect(change_context_paragraph_limit)
+        self.context_max_tokens.valueChanged.connect(change_context_max_tokens)
+        self.context_position.currentIndexChanged.connect(change_context_position)
+
         sampling_btn_group = QButtonGroup(sampling_widget)
         sampling_btn_group.addButton(temperature, 0)
         sampling_btn_group.addButton(top_p, 1)
@@ -667,6 +713,16 @@ class TranslationSetting(QDialog):
             self.genai_endpoint.setText(
                 config.get('endpoint', self.current_engine.endpoint))
             self.genai_endpoint.setCursorPosition(0)
+            # Context settings
+            context_enabled = config.get('context_enabled', False)
+            self.context_group.setChecked(context_enabled)
+            self.context_paragraph_limit.setValue(
+                config.get('context_paragraph_limit', 3))
+            self.context_max_tokens.setValue(
+                config.get('context_max_tokens', 2000))
+            self.context_position.setCurrentIndex(
+                0 if config.get('context_position', 'before') == 'before' else 1
+            )
             # Models
             if issubclass(self.current_engine, AzureChatgptTranslate):
                 genai_model_list.clear()
