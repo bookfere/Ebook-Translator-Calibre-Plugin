@@ -5,6 +5,7 @@ from types import GeneratorType
 from qt.core import (  # type: ignore
     Qt, pyqtSignal, pyqtSlot, QDialog, QThread, QGridLayout, QPushButton,
     QPlainTextEdit, QObject, QTextCursor, QLabel, QComboBox, QSpacerItem)
+from calibre.gui2 import error_dialog  # type: ignore
 
 from ..lib.utils import log, sorted_mixed_keys, traceback_error
 from ..lib.config import get_config
@@ -52,6 +53,7 @@ class EngineWorker(QObject):
     translate = pyqtSignal(str)
     result = pyqtSignal(str)
     complete = pyqtSignal()
+    failure = pyqtSignal(str)
     check = pyqtSignal()
     usage = pyqtSignal(object)
 
@@ -78,26 +80,42 @@ class EngineWorker(QObject):
             else:
                 self.clear.emit()
                 self.result.emit(translation)
-            self.complete.emit()
-        except Exception:
+        except Exception as e:
             self.clear.emit()
             error_message = traceback_error()
+            if str(e):
+                error_message += '\n\n' + str(e)
             self.result.emit(error_message)
             log.error(error_message)
+            self.failure.emit(error_message)
+        finally:
+            # The UI must always leave its busy state, including when an
+            # invalid model is rejected by the provider.
+            self.complete.emit()
 
     @pyqtSlot()
     def check_usage(self):
-        self.usage.emit(self.translator.get_usage())
+        try:
+            usage = self.translator.get_usage()
+        except Exception:
+            # Usage is optional and must not be able to terminate Calibre's
+            # worker thread.
+            log.error(traceback_error())
+            usage = None
+        self.usage.emit(usage)
 
 
 class EngineTester(QDialog):
-    usage_thread = QThread()
-    translation_thread = QThread()
-
     def __init__(self, parent, translator):
         QDialog.__init__(self, parent)
         self.parent = parent
         self.translator = translator
+        self._translation_in_progress = False
+        self._close_requested = False
+        # Threads must be per-dialog. Shared class-level QThreads can be
+        # destroyed while a later tester still has work queued on them.
+        self.usage_thread = QThread(self)
+        self.translation_thread = QThread(self)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.setWindowTitle(_('Test Translation Engine'))
         self.setModal(True)
@@ -174,16 +192,41 @@ class EngineTester(QDialog):
         self.translate_worker.result.connect(target.insertPlainText)
         self.translate_worker.complete.connect(self.usage_worker.check.emit)
 
+        def complete_translation():
+            self._translation_in_progress = False
+            translate.setDisabled(False)
+            if self._close_requested:
+                self.done(self.result())
+        self.translate_worker.complete.connect(complete_translation)
+
+        def show_translation_error(detail):
+            error_dialog(
+                self, _('Test Translation Engine Failed'),
+                _('The translation engine rejected the test request.'),
+                detail, show=True)
+        self.translate_worker.failure.connect(show_translation_error)
+
         def test_translate():
+            if self._translation_in_progress:
+                return
+            self._translation_in_progress = True
+            translate.setDisabled(True)
             self.translate_worker.translate.emit(source.toPlainText())
         translate.clicked.connect(test_translate)
 
     def done(self, result):
-        QDialog.done(self, result)
+        if self._translation_in_progress:
+            # Do not let Qt destroy a QThread while its blocking network
+            # request is still running. The dialog closes after completion.
+            self._close_requested = True
+            return
         self.usage_thread.quit()
-        self.usage_thread.wait()
         self.translation_thread.quit()
+        # A dialog owns both threads, so it must not be deleted until they
+        # have stopped. There is no active translation at this point.
+        self.usage_thread.wait()
         self.translation_thread.wait()
+        QDialog.done(self, result)
 
 
 class ManageCustomEngine(QDialog):

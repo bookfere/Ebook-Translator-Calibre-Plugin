@@ -9,7 +9,7 @@ from mechanize._response import response_seek_wrapper as Response
 from calibre.utils.localization import _  # type: ignore
 
 from .. import EbookTranslator
-from ..lib.utils import request
+from ..lib.utils import log, request
 from ..lib.exception import UnsupportedModel
 
 from .genai import GenAI
@@ -17,6 +17,25 @@ from .languages import google
 
 
 load_translations()  # type: ignore
+
+
+def get_api_base(endpoint):
+    """Return the API base URL of a chat/completions endpoint while
+    preserving any path prefix of relay services (e.g. /zen/go)."""
+    parts = urlsplit(endpoint or '', 'https')
+    path = parts.path or ''
+    for suffix in ('/chat/completions', '/completions'):
+        if path.endswith(suffix):
+            path = path[:-len(suffix)]
+            break
+    if not path:
+        path = '/v1'
+    return '%s://%s%s' % (parts.scheme, parts.netloc, path)
+
+
+def get_model_endpoint(endpoint):
+    """Derive the model list URL from a chat/completions endpoint."""
+    return '%s/models' % get_api_base(endpoint)
 
 
 class ChatgptTranslate(GenAI):
@@ -64,12 +83,32 @@ class ChatgptTranslate(GenAI):
         self.model = self.config.get('model', self.model)
 
     def get_models(self):
-        domain_name = '://'.join(urlsplit(self.endpoint or '', 'https')[:2])
-        model_endpoint = '%s/v1/models' % domain_name
+        try:
+            return self._fetch_models()
+        except Exception as e:
+            # Some relay services do not implement the /models endpoint or
+            # return an unexpected response. Fall back to the static list.
+            model_endpoint = get_model_endpoint(self.endpoint)
+            log.warning('Failed to fetch models from %s: %s'
+                        % (model_endpoint, str(e)))
+            return list(self.models)
+
+    def _fetch_models(self):
+        """Fetch model identifiers from an OpenAI-compatible endpoint.
+
+        Subclasses with a fixed protocol-specific compatibility list can use
+        this method and choose their own fallback without losing that list
+        after a previous dynamic refresh.
+        """
+        model_endpoint = get_model_endpoint(self.endpoint)
         response = request(
             model_endpoint, headers=self.get_headers(),
             proxy_uri=self.proxy_uri)
-        return [item['id'] for item in json.loads(response).get('data')]
+        data = json.loads(response).get('data')
+        if not isinstance(data, list):
+            raise ValueError('Invalid model list response.')
+        return [item['id'] for item in data if isinstance(item, dict)
+                and isinstance(item.get('id'), str)]
 
     def get_prompt(self):
         prompt = self.prompt.replace('<tlang>', self.target_lang)
@@ -107,78 +146,119 @@ class ChatgptTranslate(GenAI):
     def get_result(self, response):
         if self.stream:
             return self._parse_stream(response)
-        # Parse JSON response with robust schema handling
         try:
-            data = json.loads(response)
-            # Handle different response schemas
-            if 'choices' in data and len(data['choices']) > 0:
-                choice = data['choices'][0]
-                # Standard chat/completions format
-                if 'message' in choice and 'content' in choice['message']:
-                    return choice['message']['content']
-                # Alternative format (some nano models)
-                elif 'content' in choice:
-                    if isinstance(choice['content'], list) \
-                            and len(choice['content']) > 0:
-                        return choice['content'][0].get('text', '')
-                    elif isinstance(choice['content'], str):
-                        return choice['content']
-                # Direct text format
-                elif 'text' in choice:
-                    return choice['text']
-            # Fallback: try to find content anywhere in the response
-            if 'content' in data:
-                return data['content']
-            raise KeyError('No content found in response')
+            return self._parse_json(response)
         except (json.JSONDecodeError, KeyError, IndexError) as e:
             raise Exception(
                 _('Can not parse returned response. Raw data: {}\nError: {}')
                 .format(response[:500] + '...' if len(response) > 500 \
                         else response, str(e)))
 
+    def _parse_json(self, response):
+        """Parse a non-streaming response with robust schema handling."""
+        data = json.loads(response)
+        self.record_usage(data.get('usage'))
+        if 'choices' in data and len(data['choices']) > 0:
+            choice = data['choices'][0]
+            # Standard chat/completions format
+            if 'message' in choice and 'content' in choice['message']:
+                return choice['message']['content']
+            # Alternative format (some nano models)
+            elif 'content' in choice:
+                if isinstance(choice['content'], list) \
+                        and len(choice['content']) > 0:
+                    return choice['content'][0].get('text', '')
+                elif isinstance(choice['content'], str):
+                    return choice['content']
+            # Direct text format
+            elif 'text' in choice:
+                return choice['text']
+        # Fallback: try to find content anywhere in the response
+        if 'content' in data:
+            return data['content']
+        raise KeyError('No content found in response')
+
+    @staticmethod
+    def _parse_chunk_content(data):
+        """Extract the translated content from a streaming chunk of any
+        schema. Return None when the chunk carries no content."""
+        if 'choices' in data and len(data['choices']) > 0:
+            choice = data['choices'][0]
+            # Standard streaming format
+            if 'delta' in choice and 'content' in choice['delta']:
+                content = choice['delta']['content']
+                if content:
+                    return str(content)
+            # Alternative streaming format
+            elif 'content' in choice:
+                content = choice['content']
+                if isinstance(content, list) and len(content) > 0:
+                    text = content[0].get('text', '')
+                    if text:
+                        return str(text)
+                elif isinstance(content, str) and content:
+                    return str(content)
+            # Direct text format
+            elif 'text' in choice:
+                text = choice['text']
+                if text:
+                    return str(text)
+        return None
+
     def _parse_stream(self, response):
+        """Parse an SSE streaming response. If the response turns out to be a
+        complete JSON payload instead of an SSE stream (some relay services
+        buffer streaming responses), fall back to the JSON parser."""
+        buffer = []
         while True:
             try:
-                line = response.readline().decode('utf-8').strip()
+                raw = response.readline()
             except IncompleteRead:
-                continue
+                # The connection was closed mid-stream. Treat it as the end
+                # of the response to avoid an infinite loop.
+                break
             except Exception as e:
                 raise Exception(
                     _('Can not parse returned response. Raw data: {}')
                     .format(str(e)))
+            if raw == b'':
+                # EOF: the connection is closed or the content-length is
+                # exhausted. Stop reading to avoid an infinite loop.
+                break
+            line = raw.decode('utf-8').strip()
             if not line:
+                # Blank keep-alive separator line between SSE events.
                 continue
             if line.startswith('data:'):
-                chunk = line.split('data: ')[1]
+                # Streaming mode: stop buffering and parse SSE events.
+                buffer = []
+                chunk = line.split('data:', 1)[1].strip()
                 if chunk == '[DONE]':
                     break
                 try:
                     data = json.loads(chunk)
-                    # Handle different streaming response schemas
-                    if 'choices' in data and len(data['choices']) > 0:
-                        choice = data['choices'][0]
-                        # Standard streaming format
-                        if 'delta' in choice and 'content' in choice['delta']:
-                            content = choice['delta']['content']
-                            if content:
-                                yield str(content)
-                        # Alternative streaming format
-                        elif 'content' in choice:
-                            content = choice['content']
-                            if isinstance(content, list) and len(content) > 0:
-                                text = content[0].get('text', '')
-                                if text:
-                                    yield str(text)
-                            elif isinstance(content, str) and content:
-                                yield str(content)
-                        # Direct text format
-                        elif 'text' in choice:
-                            text = choice['text']
-                            if text:
-                                yield str(text)
                 except json.JSONDecodeError:
-                    # Skip malformed JSON chunks
+                    # Skip malformed JSON chunks.
                     continue
+                self.record_usage(data.get('usage'))
+                content = self._parse_chunk_content(data)
+                if content:
+                    yield content
+            else:
+                buffer.append(line)
+        if buffer:
+            # No SSE 'data:' line was seen: the response is a complete JSON
+            # payload returned by a buffering relay service.
+            payload = '\n'.join(buffer)
+            try:
+                result = self._parse_json(payload)
+            except Exception as e:
+                raise Exception(
+                    _('Can not parse returned response. Raw data: {}\nError: {}')
+                    .format(payload[:500] + '...' if len(payload) > 500 \
+                            else payload, str(e)))
+            if result:
+                yield str(result)
 
 
 class ChatgptBatchTranslate:
@@ -189,10 +269,9 @@ class ChatgptBatchTranslate:
         self.translator = translator
         self.translator.stream = False
 
-        domain_name = '://'.join(
-            urlsplit(self.translator.endpoint, 'https')[:2])
-        self.file_endpoint = '%s/v1/files' % domain_name
-        self.batch_endpoint = '%s/v1/batches' % domain_name
+        base = get_api_base(self.translator.endpoint)
+        self.file_endpoint = '%s/files' % base
+        self.batch_endpoint = '%s/batches' % base
 
     def _create_multipart_form_data(self, body):
         """https://www.rfc-editor.org/rfc/rfc2046#section-5.1"""

@@ -441,6 +441,14 @@ msgstr ""
 msgid "Usage: {}"
 msgstr ""
 
+#: components/engine.py:207
+msgid "Test Translation Engine Failed"
+msgstr ""
+
+#: components/engine.py:208
+msgid "The translation engine rejected the test request."
+msgstr ""
+
 #: components/engine.py:193
 msgid "Custom Translation Engine"
 msgstr ""
@@ -959,6 +967,31 @@ msgstr ""
 
 #: setting.py:655
 msgid "The model depends on your Azure project."
+msgstr ""
+
+#: engines/opencode.py:64
+msgid "OpenCode Zen lists every model returned by your API key. Some models may reject this engine's request format; use Test Translation Engine to verify a model before translating an ebook. To reduce token usage, apply the OpenCode Zen balanced preset in Merge to Translate. Check actual charges and monthly limits in the OpenCode Zen console."
+msgstr ""
+
+msgid "Use OpenCode Zen balanced preset"
+msgstr ""
+
+msgid "OpenCode Zen balanced preset applied: merged translation is enabled with about 6000 characters per request."
+msgstr ""
+
+msgid "Estimated API requests: {}"
+msgstr ""
+
+msgid "Token saving tip: enable Merge to Translate and use about 6000 characters per request."
+msgstr ""
+
+msgid "API requests: {} (retries: {})"
+msgstr ""
+
+msgid "Tokens - input: {}, output: {}, cached: {}, reasoning: {}"
+msgstr ""
+
+msgid "Token usage: unavailable in API response."
 msgstr ""
 
 #: setting.py:798
