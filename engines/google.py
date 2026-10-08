@@ -446,7 +446,7 @@ class GeminiTranslate(GenAI):
                     _('Can not parse returned response. Raw data: {}')
                     .format(str(e)))
             if line.startswith('data:'):
-                item = json.loads(line.split('data: ')[1])
+                item = json.loads(line.split('data:', 1)[1].strip())
                 candidate = item['candidates'][0]
                 content = candidate['content']
                 if 'parts' in content.keys():
