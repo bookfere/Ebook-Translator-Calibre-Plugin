@@ -52,6 +52,8 @@ class Base:
         self.proxy_port: int | None = None
 
         self.merge_enabled = False
+        self.merge_by_chapter = False
+        self.chapter_merge_length = 8000
         self.api_keys: list = self.config.get('api_keys', [])[:]
         self.bad_api_keys = []
         self.api_key = self.get_api_key()
@@ -146,6 +148,12 @@ class Base:
 
     def set_merge_enabled(self, enable):
         self.merge_enabled = enable
+
+    def set_merge_by_chapter(self, enable):
+        self.merge_by_chapter = enable
+
+    def set_chapter_merge_length(self, length):
+        self.chapter_merge_length = length
 
     def set_source_lang(self, source_lang: str) -> None:
         self.source_lang = source_lang

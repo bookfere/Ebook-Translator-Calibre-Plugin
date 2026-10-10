@@ -81,6 +81,13 @@ class ChatgptTranslate(GenAI):
         if self.merge_enabled:
             prompt += (' Ensure that placeholders matching the pattern '
                        '{{id_\\d+}} in the content are retained.')
+        if getattr(self, 'merge_by_chapter', False):
+            prompt += (
+                ' The content is divided into segments separated by '
+                'the delimiter "' + self.separator + '". '
+                'You MUST preserve exactly the same number of segments '
+                'and the same delimiter between them in your translation. '
+                'Do not merge or split segments.')
         return prompt
 
     def get_headers(self):
