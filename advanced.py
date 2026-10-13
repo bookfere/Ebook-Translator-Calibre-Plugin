@@ -8,7 +8,7 @@ from qt.core import (  # type: ignore
     QStackedWidget, QSpacerItem, QTabWidget, QCheckBox,
     QComboBox, QSizePolicy)
 from calibre.constants import __version__  # type: ignore
-from calibre.gui2 import I  # type: ignore
+from calibre.gui2 import I, error_dialog  # type: ignore
 from calibre.utils.localization import _  # type: ignore
 
 from . import EbookTranslator
@@ -58,6 +58,7 @@ class PreparationWorker(QObject):
     progress = pyqtSignal(int)
     progress_message = pyqtSignal(str)
     progress_detail = pyqtSignal(str)
+    failed = pyqtSignal(str, str)
     close = pyqtSignal(int)
     finished = pyqtSignal(str)
 
@@ -119,9 +120,11 @@ class PreparationWorker(QObject):
                         input_path, self.ebook.input_format,
                         self.ebook.encoding, self.progress_detail.emit)
                 except Exception:
-                    self.progress_message.emit(
-                        _('Failed to extract ebook content'))
-                    self.progress_detail.emit('\n' + traceback_error())
+                    message = _('Failed to extract ebook content')
+                    detail = traceback_error()
+                    self.progress_message.emit(message)
+                    self.progress_detail.emit('\n' + detail)
+                    self.failed.emit(message, detail)
                     self.progress.emit(100)
                     self.clean_cache(cache)
                     return
@@ -159,12 +162,16 @@ class PreparationWorker(QObject):
 
             self.finished.emit(cache_id)
         except Exception:
-            self.progress_message.emit(_('Failed to load ebook data'))
-            self.progress_detail.emit('\n' + traceback_error())
+            message = _('Failed to load ebook data')
+            detail = traceback_error()
+            self.progress_message.emit(message)
+            self.progress_detail.emit('\n' + detail)
+            self.failed.emit(message, detail)
             self.progress.emit(100)
             if cache is not None:
                 self.clean_cache(cache)
             else:
+                self.on_working = False
                 self.close.emit(1)
         finally:
             self.on_working = False
@@ -391,6 +398,7 @@ class AdvancedTranslation(QDialog):
         # self.error = JobError(self)
         self.current_engine = get_engine_class()
         self.cache = None
+        self.preparation_error = None
         self.merge_enabled = False
 
         self.progress_step = 0
@@ -409,6 +417,10 @@ class AdvancedTranslation(QDialog):
 
         self.preparation_worker = PreparationWorker(
             self.current_engine, self.ebook)
+
+        def preparation_failed(message, detail):
+            self.preparation_error = (message, detail)
+        self.preparation_worker.failed.connect(preparation_failed)
         self.preparation_worker.close.connect(self.done)
         self.preparation_worker.moveToThread(self.preparation_thread)
         self.preparation_thread.finished.connect(
@@ -1304,3 +1316,7 @@ class AdvancedTranslation(QDialog):
             elif result == 0:
                 self.cache.destroy()
         QDialog.done(self, result)
+        if self.preparation_error is not None:
+            message, detail = self.preparation_error
+            self.preparation_error = None
+            error_dialog(self.parent(), _('Failed'), message, detail, show=True)
