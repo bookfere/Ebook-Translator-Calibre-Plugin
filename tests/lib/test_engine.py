@@ -902,6 +902,9 @@ class TestClaudeTranslate(unittest.TestCase):
         self.assertIsInstance(self.translator, Base)
         self.assertIsInstance(self.translator, GenAI)
 
+    def test_default_model(self):
+        self.assertEqual('claude-sonnet-4-6', self.translator.model)
+
     @patch(module_name + '.anthropic.EbookTranslator')
     @patch(module_name + '.base.request')
     def test_translate(self, mock_request, mock_et):
