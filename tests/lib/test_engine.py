@@ -18,6 +18,7 @@ from ...engines.deepl import DeeplTranslate
 from ...engines.openai import ChatgptTranslate, ChatgptBatchTranslate
 from ...engines.microsoft import AzureChatgptTranslate
 from ...engines.anthropic import ClaudeTranslate
+from ...engines.google import GeminiTranslate
 from ...engines.custom import (
     create_engine_template, load_engine_data, CustomTranslate)
 
@@ -1059,6 +1060,32 @@ data: {"type":"message_stop"}
 
         self.assertIsInstance(result, GeneratorType)
         self.assertEqual('你好', ''.join(result))
+
+
+class TestGeminiTranslate(unittest.TestCase):
+    def setUp(self):
+        GeminiTranslate.set_config({'api_keys': ['a', 'b', 'c']})
+        GeminiTranslate.lang_codes = {
+            'source': {'English': 'EN'},
+            'target': {'Chinese': 'ZH'}}
+
+        self.translator = GeminiTranslate()
+        self.translator.set_source_lang('English')
+        self.translator.set_target_lang('Chinese')
+
+    def test_created_engine(self):
+        self.assertIsInstance(self.translator, Base)
+        self.assertIsInstance(self.translator, GenAI)
+
+    def test_default_model(self):
+        # gemini-2.5-flash is limited to past users on the Gemini API.
+        self.assertEqual('gemini-3.5-flash-lite', self.translator.model)
+
+    def test_default_model_in_endpoint(self):
+        self.translator.stream = False
+        self.assertIn(
+            '/gemini-3.5-flash-lite:generateContent?',
+            self.translator.get_endpoint())
 
 
 class TestFunction(unittest.TestCase):
