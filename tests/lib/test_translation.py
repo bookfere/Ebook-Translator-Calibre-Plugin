@@ -256,7 +256,8 @@ class TestTranslation(unittest.TestCase):
         self.streaming.assert_has_calls([
             call(''), call('Translating...'), call(''), call('你'),
             call('好'), call('世'), call('界')])
-        mock_time.sleep.assert_called_with(0.05)
+        # Chunks are shown as they arrive, without an artificial delay.
+        mock_time.sleep.assert_not_called()
 
         self.assertEqual('你好呀世界', self.paragraph.translation)
 

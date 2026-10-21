@@ -173,7 +173,6 @@ class Translation:
                         self.streaming('')
                         clear = False
                     self.streaming(char)
-                    time.sleep(0.05)
                     temp += char
             else:
                 temp = ''.join([char for char in translation])
