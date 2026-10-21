@@ -34,6 +34,18 @@ class TestGlossary(unittest.TestCase):
         glossary.load_from_file('/path/to/fake.txt')
         self.assertEqual([], glossary.glossary)
 
+    @patch(f'{module_name}.open')
+    def test_load_from_file_longer_terms_first(self, mock_open):
+        file = Mock()
+        file.read.return_value.strip.return_value = \
+            'Harry\n哈利\n\nHarry Potter\n哈利·波特'
+        mock_open.return_value.__enter__.return_value = file
+
+        glossary = Glossary(Base.placeholder)
+        glossary.load_from_file('/path/to/glossary.txt')
+        content = glossary.replace('Harry Potter and Harry')
+        self.assertEqual('哈利·波特 and 哈利', glossary.restore(content))
+
     def test_replace(self):
         glossary = Glossary(Base.placeholder)
         glossary.glossary = [('a', 'a'), ('b', 'Z')]
