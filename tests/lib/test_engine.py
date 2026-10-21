@@ -3,6 +3,7 @@ import re
 import json
 import unittest
 from pathlib import Path
+from http.client import IncompleteRead
 from types import GeneratorType
 from unittest.mock import patch, Mock
 
@@ -18,11 +19,31 @@ from ...engines.deepl import DeeplTranslate
 from ...engines.openai import ChatgptTranslate, ChatgptBatchTranslate
 from ...engines.microsoft import AzureChatgptTranslate
 from ...engines.anthropic import ClaudeTranslate
+from ...engines.google import GeminiTranslate
 from ...engines.custom import (
     create_engine_template, load_engine_data, CustomTranslate)
 
 
 module_name = 'calibre_plugins.ebook_translator.engines'
+
+
+def stream_response(lines):
+    """Mimic readline() of a closed stream: return b'' after the last line,
+    and fail instead of spinning if the parser keeps reading."""
+    lines = list(lines)
+    eof_reads = []
+
+    def readline():
+        if lines:
+            return lines.pop(0)
+        eof_reads.append(None)
+        if len(eof_reads) > 10:
+            raise AssertionError('readline() called repeatedly after EOF')
+        return b''
+
+    response = Mock()
+    response.readline.side_effect = readline
+    return response
 
 
 class MockEngine(Base):
@@ -538,6 +559,25 @@ class TestChatgptTranslate(unittest.TestCase):
         self.assertIsInstance(result, GeneratorType)
         self.assertEqual('你好世界！', ''.join(result))
 
+    def test_parse_stream_without_done_marker(self):
+        response = stream_response([
+            b'data: {"choices":[{"delta":{"content":"\xe4\xbd\xa0"}}]}\n',
+            b'\n',
+            b'data: {"choices":[{"delta":{"content":"\xe5\xa5\xbd"}}]}\n'])
+        result = self.translator._parse_stream(response)
+
+        self.assertEqual('你好', ''.join(result))
+
+    def test_parse_stream_incomplete_read(self):
+        # A dropped connection must not be reported as a finished reply.
+        response = Mock()
+        response.readline.side_effect = [
+            IncompleteRead(b''), b'data: [DONE]\n']
+        result = self.translator._parse_stream(response)
+
+        with self.assertRaises(Exception):
+            ''.join(result)
+
     @patch(module_name + '.base.request')
     def test_translate_normal(self, mock_request):
         mock_request.return_value = \
@@ -1028,7 +1068,8 @@ event: message_stop
 data: {"type":"message_stop"}
 """
         mock_response = Mock()
-        mock_response.readline.side_effect = data_sample.encode().splitlines()
+        mock_response.readline.side_effect = \
+            data_sample.encode().splitlines(True)
         mock_request.return_value = mock_response
         url = 'https://api.anthropic.com/v1/messages'
         self.translator.endpoint = url
@@ -1051,13 +1092,43 @@ data: {"type":"message_stop"}
             'data:{"type":"content_block_delta","delta":{"text":"好"}}\n'
             'data:{"type":"message_stop"}\n')
         mock_response = Mock()
-        mock_response.readline.side_effect = data_sample.encode().splitlines()
+        mock_response.readline.side_effect = \
+            data_sample.encode().splitlines(True)
         mock_request.return_value = mock_response
         self.translator.endpoint = 'https://api.anthropic.com/v1/messages'
         self.translator.model = 'claude-3-5-sonnet-20241022'
         result = self.translator.translate('Hello World!')
 
         self.assertIsInstance(result, GeneratorType)
+        self.assertEqual('你好', ''.join(result))
+
+    def test_parse_stream_without_message_stop(self):
+        response = stream_response([
+            b'event: content_block_delta\n',
+            b'data: {"type":"content_block_delta","delta":{"text":"'
+            b'\xe4\xbd\xa0"}}\n',
+            b'\n'])
+        result = self.translator._parse_stream(response)
+
+        self.assertEqual('你', ''.join(result))
+
+
+class TestGeminiStream(unittest.TestCase):
+    def setUp(self):
+        GeminiTranslate.set_config({'api_keys': ['a']})
+        self.translator = GeminiTranslate()
+
+    def test_parse_stream_without_stop_reason(self):
+        # A reply cut off by MAX_TOKENS ends without the STOP finish reason.
+        template = (
+            b'data: {"candidates":[{"content":{"parts":[{"text":"%b"}]}%b}]}'
+            b'\n')
+        response = stream_response([
+            template % ('你'.encode(), b''), b'\n',
+            template % ('好'.encode(), b',"finishReason":"MAX_TOKENS"'),
+            b'\n'])
+        result = self.translator._parse_stream(response)
+
         self.assertEqual('你好', ''.join(result))
 
 

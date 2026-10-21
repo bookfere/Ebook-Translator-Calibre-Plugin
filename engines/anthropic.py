@@ -1,7 +1,6 @@
 import json
 from typing import Generator
 from urllib.parse import urljoin
-from http.client import IncompleteRead
 
 from mechanize._response import response_seek_wrapper as Response
 
@@ -143,13 +142,16 @@ class ClaudeTranslate(GenAI):
     def _parse_stream(self, data: Response) -> Generator:
         while True:
             try:
-                line = data.readline().decode('utf-8').strip()
-            except IncompleteRead:
-                continue
+                raw = data.readline()
+                line = raw.decode('utf-8').strip()
             except Exception as e:
                 raise Exception(
                     _('Can not parse returned response. Raw data: {}')
                     .format(str(e)))
+            # readline() returns b'' forever once the server closes the
+            # stream, so stop here even without an end marker.
+            if not raw:
+                break
 
             if line.startswith('data:'):
                 chunk: dict = json.loads(line.split('data:', 1)[1].strip())
