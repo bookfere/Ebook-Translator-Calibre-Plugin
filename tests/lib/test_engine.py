@@ -1102,6 +1102,26 @@ data: {"type":"message_stop"}
         self.assertIsInstance(result, GeneratorType)
         self.assertEqual('你好', ''.join(result))
 
+    def test_get_body_without_sampling(self):
+        for model in (
+                'claude-opus-4-7', 'claude-opus-5-5', 'claude-sonnet-5',
+                'claude-haiku-5-5', 'claude-fable-5-1'):
+            with self.subTest(model=model):
+                self.translator.model = model
+                body = json.loads(self.translator.get_body('Hello World!'))
+                self.assertNotIn('top_k', body)
+                self.assertNotIn('temperature', body)
+
+    def test_get_body_with_sampling(self):
+        for model in (
+                'claude-3-7-sonnet-latest', 'claude-sonnet-4-20250514',
+                'claude-opus-4-6', 'claude-haiku-4-5'):
+            with self.subTest(model=model):
+                self.translator.model = model
+                body = json.loads(self.translator.get_body('Hello World!'))
+                self.assertEqual(1, body['top_k'])
+                self.assertEqual(1.0, body['temperature'])
+
     def test_parse_stream_without_message_stop(self):
         response = stream_response([
             b'event: content_block_delta\n',

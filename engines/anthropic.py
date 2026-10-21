@@ -1,3 +1,4 @@
+import re
 import json
 from typing import Generator
 from urllib.parse import urljoin
@@ -117,6 +118,13 @@ class ClaudeTranslate(GenAI):
 
         return headers
 
+    def _accepts_sampling(self):
+        # Claude Opus 4.7 and later, the 5 family, Fable and Mythos reject
+        # temperature, top_p and top_k with a 400 error.
+        return self.model is None or re.search(
+            r'claude-(opus-4-[7-9]|(opus|sonnet|haiku)-[5-9]|fable|mythos)',
+            self.model) is None
+
     def get_body(self, text):
         body = {
             'stream': self.stream,
@@ -126,8 +134,11 @@ class ClaudeTranslate(GenAI):
             'system': self._get_prompt(),
             'messages': [{'role': 'user', 'content': text}]
         }
-        sampling_value = getattr(self, self.sampling)
-        body.update({self.sampling: sampling_value})
+        if self._accepts_sampling():
+            sampling_value = getattr(self, self.sampling)
+            body.update({self.sampling: sampling_value})
+        else:
+            del body['top_k']
 
         return json.dumps(body)
 
