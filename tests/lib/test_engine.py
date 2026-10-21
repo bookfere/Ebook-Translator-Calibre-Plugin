@@ -187,6 +187,17 @@ class TestBase(unittest.TestCase):
         self.translator.api_key_errors = ['error']
         self.assertTrue(self.translator.need_swap_api_key('test error'))
 
+    def test_match_error(self):
+        self.translator.api_key_errors = ['401', 'quota']
+        self.assertTrue(self.translator.match_error(
+            'HTTP Error 401: Unauthorized'))
+        self.assertTrue(self.translator.match_error(
+            '{"code": "insufficient_quota"}'))
+        # A transient error that only contains "401" inside an ID or number.
+        self.assertFalse(self.translator.match_error(
+            'HTTP Error 529: Overloaded {"request_id": "req_0140118xyz"}'))
+        self.assertFalse(self.translator.match_error('Retry after 14012 ms'))
+
     @patch(module_name + '.base.os.path.isfile')
     def test_get_external_program(self, mock_os_path_isfile):
         mock_os_path_isfile.side_effect = lambda path: path in [
