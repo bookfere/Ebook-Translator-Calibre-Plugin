@@ -1,11 +1,12 @@
 import unittest
 from unittest.mock import MagicMock, Mock, patch, DEFAULT, call
 
-from qt.core import QApplication, QWidget  # type: ignore
+from qt.core import QApplication, QWidget, QTableWidget  # type: ignore
 
 from ..batch import BatchTranslation
 from ..lib.conversion import ConversionWorker
-from ..lib.ebook import Ebooks
+from ..lib.ebook import Ebook, Ebooks
+from ..components import InputFormat, OutputFormat
 
 
 module_name = 'calibre_plugins.ebook_translator.batch'
@@ -83,6 +84,27 @@ class TestBatchTranslation(unittest.TestCase):
             call(mock_ebook_2, is_batch=True)])
         self.mock_ebooks.clear.assert_called_once()
         mock_done.assert_called_once_with(0)
+
+    def test_row_handlers_change_their_own_row(self):
+        ebooks = [
+            Ebook(1, 'A', {'epub': 'a.epub', 'srt': 'a.srt'}, 'epub',
+                  'English', ['srt']),
+            Ebook(2, 'B', {'epub': 'b.epub'}, 'epub', 'English', ['srt'])]
+        with patch(f'{module_name}.AlertMessage'):
+            batch = BatchTranslation(self.parent, self.mock_woker, ebooks)
+        table = batch.findChild(QTableWidget)
+
+        def widget(row, column, widget_class):
+            return table.cellWidget(row, column).findChild(widget_class)
+
+        output_format_2 = widget(1, 3, OutputFormat)
+        output_2 = ebooks[1].output_format
+        widget(0, 2, InputFormat).setCurrentText('srt')
+
+        self.assertEqual('srt', ebooks[0].output_format)
+        self.assertFalse(widget(0, 3, OutputFormat).isEnabled())
+        self.assertEqual(output_2, ebooks[1].output_format)
+        self.assertTrue(output_format_2.isEnabled())
 
     def tearDown(self):
         self.app.quit()
