@@ -62,9 +62,10 @@ class ClaudeTranslate(GenAI):
 
     models: list[str] = []
     # TODO: better handle setting the default model
-    # (e.g. fetch programmatically) by default use the latest version of the
-    # most intelligent model available (currently this is claude-3-7-sonnet)
-    model: str | None = 'claude-3-7-sonnet-latest'
+    # (e.g. fetch programmatically). Claude 4.7 and later models reject the
+    # top_k parameter sent in get_body(), so the default is a Sonnet model
+    # that still accepts it.
+    model: str | None = 'claude-sonnet-4-6'
 
     def __init__(self):
         super().__init__()
