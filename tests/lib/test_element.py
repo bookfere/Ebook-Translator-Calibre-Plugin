@@ -78,8 +78,10 @@ class TestFunction(unittest.TestCase):
         item_1 = Mock(Metadata.Item, content='a')
         item_2 = Mock(Metadata.Item, content='b')
         item_3 = Mock(Metadata.Item, content='0')
+        item_4 = Mock(Metadata.Item, content='一分鐘漲一年修為')
+        item_5 = Mock(Metadata.Item, content='123 - 456')
         metadata.title = [item_1]
-        metadata.subject = [item_2, item_3]
+        metadata.subject = [item_2, item_3, item_4, item_5]
         metadata.language = []
         metadata.iterkeys.return_value = ['title', 'subject', 'language']
 
@@ -87,11 +89,29 @@ class TestFunction(unittest.TestCase):
 
         mock_get_config().get.assert_called_once_with(
             'ebook_metadata.metadata_translation', False)
-        self.assertEqual(2, len(elements))
+        self.assertEqual(3, len(elements))
         self.assertIs(item_1, elements[0].element)
         self.assertTrue(elements[0].ignored)
         self.assertIs(item_2, elements[1].element)
         self.assertTrue(elements[1].ignored)
+        self.assertIs(item_4, elements[2].element)
+        self.assertTrue(elements[2].ignored)
+
+    @patch(module_name + '.get_config')
+    def test_get_metadata_elements_translation_enabled(self, mock_get_config):
+        mock_get_config.return_value.get.return_value = True
+        metadata = Mock(Metadata)
+        item_1 = Mock(Metadata.Item, content='一分鐘漲一年修為')
+        item_2 = Mock(Metadata.Item, content='2026-09-11')
+        metadata.title = [item_1]
+        metadata.subject = [item_2]
+        metadata.iterkeys.return_value = ['title', 'subject']
+
+        elements = get_metadata_elements(metadata)
+
+        self.assertEqual(1, len(elements))
+        self.assertIs(item_1, elements[0].element)
+        self.assertFalse(elements[0].ignored)
 
 
 class MockedElement(Element):

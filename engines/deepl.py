@@ -5,7 +5,7 @@ import random
 from ..lib.utils import request
 
 from .base import Base
-from .languages import deepl
+from .languages import deepl, deepl_free
 
 
 load_translations()  # type: ignore
@@ -64,72 +64,42 @@ class DeeplFreeTranslate(Base):
     name = 'DeepL(Free)'
     alias = 'DeepL (Free)'
     free = True
-    lang_codes = Base.load_lang_codes(deepl)
-    endpoint = 'https://www2.deepl.com/jsonrpc?client=chrome-extension,1.5.1'
+    lang_codes = Base.load_lang_codes(deepl_free)
+    endpoint = 'https://oneshot-free.www.deepl.com/v1/storefront/translate'
     need_api_key = False
     placeholder = DeeplTranslate.placeholder
 
     concurrency_limit = 1
     request_interval = 1.0
 
-    def _vars(self, text):
-        # t.forEach((e => r += (e.match(/[i]/g) || []).length)),
-        # a.timestamp = o - o % r + r;
-        uid = random.randint(1000000000, 9999999999)
-        count_i = text.count('i')
-        ts = int(time.time() * 1000)
-        if count_i > 0:
-            count_i += 1
-            ts = ts - ts % count_i + count_i
-        return uid, ts
-
     def get_headers(self):
         return {
-            'Accept': '*/*',
-            'Accept-Encoding': 'gzip, deflate',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Authorization': 'None',
-            'Authority': 'www2.deepl.com',
-            'Content-Type': 'application/json; charset=utf-8',
-            'User-Agent': 'DeepLBrowserExtension/1.5.1 Mozilla/5.0 '
-            '(Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, '
-            'like Gecko) Chrome/114.0.0.0 Safari/537.36',
-            'Origin': 'chrome-extension://cofdbpoegempjloogbagkncekinflcnj',
+            'Content-Type': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36',
+            'Origin': 'https://www.deepl.com',
             'Referer': 'https://www.deepl.com/',
         }
 
     def get_body(self, text):
-        regional_variant = {}
-        target_lang = self._get_target_code()
-        if '-' in target_lang:
-            portions = target_lang.split('-')
-            variant = '-'.join([portions[0].lower(), portions[1]])
-            regional_variant['regionalVariant'] = variant
-            target_lang = portions[0]
-        uid, ts = self._vars(text)
-
-        body = json.dumps({
-            'jsonrpc': '2.0',
-            'method': 'LMT_handle_texts',
-            'params': {
-                'commonJobParams': regional_variant,
-                'texts': [{'text': text}],
-                'splitting': 'newlines',
-                'lang': {
-                    'source_lang_user_selected': self._get_source_code(),
-                    'target_lang': target_lang,
-                },
-                'timestamp': ts
+        body = {
+            'app_information': {
+                'app_build': 'Chrome',
+                'app_version': 'any',
+                'instance_id': '%08x-%04x-%04x-%04x-%012x' % (
+                    random.getrandbits(32), random.getrandbits(16),
+                    random.getrandbits(16), random.getrandbits(16),
+                    random.getrandbits(48)),
+                'os': 'Windows',
+                'os_version': 'any',
             },
-            'id': uid
-        }, separators=(',', ':'))
+            'language_model': 'next-gen',
+            'source_lang': self._get_source_code(),
+            'text': [text],
+            'usage_type': 'Translate',
+        }
+        body['target_lang'] = self._get_target_code()
 
-        # ((e, t) => e = (t.id + 3) % 13 == 0 || (t.id + 5) % 29 == 0
-        # ? e.replace('"method":"', '"method" : "')
-        # : e.replace('"method":"', '"method": "'))
-        if (uid + 3) % 13 == 0 or (uid + 5) % 29 == 0:
-            return body.replace('"method":"', '"method" : "')
-        return body.replace('"method":"', '"method": "')
+        return json.dumps(body, separators=(',', ':'))
 
     def get_result(self, response):
-        return json.loads(response)['result']['texts'][0]['text']
+        return json.loads(response)['translations'][0]['text']

@@ -151,7 +151,7 @@ class GoogleTranslate(Base):
                 startupinfo.dwFlags |= STARTF_USESHOWWINDOW
             process = Popen(
                 command, stdout=PIPE, stderr=PIPE, universal_newlines=True,
-                startupinfo=startupinfo)
+                errors='replace', startupinfo=startupinfo)
         except Exception:
             if silence:
                 return None
@@ -446,7 +446,7 @@ class GeminiTranslate(GenAI):
                     _('Can not parse returned response. Raw data: {}')
                     .format(str(e)))
             if line.startswith('data:'):
-                item = json.loads(line.split('data: ')[1])
+                item = json.loads(line.split('data:', 1)[1].strip())
                 candidate = item['candidates'][0]
                 content = candidate['content']
                 if 'parts' in content.keys():

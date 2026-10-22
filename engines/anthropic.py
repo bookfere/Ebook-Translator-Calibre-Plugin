@@ -152,7 +152,7 @@ class ClaudeTranslate(GenAI):
                     .format(str(e)))
 
             if line.startswith('data:'):
-                chunk: dict = json.loads(line.split('data: ')[1])
+                chunk: dict = json.loads(line.split('data:', 1)[1].strip())
                 event_type: str = chunk['type']
 
                 if event_type not in self.valid_event_types:
