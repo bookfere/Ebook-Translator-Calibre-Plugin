@@ -32,6 +32,8 @@ class ChatgptTranslate(GenAI):
     request_interval = 20.0
     request_timeout = 60.0
 
+    structured_output_mode = 'schema'
+
     prompt = (
         'You are a meticulous translator who translates any given content. '
         'Translate the given content from <slang> to <tlang> only. Do not '
@@ -102,6 +104,51 @@ class ChatgptTranslate(GenAI):
             body.update(stream=True)
         sampling_value = getattr(self, self.sampling)
         body.update({self.sampling: sampling_value})
+        body['reasoning_effort'] = 'none'
+        return json.dumps(body)
+
+    def get_body_for_structured(self, text, schema=None):
+        """Return the request body with structured (JSON) output enabled.
+
+        Uses OpenAI's ``response_format`` field, honored by:
+          * OpenAI itself (with ``type: json_schema`` since GPT-4o).
+          * Ollama's OpenAI-compatible endpoint (accepts both
+            ``type: json_object`` and ``type: json_schema``).
+          * Other OpenAI-compatible servers (LM Studio, vLLM, ...).
+
+        Streaming is kept enabled (``stream: true``) so that long
+        responses (80+ translated paragraphs) are delivered token by
+        token without hitting the client-side request timeout. The
+        caller is responsible for collecting all SSE chunks and
+        assembling the complete JSON string before parsing (see
+        ``NovelTranslator._translate_with_retry_structured``).
+
+        ``reasoning_effort: none`` is set for the same reason as in
+        :meth:`get_body`: reasoning tokens make structured output
+        responses very slow and do not improve translation quality.
+        """
+        body: dict[str, Any] = {
+            'model': self.model,
+            'messages': [
+                {'role': 'system', 'content': self.get_prompt()},
+                {'role': 'user', 'content': text}
+            ],
+            'stream': True,           # keep streaming to avoid client-timeout
+            'reasoning_effort': 'none',  # disable CoT reasoning tokens
+        }
+        sampling_value = getattr(self, self.sampling)
+        body.update({self.sampling: sampling_value})
+        if schema:
+            body['response_format'] = {
+                'type': 'json_schema',
+                'json_schema': {
+                    'name': 'novel_translation',
+                    'schema': schema,
+                    'strict': True,
+                },
+            }
+        else:
+            body['response_format'] = {'type': 'json_object'}
         return json.dumps(body)
 
     def get_result(self, response):

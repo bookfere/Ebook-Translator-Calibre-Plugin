@@ -18,6 +18,7 @@ from .cache import CacheManager
 from .about import AboutDialog
 from .components import AlertMessage, ModeSelection
 from .advanced import CreateTranslationProject, AdvancedTranslation
+from .novel import CreateNovelProject, NovelTranslation
 
 
 load_translations()  # type: ignore
@@ -48,6 +49,7 @@ class EbookTranslatorGui(InterfaceAction):
         menu.addAction(
             _('Advanced Mode'), self.show_advanced_translation)
         menu.addAction(_('Batch Mode'), self.show_batch_translation)
+        menu.addAction(_('Novel Mode'), self.show_novel_translation)
         menu.addSeparator()
         menu.addAction(_('Cache'), self.show_cache)
         menu.addSeparator()
@@ -106,6 +108,36 @@ class EbookTranslatorGui(InterfaceAction):
         window.show()
         self.add_window('batch', window)
 
+    def novel_translation_window(self, ebook):
+        name = 'novel_' + uid(ebook.get_input_path())
+        if self.show_window(name):
+            return
+        worker = ConversionWorker(self.gui, self.icon)
+        window = NovelTranslation(self, self.gui, worker, ebook)
+        window.setMinimumWidth(1000)
+        window.setMinimumHeight(640)
+        window.setWindowTitle(
+            '%s - %s' % (_('Novel Mode'), self.title))
+        window.setWindowIcon(self.icon)
+        window.show()
+        self.add_window(name, window)
+
+    def show_novel_translation(self):
+        ebooks = self.get_selected_ebooks()
+        if len(ebooks) < 1:
+            return self.alert.pop(
+                _('Please choose a book.'), 'warning')
+        if len(ebooks) > 1:
+            return self.alert.pop(
+                _('Novel Mode supports one book at a time. '
+                  'Please select a single book.'), 'warning')
+        window = CreateNovelProject(self.gui, ebooks.first())
+        window.start_translation.connect(self.novel_translation_window)
+        window.setModal(True)
+        window.setWindowTitle(
+            '%s - %s' % (_('Novel Mode'), self.title))
+        window.show()
+
     def show_setting(self):
         if self.has_running_jobs():
             self.alert.pop(_(
@@ -155,14 +187,15 @@ class EbookTranslatorGui(InterfaceAction):
         modes = {
             'advanced': self.show_advanced_translation,
             'batch': self.show_batch_translation,
+            'novel': self.show_novel_translation,
         }
         preferred_mode = get_config().get('preferred_mode')
         if not preferred_mode:
             window = ModeSelection(self.gui)
             window.choose_action.connect(self.select_preferred_mode)
             window.setModal(True)
-            window.setMaximumWidth(500)
-            window.setMaximumHeight(200)
+            window.setMaximumWidth(700)
+            window.setMaximumHeight(220)
             window.setWindowTitle(
                 '%s - %s' % (_('Choose Translation Mode'), self.title))
             window.show()
@@ -207,7 +240,7 @@ class EbookTranslatorGui(InterfaceAction):
             return True
         windows = self.gui.bookfere_ebook_translator.windows
         for name in windows:
-            if name.startswith('advanced_'):
+            if name.startswith('advanced_') or name.startswith('novel_'):
                 return True
         return False
 

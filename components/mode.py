@@ -45,17 +45,34 @@ class ModeSelection(QDialog):
         batch_description.setReadOnly(True)
         batch_button = QPushButton(_('Choose'))
 
+        novel_label = QLabel(_('Novel Mode'))
+        novel_label.setAlignment(Qt.AlignCenter)
+
+        novel_description = QPlainTextEdit()
+        novel_description.setPlainText(_(
+            'Chapter-aware translation for novels with LLMs (ChatGPT, '
+            'Claude, Gemini, Ollama). Maintains a running summary and a '
+            'dynamic glossary of characters and places for consistent, '
+            'context-aware translation across the whole book.'))
+        novel_description.setReadOnly(True)
+        novel_button = QPushButton(_('Choose'))
+
         choose_layout.addWidget(advanced_label, 0, 0)
         choose_layout.addWidget(advanced_description, 1, 0)
         choose_layout.addWidget(advanced_button, 2, 0)
         choose_layout.addWidget(batch_label, 0, 1)
         choose_layout.addWidget(batch_description, 1, 1)
         choose_layout.addWidget(batch_button, 2, 1)
+        choose_layout.addWidget(novel_label, 0, 2)
+        choose_layout.addWidget(novel_description, 1, 2)
+        choose_layout.addWidget(novel_button, 2, 2)
 
         advanced_button.clicked.connect(
             lambda: self.save_preferred_mode('advanced'))
         batch_button.clicked.connect(
             lambda: self.save_preferred_mode('batch'))
+        novel_button.clicked.connect(
+            lambda: self.save_preferred_mode('novel'))
 
         layout.addWidget(choose_group)
 
