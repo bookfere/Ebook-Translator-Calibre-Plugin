@@ -188,7 +188,8 @@ def extract_book(input_path, encoding):
 
 def convert_item(
         ebook_title, input_path, output_path, source_lang, target_lang,
-        cache_only, is_batch, format, encoding, direction, notification):
+        cache_only, is_batch, format, encoding, direction, notification,
+        glossary_path=None, glossary_reverse=None):
     """The following parameters need attention:
     :cache_only: Only use the translation which exists in the cache.
     :notification: It is automatically added by arbitrary_n.
@@ -218,7 +219,8 @@ def convert_item(
     cache.set_info('calibre_version', __version__)
 
     translation = get_translation(
-        translator, lambda text, error=False: log.info(text))
+        translator, lambda text, error=False: log.info(text),
+        glossary_path=glossary_path, glossary_reverse=glossary_reverse)
     translation.set_batch(is_batch)
     translation.set_callback(cache.update_paragraph)
 
@@ -276,7 +278,9 @@ class ConversionWorker:
                 'convert_item',
                 (ebook.title, input_path, output_path, ebook.source_lang,
                  ebook.target_lang, cache_only, is_batch, ebook.input_format,
-                 ebook.encoding, ebook.target_direction)),
+                 ebook.encoding, ebook.target_direction,
+                 getattr(ebook, 'glossary_path', None),
+                 getattr(ebook, 'glossary_reverse', False))),
             description=(_('[{} > {}] Translating "{}"').format(
                 ebook.source_lang, ebook.target_lang, ebook.title)))
         self.working_jobs[job] = (ebook, output_path)

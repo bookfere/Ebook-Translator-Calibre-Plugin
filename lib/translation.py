@@ -23,21 +23,54 @@ class Glossary:
     def __init__(self, placeholder):
         self.placeholder = placeholder
         self.glossary = []
+        self.reverse = False
 
     def load_from_file(self, path):
+        """Load glossary from file. Supports JSON (*.json) and legacy text format."""
         content = None
         try:
-            with open(path, 'r', newline=None) as f:
+            with open(path, 'r', newline=None, encoding='utf-8') as f:
                 content = f.read().strip()
         except Exception:
             pass
         if not content:
             return
+        # Detect JSON format (starts with '{')
+        if content.startswith('{'):
+            self._load_from_json(content)
+        else:
+            self._load_from_text(content)
+
+    def load_from_dict(self, data):
+        """Load glossary directly from a dictionary {source: target}."""
+        for key, value in data.items():
+            self.glossary.append((str(key), str(value)))
+
+    def _load_from_json(self, content):
+        """Parse JSON format: {"source_term": "target_term", ...}"""
+        try:
+            data = json.loads(content)
+            if isinstance(data, dict):
+                self.load_from_dict(data)
+        except json.JSONDecodeError:
+            pass
+
+    def _load_from_text(self, content):
+        """Parse legacy text format: groups separated by blank lines."""
         groups = re.split(r'\n{2,}', content.strip(u'\ufeff'))
         for group in filter(trim, groups):
             group = group.split('\n')
             self.glossary.append(
                 (group[0], group[0] if len(group) < 2 else group[1]))
+
+    def set_reverse(self, reverse):
+        """When reverse=True, the replacement direction is swapped:
+        source→target in original text, and target→source in translation output."""
+        self.reverse = reverse
+
+    def get_preview(self):
+        """Return a list of (source, target) pairs for UI preview."""
+        return list(self.glossary)
 
     def replace(self, content):
         for wid, words in enumerate(self.glossary):
@@ -48,8 +81,9 @@ class Glossary:
     def restore(self, content):
         for wid, words in enumerate(self.glossary):
             pattern = self.placeholder[1].format(format(wid, '06'))
-            # Eliminate the impact of backslashes on substitution.
-            content = re.sub(pattern, lambda _: words[1], content)
+            # When reversed, swap source↔target for the restoration
+            target = words[0] if self.reverse else words[1]
+            content = re.sub(pattern, lambda _, t=target: t, content)
         return content
 
 
@@ -275,14 +309,24 @@ def get_translator(engine_class=None):
             host, port = proxy_setting.get(proxy_type) or ['', '']
             translator.set_proxy(proxy_type, host, port)
     translator.set_merge_enabled(config.get('merge_enabled'))
+    translator.set_merge_by_chapter(config.get('merge_by_chapter'))
+    translator.set_chapter_merge_length(config.get('chapter_merge_length'))
     return translator
 
 
-def get_translation(translator, log=None):
+def get_translation(translator, log=None, glossary_path=None, glossary_reverse=None):
     config = get_config()
     glossary = Glossary(translator.placeholder)
-    if config.get('glossary_enabled'):
-        glossary.load_from_file(config.get('glossary_path'))
+    # Per-book glossary takes priority over global glossary
+    effective_path = glossary_path or (
+        config.get('glossary_path') if config.get('glossary_enabled') else None)
+    if effective_path:
+        glossary.load_from_file(effective_path)
+    # Reverse setting: per-book > global config
+    effective_reverse = glossary_reverse
+    if effective_reverse is None:
+        effective_reverse = config.get('glossary_reverse', False)
+    glossary.set_reverse(effective_reverse)
     translation = Translation(translator, glossary)
     if get_config().get('log_translation'):
         translation.set_logging(log)
