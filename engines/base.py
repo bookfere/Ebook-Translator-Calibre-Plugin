@@ -1,3 +1,4 @@
+import re
 import socket
 import os.path
 from typing import Any
@@ -129,7 +130,10 @@ class Base:
 
     def match_error(self, error_message):
         for error in self.api_key_errors:
-            if error in error_message:
+            # Do not match inside a longer word or number, e.g. "401" in a
+            # request ID such as "req_0140118".
+            pattern = r'(?<![A-Za-z0-9])%s(?![A-Za-z0-9])' % re.escape(error)
+            if re.search(pattern, error_message):
                 return True
         return False
 

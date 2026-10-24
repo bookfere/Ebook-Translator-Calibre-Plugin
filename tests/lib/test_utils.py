@@ -1,3 +1,5 @@
+import os
+import socket
 import unittest
 from unittest.mock import patch
 from types import GeneratorType
@@ -8,13 +10,28 @@ from ...vendor.cssselect import SelectorError
 
 from ...lib.utils import (
     ns, css, css_to_xpath, create_xpath, uid, trim, chunk, group, open_file,
-    request)
+    request, socks_proxy, original_socket)
 
 
 module_name = 'calibre_plugins.ebook_translator.lib.utils'
 
 
 class TestUtils(unittest.TestCase):
+    @patch.dict(os.environ, {'http_proxy': 'http://127.0.0.1:8080'})
+    def test_socks_proxy_overlapping_requests(self):
+        # Requests run concurrently: the first one may finish while the
+        # second one is still connecting through the proxy.
+        first = socks_proxy('127.0.0.1', 1080)
+        second = socks_proxy('127.0.0.1', 1080)
+        first.__enter__()
+        second.__enter__()
+        first.__exit__(None, None, None)
+        self.assertIsNot(original_socket, socket.socket)
+        self.assertNotIn('http_proxy', os.environ)
+        second.__exit__(None, None, None)
+        self.assertIs(original_socket, socket.socket)
+        self.assertEqual('http://127.0.0.1:8080', os.environ['http_proxy'])
+
     def test_css(self):
         self.assertEqual("self::x:div[@id = 'id']", css('div#id'))
         self.assertIsNone(css('div>>p'))  # omit invalid selector

@@ -12,7 +12,8 @@ class DeepseekTranslate(ChatgptTranslate):
     concurrency_limit = 0
     request_interval = 0.0
 
-    models: list[str] = ['deepseek-chat', 'deepseek-reasoner']
+    # deepseek-chat and deepseek-reasoner were retired on 2026-07-24.
+    models: list[str] = ['deepseek-v4-flash', 'deepseek-v4-pro']
     model: str | None = models[0]
 
     def __init__(self):

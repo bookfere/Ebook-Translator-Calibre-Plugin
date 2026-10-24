@@ -4,6 +4,7 @@ import sys
 import ssl
 import socket
 import hashlib
+import threading
 import traceback
 from types import ModuleType
 from typing import Generator
@@ -197,34 +198,40 @@ def request(
         raise Exception(traceback_error() + '\n\n' + e.read().decode('utf-8'))
 
 
+socks_lock = threading.Lock()
+socks_users = 0
+socks_backup_env: dict[str, str] = {}
+
+
 @contextmanager
 def socks_proxy(host: str, port: int) -> Generator[ModuleType, None, None]:
     """This is a monkey-patch approach to enforce Mechanize to use a SOCKS5
-    proxy. The context manager restores the original socket after it exits.
+    proxy. Concurrent requests share the patch: the first one applies it, and
+    the last one to exit restores the original socket.
     """
-    log.debug('Backup original socket: ', id(socket.socket))
-    # Temporarily remove environment proxies to prevent conflicts with the
-    # SOCKS5 proxy, which might otherwise send connections through an HTTP
-    # proxy, causing a "General SOCKS server failure" error.
-    backup_http = os.environ.pop("http_proxy", None)
-    backup_https = os.environ.pop("https_proxy", None)
-    if socket.socket is not original_socket:
-        log.debug('Socket already patched: ', id(socket.socket))
-    else:
-        # TODO: There is a bug in asyncio environments where the socket may be
-        # patched multiple times due to race conditions.
-        log.debug('Patch socket: ', id(socks.socksocket))
-        socks.set_default_proxy(socks.SOCKS5, host, int(port), rdns=True)
-        socket.socket = socks.socksocket
+    global socks_users
+    with socks_lock:
+        if socks_users == 0:
+            # Temporarily remove environment proxies to prevent conflicts with
+            # the SOCKS5 proxy, which might otherwise send connections through
+            # an HTTP proxy, causing a "General SOCKS server failure" error.
+            for name in ('http_proxy', 'https_proxy'):
+                value = os.environ.pop(name, None)
+                if value is not None:
+                    socks_backup_env[name] = value
+            log.debug('Patch socket: ', id(socks.socksocket))
+            socks.set_default_proxy(socks.SOCKS5, host, int(port), rdns=True)
+            socket.socket = socks.socksocket
+        socks_users += 1
     try:
         yield socket
     finally:
-        if socket.socket is not original_socket:
-            log.debug('Restore original socket: ', id(original_socket))
-            socket.socket = original_socket
-            socks.set_default_proxy(None)
-        # Restore the environment proxies if any exist.
-        if backup_http is not None:
-            os.environ['http_proxy'] = backup_http
-        if backup_https is not None:
-            os.environ['https_proxy'] = backup_https
+        with socks_lock:
+            socks_users -= 1
+            if socks_users == 0:
+                log.debug('Restore original socket: ', id(original_socket))
+                socket.socket = original_socket
+                socks.set_default_proxy(None)
+                # Restore the environment proxies if any exist.
+                os.environ.update(socks_backup_env)
+                socks_backup_env.clear()
