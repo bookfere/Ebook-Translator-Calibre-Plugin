@@ -128,6 +128,16 @@ class TranslationCache:
         self.cache_only = False
         self.connection = sqlite3.connect(
             self.file_path, check_same_thread=False)
+        # Performance: the default rollback journal with synchronous=FULL
+        # forces a disk sync on every per-paragraph commit (update_paragraph),
+        # which stutters the UI during bulk translation of large books. WAL
+        # plus synchronous=NORMAL keeps writes durable enough for a cache
+        # (which can always be regenerated) while making each commit cheap.
+        try:
+            self.connection.execute('PRAGMA journal_mode=WAL')
+            self.connection.execute('PRAGMA synchronous=NORMAL')
+        except sqlite3.Error:
+            pass
         self.cursor = self.connection.cursor()
         self.cursor.execute(
             'CREATE TABLE IF NOT EXISTS cache('
