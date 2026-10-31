@@ -89,7 +89,11 @@ class BatchTranslation(QDialog):
             if ebook.is_extra_format() and existed_format:
                 output_format.addItem(ebook.input_format)
 
-            def change_input_format(format, row=row):
+            # Bind this row's widgets as default arguments; the loop
+            # variables point to the last row once the handlers run.
+            def change_input_format(
+                    format, row=row, input_fmt=input_fmt,
+                    output_format=output_format):
                 ebook = self.ebooks[row]
                 ebook.set_input_format(format)
                 if ebook.is_extra_format():
@@ -100,7 +104,8 @@ class BatchTranslation(QDialog):
             change_input_format(input_fmt.currentText(), row)
             input_fmt.currentTextChanged.connect(change_input_format)
 
-            def change_output_format(format, row=row):
+            def change_output_format(
+                    format, row=row, output_format=output_format):
                 self.ebooks[row].set_output_format(format)
                 output_format.setToolTip(format)
             change_output_format(output_format.currentText(), row)
@@ -110,7 +115,7 @@ class BatchTranslation(QDialog):
             table.setCellWidget(row, 4, self._cell_widget(source_lang))
             self.source_langs.append(source_lang)
 
-            def change_source_lang(lang, row=row):
+            def change_source_lang(lang, row=row, source_lang=source_lang):
                 self.ebooks[row].set_source_lang(lang)
                 source_lang.setToolTip(lang)
             change_source_lang(source_lang.currentText(), row)
@@ -138,7 +143,8 @@ class BatchTranslation(QDialog):
                     lambda encoding, row=row: self.ebooks[row]
                     .set_encoding(encoding))
                 input_encoding.currentTextChanged.connect(
-                    lambda encoding: input_encoding.setToolTip(encoding))
+                    lambda encoding, widget=input_encoding:
+                    widget.setToolTip(encoding))
                 # Target directionality
                 target_direction = QTableWidgetItem(_('Default'))
                 target_direction.setTextAlignment(Qt.AlignCenter)
@@ -154,10 +160,12 @@ class BatchTranslation(QDialog):
                 direction_list.addItem(_('Left to Right'), 'ltr')
                 direction_list.addItem(_('Right to Left'), 'rtl')
                 direction_list.currentIndexChanged.connect(
-                    lambda index, row=row: self.ebooks[row]
-                    .set_target_direction(direction_list.itemData(index)))
+                    lambda index, row=row, widget=direction_list:
+                    self.ebooks[row].set_target_direction(
+                        widget.itemData(index)))
                 direction_list.currentTextChanged.connect(
-                    lambda direction: direction_list.setToolTip(direction))
+                    lambda direction, widget=direction_list:
+                    widget.setToolTip(direction))
 
                 engine_target_lange_codes = \
                     translation_engine.lang_codes.get('target')
@@ -172,7 +180,7 @@ class BatchTranslation(QDialog):
 
                 table.setCellWidget(row, 6, self._cell_widget(direction_list))
 
-            def change_target_lang(lang, row=row):
+            def change_target_lang(lang, row=row, target_lang=target_lang):
                 ebook = self.ebooks[row]
                 ebook.set_target_lang(lang)
                 ebook.set_lang_code(

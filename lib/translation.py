@@ -38,6 +38,9 @@ class Glossary:
             group = group.split('\n')
             self.glossary.append(
                 (group[0], group[0] if len(group) < 2 else group[1]))
+        # Replace longer terms first so that a shorter term contained in them
+        # (e.g. "Harry" in "Harry Potter") does not break their match.
+        self.glossary.sort(key=lambda words: len(words[0]), reverse=True)
 
     def replace(self, content):
         for wid, words in enumerate(self.glossary):
@@ -173,7 +176,6 @@ class Translation:
                         self.streaming('')
                         clear = False
                     self.streaming(char)
-                    time.sleep(0.05)
                     temp += char
             else:
                 temp = ''.join([char for char in translation])

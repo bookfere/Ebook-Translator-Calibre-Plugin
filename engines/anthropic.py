@@ -1,7 +1,7 @@
+import re
 import json
 from typing import Generator
 from urllib.parse import urljoin
-from http.client import IncompleteRead
 
 from mechanize._response import response_seek_wrapper as Response
 
@@ -119,6 +119,13 @@ class ClaudeTranslate(GenAI):
 
         return headers
 
+    def _accepts_sampling(self):
+        # Claude Opus 4.7 and later, the 5 family, Fable and Mythos reject
+        # temperature, top_p and top_k with a 400 error.
+        return self.model is None or re.search(
+            r'claude-(opus-4-[7-9]|(opus|sonnet|haiku)-[5-9]|fable|mythos)',
+            self.model) is None
+
     def get_body(self, text):
         body = {
             'stream': self.stream,
@@ -128,8 +135,11 @@ class ClaudeTranslate(GenAI):
             'system': self._get_prompt(),
             'messages': [{'role': 'user', 'content': text}]
         }
-        sampling_value = getattr(self, self.sampling)
-        body.update({self.sampling: sampling_value})
+        if self._accepts_sampling():
+            sampling_value = getattr(self, self.sampling)
+            body.update({self.sampling: sampling_value})
+        else:
+            del body['top_k']
 
         return json.dumps(body)
 
@@ -144,13 +154,16 @@ class ClaudeTranslate(GenAI):
     def _parse_stream(self, data: Response) -> Generator:
         while True:
             try:
-                line = data.readline().decode('utf-8').strip()
-            except IncompleteRead:
-                continue
+                raw = data.readline()
+                line = raw.decode('utf-8').strip()
             except Exception as e:
                 raise Exception(
                     _('Can not parse returned response. Raw data: {}')
                     .format(str(e)))
+            # readline() returns b'' forever once the server closes the
+            # stream, so stop here even without an end marker.
+            if not raw:
+                break
 
             if line.startswith('data:'):
                 chunk: dict = json.loads(line.split('data:', 1)[1].strip())

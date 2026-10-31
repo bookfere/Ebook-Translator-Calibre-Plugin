@@ -1145,6 +1145,24 @@ class TestExtraction(unittest.TestCase):
         self.assertEqual(1, len(elements))
         self.assertEqual('div', elements[0].get_name())
 
+    def test_extract_elements_with_list_items(self):
+        xhtml = etree.XML(b"""<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head><title>Document</title></head>
+<body><div><ul>
+<li><a>Politics</a><span></span></li>
+<li><a>Business</a><span></span></li>
+</ul></div></body>
+</html>""")
+        root = xhtml.find('.//x:body', namespaces=ns)
+        self.extraction.load_ignore_patterns()
+        elements = self.extraction.extract_elements('test', root, [])
+        self.assertEqual(2, len(elements))
+        self.assertEqual('li', elements[0].get_name())
+        self.assertEqual('Politics', elements[0].get_content())
+        self.assertEqual('Business', elements[1].get_content())
+
     def test_filter_content(self):
         def elements(markups):
             return [

@@ -3,7 +3,6 @@ import json
 import uuid
 from typing import Any
 from urllib.parse import urlsplit
-from http.client import IncompleteRead
 
 from mechanize._response import response_seek_wrapper as Response
 from calibre.utils.localization import _  # type: ignore
@@ -139,13 +138,16 @@ class ChatgptTranslate(GenAI):
     def _parse_stream(self, response):
         while True:
             try:
-                line = response.readline().decode('utf-8').strip()
-            except IncompleteRead:
-                continue
+                raw = response.readline()
+                line = raw.decode('utf-8').strip()
             except Exception as e:
                 raise Exception(
                     _('Can not parse returned response. Raw data: {}')
                     .format(str(e)))
+            # readline() returns b'' forever once the server closes the
+            # stream, so stop here even without an end marker.
+            if not raw:
+                break
             if not line:
                 continue
             if line.startswith('data:'):

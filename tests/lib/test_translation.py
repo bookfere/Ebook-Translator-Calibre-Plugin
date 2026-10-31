@@ -34,6 +34,18 @@ class TestGlossary(unittest.TestCase):
         glossary.load_from_file('/path/to/fake.txt')
         self.assertEqual([], glossary.glossary)
 
+    @patch(f'{module_name}.open')
+    def test_load_from_file_longer_terms_first(self, mock_open):
+        file = Mock()
+        file.read.return_value.strip.return_value = \
+            'Harry\n哈利\n\nHarry Potter\n哈利·波特'
+        mock_open.return_value.__enter__.return_value = file
+
+        glossary = Glossary(Base.placeholder)
+        glossary.load_from_file('/path/to/glossary.txt')
+        content = glossary.replace('Harry Potter and Harry')
+        self.assertEqual('哈利·波特 and 哈利', glossary.restore(content))
+
     def test_replace(self):
         glossary = Glossary(Base.placeholder)
         glossary.glossary = [('a', 'a'), ('b', 'Z')]
@@ -256,7 +268,8 @@ class TestTranslation(unittest.TestCase):
         self.streaming.assert_has_calls([
             call(''), call('Translating...'), call(''), call('你'),
             call('好'), call('世'), call('界')])
-        mock_time.sleep.assert_called_with(0.05)
+        # Chunks are shown as they arrive, without an artificial delay.
+        mock_time.sleep.assert_not_called()
 
         self.assertEqual('你好呀世界', self.paragraph.translation)
 

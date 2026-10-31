@@ -502,7 +502,7 @@ class Extraction:
         'footer', 'header', 'legend', 'main', 'p', 'pre', 'search', 'article',
         'aside', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hgroup', 'nav',
         'section', 'dd', 'dl', 'dt', 'menu', 'ol', 'ul', 'table', 'caption',
-        'colgroup', 'col', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th')
+        'colgroup', 'col', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th', 'li')
 
     def __init__(
             self, pages, priority_rules, rule_mode, filter_scope, filter_rules,

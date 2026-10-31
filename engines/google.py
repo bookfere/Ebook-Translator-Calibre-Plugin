@@ -4,7 +4,6 @@ import time
 import json
 from html import unescape
 from subprocess import Popen, PIPE
-from http.client import IncompleteRead
 
 from ..lib.utils import request, traceback_error
 
@@ -438,13 +437,16 @@ class GeminiTranslate(GenAI):
     def _parse_stream(self, response):
         while True:
             try:
-                line = response.readline().decode('utf-8').strip()
-            except IncompleteRead:
-                continue
+                raw = response.readline()
+                line = raw.decode('utf-8').strip()
             except Exception as e:
                 raise Exception(
                     _('Can not parse returned response. Raw data: {}')
                     .format(str(e)))
+            # readline() returns b'' forever once the server closes the
+            # stream, so stop here even without an end marker.
+            if not raw:
+                break
             if line.startswith('data:'):
                 item = json.loads(line.split('data:', 1)[1].strip())
                 candidate = item['candidates'][0]
