@@ -19,7 +19,7 @@ from ...engines.deepl import DeeplTranslate
 from ...engines.openai import ChatgptTranslate, ChatgptBatchTranslate
 from ...engines.microsoft import AzureChatgptTranslate
 from ...engines.anthropic import ClaudeTranslate
-from ...engines.google import GeminiTranslate
+from ...engines.google import GeminiTranslate, GoogleFreeTranslateHtml
 from ...engines.custom import (
     create_engine_template, load_engine_data, CustomTranslate)
 
@@ -1190,6 +1190,33 @@ class TestGeminiTranslate(unittest.TestCase):
         self.assertIn(
             '/gemini-3.5-flash-lite:generateContent?',
             self.translator.get_endpoint())
+
+
+class TestGoogleFreeTranslateHtml(unittest.TestCase):
+    def setUp(self):
+        GoogleFreeTranslateHtml.lang_codes = {
+            'source': {'English': 'en'},
+            'target': {'Chinese': 'zh'}}
+        self.translator = GoogleFreeTranslateHtml()
+        self.translator.set_source_lang('English')
+        self.translator.set_target_lang('Chinese')
+
+    def test_get_body_single_paragraph(self):
+        body = json.loads(self.translator.get_body('Hello'))
+        self.assertEqual([[['Hello'], 'en', 'zh'], 'wt_lib'], body)
+
+    def test_get_body_merged_paragraphs(self):
+        # Merged paragraphs end with a trailing separator.
+        text = 'Hello {{id_00000}}\n\nWorld\n\n'
+        body = json.loads(self.translator.get_body(text))
+        self.assertEqual(
+            [[['Hello {{id_00000}}', 'World'], 'en', 'zh'], 'wt_lib'], body)
+
+    def test_get_result_keeps_separator(self):
+        response = json.dumps([['你好 {{id_00000}}', '世界']])
+        self.assertEqual(
+            '你好 {{id_00000}}\n\n世界',
+            self.translator.get_result(response))
 
 
 class TestFunction(unittest.TestCase):
