@@ -6,7 +6,7 @@ load_translations()  # type: ignore
 class DeepseekTranslate(ChatgptTranslate):
     name = 'DeepSeek'
     alias = 'DeepSeek (Chat)'
-    endpoint = 'https://api.deepseek.com/v1/chat/completions'
+    endpoint = 'https://api.deepseek.com/chat/completions'
     temperature = 1.3
 
     concurrency_limit = 0

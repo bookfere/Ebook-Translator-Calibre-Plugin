@@ -1,3 +1,4 @@
+import os
 import time
 from types import MethodType
 
@@ -6,7 +7,7 @@ from qt.core import (  # type: ignore
     QPlainTextEdit, QPushButton, QSplitter, QLabel, QThread, QLineEdit,
     QGridLayout, QProgressBar, pyqtSignal, pyqtSlot, QPixmap, QEvent,
     QStackedWidget, QSpacerItem, QTabWidget, QCheckBox,
-    QComboBox, QSizePolicy)
+    QComboBox, QSizePolicy, QFileDialog, QMessageBox)
 from calibre.constants import __version__  # type: ignore
 from calibre.gui2 import I  # type: ignore
 from calibre.utils.localization import _  # type: ignore
@@ -16,7 +17,7 @@ from .lib.utils import uid, traceback_error
 from .lib.config import get_config
 from .lib.encodings import encoding_list
 from .lib.cache import Paragraph, get_cache
-from .lib.translation import get_engine_class, get_translator, get_translation
+from .lib.translation import get_engine_class, get_translator, get_translation, Glossary
 from .lib.element import get_element_handler
 from .lib.conversion import extract_item, extra_formats
 from .engines.openai import ChatgptTranslate, ChatgptBatchTranslate
@@ -174,6 +175,8 @@ class TranslationWorker(QObject):
         self.source_lang = ebook.source_lang
         self.target_lang = ebook.target_lang
         self.engine_class = engine_class
+        self.glossary_path = getattr(ebook, 'glossary_path', None)
+        self.glossary_reverse = getattr(ebook, 'glossary_reverse', False)
 
         self.on_working = False
         self.canceled = False
@@ -207,7 +210,9 @@ class TranslationWorker(QObject):
         translator = get_translator(self.engine_class)
         translator.set_source_lang(self.source_lang)
         translator.set_target_lang(self.target_lang)
-        translation = get_translation(translator)
+        translation = get_translation(
+            translator, glossary_path=self.glossary_path,
+            glossary_reverse=self.glossary_reverse)
         translation.set_fresh(fresh)
         translation.set_logging(
             lambda text, error=False: self.logging.emit(text, error))
@@ -347,6 +352,56 @@ class CreateTranslationProject(QDialog):
                     target_lang_code)
                 index = direction_list.findData(direction)
                 direction_list.setCurrentIndex(index)
+
+        # === Per-book Glossary ===
+        glossary_group = QGroupBox(_('Glossary (per book)'))
+        glossary_layout = QGridLayout(glossary_group)
+        self.glossary_path_edit = QLineEdit()
+        self.glossary_path_edit.setPlaceholderText(
+            _('Choose a glossary file (.txt/.json)'))
+        self.glossary_path_edit.setMinimumWidth(200)
+        glossary_choose_btn = QPushButton(_('Choose'))
+        self.glossary_reverse_cb = QCheckBox(_('Reverse'))
+        self.glossary_reverse_cb.setToolTip(
+            _('Swap source/target terms in output'))
+        self.glossary_preview_btn = QPushButton(_('Preview'))
+        self.glossary_preview_btn.setEnabled(False)
+        glossary_layout.addWidget(QLabel(_('File')), 0, 0)
+        glossary_layout.addWidget(self.glossary_path_edit, 0, 1, 1, 2)
+        glossary_layout.addWidget(glossary_choose_btn, 0, 3)
+        glossary_layout.addWidget(self.glossary_reverse_cb, 1, 0)
+        glossary_layout.addWidget(self.glossary_preview_btn, 1, 3)
+        layout.addWidget(glossary_group, 2, 0, 1, 6)
+
+        def choose_glossary():
+            path, _ = QFileDialog.getOpenFileName(
+                filter='Glossary files (*.txt *.json);;All files (*.*)')
+            if path:
+                self.glossary_path_edit.setText(path)
+                self.glossary_preview_btn.setEnabled(True)
+                self.ebook.set_glossary_path(path)
+        glossary_choose_btn.clicked.connect(choose_glossary)
+
+        def preview_glossary():
+            path = self.glossary_path_edit.text()
+            if not path or not os.path.exists(path):
+                return
+            g = Glossary(('{id_{}}', r'({{\\s*)+id\\s*_\\s*{}\\s*(\\s*}})+'))
+            g.load_from_file(path)
+            pairs = g.get_preview()
+            preview_text = '\\n'.join(
+                [f'{s} → {t}' for s, t in pairs[:50]])
+            if len(pairs) > 50:
+                preview_text += f'\\n\\n... and {len(pairs) - 50} more entries'
+            if not preview_text:
+                preview_text = _('No glossary entries found.')
+            QMessageBox.information(
+                self, _('Glossary Preview ({})').format(len(pairs)),
+                preview_text)
+        self.glossary_preview_btn.clicked.connect(preview_glossary)
+
+        self.glossary_reverse_cb.toggled.connect(
+            lambda checked: self.ebook.set_glossary_reverse(checked))
 
         return widget
 

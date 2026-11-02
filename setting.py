@@ -246,19 +246,47 @@ class TranslationSetting(QDialog):
         merge_enabled = QCheckBox(_('Enable'))
         self.merge_length = QSpinBox()
         self.merge_length.setRange(1, 999999)
+        self.merge_by_chapter = QCheckBox(_('By Chapter'))
+        self.chapter_merge_length = QSpinBox()
+        self.chapter_merge_length.setRange(100, 999999)
+        self.chapter_merge_length.setToolTip(_(
+            'Max characters per chapter chunk. '
+            'Chapters exceeding this limit will be split.'))
         merge_layout.addWidget(merge_enabled)
         merge_layout.addWidget(self.merge_length)
         merge_layout.addWidget(QLabel(_(
             'The number of characters to translate at once.')))
+        merge_layout.addWidget(self.merge_by_chapter)
+        merge_layout.addWidget(self.chapter_merge_length)
         merge_layout.addStretch(1)
         layout.addWidget(merge_group)
 
         self.disable_wheel_event(self.merge_length)
+        self.disable_wheel_event(self.chapter_merge_length)
 
         self.merge_length.setValue(self.config.get('merge_length'))
         merge_enabled.setChecked(self.config.get('merge_enabled'))
+
+        self.merge_by_chapter.setChecked(self.config.get('merge_by_chapter'))
+        self.merge_by_chapter.setEnabled(self.config.get('merge_enabled'))
+        self.chapter_merge_length.setValue(
+            self.config.get('chapter_merge_length'))
+        self.chapter_merge_length.setEnabled(
+            self.config.get('merge_by_chapter') and self.config.get('merge_enabled'))
+        self.merge_length.setDisabled(self.config.get('merge_by_chapter'))
+
+        def toggle_merge_mode(checked):
+            self.config.update(merge_by_chapter=checked)
+            self.chapter_merge_length.setEnabled(checked)
+            self.merge_length.setDisabled(checked)
+            if checked and not merge_enabled.isChecked():
+                merge_enabled.setChecked(True)
+        self.merge_by_chapter.clicked.connect(toggle_merge_mode)
+
         merge_enabled.clicked.connect(
             lambda checked: self.config.update(merge_enabled=checked))
+        merge_enabled.clicked.connect(
+            lambda checked: self.merge_by_chapter.setEnabled(checked))
 
         # Network Proxy
         proxy_group = QGroupBox(_('Network Proxy'))
@@ -1021,14 +1049,18 @@ class TranslationSetting(QDialog):
 
         # Glossary
         glossary_group = QGroupBox(_('Translation Glossary'))
-        glossary_layout = QHBoxLayout(glossary_group)
+        glossary_layout = QGridLayout(glossary_group)
         self.glossary_enabled = QCheckBox(_('Enable'))
         self.glossary_path = QLineEdit()
         self.glossary_path.setPlaceholderText(_('Choose a glossary file'))
         glossary_choose = QPushButton(_('Choose'))
-        glossary_layout.addWidget(self.glossary_enabled)
-        glossary_layout.addWidget(self.glossary_path)
-        glossary_layout.addWidget(glossary_choose)
+        self.glossary_reverse = QCheckBox(_('Reverse'))
+        self.glossary_reverse.setToolTip(_(
+            'Swap source and target terms in translation output'))
+        glossary_layout.addWidget(self.glossary_enabled, 0, 0)
+        glossary_layout.addWidget(self.glossary_path, 0, 1)
+        glossary_layout.addWidget(glossary_choose, 0, 2)
+        glossary_layout.addWidget(self.glossary_reverse, 0, 3)
         layout.addWidget(glossary_group)
 
         self.glossary_enabled.setChecked(self.config.get('glossary_enabled'))
@@ -1036,9 +1068,14 @@ class TranslationSetting(QDialog):
             lambda checked: self.config.update(glossary_enabled=checked))
 
         self.glossary_path.setText(self.config.get('glossary_path'))
+        self.glossary_reverse.setChecked(
+            self.config.get('glossary_reverse', False))
+        self.glossary_reverse.clicked.connect(
+            lambda checked: self.config.update(glossary_reverse=checked))
 
         def choose_glossary_file():
-            path = QFileDialog.getOpenFileName(filter="Text files (*.txt)")
+            path = QFileDialog.getOpenFileName(
+                filter="Glossary files (*.txt *.json);;All files (*.*)")
             self.glossary_path.setText(path[0])
         glossary_choose.clicked.connect(choose_glossary_file)
 
@@ -1259,6 +1296,8 @@ class TranslationSetting(QDialog):
 
         # Merge length
         self.config.update(merge_length=self.merge_length.value())
+        self.config.update(merge_by_chapter=self.merge_by_chapter.isChecked())
+        self.config.update(chapter_merge_length=self.chapter_merge_length.value())
 
         # Proxy setting
         proxy_setting = self.config.get('proxy_setting') or {}
