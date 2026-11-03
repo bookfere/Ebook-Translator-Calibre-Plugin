@@ -24,6 +24,7 @@ defaults: dict[str, Any] = {
     'cache_enabled': True,
     'cache_path': None,
     'log_translation': True,
+    'log_content': True,
     'show_notification': True,
     'translation_position': None,
     'column_gap': {

@@ -62,6 +62,7 @@ class TestConversionWorker(unittest.TestCase):
         self.ebook.output_format = 'epub'
         self.ebook.custom_title = 'test custom title'
         self.ebook.target_lang = 'German'
+        self.ebook.target_direction = None
         self.ebook.lang_code = 'de'
         file = Mock()
         mock_open.return_value.__enter__.return_value = file
@@ -144,6 +145,7 @@ class TestConversionWorker(unittest.TestCase):
         self.ebook.output_format = 'epub'
         self.ebook.custom_title = 'test: custom title*'
         self.ebook.target_lang = 'German'
+        self.ebook.target_direction = None
         self.ebook.lang_code = 'de'
         file = Mock()
         mock_open.return_value.__enter__.return_value = file
