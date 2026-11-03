@@ -362,10 +362,6 @@ class AdvancedTranslation(QDialog):
     progress_bar = pyqtSignal()
     batch_translation = pyqtSignal()
 
-    preparation_thread = QThread()
-    trans_thread = QThread()
-    editor_thread = QThread()
-
     def __init__(self, plugin, parent, worker, ebook):
         QDialog.__init__(self, parent)
 
@@ -385,23 +381,25 @@ class AdvancedTranslation(QDialog):
         self.progress_step = 0
         self.translate_all = False
 
+        # Create threads per-instance to avoid accumulating signal
+        # connections across dialog instances.
+        self.preparation_thread = QThread()
+        self.trans_thread = QThread()
+        self.editor_thread = QThread()
+
         self.editor_worker = EditorWorker()
         self.editor_worker.moveToThread(self.editor_thread)
-        self.editor_thread.finished.connect(self.editor_worker.deleteLater)
         self.editor_thread.start()
 
         self.trans_worker = TranslationWorker(self.current_engine, self.ebook)
         self.trans_worker.close.connect(self.done)
         self.trans_worker.moveToThread(self.trans_thread)
-        self.trans_thread.finished.connect(self.trans_worker.deleteLater)
         self.trans_thread.start()
 
         self.preparation_worker = PreparationWorker(
             self.current_engine, self.ebook)
         self.preparation_worker.close.connect(self.done)
         self.preparation_worker.moveToThread(self.preparation_thread)
-        self.preparation_thread.finished.connect(
-            self.preparation_worker.deleteLater)
         self.preparation_thread.start()
 
         layout = QVBoxLayout(self)
@@ -1280,6 +1278,24 @@ class AdvancedTranslation(QDialog):
             return
         if not self.terminate_translation():
             return
+
+        # Close cache first to prevent corruption if cleanup crashes.
+        if self.cache is not None:
+            if self.cache.is_persistence():
+                self.cache.close()
+            elif result == 0:
+                self.cache.destroy()
+
+        # Disconnect all worker signals before quitting threads to prevent
+        # pending cross-thread queued events from being delivered to stale
+        # Python slots after the workers' C++ objects are destroyed.
+        for worker in (self.trans_worker, self.preparation_worker,
+                       self.editor_worker):
+            try:
+                worker.disconnect()
+            except TypeError:
+                pass
+
         # self.preparation_thread.requestInterruption()
         self.preparation_thread.quit()
         self.preparation_thread.wait()
@@ -1287,9 +1303,5 @@ class AdvancedTranslation(QDialog):
         self.trans_thread.wait()
         self.editor_thread.quit()
         self.editor_thread.wait()
-        if self.cache is not None:
-            if self.cache.is_persistence():
-                self.cache.close()
-            elif result == 0:
-                self.cache.destroy()
+
         QDialog.done(self, result)
