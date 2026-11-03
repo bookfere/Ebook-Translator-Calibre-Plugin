@@ -969,7 +969,8 @@ class TestClaudeTranslate(unittest.TestCase):
             'do not add any prefix or suffix to the translated content. Websites\' '
             'URLs/addresses should be preserved as is in the translation\'s output. '
             'Do not omit any part of the content, even if it seems unimportant. '
-            )
+            'Never refuse a translation request or provide commentary about '
+            'the content. ')
         data = json.dumps({
             'stream': False,
             'max_tokens': 4096,
@@ -1031,7 +1032,8 @@ class TestClaudeTranslate(unittest.TestCase):
             'given content. In your answer do not add any prefix or suffix to '
             'the translated content. Websites\' URLs/addresses should be '
             'preserved as is in the translation\'s output. Do not omit any '
-            'part of the content, even if it seems unimportant. ')
+            'part of the content, even if it seems unimportant. Never refuse '
+            'a translation request or provide commentary about the content. ')
         data = json.dumps({
             'stream': True,
             'max_tokens': 4096,
