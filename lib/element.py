@@ -304,14 +304,39 @@ class PageElement(Element):
         element_name = get_name(self.element)
         new_element = self._create_new_element(element_name, translation)
 
+        # Check if the element's primary content is wrapped in a hyperlink (e.g. TOC items in <li> or <p>)
+        child_a = None
+        children = self.element.getchildren()
+        if len(children) == 1 and get_name(children[0]) == 'a' and 'href' in children[0].attrib:
+            child_a = children[0]
+
+        if child_a is not None and self.position == 'only':
+            new_a = copy.deepcopy(child_a)
+            new_a.text = translation
+            for child in list(new_a):
+                new_a.remove(child)
+            new_container = self._create_new_element(element_name)
+            new_container.append(new_a)
+            self.element.addnext(new_container)
+            self._safe_remove(self.element)
+            return
+
         # Add translation for table elements.
         group_elements = ('li', 'th', 'td', 'caption')
         if element_name in group_elements:
             if self.position == 'only':
                 self.element.addnext(new_element)
                 self._safe_remove(self.element)
+                return
             new_element = self._create_new_element(
                 'span', translation, excluding_attrs=['class'])
+            if child_a is not None:
+                new_a = copy.deepcopy(child_a)
+                new_a.text = None
+                for child in list(new_a):
+                    new_a.remove(child)
+                new_a.append(new_element)
+                new_element = new_a
             if self.position in ['left', 'above']:
                 if self.element.text is not None:
                     if self.position == 'above':
@@ -759,6 +784,23 @@ class ElementHandlerMerge(ElementHandler):
                 element.set_column_gap(self.column_gap)
             element.set_remove_pattern(self.remove_pattern)
             element.set_reserve_pattern(self.reserve_pattern)
+
+            # Do not merge standalone structural elements (TOC, metadata)
+            # into paragraph blocks to avoid alignment desynchronization
+            if isinstance(element, (TocElement, MetadataElement)):
+                if txt:
+                    md5 = uid('%s%s' % (oid, txt))
+                    self.originals.append((oid, md5, raw, txt, False))
+                    oid += 1
+                    raw = ''
+                    txt = ''
+                code = element.get_raw()
+                content = element.get_content()
+                md5 = uid('%s%s' % (oid, content))
+                self.originals.append((oid, md5, code, content, False))
+                oid += 1
+                continue
+
             code = element.get_raw()
             content = element.get_content()
             content += self.separator
@@ -858,8 +900,10 @@ def get_metadata_elements(metadata):
     return elements
 
 
-def get_toc_elements(nodes, elements=[]):
+def get_toc_elements(nodes, elements=None):
     """Be aware that elements should not overlap with existing data."""
+    if elements is None:
+        elements = []
     for node in nodes:
         elements.append(TocElement(node, 'toc.ncx'))
         if len(node.nodes) > 0:
