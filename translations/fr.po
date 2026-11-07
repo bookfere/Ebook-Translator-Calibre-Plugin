@@ -242,14 +242,12 @@ msgid "Clear All"
 msgstr "Tout effacer"
 
 msgid "All cache(s) will be moved to the default path. Are you sure to proceed?"
-msgstr ""
-"Tous les fichiers de cache seront déplacés vers le chemin par défaut. Êtes-vous sûr de vouloir "
-"continuer ?"
+msgstr "Tous les fichiers de cache seront déplacés vers le chemin par défaut. 
+"Êtes-vous sûr de vouloir continuer ?"
 
 msgid "All cache(s) will be moved to the new path. Are you sure to proceed?"
-msgstr ""
-"Tous les fichiers en cache seront déplacés vers le nouveau chemin. Êtes-vous sûr de vouloir "
-"continuer ?"
+msgstr "Tous les fichiers en cache seront déplacés vers le nouveau chemin. 
+"Êtes-vous sûr de vouloir continuer ?"
 
 msgid "Please choose an empty folder."
 msgstr "Veuillez choisir un dossier vide."
