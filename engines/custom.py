@@ -109,6 +109,13 @@ class CustomTranslate(Base):
         cls.response = data.get('response')
         cls.lang_codes = cls.load_lang_codes(data.get('languages'))
 
+        # If glossary_config is provided, replace the default placeholder
+        glossary_config = data.get('glossary_config') or {}
+        placeholder_pattern = glossary_config.get('placeholder_pattern')
+        match_pattern = glossary_config.get('match_pattern')
+        if placeholder_pattern and match_pattern:
+            cls.placeholder = (placeholder_pattern, match_pattern)
+
     def __init__(self):
         super().__init__()
         self.endpoint = self.request.get('url') or ''
