@@ -1326,7 +1326,7 @@ class TranslationSetting(QDialog):
         prompt = widget.toPlainText().strip()
         if prompt and '<tlang>' not in prompt:
             self.alert.pop(
-                _('the prompt must include {}.').format('<slang>'),
+                _('the prompt must include {}.').format('<tlang>'),
                 'warning')
             return None
         if 'prompt' in config:
