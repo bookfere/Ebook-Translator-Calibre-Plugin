@@ -1136,6 +1136,26 @@ data: {"type":"message_stop"}
                 self.assertEqual(1, body['top_k'])
                 self.assertEqual(1.0, body['temperature'])
 
+    def test_get_body_with_low_effort(self):
+        for model in (
+                'claude-opus-5', 'claude-opus-5-5', 'claude-sonnet-5',
+                'claude-sonnet-5-5', 'claude-haiku-5-5', 'claude-fable-5-2',
+                'claude-mythos-5-2'):
+            with self.subTest(model=model):
+                self.translator.model = model
+                body = json.loads(self.translator.get_body('Hello World!'))
+                self.assertEqual({'effort': 'low'}, body['output_config'])
+                self.assertNotIn('thinking', body)
+
+    def test_get_body_without_effort(self):
+        # These models do not think unless the request asks for it.
+        for model in (
+                'claude-sonnet-4-6', 'claude-opus-4-8', 'claude-haiku-4-5'):
+            with self.subTest(model=model):
+                self.translator.model = model
+                body = json.loads(self.translator.get_body('Hello World!'))
+                self.assertNotIn('output_config', body)
+
     def test_parse_stream_without_message_stop(self):
         response = stream_response([
             b'event: content_block_delta\n',
@@ -1145,6 +1165,32 @@ data: {"type":"message_stop"}
         result = self.translator._parse_stream(response)
 
         self.assertEqual('你', ''.join(result))
+
+    def test_parse_stream_with_thinking_blocks(self):
+        # Claude 5 models think by default and stream thinking blocks with
+        # empty text before the answer.
+        response = stream_response([
+            b'data: {"type":"content_block_start","index":0,'
+            b'"content_block":{"type":"thinking","thinking":""}}\n',
+            b'data: {"type":"content_block_delta","index":0,'
+            b'"delta":{"type":"thinking_delta","thinking":""}}\n',
+            b'data: {"type":"content_block_delta","index":0,'
+            b'"delta":{"type":"signature_delta","signature":"abc"}}\n',
+            b'data: {"type":"content_block_stop","index":0}\n',
+            b'data: {"type":"content_block_delta","index":1,'
+            b'"delta":{"type":"text_delta","text":"\xe4\xbd\xa0"}}\n',
+            b'data: {"type":"message_stop"}\n'])
+        result = self.translator._parse_stream(response)
+
+        self.assertEqual('你', ''.join(result))
+
+    def test_get_result_with_thinking_block(self):
+        self.translator.stream = False
+        response = json.dumps({'content': [
+            {'type': 'thinking', 'thinking': '', 'signature': 'abc'},
+            {'type': 'text', 'text': '你好'}]})
+
+        self.assertEqual('你好', self.translator.get_result(response))
 
 
 class TestGeminiStream(unittest.TestCase):
