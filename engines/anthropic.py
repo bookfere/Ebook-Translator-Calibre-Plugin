@@ -126,6 +126,13 @@ class ClaudeTranslate(GenAI):
             r'claude-(opus-4-[7-9]|(opus|sonnet|haiku)-[5-9]|fable|mythos)',
             self.model) is None
 
+    def _thinks_by_default(self):
+        # The Claude 5 family, Fable and Mythos think when the request has no
+        # thinking field, and the thinking is billed as output tokens.
+        return self.model is not None and re.search(
+            r'claude-((opus|sonnet|haiku)-[5-9]|fable|mythos)',
+            self.model) is not None
+
     def get_body(self, text):
         body = {
             'stream': self.stream,
@@ -140,6 +147,11 @@ class ClaudeTranslate(GenAI):
             body.update({self.sampling: sampling_value})
         else:
             del body['top_k']
+        # Translation needs little reasoning, so think as little as the model
+        # allows. Low effort works on every such model, while disabling
+        # thinking is rejected by some of them.
+        if self._thinks_by_default():
+            body['output_config'] = {'effort': 'low'}
 
         return json.dumps(body)
 
@@ -147,9 +159,12 @@ class ClaudeTranslate(GenAI):
         if self.stream:
             return self._parse_stream(response)
 
+        # Claude 5 models think by default, so the content can start with a
+        # thinking block that has no text.
         response_json = json.loads(response)
-        response_content_text: str = response_json['content'][0]['text']
-        return response_content_text
+        return ''.join(
+            block['text'] for block in response_json['content']
+            if block.get('type') == 'text')
 
     def _parse_stream(self, data: Response) -> Generator:
         while True:
@@ -177,9 +192,10 @@ class ClaudeTranslate(GenAI):
                 if event_type == 'message_stop':
                     break
                 elif event_type == 'content_block_delta':
-                    delta = chunk.get('delta')
-                    if delta is not None:
-                        yield str(delta.get('text'))
+                    # thinking_delta and signature_delta carry no text.
+                    delta = chunk.get('delta') or {}
+                    if 'text' in delta:
+                        yield delta['text']
                 elif event_type == 'error':
                     raise Exception(
                         _('Error received: {}')
