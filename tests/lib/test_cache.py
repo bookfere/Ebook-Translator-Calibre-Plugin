@@ -1,6 +1,8 @@
+import os
 import unittest
+from tempfile import TemporaryDirectory
 
-from ...lib.cache import Paragraph
+from ...lib.cache import Paragraph, TranslationCache
 
 
 class TestParagraph(unittest.TestCase):
@@ -75,3 +77,47 @@ class TestParagraph(unittest.TestCase):
         self.paragraph.translation = 'A\n\nB\nC'
         self.paragraph.do_aligment('\n\n')
         self.assertEqual('A\n\nB\n\nC', self.paragraph.translation)
+
+
+class TestTranslationCacheRecovery(unittest.TestCase):
+    def setUp(self):
+        self.temp_dir = TemporaryDirectory()
+        self.original_paths = (
+            TranslationCache.dir_path,
+            TranslationCache.cache_path,
+            TranslationCache.temp_path,
+        )
+        TranslationCache.dir_path = self.temp_dir.name
+        TranslationCache.cache_path = os.path.join(
+            self.temp_dir.name, 'cache')
+        TranslationCache.temp_path = os.path.join(
+            self.temp_dir.name, 'temp')
+
+    def tearDown(self):
+        (
+            TranslationCache.dir_path,
+            TranslationCache.cache_path,
+            TranslationCache.temp_path,
+        ) = self.original_paths
+        self.temp_dir.cleanup()
+
+    def test_reopens_small_cache_with_completed_translation(self):
+        cache = TranslationCache('small-book')
+        cache.save([(
+            1, 'paragraph-md5', '<p>Hello</p>', 'Hello', False, None,
+            'chapter.xhtml')])
+        paragraph = cache.paragraph(1)
+        paragraph.translation = '你好'
+        paragraph.engine_name = 'Primary'
+        paragraph.target_lang = 'Chinese'
+        cache.update_paragraph(paragraph)
+        cache_path = cache.file_path
+        cache.close()
+
+        self.assertLess(os.path.getsize(cache_path), 50000)
+        reopened = TranslationCache('small-book')
+        try:
+            self.assertFalse(reopened.is_fresh())
+            self.assertEqual('你好', reopened.paragraph(1).translation)
+        finally:
+            reopened.close()
