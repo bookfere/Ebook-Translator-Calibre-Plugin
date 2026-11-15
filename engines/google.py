@@ -74,9 +74,15 @@ class GoogleFreeTranslateHtml(Base):
         }
 
     def get_body(self, text):
+        # The translateHtml endpoint collapses whitespace, so merged
+        # paragraphs joined by the separator would come back as one block
+        # and could not be realigned. Send each paragraph as its own item.
+        paragraphs = [
+            paragraph for paragraph in text.split(self.separator)
+            if paragraph.strip()] or [text]
         return json.dumps([
             [
-                [text],
+                paragraphs,
                 self._get_source_code(),
                 self._get_target_code()
             ],
@@ -84,7 +90,7 @@ class GoogleFreeTranslateHtml(Base):
         ])
 
     def get_result(self, response):
-        return json.loads(response)[0][0]
+        return self.separator.join(json.loads(response)[0])
 
 
 class GoogleFreeTranslate(Base):
