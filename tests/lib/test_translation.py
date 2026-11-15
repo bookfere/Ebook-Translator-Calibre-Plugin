@@ -89,6 +89,8 @@ class TestProgressBar(unittest.TestCase):
 class TestTranslation(unittest.TestCase):
     def setUp(self):
         self.translator = Mock()
+        self.translator.refusal_max_retries = 0
+        self.translator.is_translation_refusal.return_value = False
         self.glossary = Mock()
         self.paragraph = Mock()
         self.streaming = Mock()

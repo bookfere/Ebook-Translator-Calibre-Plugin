@@ -321,4 +321,4 @@ class TranslationCache:
 
 def get_cache(uid):
     config = get_config()
-    return TranslationCache(uid, config.get('cache_enabled') or False)
+    return TranslationCache(uid, config.get('cache_enabled') is not False)
