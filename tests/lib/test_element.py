@@ -71,6 +71,10 @@ class TestFunction(unittest.TestCase):
         elements = get_toc_elements(toc, [])
         self.assertEqual(3, len(elements))
 
+        # Test default argument
+        elements = get_toc_elements(toc)
+        self.assertEqual(3, len(elements))
+
     @patch(module_name + '.get_config')
     def test_get_metadata_elements(self, mock_get_config):
         mock_get_config.return_value.get.return_value = False
@@ -759,6 +763,27 @@ epub:type="pagebreak"/>b</code></p></body>
         a = xhtml.find('.//x:a[2]', namespaces=ns)
         self.assertEqual('abc', a.get('href'))
         self.assertEqual('A', a.text)
+
+    def test_add_translation_list_keep_anchor(self):
+        xhtml = etree.XML(rb"""<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <body>
+        <ol>
+            <li><a href="chap1.xhtml#p1">Chapter 1</a></li>
+        </ol>
+    </body>
+</html>""")
+        li = xhtml.find('.//x:li', namespaces=ns)
+        element = PageElement(li, 'toc.xhtml')
+        element.position = 'only'
+        element.placeholder = Base.placeholder
+        element.add_translation('Bab 1')
+
+        a = xhtml.find('.//x:a', namespaces=ns)
+        self.assertIsNotNone(a)
+        self.assertEqual('chap1.xhtml#p1', a.get('href'))
+        self.assertEqual('Bab 1', a.text)
 
     def test_add_translation_table(self):
         pass
@@ -1484,6 +1509,12 @@ class TestElementHandlerMerge(unittest.TestCase):
         self.assertIsInstance(self.handler, ElementHandler)
         self.assertIsInstance(self.handler, ElementHandlerMerge)
         self.assertEqual(1000, self.handler.merge_length)
+
+    def test_prepare_original_unmerged_toc(self):
+        toc_element = TocElement(TOC('TOC Title', 'a.html'), 'toc.ncx')
+        elements = [toc_element] + self.elements
+        originals = self.handler.prepare_original(elements)
+        self.assertEqual('TOC Title', originals[0][3])
 
     def test_align_paragraph(self):
         self.handler.prepare_original(self.elements)
