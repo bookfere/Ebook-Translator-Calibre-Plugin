@@ -12,7 +12,7 @@ from calibre.gui2 import I  # type: ignore
 from calibre.utils.localization import _  # type: ignore
 
 from . import EbookTranslator
-from .lib.utils import uid, traceback_error
+from .lib.utils import traceback_error
 from .lib.config import get_config
 from .lib.encodings import encoding_list
 from .lib.cache import Paragraph, get_cache
@@ -63,7 +63,7 @@ class PreparationWorker(QObject):
 
     def __init__(self, engine_class, ebook):
         QObject.__init__(self)
-        self.engine_class = engine_class
+        self.current_engine = engine_class
         self.ebook = ebook
 
         self.on_working = False
@@ -88,22 +88,19 @@ class PreparationWorker(QObject):
         self.on_working = True
         input_path = self.ebook.get_input_path()
         element_handler = get_element_handler(
-            self.engine_class.placeholder, self.engine_class.separator,
+            self.current_engine.placeholder, self.current_engine.separator,
             self.ebook.target_direction)
-        merge_length = str(element_handler.get_merge_length())
-        encoding = ''
-        if self.ebook.encoding.lower() != 'utf-8':
-            encoding = self.ebook.encoding.lower()
-        cache_id = uid(
-            input_path + self.engine_class.name + self.ebook.target_lang
-            + merge_length + encoding)
+        from .lib.utils import get_cache_id
+        merge_length = element_handler.get_merge_length()
+        cache_id = get_cache_id(input_path, self.current_engine.name, self.ebook.target_lang,
+                                merge_length, self.ebook.encoding)
         cache = get_cache(cache_id)
 
         if cache.is_fresh() or not cache.is_persistence():
             self.progress_detail.emit(
                 'Start processing the ebook: %s' % self.ebook.title)
             cache.set_info('title', self.ebook.title)
-            cache.set_info('engine_name', self.engine_class.name)
+            cache.set_info('engine_name', self.current_engine.name)
             cache.set_info('target_lang', self.ebook.target_lang)
             cache.set_info('merge_length', merge_length)
             cache.set_info('plugin_version', EbookTranslator.__version__)
@@ -173,7 +170,7 @@ class TranslationWorker(QObject):
         QObject.__init__(self)
         self.source_lang = ebook.source_lang
         self.target_lang = ebook.target_lang
-        self.engine_class = engine_class
+        self.current_engine = engine_class
 
         self.on_working = False
         self.canceled = False
@@ -188,7 +185,7 @@ class TranslationWorker(QObject):
         self.target_lang = lang
 
     def set_engine_class(self, engine_class):
-        self.engine_class = engine_class
+        self.current_engine = engine_class
 
     def set_canceled(self, canceled):
         self.canceled = canceled
@@ -204,7 +201,7 @@ class TranslationWorker(QObject):
         """:fresh: retranslate all paragraphs."""
         self.on_working = True
         self.start.emit()
-        translator = get_translator(self.engine_class)
+        translator = get_translator(self.current_engine)
         translator.set_source_lang(self.source_lang)
         translator.set_target_lang(self.target_lang)
         translation = get_translation(translator)
