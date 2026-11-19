@@ -1,7 +1,7 @@
 from qt.core import (  # type: ignore
     Qt, QTableWidget, QHeaderView, QMenu, QAbstractItemView, QCursor,
     QBrush, QTableWidgetItem, pyqtSignal, QTableWidgetSelectionRange,
-    QColor, QPalette, QT_VERSION_STR)
+    QColor, QPalette, QT_VERSION_STR, QTimer)
 
 from calibre.utils.localization import _   # type: ignore
 
@@ -25,9 +25,22 @@ class AdvancedTranslationTable(QTableWidget):
         self.non_aligned_count = 0
         # self.setFocusPolicy(Qt.NoFocus)
         self.alert = AlertMessage(self)
+
+        # Throttled repaint of the visible cells. During bulk translation we
+        # update row data with the model signals muted (see track_row_data),
+        # so we coalesce the resulting repaints into a single viewport update
+        # a few times per second instead of once per finished paragraph.
+        self._repaint_timer = QTimer(self)
+        self._repaint_timer.setSingleShot(True)
+        self._repaint_timer.setInterval(100)
+        self._repaint_timer.timeout.connect(self._flush_repaint)
+
         self.layout()
 
         self.row.connect(self.track_row_data)
+
+    def _flush_repaint(self):
+        self.viewport().update()
 
     def layout(self):
         self.setRowCount(len(self.paragraphs))
@@ -44,6 +57,12 @@ class AdvancedTranslationTable(QTableWidget):
         # self.verticalHeader().setStyleSheet(
         #     "QHeaderView::section{background-color:red}")
 
+        # Performance: while populating a large table (big books have
+        # thousands of rows), suppress per-item repaints and signals, which
+        # otherwise make the build quadratic-feeling and freeze the UI.
+        self.setUpdatesEnabled(False)
+        _model = self.model()
+        _model_blocked = _model.blockSignals(True)
         for row, paragraph in enumerate(self.paragraphs):
             paragraph.row = row
 
@@ -67,31 +86,50 @@ class AdvancedTranslationTable(QTableWidget):
 
             self.track_row_data(row)
 
+        _model.blockSignals(_model_blocked)
+        _model.layoutChanged.emit()
+        self.setUpdatesEnabled(True)
+
         header = self.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
 
     def track_row_data(self, row):
-        paragraph = self.paragraph(row)
-        original = paragraph.original.replace('\n', ' ')
-        engine_name = paragraph.engine_name
-        target_lang = paragraph.target_lang
-        items = [original, '--', '--', _('Untranslated')]
-        if paragraph.translation:
-            before_aligned = paragraph.aligned
-            if self.parent.merge_enabled:
-                self.check_line_alignment(paragraph)
-            # If the alignment of before and after is the same, do nothing.
-            if before_aligned and not paragraph.aligned:
-                self.non_aligned_count += 1
-            elif not before_aligned and paragraph.aligned:
-                self.non_aligned_count -= 1
-            items = [original, engine_name, target_lang, _('Translated')]
-        else:
-            self.check_translation_error(paragraph)
-        for column, text in enumerate(items):
-            item = self.item(row, column)
-            item.setText(text)
-            item.setToolTip(text)
+        # Mute the model signals while rewriting this row's cells. During bulk
+        # translation this runs once per finished paragraph; every
+        # setText/setToolTip/setBackground would otherwise emit dataChanged,
+        # and on macOS each dataChanged makes Qt rebuild and release the whole
+        # table's accessibility object tree (QAccessibleCache) -> heavy
+        # main-thread churn that freezes the UI on large books. We change the
+        # data silently and ask for a throttled repaint of the visible cells;
+        # the data stays correct for anything that queries it later (including
+        # a screen reader).
+        _model = self.model()
+        _blocked = _model.blockSignals(True)
+        try:
+            paragraph = self.paragraph(row)
+            original = paragraph.original.replace('\n', ' ')
+            engine_name = paragraph.engine_name
+            target_lang = paragraph.target_lang
+            items = [original, '--', '--', _('Untranslated')]
+            if paragraph.translation:
+                before_aligned = paragraph.aligned
+                if self.parent.merge_enabled:
+                    self.check_line_alignment(paragraph)
+                # If the alignment of before and after is the same, do nothing.
+                if before_aligned and not paragraph.aligned:
+                    self.non_aligned_count += 1
+                elif not before_aligned and paragraph.aligned:
+                    self.non_aligned_count -= 1
+                items = [original, engine_name, target_lang, _('Translated')]
+            else:
+                self.check_translation_error(paragraph)
+            for column, text in enumerate(items):
+                item = self.item(row, column)
+                item.setText(text)
+                item.setToolTip(text)
+        finally:
+            _model.blockSignals(_blocked)
+        self._repaint_timer.start()
 
     def _is_light_theme(self):
         return self.palette().color(QPalette.Window).lightness() > 127

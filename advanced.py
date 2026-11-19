@@ -6,7 +6,7 @@ from qt.core import (  # type: ignore
     QPlainTextEdit, QPushButton, QSplitter, QLabel, QThread, QLineEdit,
     QGridLayout, QProgressBar, pyqtSignal, pyqtSlot, QPixmap, QEvent,
     QStackedWidget, QSpacerItem, QTabWidget, QCheckBox,
-    QComboBox, QSizePolicy)
+    QComboBox, QSizePolicy, QTimer)
 from calibre.constants import __version__  # type: ignore
 from calibre.gui2 import I  # type: ignore
 from calibre.utils.localization import _  # type: ignore
@@ -413,14 +413,43 @@ class AdvancedTranslation(QDialog):
         layout.addWidget(self.stack)
         layout.addWidget(self.footer)
 
+        # Buffer + throttle the translation log. The engine logs a line per
+        # paragraph (often the full request/response text); appending each one
+        # to the QPlainTextEdit immediately forces a text-layout + glyph
+        # shaping pass on the GUI thread -- even while the log tab is not
+        # visible -- which dominates the main thread and makes the whole
+        # translation stutter. We collect log lines and flush them in one batch
+        # a few times per second instead.
+        self._log_buffer = []
+        self._err_buffer = []
+        self._log_flush_timer = QTimer(self)
+        self._log_flush_timer.setSingleShot(True)
+        self._log_flush_timer.setInterval(250)
+
+        def flush_logs():
+            if self._log_buffer:
+                self.logging_text.appendPlainText('\n'.join(self._log_buffer))
+                self._log_buffer = []
+            if self._err_buffer:
+                self.errors_text.appendPlainText('\n'.join(self._err_buffer))
+                self._err_buffer = []
+        self._log_flush_timer.timeout.connect(flush_logs)
+
         def working_status():
+            self._log_flush_timer.stop()
+            self._log_buffer = []
+            self._err_buffer = []
             self.logging_text.clear()
             self.errors_text.clear()
         self.trans_worker.start.connect(working_status)
 
-        self.trans_worker.logging.connect(
-            lambda text, error: self.errors_text.appendPlainText(text)
-            if error else self.logging_text.appendPlainText(text))
+        def queue_log(text, error):
+            (self._err_buffer if error else self._log_buffer).append(text)
+            if not self._log_flush_timer.isActive():
+                self._log_flush_timer.start()
+        self.trans_worker.logging.connect(queue_log)
+        # Flush whatever is left as soon as the run ends.
+        self.trans_worker.finished.connect(flush_logs)
 
         def working_finished():
             if self.translate_all and not self.trans_worker.cancel_request():
@@ -1137,7 +1166,26 @@ class AdvancedTranslation(QDialog):
             if data == '':
                 translation_text.clear()
             elif isinstance(data, Paragraph):
-                self.table.setCurrentItem(self.table.item(data.row, 0))
+                # Follow the paragraph currently being translated, but keep it
+                # cheap on large books:
+                #  * Only scroll when the row is actually off-screen, so the
+                #    user can still scroll around freely during translation
+                #    instead of being yanked back on every streamed paragraph.
+                #  * Mute the selection model's signals around setCurrentItem
+                #    so this auto-follow does not fire the expensive
+                #    itemSelectionChanged handlers (editor reload + row
+                #    re-track + dataChanged -> native accessibility rebuild),
+                #    which otherwise freezes the UI.
+                item = self.table.item(data.row, 0)
+                if item is not None:
+                    visible = self.table.viewport().rect().intersects(
+                        self.table.visualItemRect(item))
+                    if not visible:
+                        selection_model = self.table.selectionModel()
+                        blocked = selection_model.blockSignals(True)
+                        self.table.setCurrentItem(item)
+                        selection_model.blockSignals(blocked)
+                        self.table.scrollToItem(item)
             else:
                 translation_text.insertPlainText(data)
         self.trans_worker.streaming.connect(streaming_translation)
@@ -1198,6 +1246,12 @@ class AdvancedTranslation(QDialog):
         self.logging_text = QPlainTextEdit()
         self.logging_text.setPlaceholderText(_('Translation log'))
         self.logging_text.setReadOnly(True)
+        # Cap the log so it cannot grow without bound: when translating a
+        # whole (large) book, appendPlainText gets progressively slower as the
+        # document grows, which causes the UI to stutter more and more as the
+        # run proceeds. Keeping a rolling window of recent lines keeps each
+        # append cheap; older lines simply scroll off.
+        self.logging_text.setMaximumBlockCount(5000)
         layout.addWidget(self.logging_text)
 
         return widget
@@ -1209,6 +1263,8 @@ class AdvancedTranslation(QDialog):
         self.errors_text = QPlainTextEdit()
         self.errors_text.setPlaceholderText(_('Error log'))
         self.errors_text.setReadOnly(True)
+        # See layout_logging(): keep the error log bounded as well.
+        self.errors_text.setMaximumBlockCount(5000)
         layout.addWidget(self.errors_text)
 
         return widget
