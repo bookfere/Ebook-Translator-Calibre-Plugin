@@ -42,8 +42,12 @@ defaults: dict[str, Any] = {
     'custom_engines': {},
     'glossary_enabled': False,
     'glossary_path': None,
+    'glossary_reverse': False,
+    'glossary_per_book': {},
     'merge_enabled': False,
     'merge_length': 1800,
+    'merge_by_chapter': False,
+    'chapter_merge_length': 8000,
     'ebook_metadata': {},
     'search_paths': [],
 }
