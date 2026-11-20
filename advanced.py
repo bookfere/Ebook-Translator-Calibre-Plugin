@@ -8,7 +8,7 @@ from qt.core import (  # type: ignore
     QStackedWidget, QSpacerItem, QTabWidget, QCheckBox,
     QComboBox, QSizePolicy)
 from calibre.constants import __version__  # type: ignore
-from calibre.gui2 import I  # type: ignore
+from calibre.gui2 import I, error_dialog  # type: ignore
 from calibre.utils.localization import _  # type: ignore
 
 from . import EbookTranslator
@@ -58,6 +58,7 @@ class PreparationWorker(QObject):
     progress = pyqtSignal(int)
     progress_message = pyqtSignal(str)
     progress_detail = pyqtSignal(str)
+    failed = pyqtSignal(str, str)
     close = pyqtSignal(int)
     finished = pyqtSignal(str)
 
@@ -86,77 +87,94 @@ class PreparationWorker(QObject):
     @pyqtSlot()
     def prepare_ebook_data(self):
         self.on_working = True
-        input_path = self.ebook.get_input_path()
-        element_handler = get_element_handler(
-            self.engine_class.placeholder, self.engine_class.separator,
-            self.ebook.target_direction)
-        merge_length = str(element_handler.get_merge_length())
-        encoding = ''
-        if self.ebook.encoding.lower() != 'utf-8':
-            encoding = self.ebook.encoding.lower()
-        cache_id = uid(
-            input_path + self.engine_class.name + self.ebook.target_lang
-            + merge_length + encoding)
-        cache = get_cache(cache_id)
+        cache = None
+        try:
+            input_path = self.ebook.get_input_path()
+            element_handler = get_element_handler(
+                self.engine_class.placeholder, self.engine_class.separator,
+                self.ebook.target_direction)
+            merge_length = str(element_handler.get_merge_length())
+            encoding = ''
+            if self.ebook.encoding.lower() != 'utf-8':
+                encoding = self.ebook.encoding.lower()
+            cache_id = uid(
+                input_path + self.engine_class.name + self.ebook.target_lang
+                + merge_length + encoding)
+            cache = get_cache(cache_id)
 
-        if cache.is_fresh() or not cache.is_persistence():
-            self.progress_detail.emit(
-                'Start processing the ebook: %s' % self.ebook.title)
-            cache.set_info('title', self.ebook.title)
-            cache.set_info('engine_name', self.engine_class.name)
-            cache.set_info('target_lang', self.ebook.target_lang)
-            cache.set_info('merge_length', merge_length)
-            cache.set_info('plugin_version', EbookTranslator.__version__)
-            cache.set_info('calibre_version', __version__)
-            # --------------------------
-            a = time.time()
-            # --------------------------
-            self.progress_message.emit(_('Extracting ebook content...'))
-            try:
-                elements = extract_item(
-                    input_path, self.ebook.input_format, self.ebook.encoding,
-                    self.progress_detail.emit)
-            except Exception:
-                self.progress_message.emit(
-                    _('Failed to extract ebook content'))
-                self.progress_detail.emit('\n' + traceback_error())
+            if cache.is_fresh() or not cache.is_persistence():
+                self.progress_detail.emit(
+                    'Start processing the ebook: %s' % self.ebook.title)
+                cache.set_info('title', self.ebook.title)
+                cache.set_info('engine_name', self.engine_class.name)
+                cache.set_info('target_lang', self.ebook.target_lang)
+                cache.set_info('merge_length', merge_length)
+                cache.set_info('plugin_version', EbookTranslator.__version__)
+                cache.set_info('calibre_version', __version__)
+                # --------------------------
+                a = time.time()
+                # --------------------------
+                self.progress_message.emit(_('Extracting ebook content...'))
+                try:
+                    elements = extract_item(
+                        input_path, self.ebook.input_format,
+                        self.ebook.encoding, self.progress_detail.emit)
+                except Exception:
+                    message = _('Failed to extract ebook content')
+                    detail = traceback_error()
+                    self.progress_message.emit(message)
+                    self.progress_detail.emit('\n' + detail)
+                    self.failed.emit(message, detail)
+                    self.progress.emit(100)
+                    self.clean_cache(cache)
+                    return
+                if self.canceled:
+                    self.clean_cache(cache)
+                    return
+                self.progress.emit(30)
+                b = time.time()
+                self.progress_detail.emit('extracting timing: %s' % (b - a))
+                if self.canceled:
+                    self.clean_cache(cache)
+                    return
+                # --------------------------
+                self.progress_message.emit(_('Filtering ebook content...'))
+                original_group = element_handler.prepare_original(elements)
+                self.progress.emit(80)
+                c = time.time()
+                self.progress_detail.emit('filtering timing: %s' % (c - b))
+                if self.canceled:
+                    self.clean_cache(cache)
+                    return
+                # --------------------------
+                self.progress_message.emit(_('Preparing user interface...'))
+                cache.save(original_group)
                 self.progress.emit(100)
-                self.clean_cache(cache)
-                return
-            if self.canceled:
-                self.clean_cache(cache)
-                return
-            self.progress.emit(30)
-            b = time.time()
-            self.progress_detail.emit('extracting timing: %s' % (b - a))
-            if self.canceled:
-                self.clean_cache(cache)
-                return
-            # --------------------------
-            self.progress_message.emit(_('Filtering ebook content...'))
-            original_group = element_handler.prepare_original(elements)
-            self.progress.emit(80)
-            c = time.time()
-            self.progress_detail.emit('filtering timing: %s' % (c - b))
-            if self.canceled:
-                self.clean_cache(cache)
-                return
-            # --------------------------
-            self.progress_message.emit(_('Preparing user interface...'))
-            cache.save(original_group)
-            self.progress.emit(100)
-            d = time.time()
-            self.progress_detail.emit('cache timing: %s' % (d - c))
-            if self.canceled:
-                self.clean_cache(cache)
-                return
-        else:
-            self.progress_detail.emit(
-                'Loading data from cache and preparing user interface...')
-            time.sleep(0.1)
+                d = time.time()
+                self.progress_detail.emit('cache timing: %s' % (d - c))
+                if self.canceled:
+                    self.clean_cache(cache)
+                    return
+            else:
+                self.progress_detail.emit(
+                    'Loading data from cache and preparing user interface...')
+                time.sleep(0.1)
 
-        self.finished.emit(cache_id)
-        self.on_working = False
+            self.finished.emit(cache_id)
+        except Exception:
+            message = _('Failed to load ebook data')
+            detail = traceback_error()
+            self.progress_message.emit(message)
+            self.progress_detail.emit('\n' + detail)
+            self.failed.emit(message, detail)
+            self.progress.emit(100)
+            if cache is not None:
+                self.clean_cache(cache)
+            else:
+                self.on_working = False
+                self.close.emit(1)
+        finally:
+            self.on_working = False
 
 
 class TranslationWorker(QObject):
@@ -380,6 +398,7 @@ class AdvancedTranslation(QDialog):
         # self.error = JobError(self)
         self.current_engine = get_engine_class()
         self.cache = None
+        self.preparation_error = None
         self.merge_enabled = False
 
         self.progress_step = 0
@@ -398,6 +417,10 @@ class AdvancedTranslation(QDialog):
 
         self.preparation_worker = PreparationWorker(
             self.current_engine, self.ebook)
+
+        def preparation_failed(message, detail):
+            self.preparation_error = (message, detail)
+        self.preparation_worker.failed.connect(preparation_failed)
         self.preparation_worker.close.connect(self.done)
         self.preparation_worker.moveToThread(self.preparation_thread)
         self.preparation_thread.finished.connect(
@@ -1293,3 +1316,7 @@ class AdvancedTranslation(QDialog):
             elif result == 0:
                 self.cache.destroy()
         QDialog.done(self, result)
+        if self.preparation_error is not None:
+            message, detail = self.preparation_error
+            self.preparation_error = None
+            error_dialog(self.parent(), _('Failed'), message, detail, show=True)
